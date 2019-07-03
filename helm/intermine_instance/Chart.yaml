@@ -1,5 +1,9 @@
+name: intermine_instance
 apiVersion: v1
 appVersion: "1.0"
-description: A Helm chart for Kubernetes
-name: intermine_instance
+description: A Helm chart for launching an intermine instance on kubernetes
 version: 0.1.0
+home: https://intermine.org
+maintainers:
+    - name: Ank
+      email: ank@leoank.me
