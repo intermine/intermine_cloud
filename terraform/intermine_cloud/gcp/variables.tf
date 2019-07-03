@@ -39,21 +39,21 @@ variable "zones" {
   description = "The zone to host the cluster in (required if is a zonal cluster)"
 }
 
-variable "network" {
-  description = "The VPC network to host the cluster in"
-}
+# variable "network" {
+#   description = "The VPC network to host the cluster in"
+# }
 
-variable "subnetwork" {
-  description = "The subnetwork to host the cluster in"
-}
+# variable "subnetwork" {
+#   description = "The subnetwork to host the cluster in"
+# }
 
-variable "ip_range_pods" {
-  description = "The secondary ip range to use for pods"
-}
+# variable "ip_range_pods" {
+#   description = "The secondary ip range to use for pods"
+# }
 
-variable "ip_range_services" {
-  description = "The secondary ip range to use for pods"
-}
+# variable "ip_range_services" {
+#   description = "The secondary ip range to use for pods"
+# }
 
 variable "http_load_balancing_boolean" {
   type = "string"
@@ -93,24 +93,24 @@ variable "node_pool_machine_type" {
 variable "node_pool_min_node_count" {
   type = "string"
   description = "minimum number of nodes for autoscaling"
-  default = 3
+  default = "3"
 }
 
 variable "node_pool_max_node_count" {
   type = "string"
   description = "maximum number of nodes for autoscaling"
-  default = 5
+  default = "5"
 }
 
 variable "node_pool_initial_node_count" {
   type = "string"
   description = "initial number of nodes for autoscaling"
-  default = 3
+  default = "3"
 }
 variable "node_disk_size_gb" {
   type = "string"
   description = "disk size in gb for nodes"
-  default = 25
+  default = "25"
 }
 
 variable "node_disk_type" {
