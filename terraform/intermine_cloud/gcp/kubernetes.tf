@@ -1,40 +1,45 @@
 module "gke" {
   source                     = "terraform-google-modules/kubernetes-engine/google"
-  project_id                 = "<PROJECT ID>"
-  name                       = "gke-test-1"
-  region                     = "us-central1"
-  zones                      = ["us-central1-a", "us-central1-b", "us-central1-f"]
-  network                    = "vpc-01"
-  subnetwork                 = "us-central1-01"
-  ip_range_pods              = "us-central1-01-gke-01-pods"
-  ip_range_services          = "us-central1-01-gke-01-services"
-  http_load_balancing        = false
-  horizontal_pod_autoscaling = true
-  kubernetes_dashboard       = true
-  network_policy             = true
-  service_account   = "project-service-account@<PROJECT ID>.iam.gserviceaccount.com"
+  project_id                 = "${var.project_id}"
+  name                       = "${var.cluster_name}"
+  region                     = "${var.project_region}"
+  regional                   = "${var.project_regional_boolean}"
+  zones                      = "${var.zones}"
+  # network                    = "${var.network}"
+  # subnetwork                 = "${var.subnetwork}"
+  # ip_range_pods              = "${var.ip_range_pods}"
+  # ip_range_services          = "${var.ip_range_services}"
+  network                    = "${google_compute_network.main.name}"
+  subnetwork                 = "${google_compute_subnetwork.main.name}"
+  ip_range_pods              = "${google_compute_subnetwork.main.secondary_ip_range.0.range_name}"
+  ip_range_services          = "${google_compute_subnetwork.main.secondary_ip_range.1.range_name}"
+  http_load_balancing        = "${var.http_load_balancing_boolean}"
+  horizontal_pod_autoscaling = "${var.horizontal_pod_autoscaling_boolean}"
+  kubernetes_dashboard       = "${var.kubernetes_dashboard_boolean}"
+  network_policy             = "${var.network_policy_boolean}"
+  service_account            = "${var.compute_engine_service_account}"
 
   node_pools = [
     {
-      name               = "default-node-pool"
-      machine_type       = "n1-standard-2"
-      min_count          = 1
-      max_count          = 6
-      disk_size_gb       = 50
-      disk_type          = "pd-standard"
-      image_type         = "COS"
-      auto_repair        = true
-      auto_upgrade       = true
-      service_account    = "project-service-account@<PROJECT ID>.iam.gserviceaccount.com"
-      preemptible        = false
-      initial_node_count = 3
+      name               = "${var.node_pool_name}"
+      machine_type       = "${var.node_pool_machine_type}"
+      min_count          = "${var.node_pool_min_node_count}"
+      max_count          = "${var.node_pool_max_node_count}"
+      disk_size_gb       = "${var.node_disk_size_gb}"
+      disk_type          = "${var.node_disk_type}"
+      image_type         = "${var.node_image_type}"
+      auto_repair        = "${var.node_auto_repair_boolean}"
+      auto_upgrade       = "${var.node_auto_upgrade_boolean}"
+      service_account    = "${var.compute_engine_service_account}"
+      preemptible        = "${var.node_preemptible_boolean}"
+      initial_node_count = "${var.node_pool_initial_node_count}"
     },
   ]
 
   node_pools_oauth_scopes = {
     all = []
 
-    default-node-pool = [
+    "${var.node_pool_name}" = [
       "https://www.googleapis.com/auth/cloud-platform",
     ]
   }
@@ -42,25 +47,25 @@ module "gke" {
   node_pools_labels = {
     all = {}
 
-    default-node-pool = {
-      default-node-pool = "true"
+    "${var.node_pool_name}" = {
+      "${var.node_pool_name}" = "true"
     }
   }
 
   node_pools_metadata = {
     all = {}
 
-    default-node-pool = {
-      node-pool-metadata-custom-value = "my-node-pool"
+    "${var.node_pool_name}" = {
+      node-pool-metadata-custom-value = "test-node-pool"
     }
   }
 
   node_pools_taints = {
     all = []
 
-    default-node-pool = [
+    "${var.node_pool_name}" = [
       {
-        key    = "default-node-pool"
+        key    = "${var.node_pool_name}"
         value  = "true"
         effect = "PREFER_NO_SCHEDULE"
       },
@@ -70,8 +75,8 @@ module "gke" {
   node_pools_tags = {
     all = []
 
-    default-node-pool = [
-      "default-node-pool",
+    "${var.node_pool_name}" = [
+      "${var.node_pool_name}",
     ]
   }
 }
