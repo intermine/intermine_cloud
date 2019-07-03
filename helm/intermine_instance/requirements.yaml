@@ -1,0 +1,3 @@
+dependencies:
+- name: postgresql
+  version: "5.3.9"
