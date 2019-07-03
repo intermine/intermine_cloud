@@ -8,11 +8,11 @@ To use this repository, you need to have few tools setup in your local environme
 
 ### Terraform
 ```bash
-sudo curl -L "https://releases.hashicorp.com/terraform/0.12.2/terraform_0.12.2_linux_amd64.zip" -o /usr/local/bin/terraform
+sudo curl -L "https://releases.hashicorp.com/terraform/0.11.14/terraform_0.11.14_linux_amd64.zip" -o /usr/local/bin/terraform
 ```
-
-### Terragrunt (optional)
-
-### Helm
+> Note: Latest terraform is not supported yet. Download a version <=0.11.14
 
 ### Kubectl
+
+
+### Helm
