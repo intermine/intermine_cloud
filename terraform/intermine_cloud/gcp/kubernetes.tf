@@ -4,7 +4,7 @@ module "gke" {
   name                       = "${var.cluster_name}"
   region                     = "${var.project_region}"
   regional                   = "${var.project_regional_boolean}"
-  zones                      = "${var.zones}"
+  zones                      = ["${slice(var.zones,0,1)}"]
   # network                    = "${var.network}"
   # subnetwork                 = "${var.subnetwork}"
   # ip_range_pods              = "${var.ip_range_pods}"
