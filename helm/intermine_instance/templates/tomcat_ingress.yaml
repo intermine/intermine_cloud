@@ -1,23 +1,23 @@
 {{- if .Values.tomcat.ingress.enabled -}}
 {{- $fullName := include "intermine_instance.fullname" . -}}
-{{- $ingressPaths := .Values.ingress.paths -}}
+{{- $ingressPaths := .Values.tomcat.ingress.paths -}}
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
-  name: {{ $fullName }}
+  name: "{{ $fullName }}-ingress"
   labels:
     app.kubernetes.io/name: {{ include "intermine_instance.name" . }}
     helm.sh/chart: {{ include "intermine_instance.chart" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
-  {{- with .Values.ingress.annotations }}
+  {{- with .Values.tomcat.ingress.annotations }}
   annotations:
     {{- toYaml . | nindent 4 }}
   {{- end }}
 spec:
-{{- if .Values.ingress.tls }}
+{{- if .Values.tomcat.ingress.tls }}
   tls:
-  {{- range .Values.ingress.tls }}
+  {{- range .Values.tomcat.ingress.tls }}
     - hosts:
       {{- range .hosts }}
         - {{ . | quote }}
@@ -26,15 +26,15 @@ spec:
   {{- end }}
 {{- end }}
   rules:
-  {{- range .Values.ingress.hosts }}
-    - host: {{ . | quote }}
-      http:
+  {{- range .Values.tomcat.ingress.hosts }}
+    # - host: {{ . | quote }}
+    - http:
         paths:
 	{{- range $ingressPaths }}
           - path: {{ . }}
             backend:
               serviceName: {{ $fullName }}
-              servicePort: http
+              servicePort: 8080
 	{{- end }}
   {{- end }}
 {{- end }}
