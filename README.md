@@ -12,6 +12,12 @@ sudo curl -L "https://releases.hashicorp.com/terraform/0.11.14/terraform_0.11.14
 ```
 > Note: Latest terraform is not supported yet. Download a version <=0.11.14
 
+### GCloud
+
+See https://cloud.google.com/sdk/docs/quickstart-debian-ubuntu
+
+This will install Kubectl
+
 ### Kubectl
 
 
