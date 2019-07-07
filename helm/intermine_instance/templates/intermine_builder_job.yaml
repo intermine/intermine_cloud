@@ -1,0 +1,41 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: "{{.Release.Name}}-builder"
+  labels:
+    app.kubernetes.io/managed-by: {{.Release.Service | quote }}
+    app.kubernetes.io/instance: {{.Release.Name | quote }}
+    helm.sh/chart: "{{.Chart.Name}}-{{.Chart.Version}}"
+  annotations:
+    # This is what defines this resource as a hook. Without this line, the
+    # job is considered part of the release.
+    "helm.sh/hook": post-install
+    "helm.sh/hook-weight": "-5"
+    "helm.sh/hook-delete-policy": hook-succeeded
+spec:
+  template:
+    metadata:
+      name: "{{.Release.Name}}-builder"
+      labels:
+        app.kubernetes.io/managed-by: {{.Release.Service | quote }}
+        app.kubernetes.io/instance: {{.Release.Name | quote }}
+        helm.sh/chart: "{{.Chart.Name}}-{{.Chart.Version}}"
+    spec:
+      restartPolicy: Never
+      containers:
+      - name: {{.Release.Name}}-builder-job
+        image: "{{.Values.builder.image.repository}}:{{.Values.builder.image.tag}}"
+        command: ["/bin/sh","/home/intermine/.intermine/build.sh"]
+        env:
+        - name: PGHOST
+          value: "{{.Release.Name}}-{{.Values.postgresql.name}}"
+        - name: PGPORT
+          value: "5432"
+        - name: PGPASSWORD
+          value: {{.Values.postgresql.postgresqlPassword}}
+        - name: SOLR_HOST
+          value: {{.Values.solr.name}}
+        - name: TOMCAT_HOST
+          value: {{ include "intermine_instance.fullname" .}}
+        - name: "MEM_OPTS"
+          value: "-Xmx1g -Xms500m"
