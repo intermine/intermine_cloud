@@ -27,11 +27,11 @@ spec:
 {{- end }}
   rules:
   {{- range .Values.tomcat.ingress.hosts }}
-    # - host: {{ . | quote }}
+    - host: {{ . | quote }}
     - http:
         paths:
 	{{- range $ingressPaths }}
-          - path: {{ . }}
+          - path: {{ . | quote }}
             backend:
               serviceName: {{ $fullName }}
               servicePort: 8080
