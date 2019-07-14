@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "intermine_cloud.fullname" . }}-wizard
+  labels:
+    app.kubernetes.io/name: {{ include "intermine_cloud.name" . }}
+    helm.sh/chart: {{ include "intermine_cloud.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.wizard.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "intermine_cloud.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "intermine_cloud.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.wizard.image.repository }}:{{ .Values.wizard.image.tag }}"
+          imagePullPolicy: {{ .Values.wizard.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.wizard.service.port }}
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.wizard.livenessProbe.path }}
+              port: {{ .Values.wizard.service.port }}
+            initialDelaySeconds: {{ .Values.wizard.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.wizard.livenessProbe.periodSeconds }}
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.wizard.readinessProbe.path }}
+              port: {{ .Values.wizard.service.port }}
+            initialDelaySeconds: {{ .Values.wizard.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.wizard.readinessProbe.periodSeconds }}
+            failureThreshold: {{ .Values.wizard.readinessProbe.failureThreshold }}
+          resources:
+            {{- toYaml .Values.wizard.resources | nindent 12 }}
+      {{- with .Values.wizard.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    {{- with .Values.wizard.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with .Values.wizard.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
