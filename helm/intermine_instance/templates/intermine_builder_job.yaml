@@ -21,11 +21,13 @@ spec:
         app.kubernetes.io/instance: {{.Release.Name | quote }}
         helm.sh/chart: "{{.Chart.Name}}-{{.Chart.Version}}"
     spec:
+      backoffLimit: 1
+      ttlSecondsAfterFinished: 100
       restartPolicy: Never
       containers:
       - name: {{.Release.Name}}-builder-job
         image: "{{.Values.builder.image.repository}}:{{.Values.builder.image.tag}}"
-        command: ["/bin/sh","/home/intermine/.intermine/build.sh"]
+        command: ["/bin/sh","/home/intermine/intermine/scripts/build.sh"]
         env:
         - name: PGHOST
           value: "{{.Release.Name}}-{{.Values.postgresql.name}}"
