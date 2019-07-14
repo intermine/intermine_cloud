@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "intermine_cloud.fullname" . }}-compose
+  labels:
+    app.kubernetes.io/name: {{ include "intermine_cloud.name" . }}
+    helm.sh/chart: {{ include "intermine_cloud.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.compose.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "intermine_cloud.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "intermine_cloud.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.compose.image.repository }}:{{ .Values.compose.image.tag }}"
+          imagePullPolicy: {{ .Values.compose.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.compose.service.port }}
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.compose.livenessProbe.path }}
+              port: {{ .Values.compose.service.port }}
+            initialDelaySeconds: {{ .Values.compose.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.compose.livenessProbe.periodSeconds }}
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.compose.readinessProbe.path }}
+              port: {{ .Values.compose.service.port }}
+            initialDelaySeconds: {{ .Values.compose.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.compose.readinessProbe.periodSeconds }}
+            failureThreshold: {{ .Values.compose.readinessProbe.failureThreshold }}
+          resources:
+            {{- toYaml .Values.compose.resources | nindent 12 }}
+      {{- with .Values.compose.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    {{- with .Values.compose.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with .Values.compose.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
