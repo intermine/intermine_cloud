@@ -1,48 +1,158 @@
-# Default values for intermine_cloud.
-# This is a YAML-formatted file.
-# Declare variables to be passed into your templates.
+compose:
+  name: intermine-compose
+  replicaCount: 1
+  image:
+    repository: intermine/compose
+    tag: latest
+    pullPolicy: Always
+  service:
+    type: ClusterIP
+    port: 8080
+  resources:
+    limits:
+      cpu: 100m
+      memory: 500Mi
+    requests:
+      cpu: 100m
+      memory: 256Mi
+  readinessProbe:
+    path: "/"
+    initialDelaySeconds: 60
+    periodSeconds: 30
+    failureThreshold: 6
+  livenessProbe:
+    path: "/"
+    initialDelaySeconds: 60
+    periodSeconds: 30
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+  ingress:
+    enabled: false
+    annotations:
+      # nginx.ingress.kubernetes.io/rewrite-target: /
+      # kubernetes.io/ingress.class: nginx
+      # nginx.ingress.kubernetes.io/ssl-redirect: \"false\"
+      # kubernetes.io/tls-acme: "true"
+    # paths: ["/*"]
+    # hosts:
+    #   - chart-example.local
+    tls: []
+    #  - secretName: chart-example-tls
+    #    hosts:
+    #      - chart-example.local
 
-replicaCount: 1
+configurator:
+  name: intermine-configurator
+  replicaCount: 1
+  image:
+    repository: intermine/configurator
+    tag: latest
+    pullPolicy: Always
+  service:
+    type: ClusterIP
+    port: 8080
+  resources:
+    limits:
+      cpu: 100m
+      memory: 500Mi
+    requests:
+      cpu: 100m
+      memory: 256Mi
+  readinessProbe:
+    path: "/"
+    initialDelaySeconds: 60
+    periodSeconds: 30
+    failureThreshold: 6
+  livenessProbe:
+    path: "/"
+    initialDelaySeconds: 60
+    periodSeconds: 30
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+  ingress:
+    enabled: true
+    annotations:
+      # nginx.ingress.kubernetes.io/rewrite-target: /
+      # kubernetes.io/ingress.class: nginx
+      # nginx.ingress.kubernetes.io/ssl-redirect: \"false\"
+      # kubernetes.io/tls-acme: "true"
+    # paths: ["/*"]
+    # hosts:
+    #   - chart-example.local
+    tls: []
+    #  - secretName: chart-example-tls
+    #    hosts:
+    #      - chart-example.local
 
-image:
-  repository: nginx
-  tag: stable
-  pullPolicy: IfNotPresent
+wizard:
+  name: intermine-wizard
+  replicaCount: 1
+  image:
+    repository: intermine/wizard
+    tag: latest
+    pullPolicy: Always
+  service:
+    type: ClusterIP
+    port: 8080
+  resources:
+    limits:
+      cpu: 100m
+      memory: 500Mi
+    requests:
+      cpu: 100m
+      memory: 256Mi
+  readinessProbe:
+    path: "/"
+    initialDelaySeconds: 60
+    periodSeconds: 30
+    failureThreshold: 6
+  livenessProbe:
+    path: "/"
+    initialDelaySeconds: 60
+    periodSeconds: 30
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+  ingress:
+    enabled: true
+    annotations:
+      # nginx.ingress.kubernetes.io/rewrite-target: /
+      # kubernetes.io/ingress.class: nginx
+      # nginx.ingress.kubernetes.io/ssl-redirect: \"false\"
+      # kubernetes.io/tls-acme: "true"
+    # paths: ["/*"]
+    # hosts:
+    #   - chart-example.local
+    tls: []
+    #  - secretName: chart-example-tls
+    #    hosts:
+    #      - chart-example.local
 
-nameOverride: ""
-fullnameOverride: ""
+postgresql:
+  name: postgresql
+  port: "5432"
+  postgresqlPassword: postgres
+  persistence:
+    size: 2Gi
+  # persistence.storageClass: 
+  # persistence.accessModes:
+  resources:
+    limits:
+      cpu: 250m
+      memory: 600Mi
+    requests:
+      cpu: 250m
+      memory: 256Mi
 
-service:
-  type: ClusterIP
-  port: 80
+rook-ceph:
+  name: rook-ceph
+  # This path is specific to GCP. Change if using on different cloud 
+  agent.flexVolumeDirPath: /home/kubernetes/flexvolume
 
-ingress:
-  enabled: false
-  annotations: {}
-    # kubernetes.io/ingress.class: nginx
-    # kubernetes.io/tls-acme: "true"
-  paths: []
-  hosts:
-    - chart-example.local
-  tls: []
-  #  - secretName: chart-example-tls
-  #    hosts:
-  #      - chart-example.local
-
-resources: {}
-  # We usually recommend not to specify default resources and to leave this as a conscious
-  # choice for the user. This also increases chances charts run on environments with little
-  # resources, such as Minikube. If you do want to specify resources, uncomment the following
-  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-  # limits:
-  #  cpu: 100m
-  #  memory: 128Mi
-  # requests:
-  #  cpu: 100m
-  #  memory: 128Mi
-
-nodeSelector: {}
-
-tolerations: []
-
-affinity: {}
+solr:
+  name: solr
+  # volumeClaimTemplates.storageClassName:
+  # volumeClaimTemplates.storageSize:
+  # volumeClaimTemplates.accessModes:
