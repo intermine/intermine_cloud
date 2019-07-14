@@ -28,7 +28,7 @@ spec:
             value: "-Xmx256m -Xms128m"
           ports:
             - name: http
-              containerPort: 8080
+              containerPort: {{ .Values.tomcat.service.port }}
               protocol: TCP
           livenessProbe:
             httpGet:
