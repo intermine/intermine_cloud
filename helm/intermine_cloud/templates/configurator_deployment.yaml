@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "intermine_cloud.fullname" . }}-configurator
+  labels:
+    app.kubernetes.io/name: {{ include "intermine_cloud.name" . }}
+    helm.sh/chart: {{ include "intermine_cloud.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.configurator.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "intermine_cloud.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "intermine_cloud.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.configurator.image.repository }}:{{ .Values.configurator.image.tag }}"
+          imagePullPolicy: {{ .Values.configurator.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.configurator.service.port }}
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.configurator.livenessProbe.path }}
+              port: {{ .Values.configurator.service.port }}
+            initialDelaySeconds: {{ .Values.configurator.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.configurator.livenessProbe.periodSeconds }}
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.configurator.readinessProbe.path }}
+              port: {{ .Values.configurator.service.port }}
+            initialDelaySeconds: {{ .Values.configurator.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.configurator.readinessProbe.periodSeconds }}
+            failureThreshold: {{ .Values.configurator.readinessProbe.failureThreshold }}
+          resources:
+            {{- toYaml .Values.configurator.resources | nindent 12 }}
+      {{- with .Values.configurator.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    {{- with .Values.configurator.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with .Values.configurator.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
