@@ -122,7 +122,7 @@ variable "node_disk_type" {
 variable "node_image_type" {
   type = "string"
   description = "image type for nodes"
-  default = "COS"
+  default = "Ubuntu"
 }
 
 variable "node_auto_repair_boolean" {
