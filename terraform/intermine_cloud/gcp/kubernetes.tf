@@ -1,6 +1,6 @@
 module "gke" {
   source                     = "terraform-google-modules/kubernetes-engine/google"
-  version                    = "3.0.0"
+  version                    = "2.1.0"
   project_id                 = "${var.project_id}"
   name                       = "${var.cluster_name}"
   region                     = "${var.project_region}"
