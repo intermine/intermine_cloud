@@ -23,23 +23,26 @@ spec:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.configurator.image.repository }}:{{ .Values.configurator.image.tag }}"
           imagePullPolicy: {{ .Values.configurator.image.pullPolicy }}
+          env:
+          - name: "IM_DATA_DIR"
+            value: "/intermine/sharedfs"
           ports:
             - name: http
               containerPort: {{ .Values.configurator.service.port }}
               protocol: TCP
-          livenessProbe:
-            httpGet:
-              path: {{ .Values.configurator.livenessProbe.path }}
-              port: {{ .Values.configurator.service.port }}
-            initialDelaySeconds: {{ .Values.configurator.livenessProbe.initialDelaySeconds }}
-            periodSeconds: {{ .Values.configurator.livenessProbe.periodSeconds }}
-          readinessProbe:
-            httpGet:
-              path: {{ .Values.configurator.readinessProbe.path }}
-              port: {{ .Values.configurator.service.port }}
-            initialDelaySeconds: {{ .Values.configurator.readinessProbe.initialDelaySeconds }}
-            periodSeconds: {{ .Values.configurator.readinessProbe.periodSeconds }}
-            failureThreshold: {{ .Values.configurator.readinessProbe.failureThreshold }}
+        #   livenessProbe:
+        #     httpGet:
+        #       path: {{ .Values.configurator.livenessProbe.path }}
+        #       port: {{ .Values.configurator.service.port }}
+        #     initialDelaySeconds: {{ .Values.configurator.livenessProbe.initialDelaySeconds }}
+        #     periodSeconds: {{ .Values.configurator.livenessProbe.periodSeconds }}
+        #   readinessProbe:
+        #     httpGet:
+        #       path: {{ .Values.configurator.readinessProbe.path }}
+        #       port: {{ .Values.configurator.service.port }}
+        #     initialDelaySeconds: {{ .Values.configurator.readinessProbe.initialDelaySeconds }}
+        #     periodSeconds: {{ .Values.configurator.readinessProbe.periodSeconds }}
+        #     failureThreshold: {{ .Values.configurator.readinessProbe.failureThreshold }}
           resources:
             {{- toYaml .Values.configurator.resources | nindent 12 }}
       {{- with .Values.configurator.nodeSelector }}
