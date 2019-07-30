@@ -27,19 +27,19 @@ spec:
             - name: http
               containerPort: {{ .Values.wizard.service.port }}
               protocol: TCP
-          livenessProbe:
-            httpGet:
-              path: {{ .Values.wizard.livenessProbe.path }}
-              port: {{ .Values.wizard.service.port }}
-            initialDelaySeconds: {{ .Values.wizard.livenessProbe.initialDelaySeconds }}
-            periodSeconds: {{ .Values.wizard.livenessProbe.periodSeconds }}
-          readinessProbe:
-            httpGet:
-              path: {{ .Values.wizard.readinessProbe.path }}
-              port: {{ .Values.wizard.service.port }}
-            initialDelaySeconds: {{ .Values.wizard.readinessProbe.initialDelaySeconds }}
-            periodSeconds: {{ .Values.wizard.readinessProbe.periodSeconds }}
-            failureThreshold: {{ .Values.wizard.readinessProbe.failureThreshold }}
+        #   livenessProbe:
+        #     httpGet:
+        #       path: {{ .Values.wizard.livenessProbe.path }}
+        #       port: {{ .Values.wizard.service.port }}
+        #     initialDelaySeconds: {{ .Values.wizard.livenessProbe.initialDelaySeconds }}
+        #     periodSeconds: {{ .Values.wizard.livenessProbe.periodSeconds }}
+        #   readinessProbe:
+        #     httpGet:
+        #       path: {{ .Values.wizard.readinessProbe.path }}
+        #       port: {{ .Values.wizard.service.port }}
+        #     initialDelaySeconds: {{ .Values.wizard.readinessProbe.initialDelaySeconds }}
+        #     periodSeconds: {{ .Values.wizard.readinessProbe.periodSeconds }}
+        #     failureThreshold: {{ .Values.wizard.readinessProbe.failureThreshold }}
           resources:
             {{- toYaml .Values.wizard.resources | nindent 12 }}
       {{- with .Values.wizard.nodeSelector }}
