@@ -30,27 +30,27 @@ output "cluster_name" {
   value       = "${module.gke.name}"
 }
 
-output "network" {
-  value = "${var.network}"
-}
+# output "network" {
+#   value = "${var.network}"
+# }
 
-output "subnetwork" {
-  value = "${var.subnetwork}"
-}
+# output "subnetwork" {
+#   value = "${var.subnetwork}"
+# }
 
 output "location" {
   value = "${module.gke.location}"
 }
 
-output "ip_range_pods" {
-  description = "The secondary IP range used for pods"
-  value       = "${var.ip_range_pods}"
-}
+# output "ip_range_pods" {
+#   description = "The secondary IP range used for pods"
+#   value       = "${var.ip_range_pods}"
+# }
 
-output "ip_range_services" {
-  description = "The secondary IP range used for services"
-  value       = "${var.ip_range_services}"
-}
+# output "ip_range_services" {
+#   description = "The secondary IP range used for services"
+#   value       = "${var.ip_range_services}"
+# }
 
 output "zones" {
   description = "List of zones in which the cluster resides"
