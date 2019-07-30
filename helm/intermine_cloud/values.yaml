@@ -7,7 +7,7 @@ compose:
     pullPolicy: Always
   service:
     type: ClusterIP
-    port: 8080
+    port: 9991
   resources:
     limits:
       cpu: 100m
@@ -16,12 +16,12 @@ compose:
       cpu: 100m
       memory: 256Mi
   readinessProbe:
-    path: "/"
+    path: "/api/v1/status/"
     initialDelaySeconds: 60
     periodSeconds: 30
     failureThreshold: 6
   livenessProbe:
-    path: "/"
+    path: "/api/v1/status/"
     initialDelaySeconds: 60
     periodSeconds: 30
   nodeSelector: {}
@@ -90,7 +90,7 @@ wizard:
   name: intermine-wizard
   replicaCount: 1
   image:
-    repository: intermine/wizard
+    repository: intermine/configurator
     tag: latest
     pullPolicy: Always
   service:
@@ -129,11 +129,26 @@ wizard:
     #  - secretName: chart-example-tls
     #    hosts:
     #      - chart-example.local
+ingress:
+    enabled: false
+    annotations:
+      # nginx.ingress.kubernetes.io/rewrite-target: /
+      # kubernetes.io/ingress.class: nginx
+      # nginx.ingress.kubernetes.io/ssl-redirect: \"false\"
+      # kubernetes.io/tls-acme: "true"
+    # paths: ["/*"]
+    # hosts:
+    #   - chart-example.local
+    tls: []
+    #  - secretName: chart-example-tls
+    #    hosts:
+    #      - chart-example.local
 
 postgresql:
   name: postgresql
   port: "5432"
   postgresqlPassword: postgres
+  postgresqlDatabase: composedb
   persistence:
     size: 2Gi
   # persistence.storageClass: 
@@ -146,13 +161,19 @@ postgresql:
       cpu: 250m
       memory: 256Mi
 
+redis:
+  name: redis
+  password: redis
+
 rook-ceph:
   name: rook-ceph
   # This path is specific to GCP. Change if using on different cloud 
-  agent.flexVolumeDirPath: /home/kubernetes/flexvolume
+  agent:
+    flexVolumeDirPath: /home/kubernetes/flexvolume
 
 solr:
   name: solr
-  # volumeClaimTemplates.storageClassName:
-  # volumeClaimTemplates.storageSize:
-  # volumeClaimTemplates.accessModes:
+  volumeClaimTemplates:
+    storageSize: 2Gi
+    # storageClassName:
+    # accessModes:
