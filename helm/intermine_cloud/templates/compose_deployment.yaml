@@ -23,6 +23,25 @@ spec:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.compose.image.repository }}:{{ .Values.compose.image.tag }}"
           imagePullPolicy: {{ .Values.compose.image.pullPolicy }}
+          env:
+          - name: "IM_DATA_DIR"
+            value: "/intermine/sharedfs"
+          - name: "PGHOST"
+            value: "{{.Release.Name}}-{{.Values.postgresql.name}}"
+          - name: "PGPORT"
+            value: "5432"
+          - name: "PGUSER"
+            value: "postgres"
+          - name: "PGPASSWORD"
+            value: "{{ .Values.postgresql.postgresqlPassword}}"
+          - name: "POSTGRES_PASSWORD"
+            value: "{{ .Values.postgresql.postgresqlPassword}}"
+          - name: "FLASK_CONFIG_MODE"
+            value: "production"
+          - name: "REDIS_HOST"
+            value: "{{.Release.Name}}-{{.Values.redis.name}}-master"
+          - name: "REDIS_PASSWORD"
+            value: "{{ .Values.redis.password }}"
           ports:
             - name: http
               containerPort: {{ .Values.compose.service.port }}
