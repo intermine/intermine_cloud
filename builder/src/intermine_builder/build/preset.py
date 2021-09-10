@@ -20,13 +20,16 @@ def main() -> None:
         Path.home() / ".intermine" / (config["mine"] + ".properties"), properties
     )
 
-    for source in config["datasources"]:
-        logger.info("Adding data source: " + source["name"])
-        project_xml.append_source(source)
+    if "datasources" in config:
+        for source in config["datasources"]:
+            logger.info("Adding data source: " + source["name"])
+            project_xml.append_source(source)
 
-    for source in config["datasources"]:
-        gradle.integrate(source["name"])
+        for source in config["datasources"]:
+            gradle.integrate(source["name"])
 
     gradle.post_process()
+
+    gradle.build_user_db()
 
     gradle.deploy()
