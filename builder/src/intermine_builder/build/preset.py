@@ -20,6 +20,8 @@ def main() -> None:
         Path.home() / ".intermine" / (config["mine"] + ".properties"), properties
     )
 
+    gradle.clean()
+
     if "datasources" in config:
         for source in config["datasources"]:
             logger.info("Adding data source: " + source["name"])
