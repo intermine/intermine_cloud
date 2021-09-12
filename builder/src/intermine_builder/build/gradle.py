@@ -48,3 +48,7 @@ def integrate(source: str, stacktrace: bool = False) -> subprocess.CompletedProc
     if stacktrace:
         args += "--stacktrace"
     return _gradle(args)
+
+def clean() -> subprocess.CompletedProcess:
+    args = ["clean"]
+    return _gradle(args)

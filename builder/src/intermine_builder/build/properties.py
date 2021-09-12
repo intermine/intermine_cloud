@@ -7,8 +7,12 @@ from typing import Optional
 
 
 def create_properties(
+    PGHOST: str = "postgres",
+    PGPORT: int = 5432,
     PSQL_USER: str = "postgres",
     PSQL_PWD: str = "postgres",
+    TOMCAT_HOST: str = "tomcat",
+    TOMCAT_PORT: int = 8080,
     TOMCAT_USER: str = "tomcat",
     TOMCAT_PWD: str = "tomcat",
     override: Optional[dict] = None,
@@ -23,7 +27,7 @@ def create_properties(
         # if true will log details about execution time of every query
         "os.production.verboseQueryLog": "true",
         # Access to the postgres database to build into and access from the webapp
-        "db.production.datasource.serverName": "localhost",
+        "db.production.datasource.serverName": PGHOST + ":" + str(PGPORT),
         "db.production.datasource.databaseName": "biotestmine",
         "db.production.datasource.user": PSQL_USER,
         "db.production.datasource.password": PSQL_PWD,
@@ -31,13 +35,13 @@ def create_properties(
         # as sources are loaded and can be discarded once the warehouse build is complete
         # It uses the InterMine 'items' metadata format to describe objects.
         # common target items database
-        "db.common-tgt-items.datasource.serverName": "localhost",
+        "db.common-tgt-items.datasource.serverName": PGHOST + ":" + str(PGPORT),
         "db.common-tgt-items.datasource.databaseName": "items-biotestmine",
         "db.common-tgt-items.datasource.user": PSQL_USER,
         "db.common-tgt-items.datasource.password": PSQL_PWD,
         # userprofile database - used by the webapp to store logins, query history,
         # saved bags, templates and tags.
-        "db.userprofile-production.datasource.serverName": "localhost",
+        "db.userprofile-production.datasource.serverName": PGHOST + ":" + str(PGPORT),
         "db.userprofile-production.datasource.databaseName": "userprofile-biotestmine",
         "db.userprofile-production.datasource.user": PSQL_USER,
         "db.userprofile-production.datasource.password": PSQL_PWD,
@@ -48,7 +52,7 @@ def create_properties(
         #####################
         # Web application deployment properties
         # location of tomcat server and path of webapp - e.g. access http://localhost:8080/malariamine
-        "webapp.deploy.url": "http://localhost:8080",
+        "webapp.deploy.url": "http://" + TOMCAT_HOST + ":" + str(TOMCAT_PORT),
         "webapp.path": "biotestmine",
         # tomcat username and password needed to deploy webapp
         "webapp.manager": TOMCAT_USER,
