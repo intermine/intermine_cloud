@@ -1,7 +1,4 @@
 FROM alpine:3.12.5
-# Modified copy of docker-intermine-gradle/intermine_builder
-# Once it's finalised, we should probably have this (and the intermine_builder
-# project) replace the Dockerfile in that repo.
 LABEL maintainer="Ank"
 
 ENV JAVA_HOME="/usr/lib/jvm/default-jvm"
@@ -64,7 +61,7 @@ RUN cpanm --force Ouch \
 RUN mkdir /home/intermine && mkdir /home/intermine/intermine
 RUN chmod -R 777 /home/intermine
 
-ENV MEM_OPTS="-Xmx1g -Xms500m"
+ENV MEM_OPTS="-Xmx16g -Xms1g"
 ENV GRADLE_OPTS="-server ${MEM_OPTS} -XX:+UseParallelGC -XX:SoftRefLRUPolicyMSPerMB=1 -XX:MaxHeapFreeRatio=99 -Dorg.gradle.daemon=false -Duser.home=/home/intermine"
 ENV HOME="/home/intermine"
 ENV USER_HOME="/home/intermine"
@@ -76,19 +73,4 @@ ENV TOMCAT_PWD="tomcat"
 ENV TOMCAT_PORT=8080
 ENV PGPORT=5432
 
-RUN apk add --no-cache python3 python3-dev curl
-
-RUN curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python3 -
-
-ENV PATH="$HOME/.poetry/bin:${PATH}"
-
-COPY example /home/intermine/builder/example
-COPY src /home/intermine/builder/src
-COPY poetry.lock pyproject.toml /home/intermine/builder/
-RUN chmod -R 777 /home/intermine
-WORKDIR /home/intermine/builder
-
-RUN poetry install
-
-# TODO support ways to pass input.json externally
-CMD ["poetry","run","app","example/input.json"]
+WORKDIR /home/intermine/intermine

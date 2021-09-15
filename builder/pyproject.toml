@@ -6,14 +6,14 @@ authors = ["InterMine devs <support@intermine.org>"]
 license = "LGPL 2.1"
 
 [tool.poetry.scripts]
-app = "intermine_builder.app:main"
+builder = "intermine_builder.cli:main"
 
 [tool.poetry.dependencies]
 python = "^3.8"
-Flask = "^2.0.1"
 pydantic = { extras = ["dotenv"], version = "^1.8.2" }
-logzero = "^1.7.0"
 xdg = "^5.0.2"
+click = "<8.0"
+docker = "^5.0.2"
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.2.4"
