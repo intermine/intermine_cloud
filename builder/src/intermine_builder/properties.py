@@ -3,7 +3,7 @@ Allows the creation of `mine.properties` as a dict that can later be written.
 """
 
 import os
-from typing import Optional
+from typing import Dict, Optional
 
 
 def create_properties(
@@ -15,7 +15,7 @@ def create_properties(
     TOMCAT_PORT: int = 8080,
     TOMCAT_USER: str = "tomcat",
     TOMCAT_PWD: str = "tomcat",
-    override: Optional[dict] = None,
+    overrides: Optional[Dict[str, str]] = None,
 ) -> dict:
     properties = {
         # This file specifies the how to access local postgres databases used for
@@ -80,13 +80,13 @@ def create_properties(
         "feedback.destination": " test_user@mail_address",
     }
 
-    if override:
-        properties.update(override)
+    if overrides:
+        properties.update(overrides)
 
     return properties
 
 
-def write_properties(filepath: os.PathLike, properties_dict: dict) -> None:
+def write_properties(filepath: os.PathLike, properties_dict: Dict[str, str]) -> None:
     os.makedirs(os.path.dirname(filepath), exist_ok=True)
 
     with open(filepath, "w") as f:

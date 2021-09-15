@@ -1,11 +1,12 @@
 import os
 from pathlib import Path
-from typing import Any, List, Optional
+from typing import Any, Dict, List, Optional, TypedDict
 
 import docker
 
 from intermine_builder.properties import create_properties, write_properties
 from intermine_builder import project_xml
+from intermine_builder.types import DataSource
 
 DOCKER_NETWORK_NAME = "builder_default"
 
@@ -18,26 +19,25 @@ class MineBuilder:
     only changes to volumes persisting.
     """
 
-    def __init__(self, config: dict) -> None:
+    def __init__(self, mine: str, build_image: bool = False):
         self.user = str(os.getuid()) + ":" + str(os.getgid())
-
-        self.mine = config["mine"]
+        self.mine = mine
 
         # TODO specify path to data folder
         # - as argument for lib usage
         # - as flag for cli usage
-        mine_path = Path.cwd() / "data" / "mine"
+        self.mine_path = Path.cwd() / "data" / "mine"
 
         # TODO centrally define all these paths, to make it easy to change and robust
         self.volumes = {
-            mine_path
+            self.mine_path
             / "dump": {"bind": "/home/intermine/intermine/dump", "mode": "rw"},
-            mine_path
+            self.mine_path
             / "configs": {"bind": "/home/intermine/intermine/configs", "mode": "rw"},
-            mine_path / "packages": {"bind": "/home/intermine/.m2", "mode": "rw"},
-            mine_path
+            self.mine_path / "packages": {"bind": "/home/intermine/.m2", "mode": "rw"},
+            self.mine_path
             / "intermine": {"bind": "/home/intermine/.intermine", "mode": "rw"},
-            mine_path
+            self.mine_path
             / self.mine: {
                 "bind": "/home/intermine/intermine/" + self.mine,
                 "mode": "rw",
@@ -46,8 +46,13 @@ class MineBuilder:
 
         self.client = docker.from_env()
 
-        # TODO maybe not the right place to build the image
-        self.image = self.client.images.build(path=".")[0]
+        if build_image:
+            self.image = self.client.images.build(path=".")[0]
+        else:
+            try:
+                self.image = self.client.images.get("intermine/builder")
+            except docker.errors.ImageNotFound:
+                self.image = self.client.images.pull("intermine/builder")
 
         try:
             if (
@@ -67,17 +72,6 @@ class MineBuilder:
                 "Missing docker network: " + DOCKER_NETWORK_NAME
             ) from exc
 
-        if "properties" in config:
-            properties = create_properties(override=config["properties"])
-            write_properties(
-                mine_path / "intermine" / (self.mine + ".properties"),
-                properties
-            )
-
-        if "datasources" in config:
-            for source in config["datasources"]:
-                project_xml.append_source(mine_path / self.mine / "project.xml", source)
-
     def __run(self, command):
         return self.client.containers.run(
             image=self.image,
@@ -91,6 +85,17 @@ class MineBuilder:
             stderr=True,
             working_dir="/home/intermine/intermine/" + self.mine,
         )
+
+    # Changes to filesystem
+
+    def create_properties_file(self, overrides: Dict[str, str]):
+        properties = create_properties(overrides=overrides)
+        write_properties(
+            self.mine_path / "intermine" / (self.mine + ".properties"), properties
+        )
+
+    def add_data_source(self, source: DataSource):
+        project_xml.append_source(self.mine_path / self.mine / "project.xml", source)
 
     # Gradle commands
 
@@ -137,6 +142,7 @@ class MineBuilder:
 
     def project_build(self):
         # TODO tailor project_build args to this use case
+        # allow specifying all flags passed through optional argument?
         return self.__run(
             [
                 "./project_build",

@@ -33,5 +33,5 @@ Now you can use this library from the Python interpreter.
 poetry shell
 python3
 >>> from intermine_builder import MineBuilder
->>> m = MineBuilder({ 'mine': 'biotestmine' })
+>>> m = MineBuilder("biotestmine")
 ```

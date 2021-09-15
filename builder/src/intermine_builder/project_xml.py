@@ -3,6 +3,7 @@
 import os
 import xml.etree.ElementTree as ET
 
+from intermine_builder.types import DataSource
 
 def _read(project_xml_path: os.PathLike) -> ET.ElementTree:
     return ET.parse(project_xml_path)
@@ -12,7 +13,7 @@ def _write(project_xml_path: os.PathLike, tree: ET.ElementTree) -> None:
     tree.write(project_xml_path)
 
 
-def append_source(project_xml_path: os.PathLike, source: dict) -> None:
+def append_source(project_xml_path: os.PathLike, source: DataSource) -> None:
     tree = _read(project_xml_path)
 
     root = tree.getroot()
