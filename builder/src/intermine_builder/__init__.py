@@ -19,14 +19,12 @@ class MineBuilder:
     only changes to volumes persisting.
     """
 
-    def __init__(self, mine: str, build_image: bool = False):
+    def __init__(self, mine: str, build_image: bool = False, data_path: Optional[os.PathLike] = None):
         self.user = str(os.getuid()) + ":" + str(os.getgid())
         self.mine = mine
 
-        # TODO specify path to data folder
-        # - as argument for lib usage
-        # - as flag for cli usage
-        self.mine_path = Path.cwd() / "data" / "mine"
+        self.data_path = Path(data_path) if data_path else (Path.cwd() / "data")
+        self.mine_path = self.data_path / "mine"
 
         # TODO centrally define all these paths, to make it easy to change and robust
         self.volumes = {
