@@ -26,12 +26,11 @@ BUILDER_CONSTRUCTOR_OPTIONS = ["build_image", "data_path"]
 # add_data_source method
 @click.option("--name")
 @click.option("--type")
-@click.option("--property", multiple=True)
-# --property 'name=src.data.dir,location=/data/panther'
-# --property 'name=panther.organisms,value=7227 6239 9606'
+@click.option("--property", multiple=True, help="Example: --property 'name=src.data.dir,location=/data/panther' --property 'name=panther.organisms,value=7227 6239 9606'")
 # methods that use gradle
 @click.option("--stacktrace", is_flag=True)
 def main(mine, task, **options):
+    """Run tasks on a mine using a transient container."""
     builder_options = {k: options[k] for k in BUILDER_CONSTRUCTOR_OPTIONS}
     builder = MineBuilder(mine, **builder_options)
     try:
