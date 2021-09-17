@@ -1,4 +1,5 @@
 *.terraform
 *.tfvars
 creds/*
+.vscode
 scratch
