@@ -131,8 +131,12 @@ def setup_poetry() -> None:
                     break
                 f.write(data)
         resp.release_conn()
-        run(["python", "./install-poetry.py"], cwd=tools_path.parent)
-
+        out = run(
+            ["python", "./install-poetry.py", "-y"],
+            cwd=tools_path.parent,
+            capture_output=True,
+        )
+        print(out.stdout.decode("utf-8"))
     # Print the info about poetry
     out = run(["poetry", "-V"], capture_output=True)
     print(f"Using Poetry at: {which('poetry')} \n{out.stdout.decode('utf-8')}")
