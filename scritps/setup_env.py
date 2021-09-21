@@ -1,4 +1,4 @@
-#! python3
+#! python
 
 """Setup scripts."""
 
@@ -52,7 +52,7 @@ with your package manager.
             )
             return 1
         else:
-            print(out.stdout)
+            print(out.stdout.decode("utf-8"))
             return 1
     else:
         print(f"Using Docker at: {which('docker')} \n\n {out.stdout}")
