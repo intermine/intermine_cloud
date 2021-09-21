@@ -69,19 +69,72 @@ current_machine = platform.machine()
 client = urllib3.PoolManager()
 
 
+def setup_miniconda() -> None:
+    """Setup miniconda."""
+    print("+++++++++++ Miniconda +++++++++++++")
+    if which("conda") is None:
+        print("Conda not found!\nInstalling Conda")
+        if current_system == "Darwin":
+            local_system = "MacOSX"
+        else:
+            local_system = current_system
+
+        # Decide platform architecture
+        local_machine = current_machine
+
+        # Build url
+        url = f"https://repo.anaconda.com/miniconda/Miniconda3-latest-{local_system}-{local_machine}.sh"
+
+        resp = client.request("GET", url)
+
+        # Download file
+        with open((tools_path / "miniconda.sh"), "wb") as f:
+            while True:
+                data = resp.read()
+                if not data:
+                    break
+                f.write(data)
+        resp.release_conn()
+        run(["chmod", "+x", "miniconda.sh"], cwd=tools_path)
+        run(
+            ["./miniconda.sh", "-b", "-p", f"{(tools_path / 'miniconda')}"],
+            cwd=tools_path,
+        )
+
+    # Print the info about Conda
+    out = run(
+        ["./conda", "info"], capture_output=True, cwd=(tools_path / "miniconda" / "bin")
+    )
+    print(f"Using Conda at: {which('conda')} \n{out.stdout.decode('utf-8')}")
+
+
 def setup_poetry() -> None:
     """Setup poetry."""
     print("+++++++++++ Poetry +++++++++++++")
     if which("poetry") is None:
         print("Poetry not found!\nInstalling poetry")
-        r = client.request(
+        resp = client.request(
             "GET",
             "https://raw.githubusercontent.com/python-poetry/poetry/master/install-poetry.py",
         )
-        exec(r.data.decode("utf-8"))
-    else:
-        out = run(["poetry", "-V"], capture_output=True)
-        print(f"Using Poetry at: {which('poetry')} \n{out.stdout.decode('utf-8')}")
+        resp = client.request(
+            "GET",
+            "https://raw.githubusercontent.com/python-poetry/poetry/master/install-poetry.py",
+        )
+
+        # Download file
+        with open((tools_path / "install-poetry.py"), "wb") as f:
+            while True:
+                data = resp.read()
+                if not data:
+                    break
+                f.write(data)
+        resp.release_conn()
+        run(["python", "./install-poetry.py"], cwd=tools_path)
+
+    # Print the info about poetry
+    out = run(["poetry", "-V"], capture_output=True)
+    print(f"Using Poetry at: {which('poetry')} \n{out.stdout.decode('utf-8')}")
 
 
 def install_projects(directory: Path) -> None:
