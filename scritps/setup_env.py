@@ -63,6 +63,7 @@ compose_path = Path(__file__).absolute().parents[1].joinpath("compose")
 demon_path = Path(__file__).absolute().parents[1].joinpath("demon")
 tools_path = Path(__file__).absolute().parents[1].joinpath("scratch", "tools")
 
+
 current_system = platform.system()
 current_machine = platform.machine()
 
@@ -88,17 +89,17 @@ def setup_miniconda() -> None:
         resp = client.request("GET", url)
 
         # Download file
-        with open((tools_path / "miniconda.sh"), "wb") as f:
+        with open((tools_path.parent / "miniconda.sh"), "wb") as f:
             while True:
                 data = resp.read()
                 if not data:
                     break
                 f.write(data)
         resp.release_conn()
-        run(["chmod", "+x", "miniconda.sh"], cwd=tools_path)
+        run(["chmod", "+x", "miniconda.sh"], cwd=tools_path.parent)
         run(
             ["./miniconda.sh", "-b", "-p", f"{(tools_path / 'miniconda')}"],
-            cwd=tools_path,
+            cwd=tools_path.parent,
         )
 
     # Print the info about Conda
@@ -123,14 +124,14 @@ def setup_poetry() -> None:
         )
 
         # Download file
-        with open((tools_path / "install-poetry.py"), "wb") as f:
+        with open((tools_path.parent / "install-poetry.py"), "wb") as f:
             while True:
                 data = resp.read()
                 if not data:
                     break
                 f.write(data)
         resp.release_conn()
-        run(["python", "./install-poetry.py"], cwd=tools_path)
+        run(["python", "./install-poetry.py"], cwd=tools_path.parent)
 
     # Print the info about poetry
     out = run(["poetry", "-V"], capture_output=True)
