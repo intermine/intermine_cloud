@@ -132,10 +132,13 @@ def setup_poetry() -> None:
             ["python", "./install-poetry.py", "-y"],
             cwd=tools_path.parent,
             capture_output=True,
+            env={**os.environ, "POETRY_HOME": f"{tools_path / 'poetry'}"},
         )
         print(out.stdout.decode("utf-8"))
     # Print the info about poetry
-    out = run(["poetry", "-V"], capture_output=True)
+    out = run(
+        ["./poetry", "-V"], capture_output=True, cwd=(tools_path / "poetry" / "bin")
+    )
     print(f"Using Poetry at: {which('poetry')} \n{out.stdout.decode('utf-8')}")
 
 
