@@ -16,7 +16,7 @@ def check_docker() -> int:
     """Check if docker is present on the system."""
     print("+++++++++++ Docker +++++++++++++")
     if which("docker") is None:
-        print("Poetry not found!")
+        print("Docker not found!")
         return 1
 
     out = run(["docker", "info"], capture_output=True)
@@ -55,7 +55,7 @@ with your package manager.
             print(out.stdout.decode("utf-8"))
             return 1
     else:
-        print(f"Using Docker at: {which('docker')} \n\n {out.stdout}")
+        print(f"Using Docker at: {which('docker')} \n\n{out.stdout.decode('utf-8')}")
         return 0
 
 
