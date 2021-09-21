@@ -86,7 +86,7 @@ def setup_miniconda() -> None:
         # Build url
         url = f"https://repo.anaconda.com/miniconda/Miniconda3-latest-{local_system}-{local_machine}.sh"
 
-        resp = client.request("GET", url)
+        resp = client.request("GET", url, preload_content=False)
 
         # Download file
         with open((tools_path.parent / "miniconda.sh"), "wb") as f:
@@ -117,10 +117,7 @@ def setup_poetry() -> None:
         resp = client.request(
             "GET",
             "https://raw.githubusercontent.com/python-poetry/poetry/master/install-poetry.py",
-        )
-        resp = client.request(
-            "GET",
-            "https://raw.githubusercontent.com/python-poetry/poetry/master/install-poetry.py",
+            preload_content=False,
         )
 
         # Download file
