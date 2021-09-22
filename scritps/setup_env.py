@@ -286,13 +286,13 @@ def setup_minio() -> None:
     )
     out_mc = run(["./mc", "-v"], capture_output=True, cwd=(tools_path / "minio"))
     print(
-        f"Using minio at {(tools_path / 'minio')} \n{out_minio.stdout.decode('utf-8')} \n{out_mc}"
+        f"Using minio at {(tools_path / 'minio')} \n{out_minio.stdout.decode('utf-8')} \n{out_mc.stdout.decode('utf-8')}"
     )
 
 
 def setup_nats() -> None:
     "Setup NATS."
-    print("+++++++++++ NATS +++++++++++++")
+    print("\n\n+++++++++++ NATS +++++++++++++")
     if os.path.isfile((tools_path / "nats" / "nats-server")) is False:
         print(f"Creating nats dir at {(tools_path / 'nats')}")
         os.makedirs((tools_path / "nats"), exist_ok=True)
@@ -357,12 +357,12 @@ def setup_nats() -> None:
         capture_output=True,
         cwd=(tools_path / "nats"),
     )
-    print(f"Using minio at {(tools_path / 'minio')} \n{out.stdout.decode('utf-8')}")
+    print(f"Using Nats at {(tools_path / 'minio')} \n{out.stdout.decode('utf-8')}")
 
 
 def setup_kind() -> None:
     """Setup Kind."""
-    print("+++++++++++ Kind +++++++++++++")
+    print("\n\n+++++++++++ Kind +++++++++++++")
     if os.path.isfile((tools_path / "kind" / "kind")) is False:
         print(f"Creating kind dir at {(tools_path / 'kind')}")
         os.makedirs((tools_path / "kind"), exist_ok=True)
@@ -409,7 +409,7 @@ def setup_kind() -> None:
 
 def setup_tools() -> None:
     """Check if tools are present."""
-    print("+++++++++++ Tools +++++++++++++")
+    print("\n\n+++++++++++ Tools +++++++++++++")
     if tools_path.exists() is False:
         print(f"Creating tools dir at {tools_path.absolute()}")
         os.makedirs(tools_path.absolute(), exist_ok=True)
@@ -418,6 +418,7 @@ def setup_tools() -> None:
         setup_traefik()
         setup_minio()
         setup_nats()
+        setup_kind()
 
 
 def main() -> None:
