@@ -2,6 +2,7 @@
 
 """Setup scripts."""
 
+import argparse
 import os
 from pathlib import Path
 import platform
@@ -139,7 +140,9 @@ def setup_poetry() -> None:
     out = run(
         ["./poetry", "-V"], capture_output=True, cwd=(tools_path / "poetry" / "bin")
     )
-    print(f"Using Poetry at: {which('poetry')} \n{out.stdout.decode('utf-8')}")
+    print(
+        f"Using Poetry at: {tools_path / 'poetry' / 'bin' / 'poetry'} \n{out.stdout.decode('utf-8')}"
+    )
 
 
 def install_projects(directory: Path) -> None:
@@ -150,7 +153,7 @@ def install_projects(directory: Path) -> None:
 
 
 def setup_traefik() -> None:
-    """Setup Traefik"""
+    """Setup Traefik."""
     print("+++++++++++ Traefik +++++++++++++")
     if os.path.isfile((tools_path / "traefik" / "traefik")) is False:
         print(f"Creating traefik dir at {(tools_path / 'traefik')}")
@@ -204,13 +207,145 @@ def setup_traefik() -> None:
         )
 
         # make binary executable
-        run(["chmod", "+x", "traefik"], cwd=(tools_path / "traefik"))
+        if local_system != "windows":
+            run(["chmod", "+x", "traefik"], cwd=(tools_path / "traefik"))
+        else:
+            # !TODO: Check equivalent in windows
+            pass
 
     # Print the info about traefik
     out = run(
         ["./traefik", "version"], capture_output=True, cwd=(tools_path / "traefik")
     )
     print(f"Using traefik at {(tools_path / 'traefik')} \n{out.stdout.decode('utf-8')}")
+
+
+def setup_minio() -> None:
+    """Setup MinIO."""
+    print("+++++++++++ MinIO +++++++++++++")
+    if os.path.isfile((tools_path / "minio" / "minio")) is False:
+        print(f"Creating minio dir at {(tools_path / 'minio')}")
+        os.makedirs((tools_path / "minio"), exist_ok=True)
+
+        print("Installing MinIO")
+        local_system = current_system.lower()
+
+        # Decide platform architecture
+        if current_machine == "x86_64":
+            local_machine = "amd64"
+        elif current_machine == "aarch64":
+            local_machine = "arm64"
+        else:
+            raise "Machine not supported"
+
+        # Decide download extension
+        if local_system == "linux" or local_system == "darwin":
+            local_ext = ""
+        elif local_system == "windows":
+            local_ext = ".exe"
+
+        # Build url
+        url = f"https://dl.min.io/server/minio/release/{local_system}-{local_machine}/minio{local_ext}"
+
+        # Download minio server
+        resp = client.request("GET", url, preload_content=False)
+        with open((tools_path / "minio" / f"minio{local_ext}"), "wb") as f:
+            while True:
+                data = resp.read()
+                if not data:
+                    break
+                f.write(data)
+        resp.release_conn()
+
+        url = f"https://dl.min.io/client/mc/release/{local_system}-{local_machine}/mc{local_ext}"
+
+        # Download minio client
+        resp = client.request("GET", url, preload_content=False)
+        with open((tools_path / "minio" / f"mc{local_ext}"), "wb") as f:
+            while True:
+                data = resp.read()
+                if not data:
+                    break
+                f.write(data)
+        resp.release_conn()
+
+        # make binary executable
+        if local_system != "windows":
+            run(["chmod", "+x", "minio"], cwd=(tools_path / "minio"))
+            run(["chmod", "+x", "mc"], cwd=(tools_path / "minio"))
+        else:
+            # !TODO: Check equivalent in windows
+            pass
+
+    # Print the info about minio server and client
+    out_minio = run(
+        ["./minio", "version"],
+        capture_output=True,
+        cwd=(tools_path / "minio"),
+    )
+    out_mc = run(["./mc", "version"], capture_output=True, cwd=(tools_path / "minio"))
+    print(
+        f"Using minio at {(tools_path / 'minio')} \n{out_minio.stdout.decode('utf-8')} \n{out_mc}"
+    )
+
+
+def setup_nats() -> None:
+    "Setup NATS."
+    print("+++++++++++ NATS +++++++++++++")
+    if os.path.isfile((tools_path / "nats" / "nats-server")) is False:
+        print(f"Creating nats dir at {(tools_path / 'nats')}")
+        os.makedirs((tools_path / "nats"), exist_ok=True)
+
+        print("Installing NATS")
+        local_system = current_system.lower()
+
+        # Decide platform architecture
+        if current_machine == "x86_64":
+            local_machine = "amd64"
+        elif current_machine == "aarch64":
+            local_machine = "arm64"
+        else:
+            raise "Machine not supported"
+
+        # Decide download extension
+        if local_system == "linux" or local_system == "darwin":
+            local_ext = "tar.gz"
+        elif local_system == "windows":
+            local_ext = "zip"
+
+        # Build url
+        url = f"https://github.com/nats-io/nats-server/releases/download/v2.5.0/nats-server-v2.5.0-{local_system}-{local_machine}.{local_ext}"
+
+        # Download nats server
+        resp = client.request("GET", url, preload_content=False)
+        with open((tools_path / "nats" / f"nats.{local_ext}"), "wb") as f:
+            while True:
+                data = resp.read()
+                if not data:
+                    break
+                f.write(data)
+        resp.release_conn()
+
+        # extract compressed file
+        unpack_archive(
+            (tools_path / "nats" / f"nats.{local_ext}"),
+            (tools_path / "nats"),
+        )
+
+        # make binary executable
+        if local_system != "windows":
+            run(["chmod", "+x", "nats-server"], cwd=(tools_path / "minio"))
+        else:
+            # !TODO: Check equivalent in windows
+            pass
+
+    # Print the info about nats server
+    out = run(
+        ["./nats-server", "version"],
+        capture_output=True,
+        cwd=(tools_path / "nats"),
+    )
+    print(f"Using minio at {(tools_path / 'minio')} \n{out.stdout.decode('utf-8')}")
 
 
 def setup_tools() -> None:
@@ -222,12 +357,30 @@ def setup_tools() -> None:
     else:
         print(f"Using tools dir at {tools_path.absolute()}")
         setup_traefik()
+        setup_minio()
+        setup_nats()
 
 
 def main() -> None:
     """Setup runner."""
-    if check_docker() != 0:
-        sys.exit(1)
+    parser = argparse.ArgumentParser(
+        description="Setup dev environment"
+    )
+    
+    parser.add_argument(
+        "--skip-docker",
+        help="skip docker check",
+        dest="skip_docker",
+        action="store_true",
+        default=False,
+    )
+    
+    args = parser.parse_args()
+    
+    if args.skip_docker is False:
+        if check_docker() != 0:
+            sys.exit(1)
+    setup_miniconda()
     setup_poetry()
     setup_tools()
 
