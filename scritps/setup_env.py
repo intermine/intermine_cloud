@@ -75,8 +75,8 @@ client = urllib3.PoolManager()
 def setup_miniconda() -> None:
     """Setup miniconda."""
     print("+++++++++++ Miniconda +++++++++++++")
-    if which("conda") is None:
-        print("Conda not found!\nInstalling Conda")
+    if os.path.isfile((tools_path / "miniconda" / "bin" / "conda")) is False:
+        print("Isolated conda not found!\nInstalling Conda")
         if current_system == "Darwin":
             local_system = "MacOSX"
         else:
@@ -116,8 +116,8 @@ def setup_miniconda() -> None:
 def setup_poetry() -> None:
     """Setup poetry."""
     print("+++++++++++ Poetry +++++++++++++")
-    if which("poetry") is None:
-        print("Poetry not found!\nInstalling poetry")
+    if os.path.isfile((tools_path / "poetry" / "bin" / "poetry")) is False:
+        print("Isolated poetry not found!\nInstalling poetry")
         resp = client.request(
             "GET",
             "https://raw.githubusercontent.com/python-poetry/poetry/master/install-poetry.py",
