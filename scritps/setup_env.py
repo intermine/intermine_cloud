@@ -477,13 +477,19 @@ def setup_kustomize() -> None:
 
         # Download kustomize
         resp = client.request("GET", url, preload_content=False)
-        with open((tools_path / "kustomize" / "kustomize"), "wb") as f:
+        with open((tools_path / "kustomize" / "kustomize.tar.gz"), "wb") as f:
             while True:
                 data = resp.read()
                 if not data:
                     break
                 f.write(data)
         resp.release_conn()
+
+        # extract compressed file
+        unpack_archive(
+            (tools_path / "kustomize" / f"kustomize.tar.gz"),
+            (tools_path / "kustomize"),
+        )
 
         # make binary executable
         if local_system != "windows":
@@ -526,13 +532,19 @@ def setup_helm() -> None:
 
         # Download helm
         resp = client.request("GET", url, preload_content=False)
-        with open((tools_path / "helm" / "helm"), "wb") as f:
+        with open((tools_path / "helm" / "helm.tar.gz"), "wb") as f:
             while True:
                 data = resp.read()
                 if not data:
                     break
                 f.write(data)
         resp.release_conn()
+
+        # extract compressed file
+        unpack_archive(
+            (tools_path / "helm" / f"helm.tar.gz"),
+            (tools_path / "helm"),
+        )
 
         # make binary executable
         if local_system != "windows":
