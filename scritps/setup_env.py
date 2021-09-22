@@ -8,6 +8,7 @@ from pathlib import Path
 import platform
 import re
 from shutil import which, unpack_archive
+import shutil
 from subprocess import run
 import sys
 import urllib3
@@ -107,7 +108,9 @@ def setup_miniconda() -> None:
     out = run(
         ["./conda", "info"], capture_output=True, cwd=(tools_path / "miniconda" / "bin")
     )
-    print(f"Using Conda at: {which('conda')} \n{out.stdout.decode('utf-8')}")
+    print(
+        f"Using Conda at: {(tools_path / 'miniconda' / 'bin')} \n{out.stdout.decode('utf-8')}"
+    )
 
 
 def setup_poetry() -> None:
@@ -129,10 +132,9 @@ def setup_poetry() -> None:
                     break
                 f.write(data)
         resp.release_conn()
-        out = run(
+        run(
             ["python", "./install-poetry.py", "-y"],
             cwd=tools_path.parent,
-            capture_output=True,
             env={**os.environ, "POETRY_HOME": f"{tools_path / 'poetry'}"},
         )
         print(out.stdout.decode("utf-8"))
@@ -279,11 +281,11 @@ def setup_minio() -> None:
 
     # Print the info about minio server and client
     out_minio = run(
-        ["./minio", "version"],
+        ["./minio", "-v"],
         capture_output=True,
         cwd=(tools_path / "minio"),
     )
-    out_mc = run(["./mc", "version"], capture_output=True, cwd=(tools_path / "minio"))
+    out_mc = run(["./mc", "-v"], capture_output=True, cwd=(tools_path / "minio"))
     print(
         f"Using minio at {(tools_path / 'minio')} \n{out_minio.stdout.decode('utf-8')} \n{out_mc}"
     )
@@ -332,20 +334,78 @@ def setup_nats() -> None:
             (tools_path / "nats"),
         )
 
+        # copy nats-server binary
+        shutil.copy(
+            (
+                tools_path
+                / "nats"
+                / f"nats-server-v2.5.0-{local_system}-{local_machine}"
+                / "nats-server"
+            ),
+            (tools_path / "nats" / "nats-server"),
+        )
+
         # make binary executable
         if local_system != "windows":
-            run(["chmod", "+x", "nats-server"], cwd=(tools_path / "minio"))
+            run(["chmod", "+x", "nats-server"], cwd=(tools_path / "nats"))
         else:
             # !TODO: Check equivalent in windows
             pass
 
     # Print the info about nats server
     out = run(
-        ["./nats-server", "version"],
+        ["./nats-server", "-v"],
         capture_output=True,
         cwd=(tools_path / "nats"),
     )
     print(f"Using minio at {(tools_path / 'minio')} \n{out.stdout.decode('utf-8')}")
+
+
+def setup_kind() -> None:
+    """Setup Kind."""
+    print("+++++++++++ Kind +++++++++++++")
+    if os.path.isfile((tools_path / "kind" / "kind")) is False:
+        print(f"Creating kind dir at {(tools_path / 'kind')}")
+        os.makedirs((tools_path / "kind"), exist_ok=True)
+
+        print("Installing Kind")
+        local_system = current_system.lower()
+
+        # Decide platform architecture
+        if current_machine == "x86_64":
+            local_machine = "amd64"
+        elif current_machine == "aarch64":
+            local_machine = "arm64"
+        else:
+            raise "Machine not supported"
+
+        # Build url
+        url = f"https://github.com/kubernetes-sigs/kind/releases/download/v0.11.1/kind-{local_system}-{local_machine}"
+
+        # Download kind
+        resp = client.request("GET", url, preload_content=False)
+        with open((tools_path / "kind" / "kind"), "wb") as f:
+            while True:
+                data = resp.read()
+                if not data:
+                    break
+                f.write(data)
+        resp.release_conn()
+
+        # make binary executable
+        if local_system != "windows":
+            run(["chmod", "+x", "kind"], cwd=(tools_path / "kind"))
+        else:
+            # !TODO: Check equivalent in windows
+            pass
+
+    # Print the info about kind
+    out = run(
+        ["./kind", "-v"],
+        capture_output=True,
+        cwd=(tools_path / "kind"),
+    )
+    print(f"Using kind at {(tools_path / 'kind')} \n{out.stdout.decode('utf-8')}")
 
 
 def setup_tools() -> None:
@@ -363,10 +423,8 @@ def setup_tools() -> None:
 
 def main() -> None:
     """Setup runner."""
-    parser = argparse.ArgumentParser(
-        description="Setup dev environment"
-    )
-    
+    parser = argparse.ArgumentParser(description="Setup dev environment")
+
     parser.add_argument(
         "--skip-docker",
         help="skip docker check",
@@ -374,9 +432,9 @@ def main() -> None:
         action="store_true",
         default=False,
     )
-    
+
     args = parser.parse_args()
-    
+
     if args.skip_docker is False:
         if check_docker() != 0:
             sys.exit(1)
