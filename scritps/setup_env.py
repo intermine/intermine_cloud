@@ -503,6 +503,53 @@ def setup_kustomize() -> None:
     )
 
 
+def setup_helm() -> None:
+    """Setup Helm."""
+    print("\n\n+++++++++++ Helm +++++++++++++")
+    if os.path.isfile((tools_path / "helm" / "helm")) is False:
+        print(f"Creating helm dir at {(tools_path / 'helm')}")
+        os.makedirs((tools_path / "helm"), exist_ok=True)
+
+        print("Installing Helm")
+        local_system = current_system.lower()
+
+        # Decide platform architecture
+        if current_machine == "x86_64":
+            local_machine = "amd64"
+        elif current_machine == "aarch64":
+            local_machine = "arm64"
+        else:
+            raise "Machine not supported"
+
+        # Build url
+        url = f"https://get.helm.sh/helm-v3.7.0-{local_system}-{local_machine}.tar.gz"
+
+        # Download helm
+        resp = client.request("GET", url, preload_content=False)
+        with open((tools_path / "helm" / "helm"), "wb") as f:
+            while True:
+                data = resp.read()
+                if not data:
+                    break
+                f.write(data)
+        resp.release_conn()
+
+        # make binary executable
+        if local_system != "windows":
+            run(["chmod", "+x", "helm"], cwd=(tools_path / "helm"))
+        else:
+            # !TODO: Check equivalent in windows
+            pass
+
+    # Print the info about helm
+    out = run(
+        ["./helm", "version"],
+        capture_output=True,
+        cwd=(tools_path / "helm"),
+    )
+    print(f"Using helm at {(tools_path / 'helm')} \n{out.stdout.decode('utf-8')}")
+
+
 def setup_tools() -> None:
     """Check if tools are present."""
     print("\n\n+++++++++++ Tools +++++++++++++")
@@ -516,6 +563,8 @@ def setup_tools() -> None:
         setup_nats()
         setup_kind()
         setup_kubectl()
+        setup_kustomize()
+        setup_helm()
 
 
 def main() -> None:
