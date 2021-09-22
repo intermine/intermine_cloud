@@ -155,7 +155,7 @@ def install_projects(directory: Path) -> None:
 
 def setup_traefik() -> None:
     """Setup Traefik."""
-    print("+++++++++++ Traefik +++++++++++++")
+    print("\n\n++++++++++ Traefik +++++++++++++")
     if os.path.isfile((tools_path / "traefik" / "traefik")) is False:
         print(f"Creating traefik dir at {(tools_path / 'traefik')}")
         os.makedirs((tools_path / "traefik"), exist_ok=True)
@@ -400,11 +400,58 @@ def setup_kind() -> None:
 
     # Print the info about kind
     out = run(
-        ["./kind", "-v"],
+        ["./kind", "--version"],
         capture_output=True,
         cwd=(tools_path / "kind"),
     )
     print(f"Using kind at {(tools_path / 'kind')} \n{out.stdout.decode('utf-8')}")
+
+
+def setup_kubectl() -> None:
+    """Setup kubectl."""
+    print("\n\n+++++++++++ Kubectl +++++++++++++")
+    if os.path.isfile((tools_path / "kubectl" / "kubectl")) is False:
+        print(f"Creating kubectl dir at {(tools_path / 'kubectl')}")
+        os.makedirs((tools_path / "kubectl"), exist_ok=True)
+
+        print("Installing Kubectl")
+        local_system = current_system.lower()
+
+        # Decide platform architecture
+        if current_machine == "x86_64":
+            local_machine = "amd64"
+        elif current_machine == "aarch64":
+            local_machine = "arm64"
+        else:
+            raise "Machine not supported"
+
+        # Build url
+        url = f"https://dl.k8s.io/release/v1.22.0/bin/{local_system}/{local_machine}/kubectl"
+
+        # Download kubectl
+        resp = client.request("GET", url, preload_content=False)
+        with open((tools_path / "kubectl" / "kubectl"), "wb") as f:
+            while True:
+                data = resp.read()
+                if not data:
+                    break
+                f.write(data)
+        resp.release_conn()
+
+        # make binary executable
+        if local_system != "windows":
+            run(["chmod", "+x", "kubectl"], cwd=(tools_path / "kubectl"))
+        else:
+            # !TODO: Check equivalent in windows
+            pass
+
+    # Print the info about kubectl
+    out = run(
+        ["./kubectl", "version", "--client"],
+        capture_output=True,
+        cwd=(tools_path / "kubectl"),
+    )
+    print(f"Using kubectl at {(tools_path / 'kubectl')} \n{out.stdout.decode('utf-8')}")
 
 
 def setup_tools() -> None:
@@ -419,6 +466,7 @@ def setup_tools() -> None:
         setup_minio()
         setup_nats()
         setup_kind()
+        setup_kubectl()
 
 
 def main() -> None:
