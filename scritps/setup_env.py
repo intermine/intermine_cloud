@@ -546,6 +546,12 @@ def setup_helm() -> None:
             (tools_path / "helm"),
         )
 
+        # copy helm binary
+        shutil.copy(
+            (tools_path / "helm" / f"{local_system}-{local_machine}" / "helm"),
+            (tools_path / "helm" / "helm"),
+        )
+
         # make binary executable
         if local_system != "windows":
             run(["chmod", "+x", "helm"], cwd=(tools_path / "helm"))
