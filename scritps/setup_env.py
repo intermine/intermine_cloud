@@ -447,11 +447,60 @@ def setup_kubectl() -> None:
 
     # Print the info about kubectl
     out = run(
-        ["./kubectl", "version", "--client"],
+        ["./kubectl", "version", "--client", "--short"],
         capture_output=True,
         cwd=(tools_path / "kubectl"),
     )
     print(f"Using kubectl at {(tools_path / 'kubectl')} \n{out.stdout.decode('utf-8')}")
+
+
+def setup_kustomize() -> None:
+    """Setup Kustomize."""
+    print("\n\n+++++++++++ Kustomize +++++++++++++")
+    if os.path.isfile((tools_path / "kustomize" / "kustomize")) is False:
+        print(f"Creating kustomize dir at {(tools_path / 'kustomize')}")
+        os.makedirs((tools_path / "kustomize"), exist_ok=True)
+
+        print("Installing Kustomize")
+        local_system = current_system.lower()
+
+        # Decide platform architecture
+        if current_machine == "x86_64":
+            local_machine = "amd64"
+        elif current_machine == "aarch64":
+            local_machine = "arm64"
+        else:
+            raise "Machine not supported"
+
+        # Build url
+        url = f"https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv4.3.0/kustomize_v4.3.0_{local_system}_{local_machine}.tar.gz"
+
+        # Download kustomize
+        resp = client.request("GET", url, preload_content=False)
+        with open((tools_path / "kustomize" / "kustomize"), "wb") as f:
+            while True:
+                data = resp.read()
+                if not data:
+                    break
+                f.write(data)
+        resp.release_conn()
+
+        # make binary executable
+        if local_system != "windows":
+            run(["chmod", "+x", "kustomize"], cwd=(tools_path / "kustomize"))
+        else:
+            # !TODO: Check equivalent in windows
+            pass
+
+    # Print the info about kustomize
+    out = run(
+        ["./kustomize", "version"],
+        capture_output=True,
+        cwd=(tools_path / "kustomize"),
+    )
+    print(
+        f"Using kustomize at {(tools_path / 'kustomize')} \n{out.stdout.decode('utf-8')}"
+    )
 
 
 def setup_tools() -> None:
