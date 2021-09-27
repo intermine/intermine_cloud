@@ -76,7 +76,7 @@ def setup_miniconda() -> None:
     """Setup miniconda."""
     print("+++++++++++ Miniconda +++++++++++++")
     if os.path.isfile((tools_path / "miniconda" / "bin" / "conda")) is False:
-        print("Isolated conda not found!\nInstalling Conda")
+        print("Isolated conda not found!\nInstalling Conda\n")
         if current_system == "Darwin":
             local_system = "MacOSX"
         else:
@@ -117,7 +117,7 @@ def setup_poetry() -> None:
     """Setup poetry."""
     print("+++++++++++ Poetry +++++++++++++")
     if os.path.isfile((tools_path / "poetry" / "bin" / "poetry")) is False:
-        print("Isolated poetry not found!\nInstalling poetry")
+        print("Isolated poetry not found!\nInstalling poetry\n")
         resp = client.request(
             "GET",
             "https://raw.githubusercontent.com/python-poetry/poetry/master/install-poetry.py",
@@ -160,7 +160,7 @@ def setup_traefik() -> None:
         print(f"Creating traefik dir at {(tools_path / 'traefik')}")
         os.makedirs((tools_path / "traefik"), exist_ok=True)
 
-        print("Installing Traefik")
+        print("Installing Traefik\n")
         local_system = current_system.lower()
 
         # Decide download extension
@@ -228,7 +228,7 @@ def setup_minio() -> None:
         print(f"Creating minio dir at {(tools_path / 'minio')}")
         os.makedirs((tools_path / "minio"), exist_ok=True)
 
-        print("Installing MinIO")
+        print("Installing MinIO\n")
         local_system = current_system.lower()
 
         # Decide platform architecture
@@ -297,7 +297,7 @@ def setup_nats() -> None:
         print(f"Creating nats dir at {(tools_path / 'nats')}")
         os.makedirs((tools_path / "nats"), exist_ok=True)
 
-        print("Installing NATS")
+        print("Installing NATS\n")
         local_system = current_system.lower()
 
         # Decide platform architecture
@@ -367,7 +367,7 @@ def setup_kind() -> None:
         print(f"Creating kind dir at {(tools_path / 'kind')}")
         os.makedirs((tools_path / "kind"), exist_ok=True)
 
-        print("Installing Kind")
+        print("Installing Kind\n")
         local_system = current_system.lower()
 
         # Decide platform architecture
@@ -414,7 +414,7 @@ def setup_kubectl() -> None:
         print(f"Creating kubectl dir at {(tools_path / 'kubectl')}")
         os.makedirs((tools_path / "kubectl"), exist_ok=True)
 
-        print("Installing Kubectl")
+        print("Installing Kubectl\n")
         local_system = current_system.lower()
 
         # Decide platform architecture
@@ -461,7 +461,7 @@ def setup_kustomize() -> None:
         print(f"Creating kustomize dir at {(tools_path / 'kustomize')}")
         os.makedirs((tools_path / "kustomize"), exist_ok=True)
 
-        print("Installing Kustomize")
+        print("Installing Kustomize\n")
         local_system = current_system.lower()
 
         # Decide platform architecture
@@ -516,7 +516,7 @@ def setup_helm() -> None:
         print(f"Creating helm dir at {(tools_path / 'helm')}")
         os.makedirs((tools_path / "helm"), exist_ok=True)
 
-        print("Installing Helm")
+        print("Installing Helm\n")
         local_system = current_system.lower()
 
         # Decide platform architecture
@@ -561,11 +561,155 @@ def setup_helm() -> None:
 
     # Print the info about helm
     out = run(
-        ["./helm", "version"],
+        ["./helm", "version", "--short"],
         capture_output=True,
         cwd=(tools_path / "helm"),
     )
     print(f"Using helm at {(tools_path / 'helm')} \n{out.stdout.decode('utf-8')}")
+
+
+def setup_terraform() -> None:
+    """Setup Terraform."""
+    print("\n\n+++++++++++ Terraform +++++++++++++")
+    if os.path.isfile((tools_path / "terraform" / "terraform")) is False:
+        print(f"Creating terraform dir at {(tools_path / 'terraform')}")
+        os.makedirs((tools_path / "terraform"), exist_ok=True)
+
+        print("Installing Terraform\n")
+        local_system = current_system.lower()
+
+        # Decide platform architecture
+        if current_machine == "x86_64":
+            local_machine = "amd64"
+        elif current_machine == "aarch64":
+            local_machine = "arm64"
+        else:
+            raise "Machine not supported"
+
+        # Build url
+        url = f"https://releases.hashicorp.com/terraform/1.0.7/terraform_1.0.7_{local_system}_{local_machine}.zip"
+
+        # Download terraform
+        resp = client.request("GET", url, preload_content=False)
+        with open((tools_path / "terraform" / "terraform.zip"), "wb") as f:
+            while True:
+                data = resp.read()
+                if not data:
+                    break
+                f.write(data)
+        resp.release_conn()
+
+        # extract compressed file
+        unpack_archive(
+            (tools_path / "terraform" / f"terraform.zip"),
+            (tools_path / "terraform"),
+        )
+
+        # make binary executable
+        if local_system != "windows":
+            run(["chmod", "+x", "terraform"], cwd=(tools_path / "terraform"))
+        else:
+            # !TODO: Check equivalent in windows
+            pass
+
+    # Print the info about terraform
+    out = run(
+        ["./terraform", "version"],
+        capture_output=True,
+        cwd=(tools_path / "terraform"),
+    )
+    print(
+        f"Using terraform at {(tools_path / 'terraform')} \n{out.stdout.decode('utf-8')}"
+    )
+
+
+def setup_fluxcd() -> None:
+    """Setup fluxcd."""
+    print("+++++++++++ FluxCD +++++++++++++")
+    if os.path.isfile((tools_path / "fluxcd" / "flux")) is False:
+        print(f"Creating fluxcd dir at {(tools_path / 'fluxcd')}")
+        os.makedirs((tools_path / "fluxcd"), exist_ok=True)
+
+        print("Installing Flux\n")
+
+        # Build url
+        url = f"https://fluxcd.io/install.sh"
+
+        resp = client.request("GET", url, preload_content=False)
+
+        # Download file
+        with open((tools_path / "fluxcd" / "flux.sh"), "wb") as f:
+            while True:
+                data = resp.read()
+                if not data:
+                    break
+                f.write(data)
+        resp.release_conn()
+        run(["chmod", "+x", "flux.sh"], cwd=(tools_path / "fluxcd"))
+        run(
+            ["./flux.sh", f"{(tools_path / 'fluxcd')}"],
+            cwd=(tools_path / "fluxcd"),
+        )
+
+    # Print the info about FluxCD
+    out = run(["./flux", "--version"], capture_output=True, cwd=(tools_path / "fluxcd"))
+    print(
+        f"Using FluxCD at: {(tools_path / 'fluxcd' / 'flux')} \n{out.stdout.decode('utf-8')}"
+    )
+
+
+def setup_gitea() -> None:
+    """Setup Gitea."""
+    print("\n\n+++++++++++ Gitea +++++++++++++")
+    if os.path.isfile((tools_path / "gitea" / "gitea")) is False:
+        print(f"Creating gitea dir at {(tools_path / 'gitea')}")
+        os.makedirs((tools_path / "gitea"), exist_ok=True)
+
+        print("Installing Gitea\n")
+        local_system = current_system.lower()
+
+        if local_system == "darwin":
+            local_system_ver = "-10.12"
+        elif local_system == "windows":
+            local_system_ver = "-4.0"
+        else:
+            local_system_ver = ""
+
+        # Decide platform architecture
+        if current_machine == "x86_64":
+            local_machine = "amd64"
+        elif current_machine == "aarch64":
+            local_machine = "arm64"
+        else:
+            raise "Machine not supported"
+
+        # Build url
+        url = f"https://dl.gitea.io/gitea/1.15.3/gitea-1.15.3-{local_system}{local_system_ver}-{local_machine}"
+
+        # Download gitea
+        resp = client.request("GET", url, preload_content=False)
+        with open((tools_path / "gitea" / "gitea"), "wb") as f:
+            while True:
+                data = resp.read()
+                if not data:
+                    break
+                f.write(data)
+        resp.release_conn()
+
+        # make binary executable
+        if local_system != "windows":
+            run(["chmod", "+x", "gitea"], cwd=(tools_path / "gitea"))
+        else:
+            # !TODO: Check equivalent in windows
+            pass
+
+    # Print the info about gitea
+    out = run(
+        ["./gitea", "--version"],
+        capture_output=True,
+        cwd=(tools_path / "gitea"),
+    )
+    print(f"Using Gitea at {(tools_path / 'gitea')} \n{out.stdout.decode('utf-8')}")
 
 
 def setup_tools() -> None:
@@ -583,6 +727,9 @@ def setup_tools() -> None:
         setup_kubectl()
         setup_kustomize()
         setup_helm()
+        setup_terraform()
+        setup_fluxcd()
+        setup_gitea()
 
 
 def main() -> None:
