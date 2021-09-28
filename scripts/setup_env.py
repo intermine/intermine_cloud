@@ -11,6 +11,7 @@ from shutil import which, unpack_archive
 import shutil
 from subprocess import run
 import sys
+from typing import Dict
 import urllib3
 
 
@@ -71,6 +72,24 @@ current_system = platform.system()
 current_machine = platform.machine()
 
 client = urllib3.PoolManager()
+
+
+def get_conda_env_dict() -> Dict:
+    """Create conda env dict."""
+    return {
+        "CONDA_SHELL_PATH": f"{(tools_path / 'miniconda' / 'etc' / 'profile.d' / 'conda.sh')}",
+        "CONDA_ENV_PATH": f"{(tools_path / 'miniconda' / 'envs' / 'imcloud')}",
+        "ADD_TO_PATH": f"{(tools_path / 'miniconda' / 'envs' / 'imcloud' / 'bin')}:{(tools_path / 'miniconda' / 'condabin')}",
+        "_CE_M": "",
+        "_CE_CONDA": "",
+        "CONDA_EXE": f"{(tools_path / 'miniconda' / 'bin' / 'conda')}",
+        "CONDA_PYTHON_EXE": f"{(tools_path / 'miniconda' / 'bin' / 'conda' / 'python')}",
+        "CONDA_SHLVL": "2",
+        "CONDA_PREFIX": f"{(tools_path / 'miniconda' / 'envs' / 'imcloud')}",
+        "CONDA_DEFAULT_ENV": "imcloud",
+        "CONDA_PROMPT_MODIFIER": "(imcloud)",
+        "CONDA_PREFIX_1": f"{(tools_path / 'miniconda')}",
+    }
 
 
 def setup_miniconda() -> None:
@@ -170,14 +189,15 @@ def create_conda_env(env_name: str = "imcloud") -> None:
 def install_projects(directory: Path) -> None:
     """Install deps and project using poetry."""
     print("+++++++++++ Installing local projects +++++++++++++")
-
+    conda_env = get_conda_env_dict()
     run(
         ["poetry", "install"],
         cwd=directory,
         env={
             **os.environ,
+            **conda_env,
             "POETRY_HOME": f"{tools_path / 'poetry'}",
-            "PATH": f"{(tools_path / 'poetry' / 'bin')}:{os.environ['PATH']}",
+            "PATH": f"{conda_env['ADD_TO_PATH']}:{(tools_path / 'poetry' / 'bin')}:{os.environ['PATH']}",
         },
     )
     # Calling again as a workaround to ensure project root is installed
@@ -186,8 +206,9 @@ def install_projects(directory: Path) -> None:
         cwd=directory,
         env={
             **os.environ,
+            **conda_env,
             "POETRY_HOME": f"{tools_path / 'poetry'}",
-            "PATH": f"{(tools_path / 'poetry' / 'bin')}:{os.environ['PATH']}",
+            "PATH": f"{conda_env['ADD_TO_PATH']}:{(tools_path / 'poetry' / 'bin')}:{os.environ['PATH']}",
         },
     )
     out = run(
@@ -196,8 +217,9 @@ def install_projects(directory: Path) -> None:
         capture_output=True,
         env={
             **os.environ,
+            **conda_env,
             "POETRY_HOME": f"{tools_path / 'poetry'}",
-            "PATH": f"{(tools_path / 'poetry' / 'bin')}:{os.environ['PATH']}",
+            "PATH": f"{conda_env['ADD_TO_PATH']}:{(tools_path / 'poetry' / 'bin')}:{os.environ['PATH']}",
         },
     )
     print(f"Using Virtual env at {out.stdout.decode('utf-8')}")
@@ -808,8 +830,8 @@ export CONDA_PREFIX_1={(tools_path / 'miniconda')}
     NC = "\033[0m"  # No Color
     print(
         f"""
-Add CONDA_SHELL_PATH using following command:
-{GREEN}export $(cat .setup.env | xargs){NC}
+Activate env using following command:
+{GREEN}source .setup.env{NC}
         """
     )
 
