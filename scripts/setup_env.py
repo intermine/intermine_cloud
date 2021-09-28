@@ -788,7 +788,7 @@ def write_env() -> None:
     data = f"""
 CONDA_SHELL_PATH={(tools_path / 'miniconda' / 'etc' / 'profile.d' / 'conda.sh')}
 CONDA_ENV_PATH={(tools_path / 'miniconda' / 'envs' / 'imcloud')}
-PATH={(tools_path / 'miniconda' / 'envs' / 'imcloud' / 'bin')}:{(tools_path / 'miniconda' / 'condabin')}:$PATH
+PATH={(tools_path / 'miniconda' / 'envs' / 'imcloud' / 'bin')}:{(tools_path / 'miniconda' / 'condabin')}:${{PATH}}
 _CE_M=
 _CE_CONDA=
 CONDA_EXE={(tools_path / 'miniconda' / 'bin' / 'conda')}
@@ -831,8 +831,10 @@ def main() -> None:
     if args.skip_docker is False:
         if check_docker() != 0:
             sys.exit(1)
+    setup_miniconda()
     setup_poetry()
     setup_tools()
+    create_conda_env()
     install_projects(compose_path)
     write_env()
 
