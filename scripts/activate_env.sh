@@ -11,6 +11,5 @@ if [[ -z "$CONDA_SHELL_PATH" ]]; then
   echo -e "${GREEN}export \$(cat .setup.env | xargs)${NC}"
   printf "\n"
 else
-  source $CONDA_SHELL_PATH
   conda activate imcloud
 fi

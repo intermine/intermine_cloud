@@ -787,6 +787,17 @@ def write_env() -> None:
     print("\n\n+++++++++++ Env File +++++++++++++\n")
     data = f"""
 CONDA_SHELL_PATH={(tools_path / 'miniconda' / 'etc' / 'profile.d' / 'conda.sh')}
+CONDA_ENV_PATH={(tools_path / 'miniconda' / 'envs' / 'imcloud')}
+PATH={(tools_path / 'miniconda' / 'envs' / 'imcloud' / 'bin')}:{(tools_path / 'miniconda' / 'condabin')}:$PATH
+_CE_M=
+_CE_CONDA=
+CONDA_EXE={(tools_path / 'miniconda' / 'bin' / 'conda')}
+CONDA_PYTHON_EXE={(tools_path / 'miniconda' / 'bin' / 'conda' / "python")}
+CONDA_SHLVL=2
+CONDA_PREFIX={(tools_path / 'miniconda' / 'envs' / 'imcloud')}
+CONDA_DEFAULT_ENV=imcloud
+CONDA_PROMPT_MODIFIER=(imcloud)
+CONDA_PREFIX_1={(tools_path / 'miniconda')}
     """
     with open((project_root / ".setup.env"), "w") as f:
         f.write(data)
