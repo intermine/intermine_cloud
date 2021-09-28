@@ -61,9 +61,10 @@ with your package manager.
         return 0
 
 
-compose_path = Path(__file__).absolute().parents[1].joinpath("compose")
-demon_path = Path(__file__).absolute().parents[1].joinpath("demon")
-tools_path = Path(__file__).absolute().parents[1].joinpath("scratch", "tools")
+project_root = Path(__file__).absolute().parents[1]
+compose_path = project_root.joinpath("compose")
+demon_path = project_root.joinpath("demon")
+tools_path = project_root.joinpath("scratch", "tools")
 
 
 current_system = platform.system()
@@ -103,8 +104,10 @@ def setup_miniconda() -> None:
             ["./miniconda.sh", "-b", "-p", f"{(tools_path / 'miniconda')}"],
             cwd=tools_path.parent,
         )
+        run(["chmod", "+x", "conda"], cwd=(tools_path / "miniconda" / "bin"))
 
     # Print the info about Conda
+    run(["chmod", "+x", "activate_env.sh"], cwd=(project_root / "scripts"))
     out = run(
         ["./conda", "info"], capture_output=True, cwd=(tools_path / "miniconda" / "bin")
     )
@@ -146,11 +149,58 @@ def setup_poetry() -> None:
     )
 
 
+def create_conda_env(env_name: str = "imcloud") -> None:
+    """Create conda env."""
+    print("+++++++++++ Creating Conda environment +++++++++++++")
+    run(
+        [
+            "./conda",
+            "create",
+            "-n",
+            env_name,
+            "python=3.8",
+        ],
+        cwd=(tools_path / "miniconda" / "bin"),
+    )
+    print(
+        f"Created Conda env \"{env_name}\" at: {(tools_path / 'miniconda' / 'env' / env_name)}\n"
+    )
+
+
 def install_projects(directory: Path) -> None:
     """Install deps and project using poetry."""
-    run(["poetry", "install"], cwd=directory)
+    print("+++++++++++ Installing local projects +++++++++++++")
+
+    run(
+        ["poetry", "install"],
+        cwd=directory,
+        env={
+            **os.environ,
+            "POETRY_HOME": f"{tools_path / 'poetry'}",
+            "PATH": f"{(tools_path / 'poetry' / 'bin')}:{os.environ['PATH']}",
+        },
+    )
     # Calling again as a workaround to ensure project root is installed
-    run(["poetry", "install"], cwd=directory)
+    run(
+        ["poetry", "install"],
+        cwd=directory,
+        env={
+            **os.environ,
+            "POETRY_HOME": f"{tools_path / 'poetry'}",
+            "PATH": f"{(tools_path / 'poetry' / 'bin')}:{os.environ['PATH']}",
+        },
+    )
+    out = run(
+        ["poetry", "env", "info", "--path"],
+        cwd=directory,
+        capture_output=True,
+        env={
+            **os.environ,
+            "POETRY_HOME": f"{tools_path / 'poetry'}",
+            "PATH": f"{(tools_path / 'poetry' / 'bin')}:{os.environ['PATH']}",
+        },
+    )
+    print(f"Using Virtual env at {out.stdout.decode('utf-8')}")
 
 
 def setup_traefik() -> None:
@@ -732,6 +782,27 @@ def setup_tools() -> None:
         setup_gitea()
 
 
+def write_env() -> None:
+    """Write .env in project root."""
+    print("\n\n+++++++++++ Env File +++++++++++++\n")
+    data = f"""
+CONDA_SHELL_PATH={(tools_path / 'miniconda' / 'etc' / 'profile.d' / 'conda.sh')}
+    """
+    with open((project_root / ".setup.env"), "w") as f:
+        f.write(data)
+
+    # Print message
+    RED = "\033[0;31m"
+    GREEN = "\033[0;33m"
+    NC = "\033[0m"  # No Color
+    print(
+        f"""
+Add CONDA_SHELL_PATH using following command:
+{GREEN}export $(cat .setup.env | xargs){NC}
+        """
+    )
+
+
 def main() -> None:
     """Setup runner."""
     parser = argparse.ArgumentParser(description="Setup dev environment")
@@ -749,9 +820,10 @@ def main() -> None:
     if args.skip_docker is False:
         if check_docker() != 0:
             sys.exit(1)
-    setup_miniconda()
     setup_poetry()
     setup_tools()
+    install_projects(compose_path)
+    write_env()
 
 
 if __name__ == "__main__":

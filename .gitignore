@@ -3,3 +3,4 @@
 creds/*
 .vscode
 scratch
+.setup.env
