@@ -65,6 +65,7 @@ with your package manager.
 project_root = Path(__file__).absolute().parents[1]
 compose_path = project_root.joinpath("compose")
 demon_path = project_root.joinpath("demon")
+maple_path = project_root.joinpath("maple")
 tools_path = project_root.joinpath("scratch", "tools")
 
 
@@ -819,7 +820,7 @@ export CONDA_PREFIX={(tools_path / 'miniconda' / 'envs' / 'imcloud')}
 export CONDA_DEFAULT_ENV=imcloud
 export CONDA_PROMPT_MODIFIER=(imcloud)
 export CONDA_PREFIX_1={(tools_path / 'miniconda')}
-export PS1=\"(imcloud) ${{PS1:+:${{PS1}}}}\"
+export PS1=\"(imcloud) ${{PS1:+${{PS1}}}}\"
     """
     with open((project_root / ".setup.env"), "w") as f:
         f.write(data)
@@ -858,6 +859,7 @@ def main() -> None:
     setup_tools()
     create_conda_env()
     install_projects(compose_path)
+    install_projects(maple_path)
     write_env()
 
 

@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "maple"
+version = "0.1.0"
+description = "InterMine automation helper"
+authors = ["Ankur Kumar <ank@leoank.me>"]
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = "^3.8"
+blackcap = "*"
+
+[tool.poetry.dev-dependencies]
+
+[tool.poetry.scripts]
+maple = "maple.cli.main:main"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

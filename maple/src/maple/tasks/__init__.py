@@ -1,0 +1,1 @@
+"""Maple celery tasks."""
