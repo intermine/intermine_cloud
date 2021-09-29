@@ -126,7 +126,6 @@ def setup_miniconda() -> None:
         run(["chmod", "+x", "conda"], cwd=(tools_path / "miniconda" / "bin"))
 
     # Print the info about Conda
-    run(["chmod", "+x", "activate_env.sh"], cwd=(project_root / "scripts"))
     out = run(
         ["./conda", "info"], capture_output=True, cwd=(tools_path / "miniconda" / "bin")
     )
