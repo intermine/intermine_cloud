@@ -11,6 +11,8 @@ import click
 
 from blackcap.configs import config_registry
 
+from yaml import dump as ydump
+
 
 from .. import __version__
 
@@ -260,6 +262,76 @@ def poetry(d, options) -> None:
     )
 
 
+def write_traefik_config() -> None:
+    """Create config files for traefik."""
+    static_data = {
+        "serversTransport": {"insecureSkipVerify": True},
+        "api": {
+            "insecure": True,
+            "dashboard": True,
+        },
+        "entryPoints": {"nats": {"address": ":1401"}, "minio": {"address": ":1402"}},
+        "providers": {
+            "file": {
+                "directory": f"{(tools_path / 'traefik')}",
+                "watch": True,
+                "filename": "dynamic.yaml",
+                "debugLogGeneratedTemplate": True,
+            }
+        },
+        "log": {"level": "debug"},
+    }
+    dynamic_data = {
+        "http": {
+            "routers": {
+                "nats": {
+                    "entryPoints": ["nats"],
+                    "service": "nats",
+                    "rule": [
+                        "Host(`localhost`) || Host(`127.0.0.1`) || Host(`${HOST}:-0.0.0.0`)"
+                    ],
+                },
+                "minio": {
+                    "entryPoints": ["minio"],
+                    "service": "minio",
+                    "rule": [
+                        "Host(`localhost`) || Host(`127.0.0.1`) || Host(`${HOST}:-0.0.0.0`)"
+                    ],
+                },
+            },
+            "services": {
+                "nats": {
+                    "loadBalancer": {"servers": [{"url": "http://localhost:4222"}]}
+                },
+                "minio": {
+                    "loadBalancer": {"servers": [{"url": "http://localhost:9001"}]}
+                },
+            },
+        },
+    }
+    with open(tools_path / "traefik" / "traefik.yaml", "w") as f:
+        f.write(ydump(static_data))
+
+    with open(tools_path / "traefik" / "dynamic.yaml", "w") as f:
+        f.write(ydump(dynamic_data))
+
+
+@click.command()
+@click.pass_context
+def dev(ctx) -> None:
+    "Start services for development."
+    print("+++++++++++ Starting services +++++++++++++")
+    print("\n\n+++++++++++ Traefik +++++++++++++\n")
+    write_traefik_config()
+    # ctx.invoke(
+    #     traefik,
+    #     "--",
+    # f"--configFile={(tools_path / 'traefik' / 'traefik.yaml')}",
+    # )
+    print("\n\n+++++++++++ MinIO +++++++++++++\n")
+    print("\n\n+++++++++++ Nats +++++++++++++\n")
+
+
 @click.group()
 @click.version_option(version=__version__)
 def main() -> None:
@@ -279,3 +351,4 @@ main.add_command(kstm)
 main.add_command(tf)
 main.add_command(gitea)
 main.add_command(flux)
+main.add_command(dev)
