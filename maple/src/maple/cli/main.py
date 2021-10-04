@@ -209,7 +209,7 @@ def mc(options) -> None:
             **os.environ,
             **conda_env,
             "POETRY_HOME": f"{tools_path / 'poetry'}",
-            "PATH": f"{conda_env['ADD_TO_PATH']}:{(tools_path / 'nats')}:{os.environ['PATH']}",
+            "PATH": f"{conda_env['ADD_TO_PATH']}:{(tools_path / 'minio')}:{os.environ['PATH']}",
         },
     )
 
@@ -289,38 +289,40 @@ def write_traefik_config() -> None:
     dynamic_data = {
         "http": {
             "routers": {
-                "nats": {
-                    "entryPoints": ["nats"],
-                    "service": "nats",
-                    "rule": [
-                        "Host(`localhost`) || Host(`127.0.0.1`) || Host(`${HOST}:-0.0.0.0`)"
-                    ],
-                },
                 "minio": {
                     "entryPoints": ["minio"],
                     "service": "minio",
                     "rule": [
-                        "Host(`localhost`) || Host(`127.0.0.1`) || Host(`${HOST}:-0.0.0.0`)"
+                        'Host(`localhost`) || Host(`127.0.0.1`) || Host(`{{or (env "HOST") "0.0.0.0"}}`)'
                     ],
                 },
                 "minio_console": {
                     "entryPoints": ["minio_console"],
                     "service": "minio_console",
                     "rule": [
-                        "Host(`localhost`) || Host(`127.0.0.1`) || Host(`${HOST}:-0.0.0.0`)"
+                        'Host(`localhost`) || Host(`127.0.0.1`) || Host(`{{or (env "HOST") "0.0.0.0"}}`)'
                     ],
                 },
             },
             "services": {
-                "nats": {
-                    "loadBalancer": {"servers": [{"url": "http://localhost:4222"}]}
-                },
                 "minio": {
                     "loadBalancer": {"servers": [{"url": "http://localhost:9000"}]}
                 },
                 "minio_console": {
                     "loadBalancer": {"servers": [{"url": "http://localhost:9001"}]}
                 },
+            },
+        },
+        "tcp": {
+            "routers": {
+                "nats": {
+                    "entryPoints": ["nats"],
+                    "service": "nats",
+                    "rule": ["HostSNI(`*`)"],
+                },
+            },
+            "services": {
+                "nats": {"loadBalancer": {"servers": [{"address": "localhost:4222"}]}},
             },
         },
     }
@@ -338,7 +340,7 @@ def dev(ctx) -> None:
     print("+++++++++++ Starting services +++++++++++++")
     conda_env = get_conda_env_dict()
     nats_process = Popen(
-        ["nats-server"],
+        ["nats-server", "-V"],
         env={
             **os.environ,
             **conda_env,
