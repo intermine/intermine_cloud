@@ -274,6 +274,7 @@ def write_traefik_config() -> None:
             "traefik": {"address": ":1400"},
             "nats": {"address": ":1401"},
             "minio": {"address": ":1402"},
+            "minio_console": {"address": ":1403"},
         },
         "providers": {
             "file": {
@@ -302,6 +303,13 @@ def write_traefik_config() -> None:
                         "Host(`localhost`) || Host(`127.0.0.1`) || Host(`${HOST}:-0.0.0.0`)"
                     ],
                 },
+                "minio_console": {
+                    "entryPoints": ["minio_console"],
+                    "service": "minio_console",
+                    "rule": [
+                        "Host(`localhost`) || Host(`127.0.0.1`) || Host(`${HOST}:-0.0.0.0`)"
+                    ],
+                },
             },
             "services": {
                 "nats": {
@@ -309,6 +317,9 @@ def write_traefik_config() -> None:
                 },
                 "minio": {
                     "loadBalancer": {"servers": [{"url": "http://localhost:9000"}]}
+                },
+                "minio_console": {
+                    "loadBalancer": {"servers": [{"url": "http://localhost:9001"}]}
                 },
             },
         },
@@ -336,7 +347,12 @@ def dev(ctx) -> None:
         },
     )
     minio_process = Popen(
-        ["minio", "server", f"{(tools_path / 'minio' / 'data')}"],
+        [
+            "minio",
+            "server",
+            "--console-address=:9001",
+            f"{(tools_path / 'minio' / 'data')}",
+        ],
         env={
             **os.environ,
             **conda_env,
