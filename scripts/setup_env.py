@@ -191,6 +191,16 @@ def install_projects(directory: Path) -> None:
     print("+++++++++++ Installing local projects +++++++++++++")
     conda_env = get_conda_env_dict()
     run(
+        ["poetry", "update"],
+        cwd=directory,
+        env={
+            **os.environ,
+            **conda_env,
+            "POETRY_HOME": f"{tools_path / 'poetry'}",
+            "PATH": f"{conda_env['ADD_TO_PATH']}:{(tools_path / 'poetry' / 'bin')}:{os.environ['PATH']}",
+        },
+    )
+    run(
         ["poetry", "install"],
         cwd=directory,
         env={
