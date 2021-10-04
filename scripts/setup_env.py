@@ -298,7 +298,7 @@ def setup_minio() -> None:
     print("+++++++++++ MinIO +++++++++++++")
     if os.path.isfile((tools_path / "minio" / "minio")) is False:
         print(f"Creating minio dir at {(tools_path / 'minio')}")
-        os.makedirs((tools_path / "minio"), exist_ok=True)
+        os.makedirs((tools_path / "minio" / "data"), exist_ok=True)
 
         print("Installing MinIO\n")
         local_system = current_system.lower()

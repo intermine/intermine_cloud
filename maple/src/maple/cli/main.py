@@ -4,7 +4,7 @@
 
 import os
 from pathlib import Path
-from subprocess import run
+from subprocess import run, Popen
 from typing import Dict
 
 import click
@@ -270,7 +270,10 @@ def write_traefik_config() -> None:
             "insecure": True,
             "dashboard": True,
         },
-        "entryPoints": {"nats": {"address": ":1401"}, "minio": {"address": ":1402"}},
+        "entryPoints": {
+            "nats": {"address": ":1401"},
+            "minio": {"address": ":1402"},
+        },
         "providers": {
             "file": {
                 "directory": f"{(tools_path / 'traefik')}",
@@ -304,7 +307,7 @@ def write_traefik_config() -> None:
                     "loadBalancer": {"servers": [{"url": "http://localhost:4222"}]}
                 },
                 "minio": {
-                    "loadBalancer": {"servers": [{"url": "http://localhost:9001"}]}
+                    "loadBalancer": {"servers": [{"url": "http://localhost:9000"}]}
                 },
             },
         },
@@ -321,15 +324,35 @@ def write_traefik_config() -> None:
 def dev(ctx) -> None:
     "Start services for development."
     print("+++++++++++ Starting services +++++++++++++")
-    print("\n\n+++++++++++ Traefik +++++++++++++\n")
+    conda_env = get_conda_env_dict()
+    nats_process = Popen(
+        ["nats-server"],
+        env={
+            **os.environ,
+            **conda_env,
+            "POETRY_HOME": f"{tools_path / 'poetry'}",
+            "PATH": f"{conda_env['ADD_TO_PATH']}:{(tools_path / 'nats')}:{os.environ['PATH']}",
+        },
+    )
+    minio_process = Popen(
+        ["minio", "server", f"{(tools_path / 'minio' / 'data')}"],
+        env={
+            **os.environ,
+            **conda_env,
+            "POETRY_HOME": f"{tools_path / 'poetry'}",
+            "PATH": f"{conda_env['ADD_TO_PATH']}:{(tools_path / 'minio')}:{os.environ['PATH']}",
+            "MINIO_ROOT_USER": "minioaccess",
+            "MINIO_ROOT_PASSWORD": "minioaccess",
+        },
+    )
     write_traefik_config()
-    # ctx.invoke(
-    #     traefik,
-    #     "--",
-    # f"--configFile={(tools_path / 'traefik' / 'traefik.yaml')}",
-    # )
-    print("\n\n+++++++++++ MinIO +++++++++++++\n")
-    print("\n\n+++++++++++ Nats +++++++++++++\n")
+    ctx.invoke(
+        traefik,
+        options=[f"--configFile={(tools_path / 'traefik' / 'traefik.yaml')}"],
+    )
+    print("\n\n+++++++++++ Shutting Down! +++++++++++++\n")
+    nats_process.kill()
+    minio_process.kill()
 
 
 @click.group()
