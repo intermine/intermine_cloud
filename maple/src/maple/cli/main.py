@@ -271,6 +271,7 @@ def write_traefik_config() -> None:
             "dashboard": True,
         },
         "entryPoints": {
+            "traefik": {"address": ":1400"},
             "nats": {"address": ":1401"},
             "minio": {"address": ":1402"},
         },
