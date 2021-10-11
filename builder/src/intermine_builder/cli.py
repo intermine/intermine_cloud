@@ -1,6 +1,8 @@
 """CLI interface to builder."""
+import sys
 
 import click
+import docker
 
 from intermine_builder import MineBuilder
 
@@ -39,27 +41,31 @@ def main(mine, task, **options):
         click.echo("No task named: " + task, err=True)
         return
 
-    if task == "create_properties_file":
-        # TODO parse options['overrides_properties'] which is path to .properties file
-        click.echo(task + " task is not implemented yet", err=True)
-    elif task == "add_data_source":
-        if not options["name"] or not options["type"]:
-            click.echo(task + " task requires --name and --type", err=True)
-            return
-        props = (
-            [
-                dict([kv.split("=") for kv in prop.split(",")])
-                for prop in options["property"]
-            ]
-            if options["property"]
-            else []
-        )
-        source = {"name": options["name"], "type": options["type"], "properties": props}
-        method(source)
-    elif task == "integrate":
-        if not options["source"]:
-            click.echo(task + " task requires --source", err=True)
-            return
-        method(options["source"], **options)
-    else:
-        method(**options)
+    try:
+        if task == "create_properties_file":
+            # TODO parse options['overrides_properties'] which is path to .properties file
+            click.echo(task + " task is not implemented yet", err=True)
+        elif task == "add_data_source":
+            if not options["name"] or not options["type"]:
+                click.echo(task + " task requires --name and --type", err=True)
+                return
+            props = (
+                [
+                    dict([kv.split("=") for kv in prop.split(",")])
+                    for prop in options["property"]
+                ]
+                if options["property"]
+                else []
+            )
+            source = {"name": options["name"], "type": options["type"], "properties": props}
+            method(source)
+        elif task == "integrate":
+            if not options["source"]:
+                click.echo(task + " task requires --source", err=True)
+                return
+            method(options["source"], **options)
+        else:
+            method(**options)
+    except docker.errors.ContainerError as err:
+        click.echo(str(err.stderr, 'utf-8'), err=True)
+        sys.exit(err.exit_status)
