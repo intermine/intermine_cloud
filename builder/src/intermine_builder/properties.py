@@ -7,11 +7,11 @@ from typing import Dict, Optional
 
 
 def create_properties(
-    PGHOST: str = "postgres",
+    PGHOST: str = "intermine_postgres",
     PGPORT: int = 5432,
     PSQL_USER: str = "postgres",
     PSQL_PWD: str = "postgres",
-    TOMCAT_HOST: str = "tomcat",
+    TOMCAT_HOST: str = "intermine_tomcat",
     TOMCAT_PORT: int = 8080,
     TOMCAT_USER: str = "tomcat",
     TOMCAT_PWD: str = "tomcat",
@@ -28,7 +28,7 @@ def create_properties(
         "os.production.verboseQueryLog": "true",
         # Access to the postgres database to build into and access from the webapp
         "db.production.datasource.serverName": PGHOST + ":" + str(PGPORT),
-        "db.production.datasource.databaseName": "biotestmine",
+        "db.production.datasource.databaseName": "mine",
         "db.production.datasource.user": PSQL_USER,
         "db.production.datasource.password": PSQL_PWD,
         # Temporary database used during the build process, this is re-built
@@ -36,13 +36,13 @@ def create_properties(
         # It uses the InterMine 'items' metadata format to describe objects.
         # common target items database
         "db.common-tgt-items.datasource.serverName": PGHOST + ":" + str(PGPORT),
-        "db.common-tgt-items.datasource.databaseName": "items-biotestmine",
+        "db.common-tgt-items.datasource.databaseName": "items-mine",
         "db.common-tgt-items.datasource.user": PSQL_USER,
         "db.common-tgt-items.datasource.password": PSQL_PWD,
         # userprofile database - used by the webapp to store logins, query history,
         # saved bags, templates and tags.
         "db.userprofile-production.datasource.serverName": PGHOST + ":" + str(PGPORT),
-        "db.userprofile-production.datasource.databaseName": "userprofile-biotestmine",
+        "db.userprofile-production.datasource.databaseName": "userprofile-mine",
         "db.userprofile-production.datasource.user": PSQL_USER,
         "db.userprofile-production.datasource.password": PSQL_PWD,
         # files for ID resolvers

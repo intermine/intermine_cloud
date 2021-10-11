@@ -1,6 +1,6 @@
 import os
 from pathlib import Path
-from typing import Any, Dict, List, Optional, TypedDict
+from typing import Any, ByteString, Dict, List, Optional, TypedDict
 
 import docker
 
@@ -71,18 +71,20 @@ class MineBuilder:
             ) from exc
 
     def __run(self, command):
-        return self.client.containers.run(
+        res = self.client.containers.run(
             image=self.image,
-            name="builder",
+            name="intermine_builder",
             user=self.user,
             volumes=self.volumes,
             network=DOCKER_NETWORK_NAME,
             command=command,
-            auto_remove=True,
-            stdout=False,
+            remove=True,
+            stdout=True,
             stderr=True,
             working_dir="/home/intermine/intermine/" + self.mine,
         )
+
+        return res
 
     # Changes to filesystem
 
