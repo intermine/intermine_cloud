@@ -7,11 +7,11 @@ from typing import Dict, Optional
 
 
 def create_properties(
-    PGHOST: str = "intermine_postgres",
+    PGHOST: str = "intermine-postgres",
     PGPORT: int = 5432,
     PSQL_USER: str = "postgres",
     PSQL_PWD: str = "postgres",
-    TOMCAT_HOST: str = "intermine_tomcat",
+    TOMCAT_HOST: str = "intermine-tomcat",
     TOMCAT_PORT: int = 8080,
     TOMCAT_USER: str = "tomcat",
     TOMCAT_PWD: str = "tomcat",
@@ -53,7 +53,7 @@ def create_properties(
         # Web application deployment properties
         # location of tomcat server and path of webapp - e.g. access http://localhost:8080/malariamine
         "webapp.deploy.url": "http://" + TOMCAT_HOST + ":" + str(TOMCAT_PORT),
-        "webapp.path": "biotestmine",
+        "webapp.path": "mine",
         # tomcat username and password needed to deploy webapp
         "webapp.manager": TOMCAT_USER,
         "webapp.password": TOMCAT_PWD,

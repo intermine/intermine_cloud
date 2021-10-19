@@ -2,14 +2,14 @@
 version: "3"
 services:
   postgres:
-    container_name: intermine_postgres
+    container_name: intermine-postgres
     image: intermine/postgres:latest
     user: ${UID:-1000}:${GID:-1000}
     volumes:
       - ./data/postgres:/var/lib/postgresql/data
 
   solr:
-    container_name: intermine_solr
+    container_name: intermine-solr
     image: intermine/solr
     environment:
       - MEM_OPTS=${MEM_OPTS:-"-Xmx2g -Xms1g"}
@@ -19,7 +19,7 @@ services:
       - ./data/solr:/var/solr
 
   # tomcat:
-  #   container_name: intermine_tomcat
+  #   container_name: intermine-tomcat
   #   image: intermine/tomcat
   #   environment:
   #     - MEM_OPTS=${MEM_OPTS:-"-Xmx1g -Xms500m"}

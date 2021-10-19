@@ -1,62 +1,13 @@
-FROM alpine:3.12.5
-LABEL maintainer="Ank"
+FROM gradle:4.9-jdk8-alpine
 
-ENV JAVA_HOME="/usr/lib/jvm/default-jvm"
-
-RUN apk add --no-cache openjdk8 openjdk8-jre && \
-    ln -sf "${JAVA_HOME}/bin/"* "/usr/bin/"
+# Gradle image doesn't use root.
+USER root
 
 RUN apk add --no-cache git \
                        maven \
-                       postgresql-client \
-                       perl \
-                       perl-utils
+                       postgresql-client
 
 RUN apk add --no-cache build-base
-RUN apk add --no-cache -X http://dl-cdn.alpinelinux.org/alpine/edge/testing perl-moosex
-RUN apk add --no-cache wget \
-                        perl-module-build \
-                        perl-module-build-tiny \
-                        perl-package-stash \
-                        perl-sub-identify \
-                        perl-moose \
-                        perl-datetime \
-                        perl-html-parser \
-                        perl-html-tree \
-                        perl-io-gzip \
-                        perl-list-moreutils-xs \
-                        perl-text-csv_xs \
-                        perl-xml-libxml \
-                        perl-xml-parser
-
-RUN perl -MCPAN -e \
-'my $c = "CPAN::HandleConfig"; $c->load(doit => 1, autoconfig => 1); $c->edit(prerequisites_policy => "follow"); $c->edit(build_requires_install_policy => "yes"); $c->commit'
-
-RUN cpan -i App::cpanminus
-
-RUN cpanm --force Ouch \
-                  LWP \
-                  URI \
-                  Module::Find \
-                  Web::Scraper \
-                  Number::Format \
-                #   PerlIO::gzip \
-                  Perl6::Junction \
-                #   List::MoreUtils \
-                  Module::Find \
-                #   Moose \
-                #   MooseX::Role::WithOverloading \
-                  MooseX::Types \
-                  MooseX::FollowPBP \
-                  MooseX::ABC \
-                  MooseX::FileAttribute \
-                #   Text::CSV_XS \
-                  Text::Glob \
-                  XML::Parser::PerlSAX \
-                  XML::DOM
-                #  Getopt::Std \
-                #  Digest::MD5 \
-                #  Log::Handler
 
 RUN mkdir /home/intermine && mkdir /home/intermine/intermine
 RUN chmod -R 777 /home/intermine
@@ -72,5 +23,23 @@ ENV TOMCAT_USER="tomcat"
 ENV TOMCAT_PWD="tomcat"
 ENV TOMCAT_PORT=8080
 ENV PGPORT=5432
+
+# This is to prime gradle dependencies, so they don't have to be downloaded
+# every time the container is run.
+RUN apk add --no-cache curl unzip && \
+    curl -jksSL -o /tmp/biotestmine-master.zip https://github.com/intermine/biotestmine/archive/refs/heads/master.zip && \
+    unzip -qq /tmp/biotestmine-master.zip -d /tmp
+
+WORKDIR /tmp/biotestmine-master
+RUN touch dbmodel/resources/biotestmine.properties
+# Gradle doesn't provide a straightforward way to only download dependencies.
+RUN ./gradlew build -x dbmodel:mergeModels # exclude mergeModels task as it requires project.xml
+
+RUN apk del curl unzip && \
+    rm -rf /tmp/* /var/cache/apk/*
+
+# Ensure new files (specifically in .gradle) added to home dir are accessible
+# by runtime user.
+RUN chmod -R 777 /home/intermine
 
 WORKDIR /home/intermine/intermine

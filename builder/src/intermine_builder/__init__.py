@@ -19,7 +19,10 @@ class MineBuilder:
     only changes to volumes persisting.
     """
 
-    def __init__(self, mine: str, build_image: bool = False, data_path: Optional[os.PathLike] = None):
+    def __init__(self, mine: str,
+            build_image: bool = False,
+            data_path: Optional[os.PathLike] = None,
+            volumes: Optional[Dict] = None):
         self.user = str(os.getuid()) + ":" + str(os.getgid())
         self.mine = mine
 
@@ -28,19 +31,18 @@ class MineBuilder:
 
         # TODO centrally define all these paths, to make it easy to change and robust
         self.volumes = {
-            self.mine_path
-            / "dump": {"bind": "/home/intermine/intermine/dump", "mode": "rw"},
-            self.mine_path
-            / "configs": {"bind": "/home/intermine/intermine/configs", "mode": "rw"},
+            self.mine_path / "dump": {"bind": "/home/intermine/intermine/dump", "mode": "rw"},
+            self.mine_path / "configs": {"bind": "/home/intermine/intermine/configs", "mode": "rw"},
             self.mine_path / "packages": {"bind": "/home/intermine/.m2", "mode": "rw"},
-            self.mine_path
-            / "intermine": {"bind": "/home/intermine/.intermine", "mode": "rw"},
-            self.mine_path
-            / self.mine: {
+            self.mine_path / "intermine": {"bind": "/home/intermine/.intermine", "mode": "rw"},
+            self.mine_path / self.mine: {
                 "bind": "/home/intermine/intermine/" + self.mine,
                 "mode": "rw",
             },
         }
+        if volumes:
+            self.volumes.update(volumes)
+
 
         self.client = docker.from_env()
 
@@ -54,8 +56,8 @@ class MineBuilder:
 
         try:
             if (
-                self.client.containers.get("intermine_postgres").status != "running"
-                or self.client.containers.get("intermine_solr").status != "running"
+                self.client.containers.get("intermine-postgres").status != "running"
+                or self.client.containers.get("intermine-solr").status != "running"
             ):
                 raise RuntimeError("postgres and solr containers need to be running")
         except docker.errors.NotFound as exc:
@@ -73,7 +75,7 @@ class MineBuilder:
     def __run(self, command):
         res = self.client.containers.run(
             image=self.image,
-            name="intermine_builder",
+            name="intermine-builder",
             user=self.user,
             volumes=self.volumes,
             network=DOCKER_NETWORK_NAME,
@@ -104,6 +106,12 @@ class MineBuilder:
         try:
             if kwargs["stacktrace"]:
                 command += ["--stacktrace"]
+            if kwargs["info"]:
+                command += ["--info"]
+            if kwargs["debug"]:
+                command += ["--debug"]
+            if kwargs["scan"]:
+                command += ["--scan"]
         except KeyError:
             pass
         return self.__run(command)
@@ -118,8 +126,8 @@ class MineBuilder:
             args += ["-Paction=" + action]
         return self.__gradle(args, **kwargs)
 
-    def post_process(self, **kwargs):
-        args = ["postProcess"]
+    def post_process(self, process: str, **kwargs):
+        args = ["postProcess", "-Pprocess=" + process]
         return self.__gradle(args, **kwargs)
 
     def build_db(self, **kwargs):
