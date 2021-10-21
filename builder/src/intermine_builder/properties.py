@@ -53,7 +53,7 @@ def create_properties(
         # Web application deployment properties
         # location of tomcat server and path of webapp - e.g. access http://localhost:8080/malariamine
         "webapp.deploy.url": "http://" + TOMCAT_HOST + ":" + str(TOMCAT_PORT),
-        "webapp.path": "mine",
+        "webapp.path": "biotestmine",
         # tomcat username and password needed to deploy webapp
         "webapp.manager": TOMCAT_USER,
         "webapp.password": TOMCAT_PWD,
