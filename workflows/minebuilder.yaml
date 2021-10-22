@@ -1,0 +1,101 @@
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: prepared-workdir
+spec:
+  accessModes: [ "ReadWriteOnce" ]
+  resources:
+    requests:
+      storage: 1Gi
+
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: build-a-mine
+spec:
+  entrypoint: build-mine
+  volumes:
+  - name: workdir
+    persistentVolumeClaim:
+      claimName: prepared-workdir
+  volumeClaimTemplates:
+  - metadata:
+      name: postgres-data
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 4Gi
+  - metadata:
+      name: solr-data
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 4Gi
+  templates:
+  - name: build-mine
+    steps:
+    - - name: start-postgres
+        template: postgres
+      - name: start-solr
+        template: solr
+
+    - - name: clean
+        template: builder
+        arguments:
+          parameters:
+          - name: cmd
+            value: clean
+    - - name: build-database
+        template: builder
+        arguments:
+          parameters:
+          - name: cmd
+            value: buildDB
+  - name: postgres
+    daemon: true
+    retryStrategy:
+      limit: 3
+    container:
+      image: intermine/postgres:latest
+      readinessProbe:
+        exec:
+          command:
+          - psql
+          - mine
+          - -c
+          - ''
+      volumeMounts:
+      - name: postgres-data
+        mountPath: /var/lib/postgresql/data
+  - name: solr
+    daemon: true
+    retryStrategy:
+      limit: 3
+    container:
+      image: intermine/solr:latest
+      readinessProbe:
+        httpGet:
+          path: /solr/{{ cookiecutter.mine_name }}-search/admin/ping
+          port: 8983
+      volumeMounts:
+      - name: solr-data
+        mountPath: /var/solr
+  - name: builder
+    inputs:
+      parameters:
+      - name: cmd
+    container:
+      image: intermine/builder:latest
+      command: ["./gradlew"]
+      args: ["{{inputs.parameters.cmd}}"]
+      resources:
+        # These are requests, not limits, meaning more will be allocated if available.
+        requests:
+          memory: 4Gi
+          cpu: 500m
+      volumeMounts:
+      - name: workdir
+        mountPath: /home/intermine
