@@ -79,6 +79,11 @@ spec:
           parameters:
           - name: cmd
             value: buildUserDB
+
+    - - name: release-artifacts
+        template: artifacts
+
+
   - name: postgres
     daemon: true
     retryStrategy:
@@ -124,3 +129,21 @@ spec:
       volumeMounts:
       - name: workdir
         mountPath: /home/intermine
+  - name: artifacts
+    container:
+      image: alpine:3.8
+      volumeMounts:
+      - name: workdir
+        mountPath: /home/intermine
+      - name: postgres-data
+        mountPath: /var/lib/postgresql/data
+      - name: solr-data
+        mountPath: /var/solr
+    outputs:
+      artifacts:
+      - name: mine-dump
+        path: /home/intermine
+      - name: postgres-dump
+        path: /var/lib/postgresql/data
+      - name: solr-dump
+        path: /var/solr
