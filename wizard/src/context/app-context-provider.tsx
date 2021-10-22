@@ -1,4 +1,4 @@
-import { AppContext } from './app-context'
+import { AppContext } from './index'
 import { useAuthReducer } from './reducers/auth-reducer'
 
 import type { TAppContext } from './types'
