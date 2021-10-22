@@ -1,0 +1,17 @@
+# Ignore dist folder
+dist
+
+# Node modules
+node_modules
+
+# Log files
+*.log
+
+# Vscode setting
+.vscode
+
+# for macOS
+.DS_Store
+
+# Coverage
+coverage

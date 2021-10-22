@@ -1,0 +1,15 @@
+node_modules
+dist
+
+# config files
+*.config.ts
+*.config.js
+
+# test files
+*.test.ts
+*.test.tsx
+*.spec.ts
+*.spec.tsx
+
+# js files
+*.js
