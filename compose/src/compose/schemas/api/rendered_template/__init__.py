@@ -1,0 +1,1 @@
+"""RenderedTemplate API schemas."""
