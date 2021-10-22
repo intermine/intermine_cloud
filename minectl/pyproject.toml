@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "maple"
+name = "minectl"
 version = "0.1.0"
 description = "InterMine automation helper"
 authors = ["Ankur Kumar <ank@leoank.me>"]
@@ -13,7 +13,7 @@ PyYAML = "^5.4.1"
 [tool.poetry.dev-dependencies]
 
 [tool.poetry.scripts]
-maple = "maple.cli.main:main"
+minectl = "minectl.cli.main:main"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

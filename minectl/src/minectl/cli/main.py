@@ -1,4 +1,4 @@
-"""Maple CLI"""
+"""Minectl CLI"""
 
 # flake8: noqa
 
@@ -246,7 +246,7 @@ def poetry(d, options) -> None:
     elif d == "demon":
         d = demon_path
     elif d == "maple":
-        d == maple_path
+        d = maple_path
 
     conda_env = get_conda_env_dict()
     cmd_arr = ["poetry"] + list(options)
@@ -334,50 +334,56 @@ def write_traefik_config() -> None:
 
 
 @click.command()
+@click.option("--kube", "-k", is_flag=True, help="Create Kubernetes dev cluster." )
 @click.pass_context
-def dev(ctx) -> None:
+def dev(kube, ctx) -> None:
     "Start services for development."
     print("+++++++++++ Starting services +++++++++++++")
-    conda_env = get_conda_env_dict()
-    nats_process = Popen(
-        ["nats-server", "-V"],
-        env={
-            **os.environ,
-            **conda_env,
-            "POETRY_HOME": f"{tools_path / 'poetry'}",
-            "PATH": f"{conda_env['ADD_TO_PATH']}:{(tools_path / 'nats')}:{os.environ['PATH']}",
-        },
-    )
-    minio_process = Popen(
-        [
-            "minio",
-            "server",
-            "--console-address=:9001",
-            f"{(tools_path / 'minio' / 'data')}",
-        ],
-        env={
-            **os.environ,
-            **conda_env,
-            "POETRY_HOME": f"{tools_path / 'poetry'}",
-            "PATH": f"{conda_env['ADD_TO_PATH']}:{(tools_path / 'minio')}:{os.environ['PATH']}",
-            "MINIO_ROOT_USER": "minioaccess",
-            "MINIO_ROOT_PASSWORD": "minioaccess",
-        },
-    )
-    write_traefik_config()
-    ctx.invoke(
-        traefik,
-        options=[f"--configFile={(tools_path / 'traefik' / 'traefik.yaml')}"],
-    )
-    print("\n\n+++++++++++ Shutting Down! +++++++++++++\n")
-    nats_process.kill()
-    minio_process.kill()
+    if not kube:
+        # Create local dev env
+        conda_env = get_conda_env_dict()
+        nats_process = Popen(
+            ["nats-server", "-V"],
+            env={
+                **os.environ,
+                **conda_env,
+                "POETRY_HOME": f"{tools_path / 'poetry'}",
+                "PATH": f"{conda_env['ADD_TO_PATH']}:{(tools_path / 'nats')}:{os.environ['PATH']}",
+            },
+        )
+        minio_process = Popen(
+            [
+                "minio",
+                "server",
+                "--console-address=:9001",
+                f"{(tools_path / 'minio' / 'data')}",
+            ],
+            env={
+                **os.environ,
+                **conda_env,
+                "POETRY_HOME": f"{tools_path / 'poetry'}",
+                "PATH": f"{conda_env['ADD_TO_PATH']}:{(tools_path / 'minio')}:{os.environ['PATH']}",
+                "MINIO_ROOT_USER": "minioaccess",
+                "MINIO_ROOT_PASSWORD": "minioaccess",
+            },
+        )
+        write_traefik_config()
+        ctx.invoke(
+            traefik,
+            options=[f"--configFile={(tools_path / 'traefik' / 'traefik.yaml')}"],
+        )
+        print("\n\n+++++++++++ Shutting Down! +++++++++++++\n")
+        nats_process.kill()
+        minio_process.kill()
+    else:
+        # Create kubernetes dev env
+        pass
 
 
 @click.group()
 @click.version_option(version=__version__)
 def main() -> None:
-    """Maple console."""
+    """MineCTL console."""
     pass
 
 
