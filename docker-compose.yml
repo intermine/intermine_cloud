@@ -1,1 +1,111 @@
-version: 3.8
+version: "3.8"
+
+volumes:
+  code:
+    driver: local
+    driver_opts:
+      type: "none"
+      o: "bind"
+      device: "./scratch"
+  # builderdata:
+  # postgresdata:
+  # solrdata:
+  # tomcatdata:
+
+services:
+  traefik:
+    container_name: im_traefik
+    image: traefik:v2.5
+    command:
+      - "--api.insecure=true" 
+      - "--providers.docker"
+      - "--entrypoints.postgres.address=:81"
+      - "--entrypoints.solr.address=:82"
+      - "--entrypoints.tomcat.address=:83"
+    ports:
+      # Services
+      - "9001:81"
+      - "9002:82"
+      - "9003:83"
+      # Traefik dashboard
+      - "8002:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    restart: unless-stopped
+
+  whoami:
+    image: traefik/whoami
+    labels:
+      - "traefik.http.routers.whoami.rule=Host(`localhost`) || Host(`127.0.0.1`) || Host(`${HOST}:-0.0.0.0`)"
+      - "traefik.http.services.whoami.loadbalancer.server.port=80"
+      - "traefik.http.routers.whoami.entrypoints=whoami"
+  
+  whoami2:
+    image: traefik/whoami
+    labels:
+      - "traefik.http.routers.whoami2.rule=Host(`localhost`) || Host(`127.0.0.1`) || Host(`${HOST}:-0.0.0.0`)"
+      - "traefik.http.services.whoami2.loadbalancer.server.port=80"
+      - "traefik.http.routers.whoami2.entrypoints=whoami2"
+  
+  busybox:
+    image: busybox
+    volumes:
+    - code:/scratch
+    command: ls /scratch
+  # builder:
+  #   container_name: im_builder
+  #   build:
+  #     context: ./intermine_builder
+  #   image: im_builder:dev
+  #   user: ${UID:-1000}:${GID:-1000}
+  #   volumes:
+  #     # - ./data/mine/data:/home/intermine/intermine/data
+  #     - ./data/mine/dump:/home/intermine/intermine/dump
+  #     - ./data/mine/configs:/home/intermine/intermine/configs
+  #     - ./data/mine/packages:/home/intermine/.m2
+  #     - ./data/mine/intermine:/home/intermine/.intermine
+  #     # - ./data/mine/[PUT_YOUR_MINE_NAME_HERE]:/home/intermine/intermine/[PUT_YOUR_MINE_NAME_HERE]
+  #     - ./data/mine/biotestmine:/home/intermine/intermine/biotestmine
+  #   environment:
+  #     - MINE_NAME=${MINE_NAME:-biotestmine}
+  #     - MINE_REPO_URL=${MINE_REPO_URL:-}
+  #     - IM_DATA_DIR=${IM_DATA_DIR:-DATA_DIR}
+  #     - MEM_OPTS=${MEM_OPTS:-"-Xmx2g -Xms1g"}
+  #     - IM_REPO_URL=${IM_REPO_URL:-}
+  #     - IM_REPO_BRANCH=${IM_REPO_BRANCH:-}
+  #   depends_on: 
+  #     - postgres
+  #     - solr
+  #     - tomcat
+
+  postgres:
+    container_name: im_postgres
+    image: postgres
+    user: ${UID:-1000}:${GID:-1000}
+    labels:
+      - "traefik.http.routers.postgres.rule=Host(`localhost`) || Host(`127.0.0.1`) || Host(`${HOST}:-0.0.0.0`)"
+      - "traefik.http.services.postgres.loadbalancer.server.port=5432"
+      - "traefik.http.routers.postgres.entrypoints=postgres"
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
+  # solr:
+  #   container_name: intermine_solr
+  #   build:
+  #     context: ./solr
+  #     dockerfile: ./solr.Dockerfile
+  #   environment:
+  #     - MEM_OPTS=${MEM_OPTS:-"-Xmx2g -Xms1g"}
+  #     - MINE_NAME=${MINE_NAME:-biotestmine}
+  #   user: ${UID:-1000}:${GID:-1000}
+  #   volumes:
+  #     - ./data/solr:/var/solr
+
+  # tomcat:
+  #   container_name: intermine_tomcat
+  #   build:
+  #     context: ./tomcat
+  #     dockerfile: ./tomcat.Dockerfile
+  #   environment:
+  #     - MEM_OPTS=${MEM_OPTS:-"-Xmx1g -Xms500m"}
+  #   ports:
+  #     - ${TOMCAT_HOST_PORT:-9999}:${TOMCAT_PORT:-8080}
