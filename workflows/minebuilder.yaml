@@ -1,0 +1,149 @@
+# This requires us to create a PVC with the mine directory before starting the workflow (we should also create the mine.properties file).
+# Having root be at /home/intermine would be nice, as it includes .intermine and mine_name dir.
+# An alternative would be to use S3: https://github.com/argoproj/argo-workflows/blob/master/examples/README.md#hardwired-artifacts
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: prepared-workdir
+spec:
+  accessModes: [ "ReadWriteOnce" ]
+  resources:
+    requests:
+      storage: 1Gi
+
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: build-a-mine
+spec:
+  entrypoint: build-mine
+  volumes:
+  - name: workdir
+    persistentVolumeClaim:
+      claimName: prepared-workdir
+  volumeClaimTemplates:
+  - metadata:
+      name: postgres-data
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 4Gi
+  - metadata:
+      name: solr-data
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 4Gi
+  templates:
+  - name: build-mine
+    steps:
+    - - name: start-postgres
+        template: postgres
+      - name: start-solr
+        template: solr
+
+    - - name: clean
+        template: builder
+        arguments:
+          parameters:
+          - name: cmd
+            value: clean
+    - - name: build-database
+        template: builder
+        arguments:
+          parameters:
+          - name: cmd
+            value: buildDB
+    {% for source in cookiecutter.sources %}
+    - - name: integrate-{{ source }}
+        template: builder
+        arguments:
+          parameters:
+          - name: cmd
+            value: integrate -Psource={{ source }}
+    {% endfor %}
+    {% for postprocess in cookiecutter.post_processing %}
+    - - name: postprocess-{{ postprocess }}
+        template: builder
+        arguments:
+          parameters:
+          - name: cmd
+            value: postProcess -Pprocess={{ postprocess }}
+    {% endfor %}
+    - - name: build-user-database
+        template: builder
+        arguments:
+          parameters:
+          - name: cmd
+            value: buildUserDB
+
+    - - name: release-artifacts
+        template: artifacts
+
+
+  - name: postgres
+    daemon: true
+    retryStrategy:
+      limit: 3
+    container:
+      image: intermine/postgres:latest
+      readinessProbe:
+        exec:
+          command:
+          - psql
+          - mine
+          - -c
+          - ''
+      volumeMounts:
+      - name: postgres-data
+        mountPath: /var/lib/postgresql/data
+  - name: solr
+    daemon: true
+    retryStrategy:
+      limit: 3
+    container:
+      image: intermine/solr:latest
+      readinessProbe:
+        httpGet:
+          path: /solr/{{ cookiecutter.mine_name }}-search/admin/ping
+          port: 8983
+      volumeMounts:
+      - name: solr-data
+        mountPath: /var/solr
+  - name: builder
+    inputs:
+      parameters:
+      - name: cmd
+    container:
+      image: intermine/builder:latest
+      command: ["./gradlew"]
+      args: ["{{inputs.parameters.cmd}}"]
+      resources:
+        # These are requests, not limits, meaning more will be allocated if available.
+        requests:
+          memory: 4Gi
+          cpu: 500m
+      volumeMounts:
+      - name: workdir
+        mountPath: /home/intermine
+  - name: artifacts
+    container:
+      image: alpine:3.8
+      volumeMounts:
+      - name: workdir
+        mountPath: /home/intermine
+      - name: postgres-data
+        mountPath: /var/lib/postgresql/data
+      - name: solr-data
+        mountPath: /var/solr
+    outputs:
+      artifacts:
+      - name: mine-dump
+        path: /home/intermine
+      - name: postgres-dump
+        path: /var/lib/postgresql/data
+      - name: solr-dump
+        path: /var/solr

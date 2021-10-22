@@ -65,8 +65,9 @@ with your package manager.
 project_root = Path(__file__).absolute().parents[1]
 compose_path = project_root.joinpath("compose")
 demon_path = project_root.joinpath("demon")
-maple_path = project_root.joinpath("maple")
+minectl_path = project_root.joinpath("minectl")
 tools_path = project_root.joinpath("scratch", "tools")
+os.makedirs(tools_path, exist_ok=True)
 
 
 current_system = platform.system()
@@ -869,7 +870,7 @@ def main() -> None:
     setup_tools()
     create_conda_env()
     install_projects(compose_path)
-    install_projects(maple_path)
+    install_projects(minectl_path)
     write_env()
 
 

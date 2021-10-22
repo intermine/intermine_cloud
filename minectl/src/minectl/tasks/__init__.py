@@ -1,0 +1,1 @@
+"""Minectl celery tasks."""
