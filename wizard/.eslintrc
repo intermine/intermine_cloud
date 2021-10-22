@@ -1,0 +1,49 @@
+{
+    "root": true,
+    "parser": "@typescript-eslint/parser",
+    "parserOptions": {
+        "project": "./tsconfig.json"
+    },
+    "env": {
+        "node": true,
+        "browser": true,
+        "jest": true
+    },
+    "extends": [
+        "plugin:@typescript-eslint/recommended",
+        "plugin:eslint-comments/recommended",
+        "plugin:jest/recommended",
+        "plugin:promise/recommended",
+        "plugin:unicorn/recommended",
+        "prettier"
+    ],
+    "plugins": [
+        "react",
+        "@typescript-eslint",
+        "eslint-comments",
+        "jest",
+        "promise",
+        "unicorn"
+    ],
+    "rules": {
+        "no-prototype-builtins": "off",
+        "@typescript-eslint/semi": 0,
+        "@typescript-eslint/member-delimiter-style": 0,
+        "@typescript-eslint/explicit-module-boundary-types": 0,
+        "react/jsx-indent": 0,
+        "react/jsx-indent-props": 0,
+        "unicorn/no-null": 0,
+        "react/require-default-props": 0,
+        "@typescript-eslint/ban-ts-ignore": 0,
+        "comma-dangle": 0,
+        "max-len": [
+            "error",
+            {
+                "code": 80
+            }
+        ],
+        "import/prefer-default-export": "off",
+        "import/extensions": 0,
+        "unicorn/prevent-abbreviations": 0
+    }
+}

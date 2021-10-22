@@ -1,0 +1,29 @@
+{
+    "compilerOptions": {
+        // Allow default imports from modules with no default export. This does not affect code emit, just typechecking.
+        "allowSyntheticDefaultImports": true,
+        // Process & infer types from .js files.
+        "allowJs": true,
+        // Ensure that .d.ts files are created by tsc, but not .js files
+        "declaration": true,
+        "emitDeclarationOnly": true,
+        // Import non-ES modules as default imports.
+        "esModuleInterop": true,
+        // Ensure that Babel can safely transpile files in the TypeScript project
+        "isolatedModules": true,
+        "jsx": "react-jsx",
+        "module": "commonjs",
+        "outDir": "dist",
+        // Enable strictest settings like strictNullChecks & noImplicitAny.
+        "strict": true,
+        // Target latest version of ECMAScript.
+        "target": "esnext"
+    },
+    "include": ["src"],
+    "exclude": [
+        "src/**/*.spec.ts",
+        "src/**/*.spec.tsx",
+        "src/**/*.test.ts",
+        "src/**/*.test.tsx",
+    ]
+}
