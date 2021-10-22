@@ -1,0 +1,1 @@
+"""Mine API schemas."""
