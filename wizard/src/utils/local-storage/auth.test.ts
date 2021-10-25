@@ -3,7 +3,7 @@ import {
     setAuthStateToLocalStorage,
 } from './auth'
 
-import { AuthStates } from '../../constants/auth'
+import { AuthStates, DEFAULT_AUTH } from '../../constants/auth'
 
 describe('Testing local-storage/auth', () => {
     beforeEach(() => {
@@ -12,13 +12,17 @@ describe('Testing local-storage/auth', () => {
 
     test('Should set and get auth state from local storage', () => {
         /**
-         * If nothing is there, then it should return false.
+         * If nothing is there, then it should return not authorize.
          */
-        expect(getAuthStateFromLocalStorage()).toBe(AuthStates.NotAuthorize)
+        expect(getAuthStateFromLocalStorage()).toEqual(DEFAULT_AUTH)
 
-        setAuthStateToLocalStorage(AuthStates.Authorize)
-        expect(getAuthStateFromLocalStorage()).toBe(AuthStates.Authorize)
-        setAuthStateToLocalStorage(AuthStates.NotAuthorize)
-        expect(getAuthStateFromLocalStorage()).toBe(AuthStates.NotAuthorize)
+        setAuthStateToLocalStorage({
+            userDetails: {},
+            authState: AuthStates.Authorize,
+        })
+        expect(getAuthStateFromLocalStorage()).toEqual({
+            userDetails: {},
+            authState: AuthStates.Authorize,
+        })
     })
 })

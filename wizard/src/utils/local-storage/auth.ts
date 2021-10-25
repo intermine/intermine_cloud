@@ -1,17 +1,22 @@
 import { getValueFromLocalStorage, setValueToLocalStorage } from './common'
-import { AuthStates } from '../../constants/auth'
+import { DEFAULT_AUTH } from '../../constants/auth'
+import { TAuthReducer } from '../../context/types'
 
 export const LOCAL_STORAGE_AUTH_KEY = 'AUTH'
 
-export const getAuthStateFromLocalStorage = (): AuthStates => {
-    const authState = getValueFromLocalStorage(LOCAL_STORAGE_AUTH_KEY)
-    if (authState && authState in AuthStates) {
-        return authState as AuthStates
-    }
+export const getAuthStateFromLocalStorage = (): TAuthReducer => {
+    try {
+        const authState = getValueFromLocalStorage(LOCAL_STORAGE_AUTH_KEY)
+        if (typeof authState !== 'string') {
+            return DEFAULT_AUTH
+        }
 
-    return AuthStates.NotAuthorize
+        return JSON.parse(authState)
+    } catch {
+        return DEFAULT_AUTH
+    }
 }
 
-export const setAuthStateToLocalStorage = (state: AuthStates): void => {
-    setValueToLocalStorage(LOCAL_STORAGE_AUTH_KEY, state.toString())
+export const setAuthStateToLocalStorage = (state: TAuthReducer): void => {
+    setValueToLocalStorage(LOCAL_STORAGE_AUTH_KEY, JSON.stringify(state))
 }
