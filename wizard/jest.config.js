@@ -1,7 +1,9 @@
 module.exports = {
     // Automatically clear mock calls and instances between every test
     clearMocks: true,
-
+    moduleNameMapper: {
+      "\\.(jpg|jpeg|png|gif|webp|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$": "<rootDir>/src/__mocks__/fileMock.js"
+    },
     // An array of glob patterns indicating a set of files for which coverage information should be collected
     collectCoverageFrom: ['src/**/*.{ts,tsx}'],
 
