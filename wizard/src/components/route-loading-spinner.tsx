@@ -7,9 +7,12 @@ export const RouteLoadingSpinner = () => {
             isContentCenter
             csx={{
                 root: ({
-                    palette: { recommendedThemeBackground: rtb, themeType }
+                    palette: {
+                        themeBackground: { light, dark },
+                        themeType
+                    }
                 }) => ({
-                    background: themeType === 'dark' ? rtb.dark : rtb.light,
+                    background: themeType === 'dark' ? dark.hex : light.hex,
                     bottom: 0,
                     left: 0,
                     position: 'absolute',

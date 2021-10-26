@@ -23,7 +23,12 @@ const useStyles = createStyle({
             position: 'relative'
         },
         body: {
-            position: 'relative'
+            position: 'relative',
+            /**
+             * It may be risky to set overflow hidden on body.
+             * Doing so to avoid unintentional overflow.
+             */
+            overflow: 'hidden'
         },
         '#root': {
             /**
@@ -56,11 +61,11 @@ export const App = () => {
                     root: ({
                         palette: {
                             themeType,
-                            recommendedThemeBackground: rtb,
+                            themeBackground: { light, dark },
                             neutral
                         }
                     }) => ({
-                        background: themeType === 'dark' ? rtb.dark : rtb.light,
+                        background: themeType === 'dark' ? dark.hex : light.hex,
                         color: neutral[90],
                         height: '100%',
                         width: '100%',
