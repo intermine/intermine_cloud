@@ -46,7 +46,9 @@ def create_data(data_list: List[Data], user_creds: Optional[User] = None) -> Lis
             raise e
 
 
-def get_data(query_params: DataGetQueryParams) -> List[Data]:
+def get_data(
+    query_params: DataGetQueryParams, user_creds: Optional[User] = None
+) -> List[Data]:
     """Query DB for Data.
 
     Args:
@@ -80,7 +82,7 @@ def get_data(query_params: DataGetQueryParams) -> List[Data]:
             raise e
 
 
-def update_data(data_update: DataUpdate) -> Data:
+def update_data(data_update: DataUpdate, user_creds: Optional[User] = None) -> Data:
     """Update Data in the DB from DataUpdate request.
 
     Args:
@@ -116,7 +118,7 @@ def update_data(data_update: DataUpdate) -> Data:
             raise e
 
 
-def delete_data(data_delete: DataDelete) -> Data:
+def delete_data(data_delete: DataDelete, user_creds: Optional[User] = None) -> Data:
     """Delete Data in the DB from DataDelete request.
 
     Args:
