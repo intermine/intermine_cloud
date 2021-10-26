@@ -23,7 +23,7 @@ project_root = Path(__file__).absolute().parents[4]
 tools_path = project_root.joinpath("scratch", "tools")
 compose_path = project_root.joinpath("compose")
 demon_path = project_root.joinpath("demon")
-maple_path = project_root.joinpath("maple")
+minectl_path = project_root.joinpath("minectl")
 
 
 def get_conda_env_dict() -> Dict:
@@ -234,7 +234,7 @@ def minio(options) -> None:
 @click.command()
 @click.option(
     "-d",
-    type=click.Choice(["compose", "demon", "maple"], case_sensitive=False),
+    type=click.Choice(["compose", "demon", "minectl"], case_sensitive=False),
     required=True,
 )
 @click.argument("options", nargs=-1)
@@ -245,8 +245,8 @@ def poetry(d, options) -> None:
         d = compose_path
     elif d == "demon":
         d = demon_path
-    elif d == "maple":
-        d = maple_path
+    elif d == "minectl":
+        d = minectl_path
 
     conda_env = get_conda_env_dict()
     cmd_arr = ["poetry"] + list(options)
