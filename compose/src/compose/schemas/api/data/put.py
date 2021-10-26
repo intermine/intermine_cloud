@@ -12,6 +12,7 @@ class DataUpdate(BaseModel):
 
     data_id: UUID4
     name: Optional[str]
+    file_id: Optional[UUID4]
 
 
 class DataPUTRequest(BaseModel):
