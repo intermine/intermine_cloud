@@ -1,6 +1,6 @@
 """"File schema."""
 
-from typing import Optional
+from typing import Dict, Optional
 
 from pydantic import BaseModel
 from pydantic.types import UUID4
@@ -14,4 +14,6 @@ class File(BaseModel):
     ext: Optional[str]
     file_type: str
     parent_id: UUID4
-    uploaded: bool
+    presigned_post: Optional[str]
+    presigned_form: Optional[Dict]
+    uploaded: bool = False
