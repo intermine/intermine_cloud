@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pv-pod
+spec:
+  volumes:
+    - name: pv-storage
+      persistentVolumeClaim:
+        claimName: prepared-workdir
+  containers:
+    - name: pv-container
+      image: docker/whalesay:latest
+      command: [sh, -c]
+      args: ["while true; do sleep 60; done"]
+      volumeMounts:
+        - mountPath: "/storage"
+          name: pv-storage

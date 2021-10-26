@@ -1,17 +1,10 @@
-# This requires us to create a PVC with the mine directory before starting the workflow (we should also create the mine.properties file).
-# Having root be at /home/intermine would be nice, as it includes .intermine and mine_name dir.
-# An alternative would be to use S3: https://github.com/argoproj/argo-workflows/blob/master/examples/README.md#hardwired-artifacts
-kind: PersistentVolumeClaim
-apiVersion: v1
-metadata:
-  name: prepared-workdir
-spec:
-  accessModes: [ "ReadWriteOnce" ]
-  resources:
-    requests:
-      storage: 1Gi
-
----
+# This workflow is a Jinja template, so it needs variables to be
+# injected before you can submit it.  It also depends on the following
+# Persistent Volume Claims to be present on the same namespace:
+# - prepared-workdir : represents `/home/intermine`, which should contain
+#     - $mine_name directory with files required to build a mine
+#     - .intermine/$mine_name.properties
+# - sourcedata : required data for data source integration
 apiVersion: argoproj.io/v1alpha1
 kind: Workflow
 metadata:
@@ -22,6 +15,14 @@ spec:
   - name: workdir
     persistentVolumeClaim:
       claimName: prepared-workdir
+  - name: sourcedata
+    persistentVolumeClaim:
+      claimName: sourcedata
+  # Volume Snapshots (https://kubernetes.io/docs/concepts/storage/volume-snapshots/)
+  # might be useful to create snapshots of each volume between tasks, to
+  # facilitate resuming at a previous point in case of failure. Although
+  # Persistent Volumes for postgres and solr data could achieve the same thing,
+  # so long as a failure doesn't "corrupt" this data.
   volumeClaimTemplates:
   - metadata:
       name: postgres-data
@@ -57,7 +58,7 @@ spec:
           parameters:
           - name: cmd
             value: buildDB
-    {% for source in cookiecutter.sources %}
+    {% for source in sources %}
     - - name: integrate-{{ source }}
         template: builder
         arguments:
@@ -65,7 +66,7 @@ spec:
           - name: cmd
             value: integrate -Psource={{ source }}
     {% endfor %}
-    {% for postprocess in cookiecutter.post_processing %}
+    {% for postprocess in post_processing %}
     - - name: postprocess-{{ postprocess }}
         template: builder
         arguments:
@@ -79,6 +80,12 @@ spec:
           parameters:
           - name: cmd
             value: buildUserDB
+    - - name: create-war
+        template: builder
+        arguments:
+          parameters:
+          - name: cmd
+            value: war
 
     - - name: release-artifacts
         template: artifacts
@@ -94,9 +101,11 @@ spec:
         exec:
           command:
           - psql
+          - --user
+          - postgres
           - mine
           - -c
-          - ''
+          - '\q'
       volumeMounts:
       - name: postgres-data
         mountPath: /var/lib/postgresql/data
@@ -108,7 +117,7 @@ spec:
       image: intermine/solr:latest
       readinessProbe:
         httpGet:
-          path: /solr/{{ cookiecutter.mine_name }}-search/admin/ping
+          path: /solr/{{ mine_name }}-search/admin/ping
           port: 8983
       volumeMounts:
       - name: solr-data
@@ -118,9 +127,10 @@ spec:
       parameters:
       - name: cmd
     container:
-      image: intermine/builder:latest
+      image: intermine/build:latest
+      workingDir: /home/intermine/{{ mine_name }}
       command: ["./gradlew"]
-      args: ["{{inputs.parameters.cmd}}"]
+      {% raw %}args: ["{{inputs.parameters.cmd}}"]{% endraw %}
       resources:
         # These are requests, not limits, meaning more will be allocated if available.
         requests:
@@ -129,6 +139,8 @@ spec:
       volumeMounts:
       - name: workdir
         mountPath: /home/intermine
+      - name: sourcedata
+        mountPath: /testdata
   - name: artifacts
     container:
       image: alpine:3.8
@@ -141,8 +153,8 @@ spec:
         mountPath: /var/solr
     outputs:
       artifacts:
-      - name: mine-dump
-        path: /home/intermine
+      - name: mine-war
+        path: /home/intermine/biotestmine/webapp/build/libs/webapp.war
       - name: postgres-dump
         path: /var/lib/postgresql/data
       - name: solr-dump
