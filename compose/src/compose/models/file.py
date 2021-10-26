@@ -6,6 +6,7 @@ from blackcap.models.meta.orm import reference_col
 
 
 from sqlalchemy import Column, String, Boolean
+from sqlalchemy.sql.sqltypes import JSON
 
 
 class FileDB(DBModel, SurrogatePKUUID, TimestampMixin):
@@ -15,6 +16,8 @@ class FileDB(DBModel, SurrogatePKUUID, TimestampMixin):
     name = Column(String, nullable=False)
     ext = Column(String)
     file_type = Column(String, nullable=False)
+    presigned_post = Column(String, nullable=False)
+    presigned_form = Column(JSON, nullable=False)
     uploaded = Column(Boolean, nullable=False)
     parent_id = Column(GUID, nullable=False)
     protagonist_id = reference_col("protagonist")
