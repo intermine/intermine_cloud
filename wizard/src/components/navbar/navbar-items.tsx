@@ -1,4 +1,5 @@
 import { useContext, useRef, useState } from 'react'
+import { useHistory } from 'react-router-dom'
 import { useOutsideClick } from '@intermine/chromatin/utils'
 import { IconButton } from '@intermine/chromatin/icon-button'
 import { Menu } from '@intermine/chromatin/menu'
@@ -10,8 +11,11 @@ import { Typography } from '@intermine/chromatin/typography'
 import DarkThemeIcon from '@intermine/chromatin/icons/Weather/sun-fill'
 import LightThemeIcon from '@intermine/chromatin/icons/Weather/moon-fill'
 
-import { AppContext } from '../context'
-import { AuthStates } from '../constants/auth'
+import { AppContext } from '../../context'
+import { AuthStates } from '../../constants/auth'
+import { LOGIN_PATH } from '../../routes'
+
+const { Authorize, NotAuthorize } = AuthStates
 
 export const NavbarItems = () => {
     const store = useContext(AppContext)
@@ -25,6 +29,7 @@ export const NavbarItems = () => {
             updateAuthState
         }
     } = store
+    const history = useHistory()
 
     const [isMenuOpen, setIsMenuOpen] = useState(false)
     const [anchorElement, setAnchorElement] = useState<HTMLElement>()
@@ -35,6 +40,12 @@ export const NavbarItems = () => {
         updateTheme(themeType === 'dark' ? 'light' : 'dark')
     }
 
+    const handleLogout = () => {
+        setIsMenuOpen(false)
+        updateAuthState(NotAuthorize)
+        history.push(LOGIN_PATH)
+    }
+
     useOutsideClick({
         anchorElement: anchorElement,
         otherElements: [menuRef.current],
@@ -42,7 +53,7 @@ export const NavbarItems = () => {
         onOutsideClicked: () => setIsMenuOpen(false)
     })
 
-    if (authState === AuthStates.Authorize) {
+    if (authState === Authorize) {
         return (
             <IconButton
                 ref={(el: HTMLElement) => setAnchorElement(el)}
@@ -86,14 +97,7 @@ export const NavbarItems = () => {
                     </MenuItem>
                     <Divider Component="li" csx={{ root: { margin: 0 } }} />
                     <MenuItem>Edit Profile</MenuItem>
-                    <MenuItem
-                        onClick={() => {
-                            setIsMenuOpen(false)
-                            updateAuthState(AuthStates.NotAuthorize)
-                        }}
-                    >
-                        Logout
-                    </MenuItem>
+                    <MenuItem onClick={handleLogout}>Logout</MenuItem>
                     <Divider Component="li" csx={{ root: { margin: 0 } }} />
                     <MenuItem onClick={handleToggleOnClick}>
                         Dark Theme: {themeType === 'dark' ? 'On' : 'Off'}

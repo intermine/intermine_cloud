@@ -2,7 +2,7 @@ import { createStyle } from '@intermine/chromatin/styles'
 import { Box } from '@intermine/chromatin/box'
 import { Typography } from '@intermine/chromatin/typography'
 
-import InterMineLogo from '../../public/assets/img/intermine-logo.webp'
+import InterMineLogo from '../../../public/assets/img/intermine-logo.webp'
 import { NavbarItems } from './navbar-items'
 
 const useStyles = createStyle((theme) => {
@@ -27,8 +27,7 @@ const useStyles = createStyle((theme) => {
         },
 
         logo: {
-            height: '3rem',
-            filter: `brightness(${themeType === 'dark' ? 10 : 0})`
+            height: '2rem'
         },
 
         logoText: {
@@ -50,10 +49,10 @@ export const Navbar = () => {
                 />
                 <Typography
                     className={classes.logoText}
-                    variant="h1"
+                    variant="h3"
                     Component="span"
                 >
-                    Wizard
+                    Intermine Cloud
                 </Typography>
             </Box>
             <Box isContentAlignCenter>
