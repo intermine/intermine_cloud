@@ -15,8 +15,7 @@ from compose.schemas.file import File
 from logzero import logger
 
 
-from minio import Minio, PostPolicy
-from minio.error import ResponseError
+from minio.api import Minio, PostPolicy
 
 from sqlalchemy import select
 
@@ -27,24 +26,28 @@ minio_client = Minio(
     config.MINIO_ENDPOINT,
     access_key=config.MINIO_ACCESS_KEY,
     secret_key=config.MINIO_SECRET_KEY,
+    secure=config.MINIO_SECURE,
 )
 
 
-def create_presigned_post_url(file: File, user_creds: User) -> Dict:
+def create_presigned_post_url(file: File, user_creds: User) -> str:
     """Create presigned post url for the file."""
-    post_policy = PostPolicy()
-    post_policy.set_bucket_name(f"imcloud-{user_creds.user_id}")
-    post_policy.set_key_startswith(file.file_id)
-
-    # Set file size limit on upload
-    post_policy.set_content_length_range(10, 1024 * 1024 * 1024)
 
     # set expiry 10 days into future
-    expires_date = datetime.utcnow() + timedelta(days=10)
-    post_policy.set_expires(expires_date)
+    # post_policy = PostPolicy(f"imcloud-{user_creds.user_id}", expires_date)
 
-    url, signed_data = minio_client.presigned_post_policy(post_policy)
-    return {"presigned_post": url, "presigned_form": signed_data}
+    # # set key condition
+    # post_policy.add_starts_with_condition("key", file.file_id)
+
+    # # Set file size limit on upload
+    # post_policy.add_content_length_range_condition(10, 1024 * 1024 * 1024)
+
+    # signed_form_data = minio_client.presigned_post_policy(post_policy)
+    return minio_client.presigned_put_object(
+        f"imcloud-{user_creds.user_id}",
+        f"{str(file.file_id)}.{file.ext}",
+        expires=timedelta(days=7),
+    )
 
 
 def create_file(file_list: List[File], user_creds: User) -> List[File]:
@@ -62,9 +65,10 @@ def create_file(file_list: List[File], user_creds: User) -> List[File]:
         try:
             file_db_create_list: List[FileDB] = [
                 FileDB(
+                    id=file.file_id,
                     protagonist_id=user_creds.user_id,
-                    **create_presigned_post_url(file),
-                    **file.dict(exclude={"file_id"}),  # noqa: E501
+                    presigned_url=create_presigned_post_url(file, user_creds),
+                    **file.dict(exclude={"file_id", "presigned_url"}),  # noqa: E501
                 )
                 for file in file_list
             ]
@@ -135,10 +139,10 @@ def update_file(file_update: FileUpdate, user_creds: User = None) -> File:
                 session.execute(stmt).scalars().all()
             )  # noqa: E501
             if len(file_list) == 1:
-                file_update_dict = file_update.dict()
+                file_update_dict = file_update.dict(exclude_defaults=True)
                 file_update_dict.pop("file_id")
                 updated_file = file_list[0].update(
-                    session, **file_update.dict()
+                    session, **file_update_dict
                 )  # noqa: E501
                 return File(file_id=updated_file.id, **updated_file.to_dict())
             if len(file_list) == 0:
