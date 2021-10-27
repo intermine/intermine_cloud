@@ -99,10 +99,10 @@ def update_mine(mine_update: MineUpdate) -> Mine:
                 session.execute(stmt).scalars().all()
             )  # noqa: E501
             if len(mine_list) == 1:
-                mine_update_dict = mine_update.dict()
+                mine_update_dict = mine_update.dict(exclude_defaults=True)
                 mine_update_dict.pop("mine_id")
                 updated_mine = mine_list[0].update(
-                    session, **mine_update.dict()
+                    session, **mine_update_dict
                 )  # noqa: E501
                 return Mine(data_id=updated_mine.id, **updated_mine.to_dict())
             if len(mine_list) == 0:

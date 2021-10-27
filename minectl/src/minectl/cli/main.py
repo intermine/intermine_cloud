@@ -23,7 +23,7 @@ project_root = Path(__file__).absolute().parents[4]
 tools_path = project_root.joinpath("scratch", "tools")
 compose_path = project_root.joinpath("compose")
 demon_path = project_root.joinpath("demon")
-maple_path = project_root.joinpath("maple")
+minectl_path = project_root.joinpath("minectl")
 
 
 def get_conda_env_dict() -> Dict:
@@ -234,7 +234,7 @@ def minio(options) -> None:
 @click.command()
 @click.option(
     "-d",
-    type=click.Choice(["compose", "demon", "maple"], case_sensitive=False),
+    type=click.Choice(["compose", "demon", "minectl"], case_sensitive=False),
     required=True,
 )
 @click.argument("options", nargs=-1)
@@ -245,8 +245,8 @@ def poetry(d, options) -> None:
         d = compose_path
     elif d == "demon":
         d = demon_path
-    elif d == "maple":
-        d = maple_path
+    elif d == "minectl":
+        d = minectl_path
 
     conda_env = get_conda_env_dict()
     cmd_arr = ["poetry"] + list(options)
@@ -262,7 +262,7 @@ def poetry(d, options) -> None:
     )
 
 
-def write_traefik_config() -> None:
+def write_traefik_config(host) -> None:
     """Create config files for traefik."""
     static_data = {
         "serversTransport": {"insecureSkipVerify": True},
@@ -293,14 +293,14 @@ def write_traefik_config() -> None:
                     "entryPoints": ["minio"],
                     "service": "minio",
                     "rule": [
-                        'Host(`localhost`) || Host(`127.0.0.1`) || Host(`{{or (env "HOST") "0.0.0.0"}}`)'
+                        f"Host(`localhost`) || Host(`127.0.0.1`) || Host(`0.0.0.0`) || Host(`{host}`)"
                     ],
                 },
                 "minio_console": {
                     "entryPoints": ["minio_console"],
                     "service": "minio_console",
                     "rule": [
-                        'Host(`localhost`) || Host(`127.0.0.1`) || Host(`{{or (env "HOST") "0.0.0.0"}}`)'
+                        f"Host(`localhost`) || Host(`127.0.0.1`) || Host(`0.0.0.0`) || Host(`{host}`)"
                     ],
                 },
             },
@@ -334,12 +334,20 @@ def write_traefik_config() -> None:
 
 
 @click.command()
-@click.option("--kube", "-k", is_flag=True, help="Create Kubernetes dev cluster." )
+@click.option("--kube", "-k", is_flag=True, help="Create Kubernetes dev cluster.")
+@click.option("--docker", "-d", is_flag=True, help="Create Docker dev cluster.")
+@click.option("--host", "-h", default="localhost", help="Hostname for the service.")
 @click.pass_context
-def dev(kube, ctx) -> None:
+def dev(ctx, kube, docker, host) -> None:
     "Start services for development."
     print("+++++++++++ Starting services +++++++++++++")
-    if not kube:
+    if kube:
+        # Create kuberenetes cluster.
+        pass
+    elif docker:
+        # Create docker cluster.
+        pass
+    else:
         # Create local dev env
         conda_env = get_conda_env_dict()
         nats_process = Popen(
@@ -367,7 +375,7 @@ def dev(kube, ctx) -> None:
                 "MINIO_ROOT_PASSWORD": "minioaccess",
             },
         )
-        write_traefik_config()
+        write_traefik_config(host)
         ctx.invoke(
             traefik,
             options=[f"--configFile={(tools_path / 'traefik' / 'traefik.yaml')}"],
@@ -375,9 +383,6 @@ def dev(kube, ctx) -> None:
         print("\n\n+++++++++++ Shutting Down! +++++++++++++\n")
         nats_process.kill()
         minio_process.kill()
-    else:
-        # Create kubernetes dev env
-        pass
 
 
 @click.group()

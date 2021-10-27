@@ -16,6 +16,7 @@ from blackcap.configs import config_registry
 from blackcap.auther import auther_registry
 from blackcap.schemas.api.auth.post import AuthUserCreds
 
+from compose.cli.data import data
 
 from .. import __version__
 
@@ -50,3 +51,4 @@ main.add_command(pub)
 main.add_command(sched)
 main.add_command(login)
 main.add_command(sub)
+main.add_command(data)
