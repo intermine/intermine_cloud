@@ -334,12 +334,20 @@ def write_traefik_config() -> None:
 
 
 @click.command()
-@click.option("--kube", "-k", is_flag=True, help="Create Kubernetes dev cluster." )
+@click.option("--kube", "-k", is_flag=True, help="Create Kubernetes dev cluster.")
+@click.option("--docker", "-d", is_flag=True, help="Create Docker dev cluster.")
+@click.option("--host", "-h", default="localhost", help="Hostname for the service.")
 @click.pass_context
-def dev(kube, ctx) -> None:
+def dev(ctx, kube, docker, host) -> None:
     "Start services for development."
     print("+++++++++++ Starting services +++++++++++++")
-    if not kube:
+    if kube:
+        # Create kuberenetes cluster.
+        pass
+    elif docker:
+        # Create docker cluster.
+        pass
+    else:
         # Create local dev env
         conda_env = get_conda_env_dict()
         nats_process = Popen(
@@ -365,6 +373,8 @@ def dev(kube, ctx) -> None:
                 "PATH": f"{conda_env['ADD_TO_PATH']}:{(tools_path / 'minio')}:{os.environ['PATH']}",
                 "MINIO_ROOT_USER": "minioaccess",
                 "MINIO_ROOT_PASSWORD": "minioaccess",
+                # "MINIO_BROWSER_REDIRECT_URI": f"{host}:1402",
+                # "CONSOLE_MINIO_SERVER": f"{host}:1402",
             },
         )
         write_traefik_config()
@@ -375,9 +385,6 @@ def dev(kube, ctx) -> None:
         print("\n\n+++++++++++ Shutting Down! +++++++++++++\n")
         nats_process.kill()
         minio_process.kill()
-    else:
-        # Create kubernetes dev env
-        pass
 
 
 @click.group()
