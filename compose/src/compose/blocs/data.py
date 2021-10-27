@@ -101,10 +101,10 @@ def update_data(data_update: DataUpdate, user_creds: Optional[User] = None) -> D
                 session.execute(stmt).scalars().all()
             )  # noqa: E501
             if len(data_list) == 1:
-                data_update_dict = data_update.dict()
+                data_update_dict = data_update.dict(exclude_defaults=True)
                 data_update_dict.pop("data_id")
                 updated_data = data_list[0].update(
-                    session, **data_update.dict()
+                    session, **data_update_dict
                 )  # noqa: E501
                 return Data(data_id=updated_data.id, **updated_data.to_dict())
             if len(data_list) == 0:

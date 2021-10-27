@@ -106,10 +106,10 @@ def update_template(template_update: TemplateUpdate) -> Template:
                 session.execute(stmt).scalars().all()
             )  # noqa: E501
             if len(template_list) == 1:
-                template_update_dict = template_update.dict()
+                template_update_dict = template_update.dict(exclude_defaults=True)
                 template_update_dict.pop("template_id")
                 updated_template = template_list[0].update(
-                    session, **template_update.dict()
+                    session, **template_update_dict
                 )  # noqa: E501
                 return Template(
                     template_id=updated_template.id, **updated_template.to_dict()

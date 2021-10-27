@@ -122,10 +122,12 @@ def update_rendered_template(
                 session.execute(stmt).scalars().all()
             )  # noqa: E501
             if len(rendered_template_list) == 1:
-                rendered_template_update_dict = rendered_template_update.dict()
+                rendered_template_update_dict = rendered_template_update.dict(
+                    exclude_defaults=True
+                )
                 rendered_template_update_dict.pop("rendered_template_id")
                 updated_rendered_template = rendered_template_list[0].update(
-                    session, **rendered_template_update.dict()
+                    session, **rendered_template_update_dict
                 )  # noqa: E501
                 return RenderedTemplate(
                     rendered_template_id=updated_rendered_template.id,
