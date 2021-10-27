@@ -30,7 +30,11 @@ helm install argo-artifacts minio/minio --set fullnameOverride=argo-artifacts
 kubectl port-forward svc/argo-artifacts 9000:9000
 ```
 
-Then you'll need to use the various manifests in the directory to create and prepopulate the contents of the two PVC's used in minebuilder.
+Then you'll need to use the various manifests in the directory to create and prepopulate the contents of the two PVC's used in minebuilder. Make sure to also create the `artifacts.yaml` resource to expose MinIO to Argo, and create a secret containing your MinIO keys with the below command.
+
+```
+kubectl -n argo create secret generic my-minio-cred --from-literal=accesskey=`kubectl get secret argo-artifacts -o jsonpath='{.data.accesskey}' | base64 --decode` --from-literal=secretkey=`kubectl get secret argo-artifacts -o jsonpath='{.data.secretkey}' | base64 --decode`
+```
 
 Finally, you can start the workflow.
 
