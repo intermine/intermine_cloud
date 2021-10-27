@@ -1,4 +1,5 @@
 """CLI interface to builder."""
+import os
 import sys
 from pathlib import Path
 
@@ -6,6 +7,7 @@ import click
 import docker
 
 from intermine_builder import MineBuilder
+from intermine_builder.properties import create_properties, write_properties, write_solr_host
 
 # There really is no (clean) way to have both separate commands for the methods
 # that need to be handled differently, and dynamic resolution of method names.
@@ -95,3 +97,29 @@ def main(mine, task, **options):
     except docker.errors.ContainerError as err:
         click.echo(str(err.stderr, 'utf-8'), err=True)
         sys.exit(err.exit_status)
+
+
+@click.command()
+@click.option("--mine-path", type=click.Path(exists=True, file_okay=False), required=True, help="Path to mine directory to be prepared.")
+@click.option("--override", multiple=True, help="Example: --override webapp.path=kittenmine --override project.title=KittenMine")
+def prepare(**options):
+    """Make changes to the filesystem to faciliate building a mine - no containers used."""
+    mine_path = Path(options['mine_path'])
+    mine_name = mine_path.name
+
+    overrides = None
+    if options['override']:
+        overrides = {}
+        for kv in options['override']:
+            (k, v) = kv.split('=')
+            overrides[k] = v
+
+    kwargs = dict([(envvar, os.environ.get(envvar)) for envvar in
+                    ['PGHOST', 'PGPORT', 'PSQL_USER', 'PSQL_PWD', 'TOMCAT_HOST',
+                     'TOMCAT_PORT', 'TOMCAT_USER', 'TOMCAT_PWD']
+                    if envvar in os.environ])
+    kwargs['overrides'] = overrides
+
+    properties = create_properties(**kwargs)
+    write_properties(Path.home() / '.intermine' / (mine_name + '.properties'), properties)
+    write_solr_host(mine_path, os.getenv('SOLR_HOST', 'localhost'), mine_name)

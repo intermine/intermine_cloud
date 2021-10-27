@@ -3,7 +3,9 @@ Allows the creation of `mine.properties` as a dict that can later be written.
 """
 
 import os
+import re
 from typing import Dict, Optional
+from pathlib import Path
 
 
 def create_properties(
@@ -97,3 +99,32 @@ def write_properties(filepath: os.PathLike, properties_dict: Dict[str, str]) -> 
             properties_string += key + "=" + value + "\n"
 
         f.write(properties_string)
+
+
+def _replace_property(filepath: os.PathLike, property: str, value: str):
+    with open(filepath, 'r') as f:
+        properties = f.read().split('\n')
+
+    def replace_line_fn(line):
+        if re.match(re.escape(property) + r'\s*=', line):
+            return property + '=' + value
+        return line
+
+    properties_replaced = map(replace_line_fn, properties)
+
+    with open(filepath, 'w') as f:
+        f.write('\n'.join(properties_replaced))
+
+
+def write_solr_host(minepath: os.PathLike, solr_host: str, mine_name: str):
+    minepath = Path(minepath)
+    p1_path = minepath / 'dbmodel' / 'resources' / 'keyword_search.properties'
+    p2_path = minepath / 'dbmodel' / 'resources' / 'objectstoresummary.config.properties'
+
+    solr_url = 'http://' + solr_host + ':8983/solr/' + mine_name
+
+    try:
+        _replace_property(p1_path, 'index.solrurl', solr_url + '-search')
+        _replace_property(p2_path, 'autocomplete.solrurl', solr_url + '-autocomplete')
+    except FileNotFoundError:
+        pass
