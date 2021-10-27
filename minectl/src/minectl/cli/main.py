@@ -262,7 +262,7 @@ def poetry(d, options) -> None:
     )
 
 
-def write_traefik_config() -> None:
+def write_traefik_config(host) -> None:
     """Create config files for traefik."""
     static_data = {
         "serversTransport": {"insecureSkipVerify": True},
@@ -293,14 +293,14 @@ def write_traefik_config() -> None:
                     "entryPoints": ["minio"],
                     "service": "minio",
                     "rule": [
-                        'Host(`localhost`) || Host(`127.0.0.1`) || Host(`{{or (env "HOST") "0.0.0.0"}}`)'
+                        f"Host(`localhost`) || Host(`127.0.0.1`) || Host(`0.0.0.0`) || Host(`{host}`)"
                     ],
                 },
                 "minio_console": {
                     "entryPoints": ["minio_console"],
                     "service": "minio_console",
                     "rule": [
-                        'Host(`localhost`) || Host(`127.0.0.1`) || Host(`{{or (env "HOST") "0.0.0.0"}}`)'
+                        f"Host(`localhost`) || Host(`127.0.0.1`) || Host(`0.0.0.0`) || Host(`{host}`)"
                     ],
                 },
             },
@@ -373,11 +373,9 @@ def dev(ctx, kube, docker, host) -> None:
                 "PATH": f"{conda_env['ADD_TO_PATH']}:{(tools_path / 'minio')}:{os.environ['PATH']}",
                 "MINIO_ROOT_USER": "minioaccess",
                 "MINIO_ROOT_PASSWORD": "minioaccess",
-                # "MINIO_BROWSER_REDIRECT_URI": f"{host}:1402",
-                # "CONSOLE_MINIO_SERVER": f"{host}:1402",
             },
         )
-        write_traefik_config()
+        write_traefik_config(host)
         ctx.invoke(
             traefik,
             options=[f"--configFile={(tools_path / 'traefik' / 'traefik.yaml')}"],
