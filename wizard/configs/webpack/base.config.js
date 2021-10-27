@@ -39,7 +39,7 @@ module.exports = {
             filename: 'index.html',
             minify: true,
             publicPath: '/',
-            title: 'Intermine Cloud - Wizard',
+            title: 'Intermine Cloud',
             favicon: path.join(
                 rootDir,
                 'public',
