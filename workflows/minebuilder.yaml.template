@@ -46,24 +46,33 @@ spec:
       - name: start-solr
         template: solr
 
+    - - name: prepare-mine
+        template: prebuilder
+        arguments:
+          parameters:
+          - name: postgres-host
+            value: {% raw %}"{{steps.start-postgres.ip}}"{% endraw %}
+          - name: solr-host
+            value: {% raw %}"{{steps.start-solr.ip}}"{% endraw %}
+
     - - name: clean
         template: builder
         arguments:
           parameters:
-          - name: cmd
+          - name: task
             value: clean
     - - name: build-database
         template: builder
         arguments:
           parameters:
-          - name: cmd
+          - name: task
             value: buildDB
     {% for source in sources %}
     - - name: integrate-{{ source }}
         template: builder
         arguments:
           parameters:
-          - name: cmd
+          - name: task
             value: integrate -Psource={{ source }}
     {% endfor %}
     {% for postprocess in post_processing %}
@@ -71,20 +80,20 @@ spec:
         template: builder
         arguments:
           parameters:
-          - name: cmd
+          - name: task
             value: postProcess -Pprocess={{ postprocess }}
     {% endfor %}
     - - name: build-user-database
         template: builder
         arguments:
           parameters:
-          - name: cmd
+          - name: task
             value: buildUserDB
     - - name: create-war
         template: builder
         arguments:
           parameters:
-          - name: cmd
+          - name: task
             value: war
 
     - - name: release-artifacts
@@ -115,6 +124,9 @@ spec:
       limit: 3
     container:
       image: intermine/solr:latest
+      env:
+      - name: MINE_NAME
+        value: {{ mine_name }}
       readinessProbe:
         httpGet:
           path: /solr/{{ mine_name }}-search/admin/ping
@@ -122,15 +134,33 @@ spec:
       volumeMounts:
       - name: solr-data
         mountPath: /var/solr
+  - name: prebuilder
+    inputs:
+      parameters:
+      - name: postgres-host
+      - name: solr-host
+    container:
+      image: intermine/prebuild:latest
+      command: ["builder_prepare"]
+      args: ["--mine-path", "/home/intermine/{{ mine_name }}"]
+      # TODO support property overrides in a way secrets aren't visible
+      env:
+      - name: PGHOST
+        value: {% raw %}"{{inputs.parameters.postgres-host}}"{% endraw %}
+      - name: SOLR_HOST
+        value: {% raw %}"{{inputs.parameters.solr-host}}"{% endraw %}
+      volumeMounts:
+      - name: workdir
+        mountPath: /home/intermine
   - name: builder
     inputs:
       parameters:
-      - name: cmd
+      - name: task
     container:
       image: intermine/build:latest
       workingDir: /home/intermine/{{ mine_name }}
-      command: ["./gradlew"]
-      {% raw %}args: ["{{inputs.parameters.cmd}}"]{% endraw %}
+      command: [sh, -c]
+      args: {% raw %}["./gradlew {{inputs.parameters.task}}"]{% endraw %}
       resources:
         # These are requests, not limits, meaning more will be allocated if available.
         requests:
