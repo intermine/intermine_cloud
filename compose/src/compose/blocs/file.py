@@ -15,7 +15,9 @@ from compose.schemas.file import File
 from logzero import logger
 
 
-from minio.api import Minio, PostPolicy
+from minio.api import Minio
+
+from pydantic.types import UUID4
 
 from sqlalchemy import select
 
@@ -30,22 +32,13 @@ minio_client = Minio(
 )
 
 
-def create_presigned_post_url(file: File, user_creds: User) -> str:
+def create_presigned_post_url(file: FileDB, user_creds: User, method: str) -> str:
     """Create presigned post url for the file."""
 
-    # set expiry 10 days into future
-    # post_policy = PostPolicy(f"imcloud-{user_creds.user_id}", expires_date)
-
-    # # set key condition
-    # post_policy.add_starts_with_condition("key", file.file_id)
-
-    # # Set file size limit on upload
-    # post_policy.add_content_length_range_condition(10, 1024 * 1024 * 1024)
-
-    # signed_form_data = minio_client.presigned_post_policy(post_policy)
-    return minio_client.presigned_put_object(
+    return minio_client.get_presigned_url(
+        method,
         f"imcloud-{user_creds.user_id}",
-        f"{str(file.file_id)}.{file.ext}",
+        f"{str(file.id)}.{file.ext}",
         expires=timedelta(days=7),
     )
 
@@ -67,14 +60,17 @@ def create_file(file_list: List[File], user_creds: User) -> List[File]:
                 FileDB(
                     id=file.file_id,
                     protagonist_id=user_creds.user_id,
-                    presigned_url=create_presigned_post_url(file, user_creds),
                     **file.dict(exclude={"file_id", "presigned_url"}),  # noqa: E501
                 )
                 for file in file_list
             ]
             FileDB.bulk_create(file_db_create_list, session)
             return [
-                File(file_id=obj.id, **obj.to_dict())
+                File(
+                    file_id=obj.id,
+                    presigned_url=create_presigned_post_url(obj, user_creds, "PUT"),
+                    **obj.to_dict(),
+                )
                 for obj in file_db_create_list  # noqa: E501
             ]
         except Exception as e:
@@ -101,7 +97,7 @@ def get_file(query_params: FileGetQueryParams, user_creds: User = None) -> List[
 
     if query_params.query_type == FileQueryType.GET_ALL_FILES:
         stmt = select(FileDB)
-    if query_params.query_type == FileQueryType.GET_FILES_BY_ID:
+    if query_params.query_type == FileQueryType.GET_FILE_BY_ID:
         stmt = select(FileDB).where(FileDB.id == query_params.file_id)
     if query_params.query_type == FileQueryType.GET_FILES_BY_PROTAGONIST_ID:
         stmt = select(FileDB).where(FileDB.id == query_params.protagonist_id)
@@ -111,7 +107,14 @@ def get_file(query_params: FileGetQueryParams, user_creds: User = None) -> List[
             file_list: List[FileDB] = (
                 session.execute(stmt).scalars().all()
             )  # noqa: E501
-            return [File(file_id=obj.id, **obj.to_dict()) for obj in file_list]
+            return [
+                File(
+                    file_id=obj.id,
+                    presigned_url=create_presigned_post_url(obj, user_creds, "GET"),
+                    **obj.to_dict(),
+                )
+                for obj in file_list
+            ]
         except Exception as e:
             session.rollback()
             logger.error(f"Unable to fetch files due to {e}")

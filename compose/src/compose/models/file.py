@@ -16,7 +16,6 @@ class FileDB(DBModel, SurrogatePKUUID, TimestampMixin):
     name = Column(String, nullable=False)
     ext = Column(String)
     file_type = Column(String, nullable=False)
-    presigned_url = Column(String, nullable=False)
     uploaded = Column(Boolean, nullable=False)
     parent_id = Column(GUID, nullable=False)
     protagonist_id = reference_col("protagonist")
