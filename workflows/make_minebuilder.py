@@ -39,7 +39,9 @@ if postprocessing_el:
 context = {
         'mine_name': mine_name,
         'sources': project['sources'],
-        'post_processing': project['post_processing']
+        'post_processing': project['post_processing'],
+        'postgres_host': 'intermine-postgres',
+        'solr_host': 'intermine-solr'
         }
 
 tmpl_loader = FileSystemLoader(searchpath='./')

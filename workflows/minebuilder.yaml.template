@@ -46,7 +46,7 @@ spec:
       - name: start-solr
         template: solr
 
-    - - name: prepare-mine
+    - - name: prepare-build
         template: prebuilder
         arguments:
           parameters:
@@ -89,12 +89,28 @@ spec:
           parameters:
           - name: task
             value: buildUserDB
+    - - name: summarise-object-store
+        template: builder
+        arguments:
+          parameters:
+          - name: task
+            value: summariseObjectStore
+
+    - - name: prepare-deployment
+        template: prebuilder
+        arguments:
+          parameters:
+          - name: postgres-host
+            value: {{ postgres_host }}
+          - name: solr-host
+            value: {{ solr_host }}
+
     - - name: create-war
         template: builder
         arguments:
           parameters:
           - name: task
-            value: war
+            value: war -x summariseObjectStore
 
     - - name: release-artifacts
         template: artifacts
