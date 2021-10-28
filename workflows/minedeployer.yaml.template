@@ -1,0 +1,89 @@
+# This workflow is a Jinja template, so it needs variables to be
+# injected before you can submit it.
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: deploy-a-mine
+spec:
+  entrypoint: deploy-mine
+  volumeClaimTemplates:
+  - metadata:
+      name: workdir
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 200Mi
+  templates:
+  - name: deploy-mine
+    steps:
+    # - - name: start-services
+    #     resource:
+    # # TODO install kubernetes resources for intermine_instance here
+    #     outputs:
+    #       parameters:
+    #       - name: resource-name
+    #         valueFrom:
+    #           jsonPath: '{.metadata.name}'
+    # # TODO extract postgres and solr addresses from resource (if you can't define it beforehand?)
+
+    - - name: prepare-deploy
+        template: prebuilder
+        arguments:
+          parameters:
+          - name: postgres-host
+            value: {{ postgres_host }}
+          - name: solr-host
+            value: {{ solr_host }}
+          - name: tomcat-host
+            value: {{ tomcat_host }}
+
+    - - name: deploy
+        template: builder
+        arguments:
+          parameters:
+          - name: task
+            value: cargoDeployRemote
+
+  - name: prebuilder
+    inputs:
+      parameters:
+      - name: postgres-host
+      - name: solr-host
+      - name: tomcat-host
+      artifacts:
+      - name: mine-dir
+        path: /home/intermine/{{ mine_name }}
+        s3:
+          key: {{ minedir_path }}
+    container:
+      image: intermine/prebuild:latest
+      command: ["builder_prepare"]
+      args: ["--mine-path", "/home/intermine/{{ mine_name }}"]
+      # TODO support property overrides in a way secrets aren't visible
+      env:
+      - name: PGHOST
+        value: {% raw %}"{{inputs.parameters.postgres-host}}"{% endraw %}
+      - name: SOLR_HOST
+        value: {% raw %}"{{inputs.parameters.solr-host}}"{% endraw %}
+      - name: TOMCAT_HOST
+        value: {% raw %}"{{inputs.parameters.tomcat-host}}"{% endraw %}
+      volumeMounts:
+      - name: workdir
+        mountPath: /home/intermine
+  - name: builder
+    inputs:
+      parameters:
+      - name: task
+    container:
+      image: intermine/build:latest
+      workingDir: /home/intermine/{{ mine_name }}
+      command: [sh, -c]
+      args: {% raw %}["./gradlew {{inputs.parameters.task}}"]{% endraw %}
+      resources:
+        requests:
+          memory: 4Gi
+          cpu: 500m
+      volumeMounts:
+      - name: workdir
+        mountPath: /home/intermine
