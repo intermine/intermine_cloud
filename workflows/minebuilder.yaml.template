@@ -89,28 +89,6 @@ spec:
           parameters:
           - name: task
             value: buildUserDB
-    - - name: summarise-object-store
-        template: builder
-        arguments:
-          parameters:
-          - name: task
-            value: summariseObjectStore
-
-    - - name: prepare-deployment
-        template: prebuilder
-        arguments:
-          parameters:
-          - name: postgres-host
-            value: {{ postgres_host }}
-          - name: solr-host
-            value: {{ solr_host }}
-
-    - - name: create-war
-        template: builder
-        arguments:
-          parameters:
-          - name: task
-            value: war -x summariseObjectStore
 
     - - name: release-artifacts
         template: artifacts
@@ -199,8 +177,8 @@ spec:
         mountPath: /var/solr
     outputs:
       artifacts:
-      - name: mine-war
-        path: /home/intermine/biotestmine/webapp/build/libs/webapp.war
+      - name: mine-dir
+        path: /home/intermine/biotestmine
       - name: postgres-dump
         path: /var/lib/postgresql/data
       - name: solr-dump
