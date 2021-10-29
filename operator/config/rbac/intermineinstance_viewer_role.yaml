@@ -1,0 +1,20 @@
+# permissions for end users to view intermineinstances.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: intermineinstance-viewer-role
+rules:
+- apiGroups:
+  - my.domain
+  resources:
+  - intermineinstances
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - my.domain
+  resources:
+  - intermineinstances/status
+  verbs:
+  - get

@@ -1,0 +1,24 @@
+# permissions for end users to edit intermineinstances.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: intermineinstance-editor-role
+rules:
+- apiGroups:
+  - my.domain
+  resources:
+  - intermineinstances
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - my.domain
+  resources:
+  - intermineinstances/status
+  verbs:
+  - get
