@@ -20,7 +20,7 @@ kubectl apply -n argo -f https://raw.githubusercontent.com/argoproj/argo-workflo
 
 You will need the Argo CLI to access the web UI at https://localhost:2746 - follow the instructions at https://github.com/argoproj/argo-workflows/releases and run `argo server --auth-mode server`.
 
-To support output artifacts for testing, you'll need to setup MinIO as the artifact repository (web UI accessible from http://localhost:9000).
+To support artifacts, you'll need to setup MinIO (web UI accessible from http://localhost:9000).
 
 ```
 # install helm with your package manager
@@ -30,15 +30,16 @@ helm install argo-artifacts minio/minio --set fullnameOverride=argo-artifacts
 kubectl port-forward svc/argo-artifacts 9000:9000
 ```
 
-Then you'll need to use the various manifests in the directory to create and prepopulate the contents of the two PVC's used in minebuilder. Make sure to also create the `artifacts.yaml` resource to expose MinIO to Argo, and create a secret containing your MinIO keys with the below command.
+You need to tell Argo to use MinIO as the artifact repository. To achieve this, you create a ConfigMap and a Secret containing the necessary MinIO authentication keys.
 
 ```
+kubectl -n argo apply -f artifacts.yaml
 kubectl -n argo create secret generic my-minio-cred --from-literal=accesskey=`kubectl get secret argo-artifacts -o jsonpath='{.data.accesskey}' | base64 --decode` --from-literal=secretkey=`kubectl get secret argo-artifacts -o jsonpath='{.data.secretkey}' | base64 --decode`
 ```
 
 Finally, you can start the workflow.
 
 ```
-./make_minebuilder.py ~/path/to/biotestmine
+./make_minebuilder.py --mine-path ~/testmines/biotestmine --source-path ~/testdata/malaria
 argo -n argo submit --watch minebuilder.yaml
 ```

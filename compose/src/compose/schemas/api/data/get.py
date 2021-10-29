@@ -7,6 +7,7 @@ from blackcap.schemas.api.common import ResponseSchema
 from compose.schemas.data import Data
 
 from pydantic import BaseModel
+from pydantic.types import UUID4
 
 
 class DataGetResponse(ResponseSchema):
@@ -28,5 +29,5 @@ class DataGetQueryParams(BaseModel):
     """Data GET request query params schema."""
 
     query_type: DataQueryType
-    data_id: Optional[str]
+    data_id: Optional[UUID4]
     protagonist_id: Optional[str]

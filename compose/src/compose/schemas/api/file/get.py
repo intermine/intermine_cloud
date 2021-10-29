@@ -7,6 +7,7 @@ from blackcap.schemas.api.common import ResponseSchema
 from compose.schemas.file import File
 
 from pydantic import BaseModel
+from pydantic.types import UUID4
 
 
 class FileGetResponse(ResponseSchema):
@@ -28,5 +29,5 @@ class FileGetQueryParams(BaseModel):
     """File GET request query params schema."""
 
     query_type: FileQueryType
-    file_id: Optional[str]
+    file_id: Optional[UUID4]
     protagonist_id: Optional[str]
