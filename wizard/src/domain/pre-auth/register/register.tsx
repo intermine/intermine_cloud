@@ -1,13 +1,53 @@
 import { Link } from 'react-router-dom'
-import { CardContent } from '@intermine/chromatin/card-content'
-import { CardAction } from '@intermine/chromatin/card-action'
-import { CardHeader } from '@intermine/chromatin/card-header'
-import { createStyle } from '@intermine/chromatin/styles'
+
+import { LOGIN_PATH } from '../../../routes'
+import {
+    Form,
+    FormHeader,
+    FormGroup,
+    FormBody,
+    FormAction
+} from '../../../components/form'
 
 export const Register = () => {
     return (
-        <div>
-            Register <Link to="/">Go to Login</Link>
-        </div>
+        <Form id="register">
+            <FormHeader heading="Register" />
+            <FormBody>
+                <FormGroup label="Name" inputProps={{ placeholder: 'Name' }} />
+                <FormGroup
+                    label="Organisation"
+                    inputProps={{ placeholder: 'Organisation' }}
+                />
+                <FormGroup
+                    label="Email"
+                    inputProps={{ placeholder: 'Email' }}
+                />
+                <FormGroup
+                    label="Username"
+                    inputProps={{ placeholder: 'Username' }}
+                />
+
+                <FormGroup
+                    label="Password"
+                    inputProps={{ type: 'password', placeholder: 'Password' }}
+                />
+                <FormGroup
+                    label="Confirm Password"
+                    inputProps={{
+                        type: 'password',
+                        placeholder: 'Confirm Password'
+                    }}
+                />
+            </FormBody>
+            <FormAction
+                primaryAction={{ children: 'Register' }}
+                secondaryAction={{
+                    children: 'Already have an account',
+                    Component: Link,
+                    to: LOGIN_PATH
+                }}
+            />
+        </Form>
     )
 }
