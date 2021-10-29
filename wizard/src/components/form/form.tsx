@@ -6,20 +6,25 @@ export type TFormProps = {
 }
 
 const useStyles = createStyle((theme) => {
-    const { spacing } = theme
+    const {
+        spacing,
+        breakingPoints: { mixin }
+    } = theme
     return {
         form: {
-            height: '100%',
-            maxHeight: '35rem',
             maxWidth: '30rem',
             overflow: 'auto',
             padding: spacing(1),
-            width: '100%'
+            width: '100%',
+            ...mixin({ sm: { height: '100%', padding: 0 } }, 'max')
         },
 
         card: {
             height: '100%',
-            padding: spacing(0, 5)
+            padding: spacing(0, 5),
+            '&&': {
+                ...mixin({ sm: { borderRadius: 0 } }, 'max')
+            }
         }
     }
 })

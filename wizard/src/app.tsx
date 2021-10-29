@@ -34,12 +34,7 @@ const useStyles = createStyle({
             position: 'relative'
         },
         body: {
-            position: 'relative',
-            /**
-             * It may be risky to set overflow hidden on body.
-             * Doing so to avoid unintentional overflow.
-             */
-            overflow: 'hidden'
+            position: 'relative'
         },
         '#root': {
             /**
@@ -134,7 +129,7 @@ export const App = () => {
                         }
                     }) => ({
                         background: themeType === 'dark' ? dark.hex : light.hex,
-                        color: neutral[90],
+                        color: neutral[50],
                         display: 'flex',
                         flexDirection: 'column',
                         height: '100%',

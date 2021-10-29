@@ -10,20 +10,30 @@ const useStyles = createStyle((theme) => {
         themeType,
         spacing,
         palette: {
+            darkGrey,
             neutral,
             common: { white }
         },
-        elevation
+        elevation,
+        breakingPoints: { mixin }
     } = theme
 
     return {
         root: {
             alignItems: 'center',
-            background: themeType === 'dark' ? neutral[30] : white,
+            background: themeType === 'dark' ? darkGrey[20] : white,
             boxShadow: elevation.low,
             display: 'flex',
             justifyContent: 'space-between',
-            padding: '1rem 2rem'
+            padding: '1rem 2rem',
+            ...mixin(
+                {
+                    sm: {
+                        boxShadow: `inset 0 -1px ${neutral[10]}`
+                    }
+                },
+                'max'
+            )
         },
 
         logo: {

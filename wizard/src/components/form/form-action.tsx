@@ -16,9 +16,10 @@ export const FormAction = (props: TFormActionProps) => {
     return (
         <Box
             csx={{
-                root: ({ spacing }) => ({
+                root: ({ spacing, breakingPoints: { mixin } }) => ({
                     display: 'flex',
-                    padding: spacing(2, 0, 10, 0)
+                    padding: spacing(2, 0, 10, 0),
+                    ...mixin({ sm: { flexDirection: 'column-reverse' } }, 'max')
                 })
             }}
         >
@@ -27,7 +28,11 @@ export const FormAction = (props: TFormActionProps) => {
                     {_secondaryChildren}
                 </Button>
             )}
-            <Box csx={{ root: { flex: 1 } }} />
+            <Box
+                csx={{
+                    root: ({ spacing }) => ({ flex: 1, margin: spacing(2) })
+                }}
+            />
             {_primaryChildren && (
                 <Button color="primary" {...primaryAction}>
                     {_primaryChildren}

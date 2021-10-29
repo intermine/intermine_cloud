@@ -87,7 +87,7 @@ export const NavbarItems = () => {
                         <Typography
                             csx={{
                                 root: ({ palette: { neutral } }) => ({
-                                    color: neutral[60]
+                                    color: neutral[30]
                                 })
                             }}
                             variant="caption"
@@ -112,11 +112,10 @@ export const NavbarItems = () => {
             message={`Switch to ${
                 themeType === 'dark' ? 'light' : 'dark'
             } theme.`}
-            placement="left"
+            placement="right"
         >
             <IconButton
                 onClick={handleToggleOnClick}
-                color="neutral"
                 hasHighlightOnFocus={isMenuOpen ? false : true}
                 isHovered={isMenuOpen}
                 Icon={
