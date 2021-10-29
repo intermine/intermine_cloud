@@ -1,29 +1,31 @@
 # This workflow is a Jinja template, so it needs variables to be
-# injected before you can submit it.  It also depends on the following
-# Persistent Volume Claims to be present on the same namespace:
-# - prepared-workdir : represents `/home/intermine`, which should contain
-#     - $mine_name directory with files required to build a mine
-#     - .intermine/$mine_name.properties
-# - sourcedata : required data for data source integration
+# injected before you can submit it.
 apiVersion: argoproj.io/v1alpha1
 kind: Workflow
 metadata:
-  generateName: build-a-mine
+  generateName: build-a-mine-
 spec:
   entrypoint: build-mine
-  volumes:
-  - name: workdir
-    persistentVolumeClaim:
-      claimName: prepared-workdir
-  - name: sourcedata
-    persistentVolumeClaim:
-      claimName: sourcedata
   # Volume Snapshots (https://kubernetes.io/docs/concepts/storage/volume-snapshots/)
   # might be useful to create snapshots of each volume between tasks, to
   # facilitate resuming at a previous point in case of failure. Although
   # Persistent Volumes for postgres and solr data could achieve the same thing,
   # so long as a failure doesn't "corrupt" this data.
   volumeClaimTemplates:
+  - metadata:
+      name: workdir
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 200Mi
+  - metadata:
+      name: sources
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 1Gi
   - metadata:
       name: postgres-data
     spec:
@@ -45,6 +47,8 @@ spec:
         template: postgres
       - name: start-solr
         template: solr
+      - name: get-artifacts
+        template: getter
 
     - - name: prepare-build
         template: prebuilder
@@ -128,6 +132,24 @@ spec:
       volumeMounts:
       - name: solr-data
         mountPath: /var/solr
+  - name: getter
+    inputs:
+      artifacts:
+      - name: minedir
+        path: /home/intermine/{{ mine_name }}
+        s3:
+          key: mine.tgz
+      - name: sources
+        path: /data/{{ source_name }}
+        s3:
+          key: source.tgz
+    container:
+      image: alpine:3.8
+      volumeMounts:
+      - name: workdir
+        mountPath: /home/intermine
+      - name: sources
+        mountPath: /data
   - name: prebuilder
     inputs:
       parameters:
@@ -163,8 +185,8 @@ spec:
       volumeMounts:
       - name: workdir
         mountPath: /home/intermine
-      - name: sourcedata
-        mountPath: /testdata
+      - name: sources
+        mountPath: /data
   - name: artifacts
     container:
       image: alpine:3.8
@@ -178,7 +200,7 @@ spec:
     outputs:
       artifacts:
       - name: mine-dir
-        path: /home/intermine/biotestmine
+        path: /home/intermine/{{ mine_name }}
       - name: postgres-dump
         path: /var/lib/postgresql/data
       - name: solr-dump
