@@ -11,7 +11,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
-	mydomainv1alpha1 "hello-operator2/api/v1alpha1"
+	mydomainv1alpha1 "intermine_cloud/operator/api/v1alpha1"
 )
 
 func labels(v *mydomainv1alpha1.IntermineInstance, tier string) map[string]string {

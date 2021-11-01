@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"context"
-	mydomainv1alpha1 "hello-operator2/api/v1alpha1"
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -12,6 +11,8 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
+
+	mydomainv1alpha1 "intermine_cloud/operator/api/v1alpha1"
 )
 
 // ensureService ensures Service is Running in a namespace.
