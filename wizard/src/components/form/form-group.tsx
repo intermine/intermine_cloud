@@ -37,7 +37,15 @@ export const FormGroup = (props: TFormGroupProps) => {
             >
                 {label}
                 <Input
-                    csx={{ root: ({ spacing }) => ({ marginTop: spacing(2) }) }}
+                    csx={{
+                        root: ({ spacing }) => ({
+                            marginTop: spacing(2)
+                        }),
+                        inputRoot: {
+                            width: '100%',
+                            minWidth: 0
+                        }
+                    }}
                     color="neutral.20"
                     hasFullWidth
                     isError={isError}

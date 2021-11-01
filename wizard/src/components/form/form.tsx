@@ -15,6 +15,7 @@ const useStyles = createStyle((theme) => {
         form: {
             display: 'flex',
             maxWidth: '30rem',
+            minWidth: 0,
             overflow: 'auto',
             padding: spacing(1),
             width: '100%',
@@ -31,7 +32,6 @@ const useStyles = createStyle((theme) => {
 
         card: {
             flex: '1',
-            padding: spacing(0, 5),
             '&&': {
                 ...mixin({ sm: { borderRadius: 0 } }, 'max')
             }

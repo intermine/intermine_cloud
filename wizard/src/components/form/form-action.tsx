@@ -18,7 +18,7 @@ export const FormAction = (props: TFormActionProps) => {
             csx={{
                 root: ({ spacing, breakingPoints: { mixin } }) => ({
                     display: 'flex',
-                    padding: spacing(2, 4, 10, 2),
+                    padding: spacing(10, 12, 10, 10),
                     ...mixin(
                         {
                             sm: {

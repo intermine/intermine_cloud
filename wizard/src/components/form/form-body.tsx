@@ -9,8 +9,10 @@ export const FormBody = (props: TFormBodyProps) => {
     return (
         <CardContent
             csx={{
-                root: ({ breakingPoints: { mixin } }) => ({
-                    ...mixin({ sm: { minHeight: '20rem' } }, 'min')
+                root: ({ breakingPoints: { mixin }, spacing }) => ({
+                    padding: spacing(10, 12),
+                    ...mixin({ sm: { minHeight: '20rem' } }, 'min'),
+                    ...mixin({ sm: { padding: spacing(5) } }, 'max')
                 })
             }}
         >
