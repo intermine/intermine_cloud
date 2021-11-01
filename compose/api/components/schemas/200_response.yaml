@@ -1,0 +1,17 @@
+description: Sucessful return schema
+type: object
+properties:
+  msg:
+    type: string
+  items:
+    type: array
+    items:
+      type: string
+  errors:
+    type: array
+    items:
+      type: string
+required:
+  - "msg"
+  - "items"
+  - "errors"

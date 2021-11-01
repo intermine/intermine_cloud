@@ -1,0 +1,54 @@
+openapi: 3.0.2
+info:
+  version: 1.0.0
+  title: Compose
+  # termsOfService: 'https://example.com/terms/'
+  contact:
+    email: dev@lists.intermine.org
+    url: 'http://intermine.org/contact/'
+  license:
+    name: Apache 2.0
+    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+  x-logo:
+    url: 'https://raw.githubusercontent.com/intermine/design-materials/ff1ec6bf/logos/intermine/intermine-300x37.png'
+  description: >
+    This is OpenAPI specification for InterMine Cloud
+
+    # Introduction
+
+externalDocs:
+  description: Find out more about intermine cloud
+  url: 'https://github.com/intermine/intermine_cloud'
+tags:
+  - name: auth
+    description: Auth operations
+  - name: user
+    description: User operations
+servers:
+  - url: "https://localhost:{port}/v1"
+    description: Localhost server
+    variables:
+      port:
+        default: "1404"
+        description: "port"
+  - url: "https://{subdomain}.{domain}:{port}/v1"
+    description: Online server
+    variables:
+      domain:
+        default: "intremine.org"
+        description: "domain"
+      subdomain:
+        default: "cloud"
+        description: "sub domain"
+      port:
+        default: "443"
+        description: "port"
+paths:
+  /job:
+    $ref: paths/job.yaml
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
