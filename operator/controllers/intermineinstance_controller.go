@@ -37,9 +37,9 @@ type IntermineInstanceReconciler struct {
 	Scheme *runtime.Scheme
 }
 
-//+kubebuilder:rbac:groups=my.domain,resources=intermineinstances,verbs=get;list;watch;create;update;patch;delete
-//+kubebuilder:rbac:groups=my.domain,resources=intermineinstances/status,verbs=get;update;patch
-//+kubebuilder:rbac:groups=my.domain,resources=intermineinstances/finalizers,verbs=update
+//+kubebuilder:rbac:groups=intermine.org,resources=intermineinstances,verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups=intermine.org,resources=intermineinstances/status,verbs=get;update;patch
+//+kubebuilder:rbac:groups=intermine.org,resources=intermineinstances/finalizers,verbs=update
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.

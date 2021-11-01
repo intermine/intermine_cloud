@@ -6,9 +6,9 @@ metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.7.0
   creationTimestamp: null
-  name: intermineinstances.my.domain
+  name: intermineinstances.intermine.org
 spec:
-  group: my.domain
+  group: intermine.org
   names:
     kind: IntermineInstance
     listKind: IntermineInstanceList

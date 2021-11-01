@@ -7,7 +7,7 @@ metadata:
   name: manager-role
 rules:
 - apiGroups:
-  - my.domain
+  - intermine.org
   resources:
   - intermineinstances
   verbs:
@@ -19,13 +19,13 @@ rules:
   - update
   - watch
 - apiGroups:
-  - my.domain
+  - intermine.org
   resources:
   - intermineinstances/finalizers
   verbs:
   - update
 - apiGroups:
-  - my.domain
+  - intermine.org
   resources:
   - intermineinstances/status
   verbs:
