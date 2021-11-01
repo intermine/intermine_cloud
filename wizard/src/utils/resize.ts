@@ -8,8 +8,12 @@ export const resizeWorkSpaceContainer = () => {
         '#' + WorkspaceContainer
     )
 
-    if (navbar && workspace) {
-        const { height: navbarHeight } = navbar.getBoundingClientRect()
+    if (workspace) {
+        let navbarHeight = 0
+        if (navbar) {
+            const { height } = navbar.getBoundingClientRect()
+            navbarHeight = height
+        }
         const { innerHeight: windowHeight } = window
 
         workspace.style.height = windowHeight - navbarHeight + 'px'

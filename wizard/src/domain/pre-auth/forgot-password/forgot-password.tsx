@@ -10,11 +10,12 @@ import {
     FormBody,
     FormAction
 } from '../../../components/form'
+import { Logo } from '../../../components/logo'
 
 export const ForgotPassword = () => {
     return (
         <Form id={DomElementIDs.ForgotPasswordForm}>
-            <FormHeader heading="Forgot Password" />
+            <FormHeader logo={<Logo height="1.5rem" />} />
             <FormBody>
                 <FormGroup
                     label="Email"
@@ -22,7 +23,7 @@ export const ForgotPassword = () => {
                 />
             </FormBody>
             <FormAction
-                primaryAction={{ children: 'Send Reset Link' }}
+                primaryAction={{ children: 'Send password reset link' }}
                 secondaryAction={{
                     children: 'Login',
                     Component: Link,

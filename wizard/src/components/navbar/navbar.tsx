@@ -1,15 +1,14 @@
 import { createStyle } from '@intermine/chromatin/styles'
 import { Box } from '@intermine/chromatin/box'
-import { Typography } from '@intermine/chromatin/typography'
 
-import InterMineLogo from '../../../public/assets/img/intermine-logo.webp'
 import { DomElementIDs } from '../../constants/ids'
 import { NavbarItems } from './navbar-items'
+import { Logo } from '../logo'
 
 const useStyles = createStyle((theme) => {
     const {
         themeType,
-        spacing,
+
         palette: {
             darkGrey,
             neutral,
@@ -35,14 +34,6 @@ const useStyles = createStyle((theme) => {
                 },
                 'max'
             )
-        },
-
-        logo: {
-            height: '2rem'
-        },
-
-        logoText: {
-            marginLeft: spacing(4)
         }
     }
 })
@@ -52,20 +43,7 @@ export const Navbar = () => {
 
     return (
         <Box id={DomElementIDs.Navbar} className={classes.root}>
-            <Box isContentAlignCenter>
-                <img
-                    className={classes.logo}
-                    src={InterMineLogo}
-                    alt="intermine's logo"
-                />
-                <Typography
-                    className={classes.logoText}
-                    variant="h3"
-                    Component="span"
-                >
-                    Intermine Cloud
-                </Typography>
-            </Box>
+            <Logo />
             <Box isContentAlignCenter>
                 <NavbarItems />
             </Box>

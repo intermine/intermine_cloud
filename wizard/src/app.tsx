@@ -9,7 +9,6 @@ import { AuthStates } from './constants/auth'
 import { AppContext } from './context'
 import { RouteLoadingSpinner } from './components/route-loading-spinner'
 import { darkTheme, lightTheme } from './constants/theme'
-import { Navbar } from './components/navbar'
 import { PageNotFound } from './components/page-not-found'
 import {
     isAuthRoute,
@@ -20,6 +19,10 @@ import {
 } from './routes'
 import { DomElementIDs } from './constants/ids'
 import { resizeWorkSpaceContainer } from './utils/resize'
+
+import backgroundImgDark from '../public/assets/img/background-dark.svg'
+import backgroundImgLight from '../public/assets/img/background-light.svg'
+import { Navbar } from './components/navbar'
 
 const Dashboard = lazy(() => import('./domain/dashboard'))
 const PreAuth = lazy(() => import('./domain/pre-auth'))
@@ -141,14 +144,20 @@ export const App = () => {
                             neutral
                         }
                     }) => ({
-                        background: themeType === 'dark' ? dark.hex : light.hex,
+                        backgroundImage: `url(${
+                            themeType === 'dark'
+                                ? backgroundImgDark
+                                : backgroundImgLight
+                        })`,
+                        backgroundColor:
+                            themeType === 'dark' ? dark.hex : light.hex,
                         color: neutral[50],
                         width: '100%',
                         position: 'relative'
                     })
                 }}
             >
-                <Navbar />
+                {/* <Navbar /> */}
                 <Box
                     id={DomElementIDs.WorkspaceContainer}
                     csx={{ root: { overflow: 'auto' } }}

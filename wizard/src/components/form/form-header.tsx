@@ -1,23 +1,25 @@
 import { CardHeader } from '@intermine/chromatin/card-header'
 
 export type TFormHeader = {
-    heading: string
+    heading?: string
+    logo?: JSX.Element
 }
 
 export const FormHeader = (props: TFormHeader) => {
-    const { heading } = props
+    const { heading, logo = <></> } = props
 
     return (
         <CardHeader
             csx={{
                 root: ({ spacing, breakingPoints: { mixin } }) => ({
-                    fontSize: '1.5rem',
-                    justifyContent: 'center',
+                    alignItems: 'center',
+                    flexDirection: 'column',
+                    fontSize: '1.25rem',
                     padding: spacing(10),
                     ...mixin(
                         {
                             sm: {
-                                justifyContent: 'flex-start',
+                                alignItems: 'flex-start',
                                 padding: spacing(10, 0, 5, 5)
                             }
                         },
@@ -26,6 +28,7 @@ export const FormHeader = (props: TFormHeader) => {
                 })
             }}
         >
+            {logo}
             {heading}
         </CardHeader>
     )

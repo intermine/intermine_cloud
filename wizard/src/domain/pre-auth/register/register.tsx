@@ -10,11 +10,12 @@ import {
     FormBody,
     FormAction
 } from '../../../components/form'
+import { Logo } from '../../../components/logo'
 
 export const Register = () => {
     return (
         <Form id={DomElementIDs.RegisterForm}>
-            <FormHeader heading="Register" />
+            <FormHeader logo={<Logo height="1.5rem" />} />
             <FormBody>
                 <FormGroup label="Name" inputProps={{ placeholder: 'Name' }} />
                 <FormGroup
@@ -45,7 +46,7 @@ export const Register = () => {
             <FormAction
                 primaryAction={{ children: 'Register' }}
                 secondaryAction={{
-                    children: 'Already have an account',
+                    children: 'Login',
                     Component: Link,
                     to: LOGIN_PATH,
                     LeftIcon: <GoBackIcon />

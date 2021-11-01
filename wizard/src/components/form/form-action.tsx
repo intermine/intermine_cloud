@@ -18,7 +18,7 @@ export const FormAction = (props: TFormActionProps) => {
             csx={{
                 root: ({ spacing, breakingPoints: { mixin } }) => ({
                     display: 'flex',
-                    padding: spacing(2, 4, 10, 0),
+                    padding: spacing(2, 4, 10, 2),
                     ...mixin(
                         {
                             sm: {
@@ -32,7 +32,12 @@ export const FormAction = (props: TFormActionProps) => {
             }}
         >
             {_secondaryChildren && (
-                <Button variant="ghost" color="primary" {...secondaryAction}>
+                <Button
+                    variant="ghost"
+                    color="primary"
+                    csx={{ root: ({ spacing }) => ({ padding: spacing(2) }) }}
+                    {...secondaryAction}
+                >
                     {_secondaryChildren}
                 </Button>
             )}

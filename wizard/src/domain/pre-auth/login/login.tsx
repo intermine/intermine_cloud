@@ -17,6 +17,7 @@ import {
     FormBody,
     FormAction
 } from '../../../components/form'
+import { Logo } from '../../../components/logo'
 
 export const Login = () => {
     const store = useContext(AppContext)
@@ -27,7 +28,7 @@ export const Login = () => {
 
     return (
         <Form id={DomElementIDs.LoginForm}>
-            <FormHeader heading="Login" />
+            <FormHeader logo={<Logo height="1.5rem" />} />
             <FormBody>
                 <FormGroup
                     label="Username"
