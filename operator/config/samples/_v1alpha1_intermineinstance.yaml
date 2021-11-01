@@ -1,4 +1,4 @@
-apiVersion: my.domain/v1alpha1
+apiVersion: intermine.org/v1alpha1
 kind: IntermineInstance
 metadata:
   name: intermineinstance-sample

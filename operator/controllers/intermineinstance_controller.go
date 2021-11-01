@@ -28,7 +28,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
-	mydomainv1alpha1 "intermine_cloud/operator/api/v1alpha1"
+	intermineorgv1alpha1 "intermine_cloud/operator/api/v1alpha1"
 )
 
 // IntermineInstanceReconciler reconciles a IntermineInstance object
@@ -37,9 +37,9 @@ type IntermineInstanceReconciler struct {
 	Scheme *runtime.Scheme
 }
 
-//+kubebuilder:rbac:groups=my.domain,resources=intermineinstances,verbs=get;list;watch;create;update;patch;delete
-//+kubebuilder:rbac:groups=my.domain,resources=intermineinstances/status,verbs=get;update;patch
-//+kubebuilder:rbac:groups=my.domain,resources=intermineinstances/finalizers,verbs=update
+//+kubebuilder:rbac:groups=intermine.org,resources=intermineinstances,verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups=intermine.org,resources=intermineinstances/status,verbs=get;update;patch
+//+kubebuilder:rbac:groups=intermine.org,resources=intermineinstances/finalizers,verbs=update
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
@@ -54,7 +54,7 @@ func (r *IntermineInstanceReconciler) Reconcile(ctx context.Context, req ctrl.Re
 	log := log.FromContext(ctx).WithValues("IntermineInstance", req.NamespacedName)
 
 	// Fetch the IntermineInstance
-	instance := &mydomainv1alpha1.IntermineInstance{}
+	instance := &intermineorgv1alpha1.IntermineInstance{}
 	err := r.Get(context.TODO(), req.NamespacedName, instance)
 	if err != nil {
 		if errors.IsNotFound(err) {
@@ -94,6 +94,6 @@ func (r *IntermineInstanceReconciler) Reconcile(ctx context.Context, req ctrl.Re
 // SetupWithManager sets up the controller with the Manager.
 func (r *IntermineInstanceReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
-		For(&mydomainv1alpha1.IntermineInstance{}).
+		For(&intermineorgv1alpha1.IntermineInstance{}).
 		Complete(r)
 }

@@ -1,20 +1,34 @@
-# permissions for end users to view intermineinstances.
+
+---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: intermineinstance-viewer-role
+  creationTimestamp: null
+  name: manager-role
 rules:
 - apiGroups:
   - intermine.org
   resources:
   - intermineinstances
   verbs:
+  - create
+  - delete
   - get
   - list
+  - patch
+  - update
   - watch
+- apiGroups:
+  - intermine.org
+  resources:
+  - intermineinstances/finalizers
+  verbs:
+  - update
 - apiGroups:
   - intermine.org
   resources:
   - intermineinstances/status
   verbs:
   - get
+  - patch
+  - update
