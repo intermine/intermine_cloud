@@ -1,0 +1,20 @@
+description: Site create schema
+type: object
+properties:
+  country:
+    type: string
+  state:
+    type: string
+  district:
+    type: string
+  city:
+    type: string
+  name:
+    type: string
+required:
+  - "country"
+  - "state"
+  - "district"
+  - "city"
+  - "name"
+
