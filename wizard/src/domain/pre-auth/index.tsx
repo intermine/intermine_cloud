@@ -31,7 +31,10 @@ const routes = [
 
 const PreAuth = () => {
     return (
-        <Box isContentCenter csx={{ root: { flex: 1 } }}>
+        <Box
+            isContentCenter
+            csx={{ root: { height: '100%', flexWrap: 'wrap' } }}
+        >
             <Switch>
                 <Redirect exact from={PRE_AUTH_PATH_BASE} to={LOGIN_PATH} />
                 {routes.map(({ path, id, Component }) => (

@@ -7,7 +7,13 @@ export type TFormBodyProps = {
 export const FormBody = (props: TFormBodyProps) => {
     const { children } = props
     return (
-        <CardContent csx={{ root: { minHeight: '20rem' } }}>
+        <CardContent
+            csx={{
+                root: ({ breakingPoints: { mixin } }) => ({
+                    ...mixin({ sm: { minHeight: '20rem' } }, 'min')
+                })
+            }}
+        >
             {children}
         </CardContent>
     )

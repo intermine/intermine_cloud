@@ -1,5 +1,7 @@
 import { Link } from 'react-router-dom'
+import GoBackIcon from '@intermine/chromatin/icons/System/arrow-left-line'
 
+import { DomElementIDs } from '../../../constants/ids'
 import { LOGIN_PATH } from '../../../routes'
 import {
     Form,
@@ -11,7 +13,7 @@ import {
 
 export const Register = () => {
     return (
-        <Form id="register">
+        <Form id={DomElementIDs.RegisterForm}>
             <FormHeader heading="Register" />
             <FormBody>
                 <FormGroup label="Name" inputProps={{ placeholder: 'Name' }} />
@@ -45,7 +47,8 @@ export const Register = () => {
                 secondaryAction={{
                     children: 'Already have an account',
                     Component: Link,
-                    to: LOGIN_PATH
+                    to: LOGIN_PATH,
+                    LeftIcon: <GoBackIcon />
                 }}
             />
         </Form>

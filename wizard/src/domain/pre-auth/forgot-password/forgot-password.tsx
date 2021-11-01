@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import GoBackIcon from '@intermine/chromatin/icons/System/arrow-left-line'
 
+import { DomElementIDs } from '../../../constants/ids'
 import { LOGIN_PATH } from '../../../routes'
 import {
     Form,
@@ -12,7 +13,7 @@ import {
 
 export const ForgotPassword = () => {
     return (
-        <Form id="forgot-password">
+        <Form id={DomElementIDs.ForgotPasswordForm}>
             <FormHeader heading="Forgot Password" />
             <FormBody>
                 <FormGroup

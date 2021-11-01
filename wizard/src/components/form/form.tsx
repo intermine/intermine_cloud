@@ -1,5 +1,6 @@
 import { Card } from '@intermine/chromatin/card'
 import { createStyle } from '@intermine/chromatin/styles'
+import { useEffect, useRef } from 'react'
 export type TFormProps = {
     children: React.ReactChild | React.ReactChild[]
     id: string
@@ -12,15 +13,24 @@ const useStyles = createStyle((theme) => {
     } = theme
     return {
         form: {
+            display: 'flex',
             maxWidth: '30rem',
             overflow: 'auto',
             padding: spacing(1),
             width: '100%',
-            ...mixin({ sm: { height: '100%', padding: 0 } }, 'max')
+            ...mixin(
+                {
+                    sm: {
+                        minHeight: '100%',
+                        padding: 0
+                    }
+                },
+                'max'
+            )
         },
 
         card: {
-            height: '100%',
+            flex: '1',
             padding: spacing(0, 5),
             '&&': {
                 ...mixin({ sm: { borderRadius: 0 } }, 'max')
@@ -32,9 +42,15 @@ const useStyles = createStyle((theme) => {
 export const Form = (props: TFormProps) => {
     const { children, id } = props
     const classes = useStyles()
+    const formRef = useRef<HTMLFormElement>(null)
 
+    useEffect(() => {
+        if (formRef.current) {
+            formRef.current.scrollIntoView()
+        }
+    }, [])
     return (
-        <form id={id} className={classes.form}>
+        <form ref={formRef} id={id} className={classes.form}>
             <Card hoverVariant="none" className={classes.card}>
                 {children}
             </Card>

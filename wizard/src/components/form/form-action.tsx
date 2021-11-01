@@ -18,8 +18,16 @@ export const FormAction = (props: TFormActionProps) => {
             csx={{
                 root: ({ spacing, breakingPoints: { mixin } }) => ({
                     display: 'flex',
-                    padding: spacing(2, 0, 10, 0),
-                    ...mixin({ sm: { flexDirection: 'column-reverse' } }, 'max')
+                    padding: spacing(2, 4, 10, 0),
+                    ...mixin(
+                        {
+                            sm: {
+                                flexDirection: 'column-reverse',
+                                padding: spacing(4)
+                            }
+                        },
+                        'max'
+                    )
                 })
             }}
         >
