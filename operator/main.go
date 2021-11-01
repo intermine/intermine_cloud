@@ -31,7 +31,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
-	mydomainv1alpha1 "intermine_cloud/operator/api/v1alpha1"
+	intermineorgv1alpha1 "intermine_cloud/operator/api/v1alpha1"
 	"intermine_cloud/operator/controllers"
 	//+kubebuilder:scaffold:imports
 )
@@ -44,7 +44,7 @@ var (
 func init() {
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
 
-	utilruntime.Must(mydomainv1alpha1.AddToScheme(scheme))
+	utilruntime.Must(intermineorgv1alpha1.AddToScheme(scheme))
 	//+kubebuilder:scaffold:scheme
 }
 

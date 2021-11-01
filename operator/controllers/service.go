@@ -12,12 +12,12 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
-	mydomainv1alpha1 "intermine_cloud/operator/api/v1alpha1"
+	intermineorgv1alpha1 "intermine_cloud/operator/api/v1alpha1"
 )
 
 // ensureService ensures Service is Running in a namespace.
 func (r *IntermineInstanceReconciler) ensureService(request reconcile.Request,
-	instance *mydomainv1alpha1.IntermineInstance,
+	instance *intermineorgv1alpha1.IntermineInstance,
 	service *corev1.Service,
 ) (*reconcile.Result, error) {
 
@@ -48,7 +48,7 @@ func (r *IntermineInstanceReconciler) ensureService(request reconcile.Request,
 }
 
 // backendService is a code for creating a Service
-func (r *IntermineInstanceReconciler) backendService(v *mydomainv1alpha1.IntermineInstance) *corev1.Service {
+func (r *IntermineInstanceReconciler) backendService(v *intermineorgv1alpha1.IntermineInstance) *corev1.Service {
 	labels := labels(v, "backend")
 
 	service := &corev1.Service{

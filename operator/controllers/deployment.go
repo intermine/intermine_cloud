@@ -11,10 +11,10 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
-	mydomainv1alpha1 "intermine_cloud/operator/api/v1alpha1"
+	intermineorgv1alpha1 "intermine_cloud/operator/api/v1alpha1"
 )
 
-func labels(v *mydomainv1alpha1.IntermineInstance, tier string) map[string]string {
+func labels(v *intermineorgv1alpha1.IntermineInstance, tier string) map[string]string {
 	// Fetches and sets labels
 
 	return map[string]string{
@@ -26,7 +26,7 @@ func labels(v *mydomainv1alpha1.IntermineInstance, tier string) map[string]strin
 
 // ensureDeployment ensures Deployment resource presence in given namespace.
 func (r *IntermineInstanceReconciler) ensureDeployment(request reconcile.Request,
-	instance *mydomainv1alpha1.IntermineInstance,
+	instance *intermineorgv1alpha1.IntermineInstance,
 	dep *appsv1.Deployment,
 ) (*reconcile.Result, error) {
 
@@ -57,7 +57,7 @@ func (r *IntermineInstanceReconciler) ensureDeployment(request reconcile.Request
 }
 
 // backendDeployment is a code for Creating Deployment
-func (r *IntermineInstanceReconciler) backendDeployment(v *mydomainv1alpha1.IntermineInstance) *appsv1.Deployment {
+func (r *IntermineInstanceReconciler) backendDeployment(v *intermineorgv1alpha1.IntermineInstance) *appsv1.Deployment {
 
 	labels := labels(v, "backend")
 	size := int32(1)
