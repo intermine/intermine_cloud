@@ -3,6 +3,7 @@ import { Box } from '@intermine/chromatin/box'
 import { Typography } from '@intermine/chromatin/typography'
 
 import InterMineLogo from '../../../public/assets/img/intermine-logo.webp'
+import { DomElementIDs } from '../../constants/ids'
 import { NavbarItems } from './navbar-items'
 
 const useStyles = createStyle((theme) => {
@@ -50,7 +51,7 @@ export const Navbar = () => {
     const classes = useStyles()
 
     return (
-        <Box className={classes.root}>
+        <Box id={DomElementIDs.Navbar} className={classes.root}>
             <Box isContentAlignCenter>
                 <img
                     className={classes.logo}
