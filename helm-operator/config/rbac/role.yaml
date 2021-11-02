@@ -52,11 +52,31 @@ rules:
   resources:
   - "serviceaccounts"
   - "services"
+  - "persistentvolumeclaims"
 - verbs:
   - "*"
   apiGroups:
   - "apps"
   resources:
   - "deployments"
+  - "statefulsets"
+- apiGroups:
+  - policy
+  resources:
+  - '*'
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- verbs:
+  - "*"
+  apiGroups:
+  - "networking.k8s.io"
+  resources:
+  - "ingresses"
 
 #+kubebuilder:scaffold:rules

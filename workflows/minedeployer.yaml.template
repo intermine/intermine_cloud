@@ -14,29 +14,59 @@ spec:
       resources:
         requests:
           storage: 200Mi
+  - metadata:
+      name: postgres-data
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 4Gi
+  - metadata:
+      name: solr-data
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 4Gi
   templates:
   - name: deploy-mine
     steps:
-    # - - name: start-services
-    #     resource:
-    # # TODO install kubernetes resources for intermine_instance here
-    #     outputs:
-    #       parameters:
-    #       - name: resource-name
-    #         valueFrom:
-    #           jsonPath: '{.metadata.name}'
-    # # TODO extract postgres and solr addresses from resource (if you can't define it beforehand?)
+    - - name: get-artifacts
+        template: getter
+
+    - - name: start-services
+        resource:
+          action: create
+          manifest: |
+            apiVersion: intermine.intermine.org/v1alpha1
+            kind: IntermineInstance
+            metadata:
+              name: {% raw %}"mine-{{workflow.uid}}-instance"{% endraw %}
+            spec:
+              postgresql:
+                fullnameOverride: {% raw %}"mine-{{workflow.uid}}-postgres"{% endraw %}
+                persistence:
+                  existingClaim: postgres-data
+              solr:
+                fullnameOverride: {% raw %}"mine-{{workflow.uid}}-solr"{% endraw %}
+                persistence:
+                  existingClaim: solr-data
+              tomcat:
+                fullnameOverride: {% raw %}"mine-{{workflow.uid}}-tomcat"{% endraw %}
 
     - - name: prepare-deploy
         template: prebuilder
         arguments:
           parameters:
           - name: postgres-host
-            value: {{ postgres_host }}
+            value: {% raw %}"mine-{{workflow.uid}}-postgres"{% endraw %}
           - name: solr-host
-            value: {{ solr_host }}
+            value: {% raw %}"mine-{{workflow.uid}}-solr"{% endraw %}
           - name: tomcat-host
-            value: {{ tomcat_host }}
+            value: {% raw %}"mine-{{workflow.uid}}-tomcat"{% endraw %}
+
+    # TODO don't move onto the next step until tomcat is running
+    # https://github.com/argoproj/argo-workflows/blob/master/examples/README.md#sidecars
 
     - - name: deploy
         template: builder
@@ -45,17 +75,36 @@ spec:
           - name: task
             value: cargoDeployRemote
 
+  - name: getter
+    inputs:
+      artifacts:
+      - name: minedir
+        path: /home/intermine/{{ mine_name }}
+        s3:
+          key: {{ minedir_path }}
+      - name: postgres-data
+        path: /postgres/data
+        s3:
+          key: {{ postgresdump_path }}
+      - name: solr-data
+        path: /solr/solr
+        s3:
+          key: {{  solrdump_path }}
+    container:
+      image: alpine:3.8
+      volumeMounts:
+      - name: workdir
+        mountPath: /home/intermine
+      - name: postgres-data
+        mountPath: /postgres
+      - name: solr-data
+        mountPath: /solr
   - name: prebuilder
     inputs:
       parameters:
       - name: postgres-host
       - name: solr-host
       - name: tomcat-host
-      artifacts:
-      - name: mine-dir
-        path: /home/intermine/{{ mine_name }}
-        s3:
-          key: {{ minedir_path }}
     container:
       image: intermine/prebuild:latest
       command: ["builder_prepare"]
