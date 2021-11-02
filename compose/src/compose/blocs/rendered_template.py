@@ -54,7 +54,7 @@ def create_rendered_template(
 
 
 def get_rendered_template(
-    query_params: RenderedTemplateGetQueryParams,
+    query_params: RenderedTemplateGetQueryParams, user_creds: Optional[User] = None
 ) -> List[RenderedTemplate]:
     """Query DB for RenderedTemplates.
 
@@ -100,7 +100,7 @@ def get_rendered_template(
 
 
 def update_rendered_template(
-    rendered_template_update: RenderedTemplateUpdate,
+    rendered_template_update: RenderedTemplateUpdate, user_creds: Optional[User] = None
 ) -> RenderedTemplate:
     """Update RenderedTemplate in the DB from RenderedTemplateUpdate request.
 
@@ -145,7 +145,7 @@ def update_rendered_template(
 
 
 def delete_rendered_template(
-    rendered_template_delete: RenderedTemplateDelete,
+    rendered_template_delete: RenderedTemplateDelete, user_creds: Optional[User] = None
 ) -> RenderedTemplate:
     """Delete rendered template in the DB from RenderedTemplateDelete request.
 

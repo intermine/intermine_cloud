@@ -46,7 +46,9 @@ def create_mine(mine_list: List[Mine], user_creds: Optional[User] = None) -> Lis
             raise e
 
 
-def get_mine(query_params: MineGetQueryParams) -> List[Mine]:
+def get_mine(
+    query_params: MineGetQueryParams, user_creds: Optional[User] = None
+) -> List[Mine]:
     """Query DB for Mines.
 
     Args:
@@ -80,7 +82,7 @@ def get_mine(query_params: MineGetQueryParams) -> List[Mine]:
             raise e
 
 
-def update_mine(mine_update: MineUpdate) -> Mine:
+def update_mine(mine_update: MineUpdate, user_creds: Optional[User] = None) -> Mine:
     """Update Mine in the DB from MineUpdate request.
 
     Args:
@@ -116,7 +118,7 @@ def update_mine(mine_update: MineUpdate) -> Mine:
             raise e
 
 
-def delete_mine(mine_delete: MineDelete) -> Mine:
+def delete_mine(mine_delete: MineDelete, user_creds: Optional[User] = None) -> Mine:
     """Delete Mine in the DB from MineDelete request.
 
     Args:

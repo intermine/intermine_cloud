@@ -48,7 +48,9 @@ def create_template(
             raise e
 
 
-def get_template(query_params: TemplateGetQueryParams) -> List[Template]:
+def get_template(
+    query_params: TemplateGetQueryParams, user_creds: Optional[User] = None
+) -> List[Template]:
     """Query DB for Templates.
 
     Args:
@@ -66,7 +68,7 @@ def get_template(query_params: TemplateGetQueryParams) -> List[Template]:
 
     if query_params.query_type == TemplateQueryType.GET_ALL_TEMPLATES:
         stmt = select(TemplateDB)
-    if query_params.query_type == TemplateQueryType.GET_TEMPLATES_BY_ID:
+    if query_params.query_type == TemplateQueryType.GET_TEMPLATE_BY_ID:
         stmt = select(TemplateDB).where(TemplateDB.id == query_params.template_id)
     if query_params.query_type == TemplateQueryType.GET_TEMPLATES_BY_PROTAGONIST_ID:
         stmt = select(TemplateDB).where(TemplateDB.id == query_params.protagonist_id)
@@ -87,7 +89,9 @@ def get_template(query_params: TemplateGetQueryParams) -> List[Template]:
     return template_list
 
 
-def update_template(template_update: TemplateUpdate) -> Template:
+def update_template(
+    template_update: TemplateUpdate, user_creds: Optional[User] = None
+) -> Template:
     """Update Template in the DB from TemplateUpdate request.
 
     Args:
@@ -125,7 +129,9 @@ def update_template(template_update: TemplateUpdate) -> Template:
             raise e
 
 
-def delete_template(template_delete: TemplateDelete) -> Template:
+def delete_template(
+    template_delete: TemplateDelete, user_creds: Optional[User] = None
+) -> Template:
     """Delete template in the DB from TemplateDelete request.
 
     Args:
