@@ -28,5 +28,5 @@ class TemplateGetQueryParams(BaseModel):
     """Template GET request query params schema."""
 
     query_type: TemplateQueryType
-    template_id: Optional[str]
+    latest_file_id: Optional[str]
     protagonist_id: Optional[str]
