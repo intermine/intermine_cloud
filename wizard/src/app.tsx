@@ -20,10 +20,6 @@ import {
 import { DomElementIDs } from './constants/ids'
 import { resizeWorkSpaceContainer } from './utils/resize'
 
-import backgroundImgDark from '../public/assets/img/background-dark.svg'
-import backgroundImgLight from '../public/assets/img/background-light.svg'
-import { Navbar } from './components/navbar'
-
 const Dashboard = lazy(() => import('./domain/dashboard'))
 const PreAuth = lazy(() => import('./domain/pre-auth'))
 
@@ -121,7 +117,7 @@ export const App = () => {
 
     const debouncedResizeWorkSpaceContainer = useDebouncedCallback(
         resizeWorkSpaceContainer,
-        300
+        800
     )
 
     useEffect(() => {
@@ -137,27 +133,13 @@ export const App = () => {
         <ThemeProvider theme={themeType === 'dark' ? darkTheme : lightTheme}>
             <Box
                 csx={{
-                    root: ({
-                        palette: {
-                            themeType,
-                            themeBackground: { light, dark },
-                            neutral
-                        }
-                    }) => ({
-                        backgroundImage: `url(${
-                            themeType === 'dark'
-                                ? backgroundImgDark
-                                : backgroundImgLight
-                        })`,
-                        backgroundColor:
-                            themeType === 'dark' ? dark.hex : light.hex,
+                    root: ({ palette: { neutral } }) => ({
                         color: neutral[50],
                         width: '100%',
                         position: 'relative'
                     })
                 }}
             >
-                {/* <Navbar /> */}
                 <Box
                     id={DomElementIDs.WorkspaceContainer}
                     csx={{ root: { overflow: 'auto' } }}

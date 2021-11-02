@@ -11,6 +11,9 @@ import {
     FORGOT_PASSWORD_PATH
 } from '../../routes'
 
+import backgroundImgDark from '../../../public/assets/img/background-dark.svg'
+import backgroundImgLight from '../../../public/assets/img/background-light.svg'
+
 const routes = [
     {
         path: LOGIN_PATH,
@@ -33,7 +36,23 @@ const PreAuth = () => {
     return (
         <Box
             isContentCenter
-            csx={{ root: { height: '100%', flexWrap: 'wrap' } }}
+            csx={{
+                root: ({
+                    themeType,
+                    palette: {
+                        themeBackground: { light, dark }
+                    }
+                }) => ({
+                    height: '100%',
+                    flexWrap: 'wrap',
+                    backgroundImage: `url(${
+                        themeType === 'dark'
+                            ? backgroundImgDark
+                            : backgroundImgLight
+                    })`,
+                    backgroundColor: themeType === 'dark' ? dark.hex : light.hex
+                })
+            }}
         >
             <Switch>
                 <Redirect exact from={PRE_AUTH_PATH_BASE} to={LOGIN_PATH} />
