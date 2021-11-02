@@ -54,6 +54,7 @@ const PreAuth = () => {
                 })
             }}
         >
+            {/* TODO: Add Page not found */}
             <Switch>
                 <Redirect exact from={PRE_AUTH_PATH_BASE} to={LOGIN_PATH} />
                 {routes.map(({ path, id, Component }) => (

@@ -4,7 +4,7 @@ import { createStyle } from '@intermine/chromatin/styles'
 
 import IntermineLogo from '../../../public/assets/img/logo.png'
 
-export type LogoProps = {
+export type TLogoProps = {
     /**
      * @default '2rem'
      */
@@ -21,14 +21,14 @@ const useStyles = createStyle((theme) => {
     const { spacing } = theme
 
     return {
-        logo: (props: LogoProps) => ({
+        logo: (props: TLogoProps) => ({
             height: props.height ?? '2rem',
             marginRight: spacing(2)
         })
     }
 })
 
-export const Logo = (props: LogoProps) => {
+export const Logo = (props: TLogoProps) => {
     const { height = '2rem', spacing = 4, csx = {} } = props
 
     const classes = useStyles({ height, spacing })

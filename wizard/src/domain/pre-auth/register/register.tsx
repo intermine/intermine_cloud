@@ -17,23 +17,31 @@ export const Register = () => {
         <Form id={DomElementIDs.RegisterForm}>
             <FormHeader logo={<Logo height="1.5rem" />} />
             <FormBody>
-                <FormGroup label="Name" inputProps={{ placeholder: 'Name' }} />
+                <FormGroup
+                    label="Name"
+                    inputProps={{ placeholder: 'Name' }}
+                    hasAsterisk
+                />
                 <FormGroup
                     label="Organisation"
                     inputProps={{ placeholder: 'Organisation' }}
+                    hasAsterisk
                 />
                 <FormGroup
                     label="Email"
                     inputProps={{ placeholder: 'Email' }}
+                    hasAsterisk
                 />
                 <FormGroup
                     label="Username"
                     inputProps={{ placeholder: 'Username' }}
+                    hasAsterisk
                 />
 
                 <FormGroup
                     label="Password"
                     inputProps={{ type: 'password', placeholder: 'Password' }}
+                    hasAsterisk
                 />
                 <FormGroup
                     label="Confirm Password"
@@ -41,6 +49,7 @@ export const Register = () => {
                         type: 'password',
                         placeholder: 'Confirm Password'
                     }}
+                    hasAsterisk
                 />
             </FormBody>
             <FormAction
