@@ -41,18 +41,15 @@ def make_archive(name: str, in_path: Path, out_path: Path) -> str:
     Returns:
         str: Path of created archive
     """
-    return shutil.make_archive(out_path.joinpath("name"), "tar", in_path)
+    return shutil.make_archive(out_path.joinpath(name), "tar", in_path)
 
 
 @click.command()
 @click.option("--name", required=True)
 @click.option("--ext", required=True)
 @click.option("--file_type", required=True)
-@click.option("--endpoint", default=config.MINIO_ENDPOINT)
-@click.option("--access_key", default=config.MINIO_ACCESS_KEY)
-@click.option("--access_secret", default=config.MINIO_SECRET_KEY)
 @click.argument("path")
-def create(name, ext, file_type, endpoint, access_key, access_secret, path) -> None:
+def create(name, ext, file_type, path) -> None:
     """Create data object."""
     # Check Authorization
     user = check_auth(config)
