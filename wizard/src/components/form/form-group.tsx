@@ -8,11 +8,21 @@ export type TFormGroupProps = {
     label: string
     inputProps?: InputProps
     isError?: boolean
+    isDisabled?: boolean
     errorMessage?: string
+    hasAsterisk?: boolean
 }
 
 export const FormGroup = (props: TFormGroupProps) => {
-    const { children, label, inputProps, isError = false, errorMessage } = props
+    const {
+        children,
+        label,
+        inputProps,
+        isError = false,
+        isDisabled = false,
+        errorMessage,
+        hasAsterisk = false
+    } = props
 
     return (
         <Box
@@ -27,6 +37,7 @@ export const FormGroup = (props: TFormGroupProps) => {
         >
             <Label
                 color={isError ? 'error' : undefined}
+                disabled={isDisabled}
                 csx={{
                     root: ({ typography: { title } }) => ({
                         display: 'block',
@@ -36,6 +47,12 @@ export const FormGroup = (props: TFormGroupProps) => {
                 }}
             >
                 {label}
+                {hasAsterisk && (
+                    <Typography color="error" Component="span">
+                        *
+                    </Typography>
+                )}
+
                 <Input
                     csx={{
                         root: ({ spacing }) => ({
@@ -49,6 +66,7 @@ export const FormGroup = (props: TFormGroupProps) => {
                     color="neutral.20"
                     hasFullWidth
                     isError={isError}
+                    isDisabled={isDisabled}
                     {...inputProps}
                 />
                 {isError && (
