@@ -84,8 +84,15 @@ func (r *IntermineInstanceReconciler) Reconcile(ctx context.Context, req ctrl.Re
 		return *result, err
 	}
 
-	// Deployment and Service already exists - don't requeue
-	log.Info("Skip reconcile: Deployment and service already exists",
+	// Check if this Ingress already exists
+	result, err = r.ensureIngress(req, instance, r.backendIngress(instance))
+	if result != nil {
+		log.Error(err, "Ingress Not Ready")
+		return *result, err
+	}
+
+	// They all already exists - don't requeue
+	log.Info("Skip reconcile: Resources already exists",
 		"Deployment.Namespace", found.Namespace, "Deployment.Name", found.Name)
 
 	return ctrl.Result{}, nil

@@ -14,7 +14,9 @@ Finally, run the following to deploy it to your cluster.
 
 ```
 make deploy
+kubectl apply -f config/samples/_v1alpha1_intermineinstance.yaml
 # Play with it!
+kubectl delete -f config/samples/_v1alpha1_intermineinstance.yaml
 make undeploy
 ```
 
