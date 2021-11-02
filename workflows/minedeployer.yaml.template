@@ -35,24 +35,7 @@ spec:
         template: getter
 
     - - name: start-services
-        resource:
-          action: create
-          manifest: |
-            apiVersion: intermine.intermine.org/v1alpha1
-            kind: IntermineInstance
-            metadata:
-              name: {% raw %}"mine-{{workflow.uid}}-instance"{% endraw %}
-            spec:
-              postgresql:
-                fullnameOverride: {% raw %}"mine-{{workflow.uid}}-postgres"{% endraw %}
-                persistence:
-                  existingClaim: postgres-data
-              solr:
-                fullnameOverride: {% raw %}"mine-{{workflow.uid}}-solr"{% endraw %}
-                persistence:
-                  existingClaim: solr-data
-              tomcat:
-                fullnameOverride: {% raw %}"mine-{{workflow.uid}}-tomcat"{% endraw %}
+        template: intermine-instance
 
     - - name: prepare-deploy
         template: prebuilder
@@ -99,6 +82,25 @@ spec:
         mountPath: /postgres
       - name: solr-data
         mountPath: /solr
+  - name: intermine-instance
+    resource:
+      action: create
+      manifest: |
+        apiVersion: intermine.intermine.org/v1alpha1
+        kind: IntermineInstance
+        metadata:
+          name: {% raw %}"mine-{{workflow.uid}}-instance"{% endraw %}
+        spec:
+          postgresql:
+            fullnameOverride: {% raw %}"mine-{{workflow.uid}}-postgres"{% endraw %}
+            persistence:
+              existingClaim: postgres-data
+          solr:
+            fullnameOverride: {% raw %}"mine-{{workflow.uid}}-solr"{% endraw %}
+            persistence:
+              existingClaim: solr-data
+          tomcat:
+            fullnameOverride: {% raw %}"mine-{{workflow.uid}}-tomcat"{% endraw %}
   - name: prebuilder
     inputs:
       parameters:
