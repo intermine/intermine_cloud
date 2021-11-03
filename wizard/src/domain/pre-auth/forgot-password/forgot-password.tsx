@@ -15,7 +15,7 @@ import { Logo } from '../../../components/logo'
 export const ForgotPassword = () => {
     return (
         <Form id={DomElementIDs.ForgotPasswordForm}>
-            <FormHeader logo={<Logo height="1.5rem" />} />
+            <FormHeader logo={<Logo />} />
             <FormBody>
                 <FormGroup
                     label="Email"

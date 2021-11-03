@@ -15,7 +15,7 @@ import { Logo } from '../../../components/logo'
 export const Register = () => {
     return (
         <Form id={DomElementIDs.RegisterForm}>
-            <FormHeader logo={<Logo height="1.5rem" />} />
+            <FormHeader logo={<Logo />} />
             <FormBody>
                 <FormGroup
                     label="Name"

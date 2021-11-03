@@ -6,7 +6,7 @@ import IntermineLogo from '../../../public/assets/img/logo.png'
 
 export type TLogoProps = {
     /**
-     * @default '2rem'
+     * @default '1.5rem'
      */
     height?: string
     /**
@@ -22,14 +22,14 @@ const useStyles = createStyle((theme) => {
 
     return {
         logo: (props: TLogoProps) => ({
-            height: props.height ?? '2rem',
+            height: props.height ?? '1.5rem',
             marginRight: spacing(2)
         })
     }
 })
 
 export const Logo = (props: TLogoProps) => {
-    const { height = '2rem', spacing = 4, csx = {} } = props
+    const { height = '1.5rem', spacing = 4, csx = {} } = props
 
     const classes = useStyles({ height, spacing })
 
