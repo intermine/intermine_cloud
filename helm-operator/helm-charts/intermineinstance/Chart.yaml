@@ -4,3 +4,13 @@ description: A Helm chart for Kubernetes
 name: intermineinstance
 type: application
 version: 0.1.0
+dependencies:
+  - name: postgresql
+    version: 10.13.4
+    repository: https://charts.bitnami.com/bitnami
+  - name: solr
+    version: 2.1.2
+    repository: https://charts.bitnami.com/bitnami
+  - name: tomcat
+    version: 9.5.3
+    repository: https://charts.bitnami.com/bitnami

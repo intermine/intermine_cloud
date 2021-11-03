@@ -5,10 +5,10 @@
 replicaCount: 1
 
 image:
-  repository: nginx
+  repository: paulbouwer/hello-kubernetes
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: ""
+  tag: "1.10"
 
 imagePullSecrets: []
 nameOverride: ""
@@ -80,3 +80,27 @@ nodeSelector: {}
 tolerations: []
 
 affinity: {}
+
+postgresql:
+  name: postgresql
+  port: 5432
+  postgresqlPassword: postgres
+
+solr:
+  name: solr
+  cloudEnabled: false
+  cloudBootstrap: false
+  zookeeper:
+    enabled: false
+  replicaCount: 1
+
+tomcat:
+  name: tomcat
+  image:
+    repository: intermine/tomcat
+    tag: latest # TODO use versioned tags
+    pullPolicy: Always
+  tomcatUsername: tomcat
+  tomcatPassword: tomcat
+  ingress:
+    enabled: true

@@ -27,7 +27,6 @@ class Template(BaseModel):
     name: str
     description: Optional[str]
     template_vars: List[TemplateVar]
-    status: str
     latest_file_id: Optional[UUID4]
 
 
@@ -41,4 +40,3 @@ class RenderedTemplate(BaseModel):
     template_context: TemplateContext
     parent_mine_id: UUID4
     file_id: Optional[UUID4]
-    status: str
