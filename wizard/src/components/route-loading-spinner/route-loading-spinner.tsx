@@ -1,7 +1,16 @@
 import { Spinner } from '@intermine/chromatin/loading'
 import { Box } from '@intermine/chromatin/box'
 
-export const RouteLoadingSpinner = () => {
+export type TRouteLoadingSpinner = {
+    /**
+     * @default 'true'
+     */
+    hasBackground?: boolean
+}
+
+export const RouteLoadingSpinner = (props: TRouteLoadingSpinner) => {
+    const { hasBackground = true } = props
+
     return (
         <Box
             isContentCenter
@@ -12,7 +21,9 @@ export const RouteLoadingSpinner = () => {
                         themeType
                     }
                 }) => ({
-                    background: themeType === 'dark' ? dark.hex : light.hex,
+                    ...(hasBackground && {
+                        background: themeType === 'dark' ? dark.hex : light.hex
+                    }),
                     bottom: 0,
                     left: 0,
                     position: 'absolute',
@@ -24,7 +35,7 @@ export const RouteLoadingSpinner = () => {
             <Spinner
                 csx={{ root: { display: 'block' } }}
                 size={100}
-                dotSize={5}
+                dotSize={10}
                 color="info"
             />
         </Box>
