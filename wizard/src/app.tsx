@@ -3,7 +3,6 @@ import { useHistory, useLocation, Switch, Route } from 'react-router-dom'
 import { ThemeProvider } from '@intermine/chromatin/styles'
 import { Box } from '@intermine/chromatin/box'
 import { createStyle } from '@intermine/chromatin/styles'
-import { useDebouncedCallback } from '@intermine/chromatin/utils'
 
 import { AuthStates } from './constants/auth'
 import { AppContext } from './context'
@@ -17,8 +16,6 @@ import {
     LOGIN_PATH,
     DASHBOARD_OVERVIEW_PATH
 } from './routes'
-import { DomElementIDs } from './constants/ids'
-import { resizeWorkSpaceContainer } from './utils/resize'
 
 const Dashboard = lazy(() => import('./domain/dashboard'))
 const PreAuth = lazy(() => import('./domain/pre-auth'))
@@ -115,19 +112,9 @@ export const App = () => {
         }
     }
 
-    const debouncedResizeWorkSpaceContainer = useDebouncedCallback(
-        resizeWorkSpaceContainer,
-        800
-    )
-
     useEffect(() => {
         onLocationChange()
     }, [pathname])
-
-    useEffect(() => {
-        window.addEventListener('resize', debouncedResizeWorkSpaceContainer)
-        resizeWorkSpaceContainer()
-    }, [])
 
     return (
         <ThemeProvider theme={themeType === 'dark' ? darkTheme : lightTheme}>
@@ -135,28 +122,25 @@ export const App = () => {
                 csx={{
                     root: ({ palette: { neutral } }) => ({
                         color: neutral[50],
+                        height: '100%',
+                        position: 'relative',
                         width: '100%',
-                        position: 'relative'
+                        overflow: 'auto'
                     })
                 }}
             >
-                <Box
-                    id={DomElementIDs.WorkspaceContainer}
-                    csx={{ root: { overflow: 'auto' } }}
-                >
-                    <Suspense fallback={<RouteLoadingSpinner />}>
-                        <Switch>
-                            {routes.map(({ path, Component, id }) => (
-                                <Route key={id} path={path}>
-                                    <Component />
-                                </Route>
-                            ))}
-                            <Route path="*">
-                                <PageNotFound />
+                <Suspense fallback={<RouteLoadingSpinner />}>
+                    <Switch>
+                        {routes.map(({ path, Component, id }) => (
+                            <Route key={id} path={path}>
+                                <Component />
                             </Route>
-                        </Switch>
-                    </Suspense>
-                </Box>
+                        ))}
+                        <Route path="*">
+                            <PageNotFound />
+                        </Route>
+                    </Switch>
+                </Suspense>
             </Box>
         </ThemeProvider>
     )
