@@ -73,7 +73,7 @@ export const Login = () => {
     }
 
     useEffect(() => {
-        if (authMachineState.value === 'authorized') {
+        if (authMachineState.value === 'end') {
             updateAuthState(AuthStates.Authorize)
             history.push(DASHBOARD_OVERVIEW_PATH)
         }
@@ -89,7 +89,7 @@ export const Login = () => {
 
     return (
         <Form id={DomElementIDs.LoginForm}>
-            <FormHeader logo={<Logo height="1.5rem" />} />
+            <FormHeader logo={<Logo />} />
             <FormBody>
                 <InlineAlert
                     message={authMachineState.context.errorMessage}
@@ -138,7 +138,8 @@ export const Login = () => {
                         csx={{
                             root: ({ spacing }) => ({
                                 marginTop: spacing(2),
-                                padding: '0.25rem'
+                                padding: '0.25rem',
+                                textTransform: 'none'
                             })
                         }}
                     >

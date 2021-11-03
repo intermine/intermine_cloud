@@ -20,15 +20,15 @@ export type TAuthMachineState =
       }
     | { value: 'resetPassword'; context: TAuthMachineContext }
     | { value: 'register'; context: TAuthMachineContext }
-    | { value: 'unauthorized'; context: TAuthMachineContext }
-    | { value: 'authorized'; context: TAuthMachineContext }
+    | { value: 'start'; context: TAuthMachineContext }
+    | { value: 'end'; context: TAuthMachineContext }
 
 export type TAuthMachineEvents =
     | { type: 'LOGIN' }
     | { type: 'REGISTER' }
     | { type: 'RESET_PASSWORD' }
-    | { type: 'AUTHORIZED' }
-    | { type: 'UNAUTHORIZED' }
+    | { type: 'END' }
+    | { type: 'START' }
 
 const authMachineInitialContext: TAuthMachineContext = {
     errorMessage: '',
@@ -44,11 +44,11 @@ export const authMachine = createMachine<
 >(
     {
         id: 'pre-auth-machine',
-        initial: 'unauthorized',
+        initial: 'start',
         context: clone(authMachineInitialContext),
         states: {
-            unauthorized: {
-                entry: 'unauthorizeUser',
+            start: {
+                entry: 'resetAuthState',
                 on: {
                     LOGIN: 'login',
                     REGISTER: 'register',
@@ -60,18 +60,18 @@ export const authMachine = createMachine<
                 invoke: {
                     src: 'login',
                     onDone: {
-                        target: 'authorized',
+                        target: 'end',
                     },
 
                     onError: {
-                        target: 'unauthorized',
+                        target: 'start',
                         actions: 'requestFailed',
                     },
                 },
             },
             register: {},
             resetPassword: {},
-            authorized: {},
+            end: {},
         },
     },
     {
@@ -83,7 +83,7 @@ export const authMachine = createMachine<
                     return 'Failed to load response'
                 },
             }),
-            unauthorizeUser: assign<TAuthMachineContext, TAuthMachineEvents>({
+            resetAuthState: assign<TAuthMachineContext, TAuthMachineEvents>({
                 authState: AuthStates.NotAuthorize,
             }),
             resetRequestStatus: assign<TAuthMachineContext, TAuthMachineEvents>(
