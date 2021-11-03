@@ -263,7 +263,7 @@ def get(template_id, extract, path) -> None:
     )
     # get file from template
     query_params = FileGetQueryParams(
-        query_type=FileQueryType.GET_FILE_BY_ID, latest_file_id=template.latest_file_id
+        query_type=FileQueryType.GET_FILE_BY_ID, file_id=template.latest_file_id
     )
     fetched_file = get_file(query_params, user)
     if len(fetched_file) == 0:
