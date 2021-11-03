@@ -57,11 +57,15 @@ export const NavbarItems = () => {
         return (
             <IconButton
                 ref={(el: HTMLElement) => setAnchorElement(el)}
-                color="primary"
+                color="info"
                 variant="normal"
                 hasElevation={false}
                 hasHighlightOnFocus={false}
-                Icon={<Box isContentCenter>Z</Box>}
+                Icon={
+                    <Box isContentCenter csx={{ root: { fontWeight: 800 } }}>
+                        Z
+                    </Box>
+                }
             >
                 <Menu
                     ref={menuRef}

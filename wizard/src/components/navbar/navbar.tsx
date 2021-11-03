@@ -7,25 +7,20 @@ import { Logo } from '../logo'
 
 const useStyles = createStyle((theme) => {
     const {
-        themeType,
-
-        palette: {
-            darkGrey,
-            neutral,
-            common: { white }
-        },
-        elevation,
+        palette: { neutral },
         breakingPoints: { mixin }
     } = theme
 
     return {
         root: {
             alignItems: 'center',
-            background: themeType === 'dark' ? darkGrey[20] : white,
-            boxShadow: elevation.low,
             display: 'flex',
             justifyContent: 'space-between',
+            left: 0,
             padding: '1rem 2rem',
+            position: 'fixed',
+            right: 0,
+            top: 0,
             ...mixin(
                 {
                     sm: {
