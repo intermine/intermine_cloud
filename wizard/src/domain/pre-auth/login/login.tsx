@@ -23,7 +23,7 @@ import {
 import { Logo } from '../../../components/logo'
 import { authMachine } from '../machine/auth-machine'
 
-import { TInputField, updateError, updateValue } from '../utils'
+import { scrollTo, TInputField, updateError, updateValue } from '../utils'
 
 type TInputFields = {
     username: TInputField
@@ -69,6 +69,7 @@ export const Login = () => {
          */
         if (errorFields.length > 0) {
             updateError(setFields, errorFields)
+            scrollTo(DomElementIDs.LoginForm)
             return
         }
 
@@ -84,6 +85,8 @@ export const Login = () => {
             /**
              * Failed request.
              */
+            scrollTo(DomElementIDs.LoginForm)
+
             setIsInlineAlertOpen(true)
         }
     }, [authMachineState.value])

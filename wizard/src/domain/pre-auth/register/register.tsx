@@ -20,7 +20,7 @@ import {
 import { Logo } from '../../../components/logo'
 import { authMachine } from '../machine/auth-machine'
 
-import { TInputField, updateError, updateValue } from '../utils'
+import { scrollTo, TInputField, updateError, updateValue } from '../utils'
 import { isValidEmail, isValueSame } from '../../../components/form/utils'
 
 type TInputFields = {
@@ -66,29 +66,52 @@ export const Register = () => {
             isOpen: false
         }))
         const errorFields: [keyof TInputFields, string][] = []
+        let canScroll = true
 
         if (name.value.length === 0) {
             errorFields.push(['name', 'Name is required'])
+            scrollTo('name')
+            canScroll = false
         }
 
         if (organisation.value.length === 0) {
             errorFields.push(['organisation', 'Organisation is required'])
+            if (canScroll) {
+                scrollTo('organisation')
+                canScroll = false
+            }
         }
 
         if (email.value.length === 0) {
             errorFields.push(['email', 'Email is required'])
+            if (canScroll) {
+                scrollTo('email')
+                canScroll = false
+            }
         }
 
         if (email.value.length > 0 && !isValidEmail(email.value)) {
             errorFields.push(['email', 'Please enter a valid email address.'])
+            if (canScroll) {
+                scrollTo('email')
+                canScroll = false
+            }
         }
 
         if (username.value.length === 0) {
             errorFields.push(['username', 'Username is required'])
+            if (canScroll) {
+                scrollTo('username')
+                canScroll = false
+            }
         }
 
         if (password.value.length === 0) {
             errorFields.push(['password', 'Password is required'])
+            if (canScroll) {
+                scrollTo('password')
+                canScroll = false
+            }
         }
 
         if (confirmPassword.value.length === 0) {
@@ -96,6 +119,10 @@ export const Register = () => {
                 'confirmPassword',
                 'Confirm Password is required'
             ])
+            if (canScroll) {
+                scrollTo('confirmPassword')
+                canScroll = false
+            }
         }
 
         if (
@@ -107,6 +134,10 @@ export const Register = () => {
                 ['password', "Password doesn't match"],
                 ['confirmPassword', "Password doesn't match"]
             )
+            if (canScroll) {
+                scrollTo('password')
+                canScroll = false
+            }
         }
 
         if (errorFields.length > 0) {
@@ -128,6 +159,7 @@ export const Register = () => {
             setTimeout(() => {
                 history.push(LOGIN_PATH)
             }, 5000)
+            scrollTo(DomElementIDs.RegisterForm)
         }
 
         if (authMachineState.context.isRequestFailed) {
@@ -139,6 +171,7 @@ export const Register = () => {
                 type: 'error',
                 isOpen: true
             })
+            scrollTo(DomElementIDs.RegisterForm)
         }
     }, [authMachineState.value])
 
@@ -162,6 +195,7 @@ export const Register = () => {
                     }
                 />
                 <FormGroup
+                    id="name"
                     isDisabled={isMakingRequest}
                     label="Name"
                     isError={name.isError}
@@ -175,6 +209,7 @@ export const Register = () => {
                     hasAsterisk
                 />
                 <FormGroup
+                    id="organisation"
                     isDisabled={isMakingRequest}
                     label="Organisation"
                     isError={organisation.isError}
@@ -188,6 +223,7 @@ export const Register = () => {
                     hasAsterisk
                 />
                 <FormGroup
+                    id="email"
                     isDisabled={isMakingRequest}
                     label="Email"
                     isError={email.isError}
@@ -201,6 +237,7 @@ export const Register = () => {
                     hasAsterisk
                 />
                 <FormGroup
+                    id="username"
                     isDisabled={isMakingRequest}
                     label="Username"
                     isError={username.isError}
@@ -214,6 +251,7 @@ export const Register = () => {
                     hasAsterisk
                 />
                 <FormGroup
+                    id="password"
                     isDisabled={isMakingRequest}
                     label="Password"
                     isError={password.isError}
@@ -243,6 +281,7 @@ export const Register = () => {
                     hasAsterisk
                 />
                 <FormGroup
+                    id="confirm-password"
                     isDisabled={isMakingRequest}
                     label="Confirm Password"
                     isError={confirmPassword.isError}
