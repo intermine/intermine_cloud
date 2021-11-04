@@ -134,12 +134,12 @@ export const Login = () => {
                         type="button"
                         variant="ghost"
                         isDense
+                        isTextUppercase={false}
                         color="primary"
                         csx={{
                             root: ({ spacing }) => ({
                                 marginTop: spacing(2),
-                                padding: '0.25rem',
-                                textTransform: 'none'
+                                padding: '0.25rem'
                             })
                         }}
                     >

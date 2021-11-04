@@ -57,11 +57,7 @@ export const FormGroup = (props: TFormGroupProps) => {
                     csx={{
                         root: ({ spacing }) => ({
                             marginTop: spacing(2)
-                        }),
-                        inputRoot: {
-                            width: '100%',
-                            minWidth: 0
-                        }
+                        })
                     }}
                     color="neutral.20"
                     hasFullWidth
