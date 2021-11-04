@@ -11,6 +11,7 @@ export type TFormGroupProps = {
     isDisabled?: boolean
     errorMessage?: string
     hasAsterisk?: boolean
+    id?: string
 }
 
 export const FormGroup = (props: TFormGroupProps) => {
@@ -21,7 +22,8 @@ export const FormGroup = (props: TFormGroupProps) => {
         isError = false,
         isDisabled = false,
         errorMessage,
-        hasAsterisk = false
+        hasAsterisk = false,
+        id
     } = props
 
     return (
@@ -36,6 +38,7 @@ export const FormGroup = (props: TFormGroupProps) => {
             }}
         >
             <Label
+                id={id}
                 color={isError ? 'error' : undefined}
                 disabled={isDisabled}
                 csx={{
