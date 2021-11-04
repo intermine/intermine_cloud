@@ -1,3 +1,4 @@
+import { clone } from '@intermine/chromatin/utils'
 import React from 'react'
 
 export type TInputField = {
@@ -8,17 +9,20 @@ export type TInputField = {
 
 export const updateError = <T>(
     setFields: React.Dispatch<React.SetStateAction<T>>,
-    key: keyof T,
-    errorMessage: string
+    errorFields: [keyof T, string][]
 ) => {
-    setFields((prev) => ({
-        ...prev,
-        [key]: {
-            ...prev[key],
-            isError: true,
-            errorMessage,
-        },
-    }))
+    setFields((prev) => {
+        const newPrev: T = clone(prev)
+
+        for (const keyVal of errorFields) {
+            newPrev[keyVal[0]] = {
+                ...newPrev[keyVal[0]],
+                isError: true,
+                errorMessage: keyVal[1],
+            }
+        }
+        return newPrev
+    })
 }
 
 export const updateValue = <T>(

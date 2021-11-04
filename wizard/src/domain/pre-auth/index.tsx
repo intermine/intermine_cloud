@@ -50,7 +50,9 @@ const PreAuth = () => {
                             ? backgroundImgDark
                             : backgroundImgLight
                     })`,
-                    backgroundColor: themeType === 'dark' ? dark.hex : light.hex
+                    backgroundColor:
+                        themeType === 'dark' ? dark.hex : light.hex,
+                    overflow: 'auto'
                 })
             }}
         >

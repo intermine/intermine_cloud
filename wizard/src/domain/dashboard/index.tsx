@@ -63,7 +63,7 @@ const useStyles = createStyle((theme) => {
             padding: '4.75rem 0 3rem',
             flex: 1
         },
-        
+
         pageContainer: {
             padding: '3rem',
             position: 'relative',
@@ -74,8 +74,8 @@ const useStyles = createStyle((theme) => {
         progressContainer: {
             background: themeType === 'dark' ? darkGrey[40] : grey[40],
             bottom: '0',
-            borderRadius: '1rem 0 0 1rem',
-            left: '3rem',
+            borderRadius: '1rem 0 0 0',
+            left: '15rem',
             minHeight: '3rem',
             right: 0,
             position: 'fixed'
@@ -115,9 +115,9 @@ const Dashboard = () => {
                     </Box>
                 </Box>
 
-                <Box className={classes.progressContainer}>
+                {/* <Box className={classes.progressContainer}>
                     <Progress />
-                </Box>
+                </Box> */}
             </Box>
         </Box>
     )

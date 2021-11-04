@@ -58,6 +58,9 @@ export const FormGroup = (props: TFormGroupProps) => {
                         root: ({ spacing }) => ({
                             marginTop: spacing(2)
                         })
+                        // inputRoot: {
+                        //     padding: '0.7rem 1rem'
+                        // }
                     }}
                     color="neutral.20"
                     hasFullWidth

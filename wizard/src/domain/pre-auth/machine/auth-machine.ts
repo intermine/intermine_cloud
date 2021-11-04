@@ -22,6 +22,7 @@ export type TAuthMachineState =
     | { value: 'register'; context: TAuthMachineContext }
     | { value: 'start'; context: TAuthMachineContext }
     | { value: 'end'; context: TAuthMachineContext }
+    | { value: 'reset'; context: TAuthMachineContext }
 
 export type TAuthMachineEvents =
     | { type: 'LOGIN' }
@@ -29,6 +30,7 @@ export type TAuthMachineEvents =
     | { type: 'RESET_PASSWORD' }
     | { type: 'END' }
     | { type: 'START' }
+    | { type: 'RESET' }
 
 const authMachineInitialContext: TAuthMachineContext = {
     errorMessage: '',
@@ -69,9 +71,35 @@ export const authMachine = createMachine<
                     },
                 },
             },
-            register: {},
-            resetPassword: {},
-            end: {},
+            register: {
+                invoke: {
+                    src: 'login',
+                    onDone: {
+                        target: 'end',
+                    },
+                    onError: {
+                        target: 'start',
+                        actions: 'requestFailed',
+                    },
+                },
+            },
+            resetPassword: {
+                invoke: {
+                    src: 'login',
+                    onDone: {
+                        target: 'end',
+                    },
+                    onError: {
+                        target: 'start',
+                        actions: 'requestFailed',
+                    },
+                },
+            },
+            end: {
+                on: {
+                    RESET: 'start',
+                },
+            },
         },
     },
     {
@@ -94,7 +122,9 @@ export const authMachine = createMachine<
         },
         services: {
             login: () => {
-                return new Promise((resolve) => setTimeout(resolve, 1000))
+                return new Promise((resolve, reject) =>
+                    setTimeout(resolve, 4000)
+                )
             },
         },
     }

@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import { Link, useHistory } from 'react-router-dom'
 import { useMachine } from '@xstate/react'
 import { InlineAlert } from '@intermine/chromatin/inline-alert'
@@ -21,7 +21,6 @@ import {
     FormAction
 } from '../../../components/form'
 import { Logo } from '../../../components/logo'
-
 import { authMachine } from '../machine/auth-machine'
 
 import { TInputField, updateError, updateValue } from '../utils'
@@ -53,21 +52,25 @@ export const Login = () => {
     const [isInlineAlertOpen, setIsInlineAlertOpen] = useState(false)
 
     const handleLoginClick = () => {
-        let hasAnyError = false
+        setIsInlineAlertOpen(false)
+
+        const errorFields: [keyof TInputFields, string][] = []
+
         if (username.value.length === 0) {
-            updateError(setFields, 'username', 'Username is required')
-            hasAnyError = true
+            errorFields.push(['username', 'Username is required'])
         }
 
         if (password.value.length === 0) {
-            updateError(setFields, 'password', 'Password is required')
-            hasAnyError = true
+            errorFields.push(['password', 'Password is required'])
         }
 
         /**
          * If error then not proceeding.
          */
-        if (hasAnyError) return
+        if (errorFields.length > 0) {
+            updateError(setFields, errorFields)
+            return
+        }
 
         dispatch('LOGIN')
     }

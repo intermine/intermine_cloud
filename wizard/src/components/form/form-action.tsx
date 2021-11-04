@@ -35,7 +35,11 @@ export const FormAction = (props: TFormActionProps) => {
                 <Button
                     variant="ghost"
                     color="primary"
-                    csx={{ root: ({ spacing }) => ({ padding: spacing(2) }) }}
+                    csx={{
+                        root: ({ spacing }) => ({
+                            padding: spacing(2)
+                        })
+                    }}
                     {...secondaryAction}
                 >
                     {_secondaryChildren}
