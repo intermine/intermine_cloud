@@ -2,7 +2,7 @@ import { Typography } from '@intermine/chromatin'
 import { Box, BoxBaseProps } from '@intermine/chromatin/box'
 import { createStyle } from '@intermine/chromatin/styles'
 
-import IntermineLogo from '../../../public/assets/img/logo.png'
+import IntermineLogo from '../../../public/assets/img/logo-light.svg'
 
 export type TLogoProps = {
     /**
