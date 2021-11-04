@@ -33,13 +33,27 @@ kubectl port-forward svc/argo-artifacts 9000:9000
 You need to tell Argo to use MinIO as the artifact repository. To achieve this, you create a ConfigMap and a Secret containing the necessary MinIO authentication keys.
 
 ```
-kubectl -n argo apply -f artifacts.yaml
-kubectl -n argo create secret generic my-minio-cred --from-literal=accesskey=`kubectl get secret argo-artifacts -o jsonpath='{.data.accesskey}' | base64 --decode` --from-literal=secretkey=`kubectl get secret argo-artifacts -o jsonpath='{.data.secretkey}' | base64 --decode`
+kubectl apply -f artifacts.yaml
+kubectl create secret generic my-minio-cred --from-literal=accesskey=`kubectl get secret argo-artifacts -o jsonpath='{.data.accesskey}' | base64 --decode` --from-literal=secretkey=`kubectl get secret argo-artifacts -o jsonpath='{.data.secretkey}' | base64 --decode`
 ```
 
 Finally, you can start the workflow.
 
 ```
 ./make_minebuilder.py --mine-path ~/testmines/biotestmine --source-path ~/testdata/malaria
-argo -n argo submit --watch minebuilder.yaml
+argo submit --watch minebuilder.yaml
+```
+
+Once the minebuilder workflow has finished, you can move on to run the minedeployer workflow. Before you do that, you should follow *intermine_cloud/helm-operator/README.md* to deploy the InterMine operator. Once that's done, you'll need permissions to create an IntermineInstance CRD.
+
+```
+kubectl apply -f rbac.yaml
+kubectl create rolebinding workflow --role=workflow-role --serviceaccount=default:default
+```
+
+Now you can start the final workflow (remember to replace the `--bucket-path` flag using the MinIO webapp).
+
+```
+./make_minedeployer.py --mine-name biotestmine --bucket-path build-a-mine-m7jg5/build-a-mine-m7jg5-914546954
+argo submit --watch minedeployer.yaml
 ```

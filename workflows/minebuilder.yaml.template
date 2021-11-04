@@ -103,7 +103,7 @@ spec:
     retryStrategy:
       limit: 3
     container:
-      image: intermine/postgres:latest
+      image: intermine/postgres:0.0.2 # WARNING - not on docker hub
       readinessProbe:
         exec:
           command:

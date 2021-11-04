@@ -82,25 +82,33 @@ tolerations: []
 affinity: {}
 
 postgresql:
-  name: postgresql
   port: 5432
   postgresqlPassword: postgres
 
 solr:
-  name: solr
   cloudEnabled: false
   cloudBootstrap: false
   zookeeper:
     enabled: false
   replicaCount: 1
+  collectionReplicas: 1
 
 tomcat:
-  name: tomcat
-  image:
-    repository: intermine/tomcat
-    tag: latest # TODO use versioned tags
-    pullPolicy: Always
   tomcatUsername: tomcat
   tomcatPassword: tomcat
+  image:
+    repository: bitnami/tomcat
+    tag: 8.5.72
+  livenessProbe:
+    httpGet:
+      path: /{{ mine_name }}/begin.do
+  readinessProbe:
+    httpGet:
+      path: /{{ mine_name }}/begin.do
+  service:
+    type: ClusterIP
+    port: 8080
   ingress:
     enabled: true
+    hostname: localhost
+    pathType: Prefix
