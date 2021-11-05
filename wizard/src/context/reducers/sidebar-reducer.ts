@@ -8,7 +8,8 @@ import type {
     TUseSidebarReducer,
 } from '../types'
 
-const { ChangePageSwitchStatus, UpdateOnSidebarClick } = SidebarActions
+const { ChangePageSwitchStatus, UpdateOnSidebarClick, RemoveOnSidebarClick } =
+    SidebarActions
 
 /**
  * Sidebar reducer initial state
@@ -39,6 +40,15 @@ const sidebarReducer = (
             }
             return state
 
+        case RemoveOnSidebarClick:
+            state = {
+                ...state,
+                // eslint-disable-next-line @typescript-eslint/no-empty-function
+                onSidebarItemClick: () => {},
+            }
+
+            return state
+
         /* istanbul ignore next */
         default:
             throw new Error(
@@ -61,10 +71,16 @@ export const useSidebarReducer = (): TUseSidebarReducer => {
         })
 
     const onSidebarItemClick = (fn: TSidebarReducer['onSidebarItemClick']) => {
-        console.log('On side')
         dispatch({
             type: UpdateOnSidebarClick,
             data: fn,
+        })
+    }
+
+    const removeOnSidebarItemClick = () => {
+        dispatch({
+            type: RemoveOnSidebarClick,
+            data: {},
         })
     }
 
@@ -72,5 +88,6 @@ export const useSidebarReducer = (): TUseSidebarReducer => {
         state,
         onSidebarItemClick,
         updatePageSwitchStatus,
+        removeOnSidebarItemClick,
     }
 }
