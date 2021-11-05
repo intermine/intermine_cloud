@@ -1,12 +1,14 @@
+import { useContext } from 'react'
 import { Box } from '@intermine/chromatin/box'
 import { List } from '@intermine/chromatin/list'
 import { ListItem } from '@intermine/chromatin/list-item'
 import { Button } from '@intermine/chromatin/button'
-import { NavLink, useLocation } from 'react-router-dom'
+import { useLocation, useHistory, NavLink } from 'react-router-dom'
 import OverviewIcon from '@intermine/chromatin/icons/System/apps-fill'
 import DataIcon from '@intermine/chromatin/icons/Device/database-2-fill'
 import MinesIcon from '@intermine/chromatin/icons/Business/bubble-chart-fill'
 
+import { AppContext } from '../../../context'
 import {
     DASHBOARD_OVERVIEW_PATH,
     DASHBOARD_DATA_PATH,
@@ -58,9 +60,26 @@ const useStyles = createStyle((theme) => {
 export const Sidebar = () => {
     const classes = useStyles()
     const location = useLocation()
+    const history = useHistory()
+    const store = useContext(AppContext)
+
+    const {
+        sidebarReducer: { state: sidebarState }
+    } = store
 
     const isCurrentPath = (path: string): boolean => {
         return location.pathname.startsWith(path)
+    }
+
+    const onSidebarItemClick = (to: string) => {
+        const {
+            isPageSwitchingAllowed,
+            onSidebarItemClick: _onSidebarItemClick
+        } = sidebarState
+        _onSidebarItemClick(to)
+        if (isPageSwitchingAllowed) {
+            history.push(to)
+        }
     }
 
     return (
@@ -77,8 +96,7 @@ export const Sidebar = () => {
                         >
                             <Button
                                 variant="ghost"
-                                Component={NavLink}
-                                to={to}
+                                onClick={() => onSidebarItemClick(to)}
                                 LeftIcon={icon}
                                 hasFullWidth
                                 className={classes.button}

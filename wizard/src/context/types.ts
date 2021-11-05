@@ -2,6 +2,7 @@ import type { ThemeType } from '@intermine/chromatin/styles'
 
 import { AuthStates, AuthActions } from '../constants/auth'
 import { PreferencesActions } from '../constants/preferences'
+import { SidebarActions } from '../constants/sidebar'
 
 /**
  * Auth
@@ -51,7 +52,31 @@ export type TUsePreferencesReducer = {
  * Preferences Ends
  */
 
+/**
+ * Sidebar
+ */
+export type TSidebarReducer = {
+    onSidebarItemClick: (to: string) => void
+    isPageSwitchingAllowed: boolean
+}
+
+export type TSidebarReducerAction = {
+    type: SidebarActions
+    data: unknown
+}
+
+export type TUseSidebarReducer = {
+    state: TSidebarReducer
+    onSidebarItemClick: (fn: TSidebarReducer['onSidebarItemClick']) => void
+    updatePageSwitchStatus: (status: boolean) => void
+}
+
+/**
+ * Sidebar Ends
+ */
+
 export type TAppContext = {
     authReducer: TUseAuthReducer
     preferencesReducer: TUsePreferencesReducer
+    sidebarReducer: TUseSidebarReducer
 }
