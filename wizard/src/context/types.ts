@@ -1,6 +1,8 @@
+import { ButtonCommonProps } from '@intermine/chromatin/button'
 import type { ThemeType } from '@intermine/chromatin/styles'
 
 import { AuthStates, AuthActions } from '../constants/auth'
+import { GlobalModalActions } from '../constants/global-modal'
 import { PreferencesActions } from '../constants/preferences'
 import { SidebarActions } from '../constants/sidebar'
 
@@ -69,14 +71,43 @@ export type TUseSidebarReducer = {
     state: TSidebarReducer
     onSidebarItemClick: (fn: TSidebarReducer['onSidebarItemClick']) => void
     updatePageSwitchStatus: (status: boolean) => void
+    removeOnSidebarItemClick: () => void
 }
 
 /**
  * Sidebar Ends
  */
 
+/**
+ * Modal
+ */
+export type TGlobalModalReducer = {
+    heading?: string
+    type?: 'error' | 'warning' | 'success' | 'info'
+    children?: React.ReactChild | React.ReactChild[]
+    isOpen?: boolean
+    primaryAction?: ButtonCommonProps
+    secondaryAction?: ButtonCommonProps
+}
+
+export type TGlobalModalReducerAction = {
+    type: GlobalModalActions
+    data: unknown
+}
+
+export type TUseGlobalModalReducer = {
+    state: TGlobalModalReducer
+    updateGlobalModalProps: (data: TGlobalModalReducer) => void
+    closeGlobalModal: () => void
+}
+
+/**
+ * Modal Ends
+ */
+
 export type TAppContext = {
     authReducer: TUseAuthReducer
     preferencesReducer: TUsePreferencesReducer
     sidebarReducer: TUseSidebarReducer
+    globalModalReducer: TUseGlobalModalReducer
 }

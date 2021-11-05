@@ -1,5 +1,6 @@
 import { AppContext } from './index'
 import { useAuthReducer } from './reducers/auth-reducer'
+import { useGlobalModalReducer } from './reducers/global-modal-reducer'
 import { usePreferencesReducer } from './reducers/preferences-reducer'
 import { useSidebarReducer } from './reducers/sidebar-reducer'
 
@@ -14,7 +15,8 @@ export const AppContextProvider = (props: AppContextProviderProps) => {
     const store: TAppContext = {
         authReducer: useAuthReducer(),
         preferencesReducer: usePreferencesReducer(),
-        sidebarReducer: useSidebarReducer()
+        sidebarReducer: useSidebarReducer(),
+        globalModalReducer: useGlobalModalReducer()
     }
 
     return <AppContext.Provider value={store}>{children}</AppContext.Provider>
