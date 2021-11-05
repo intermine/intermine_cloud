@@ -29,10 +29,10 @@ rules:
   - create
 
 ##
-## Rules for intermine.intermine.org/v1alpha1, Kind: IntermineInstance
+## Rules for intermine.org/v1alpha1, Kind: IntermineInstance
 ##
 - apiGroups:
-  - intermine.intermine.org
+  - intermine.org
   resources:
   - intermineinstances
   - intermineinstances/status

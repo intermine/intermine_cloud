@@ -10,7 +10,6 @@ resources:
     crdVersion: v1
     namespaced: true
   domain: intermine.org
-  group: intermine
   kind: IntermineInstance
   version: v1alpha1
 version: "3"

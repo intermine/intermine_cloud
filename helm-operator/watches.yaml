@@ -1,5 +1,5 @@
 # Use the 'create api' subcommand to add watches to this file.
-- group: intermine.intermine.org
+- group: intermine.org
   version: v1alpha1
   kind: IntermineInstance
   chart: helm-charts/intermineinstance

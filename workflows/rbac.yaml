@@ -23,7 +23,7 @@ rules:
   - watch
 # create IntermineInstance CRD
 - apiGroups:
-  - "intermine.intermine.org"
+  - "intermine.org"
   resources:
   - intermineinstances
   verbs:
