@@ -99,12 +99,6 @@ tomcat:
   image:
     repository: bitnami/tomcat
     tag: 8.5.72
-  livenessProbe:
-    httpGet:
-      path: /{{ mine_name }}/begin.do
-  readinessProbe:
-    httpGet:
-      path: /{{ mine_name }}/begin.do
   service:
     type: ClusterIP
     port: 8080

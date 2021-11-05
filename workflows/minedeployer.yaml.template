@@ -110,6 +110,12 @@ spec:
             fullnameOverride: {% raw %}"{{workflow.name}}-tomcat"{% endraw %}
             persistence:
               existingClaim: {% raw %}"{{workflow.name}}-tomcat-data"{% endraw %}
+            livenessProbe:
+              httpGet:
+                path: /{{ mine_name }}/begin.do
+            readinessProbe:
+              httpGet:
+                path: /{{ mine_name }}/begin.do
             initContainers:
             - name: wait-for-pvc
               image: bitnami/kubectl:1.20.12
