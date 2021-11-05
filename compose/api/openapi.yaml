@@ -46,6 +46,8 @@ servers:
 paths:
   /job:
     $ref: paths/job.yaml
+  /data:
+    $ref: paths/data.yaml
 components:
   securitySchemes:
     bearerAuth:

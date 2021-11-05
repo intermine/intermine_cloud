@@ -1,0 +1,8 @@
+description: Site create schema
+type: object
+properties:
+  data_id:
+    type: string
+required:
+  - "data_id"
+

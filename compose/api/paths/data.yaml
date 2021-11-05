@@ -1,0 +1,118 @@
+
+summary: data resource endpoint
+description: data endpoint
+get:
+  tags:
+    - data
+  operationId: data-get
+  summary: Get data
+  security:
+    - bearerAuth: []
+  parameters:
+    - in: query
+      name: query_type
+      schema:
+        type: string
+        enum:
+          - get_all_data
+          - get_data_by_id
+      description: type of data query to execute
+    - in: query
+      name: data_id
+      schema:
+        type: string
+      description: id of the data to fetch
+  responses:
+    "200":
+      description: "Successfully retreived status"
+      content:
+        application/json:
+          schema:
+            $ref: "../components/schemas/200_response.yaml"
+    "401":
+      description: "Bad request"
+      content:
+        application/json:
+          schema:
+            $ref: "../components/schemas/401_response.yaml"
+post:
+  tags:
+    - data
+  operationId: data-post
+  summary: Create data
+  security:
+    - bearerAuth: []
+  requestBody:
+    content:
+      application/json:
+        schema:
+          type: array
+          items:
+            $ref: "../components/schemas/data/post.yaml"
+  responses:
+    "200":
+      description: "Successfully created data"
+      content:
+        application/json:
+          schema:
+            $ref: "../components/schemas/200_response.yaml"
+    "401":
+      description: "Bad request"
+      content:
+        application/json:
+          schema:
+            $ref: "../components/schemas/401_response.yaml"
+put:
+  tags:
+    - data
+  operationId: data-put
+  summary: Update data
+  security:
+    - bearerAuth: []
+  requestBody:
+    content:
+      application/json:
+        schema:
+          type: array
+          items:
+            $ref: "../components/schemas/data/put.yaml"
+  responses:
+    "200":
+      description: "Successfully updated data"
+      content:
+        application/json:
+          schema:
+            $ref: "../components/schemas/200_response.yaml"
+    "401":
+      description: "Bad request"
+      content:
+        application/json:
+          schema:
+            $ref: "../components/schemas/401_response.yaml"
+delete:
+  tags:
+    - data
+  operationId: data-delete
+  summary: Delete data
+  security:
+    - bearerAuth: []
+  requestBody:
+    content:
+      application/json:
+        schema:
+          type: array
+          items:
+            $ref: "../components/schemas/data/delete.yaml"
+  responses:
+    "200":
+      description: "Successfully deleted data"
+      content:
+        application/json:
+          schema:
+            $ref: "../components/schemas/200_response.yaml"
+    "401":
+      description: "Bad request"
+      content:
+        application/json:
+          schema:
+            $ref: "../components/schemas/401_response.yaml"

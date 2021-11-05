@@ -1,0 +1,16 @@
+description: Data create schema
+type: object
+properties:
+  name:
+    type: string
+  description:
+    type: string
+  ext:
+    type: string
+  file_type:
+    type: string
+required:
+  - "data_id"
+  - "name"
+  - "ext"
+  - "file_type"
