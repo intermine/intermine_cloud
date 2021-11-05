@@ -73,13 +73,13 @@ spec:
         s3:
           key: {{ postgresdump_path }}
       - name: solr-data
-        path: /solr/solr
+        path: /solr/server/solr
         s3:
-          key: {{  solrdump_path }}
+          key: {{ solrdump_path }}
     container:
       image: alpine:3.8
       command:  [sh, -c]
-      args: ["chown -R 1001:1001 /postgres/data /solr/solr && mv /solr/solr/* /solr && rmdir /solr/solr"]
+      args: ["chown -R 1001:1001 /postgres/data /solr/server && mv -v /solr/server/solr/data/* /solr/server/solr"]
       volumeMounts:
       - name: workdir
         mountPath: /home/intermine
@@ -145,6 +145,7 @@ spec:
   - name: tomcat
     container:
       image: intermine/tomcat:latest
+      # Copy Tomcat configs/libs/etc. excluding webapps.
       command: ["sh", "-c", "cp -av $CATALINA_HOME/. /tomcat && rm -rvf /tomcat/webapps"]
       volumeMounts:
       - name: tomcat-data
