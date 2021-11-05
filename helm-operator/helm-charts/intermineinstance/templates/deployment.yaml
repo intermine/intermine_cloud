@@ -47,10 +47,15 @@ spec:
               port: http
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
-          {{- if .Values.image.env }}
           env:
-            {{- toYaml .Values.image.env | nindent 12 }}
-          {{- end }}
+            - name: SERVER_PORT
+              value: "80"
+            - name: BLUEGENES_DEFAULT_SERVICE_ROOT
+              value: {{ .Values.bluegenes.serviceRoot }}
+            - name: BLUEGENES_DEFAULT_MINE_NAME
+              value: {{ .Values.bluegenes.mineName }}
+            - name: BLUEGENES_DEFAULT_NAMESPACE
+              value: {{ .Values.bluegenes.mineNamespace }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

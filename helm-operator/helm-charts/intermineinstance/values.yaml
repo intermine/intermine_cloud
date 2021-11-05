@@ -9,16 +9,6 @@ image:
   pullPolicy: Always
   # Overrides the image tag whose default is the chart appVersion.
   tag: "latest"
-  env:
-    - name: SERVER_PORT
-      value: "80"
-      # TODO make below dynamic
-    - name: BLUEGENES_DEFAULT_SERVICE_ROOT
-      value: "localhost/biotestmine"
-    - name: BLUEGENES_DEFAULT_MINE_NAME
-      value: "BiotestMine"
-    - name: BLUEGENES_DEFAULT_NAMESPACE
-      value: "biotestmine"
 
 imagePullSecrets: []
 nameOverride: ""
@@ -116,3 +106,9 @@ tomcat:
     enabled: true
     hostname: localhost
     pathType: Prefix
+
+# Default values that should be overriden by manifest.
+bluegenes:
+  serviceRoot: "localhost/biotestmine"
+  mineName: "BiotestMine"
+  mineNamespace: "biotestmine"
