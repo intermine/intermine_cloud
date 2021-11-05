@@ -32,14 +32,14 @@ spec:
       accessModes: [ "ReadWriteOnce" ]
       resources:
         requests:
-          storage: 4Gi
+          storage: 1Gi
   - metadata:
       name: solr-data
     spec:
       accessModes: [ "ReadWriteOnce" ]
       resources:
         requests:
-          storage: 4Gi
+          storage: 1Gi
   templates:
   - name: build-mine
     steps:
