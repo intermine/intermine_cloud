@@ -122,7 +122,8 @@ spec:
               command: ["kubectl"]
               args: {% raw %}["wait", "--for=condition=Completed=True", "workflow/{{workflow.name}}", "--timeout=-1s"]{% endraw %}
           bluegenes:
-            serviceRoot: {% raw %}{{workflow.name}}-tomcat:8080{% endraw %}/{{ mine_name }}
+            backendServiceRoot: {% raw %}{{workflow.name}}-tomcat:8080{% endraw %}/{{ mine_name }}
+            serviceRoot: legacy.localhost/{{ mine_name }}
             mineName: {{ pretty_mine_name }}
             mineNamespace: {{ mine_name }}
   - name: prebuilder

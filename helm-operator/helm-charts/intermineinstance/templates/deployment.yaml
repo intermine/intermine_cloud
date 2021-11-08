@@ -50,6 +50,8 @@ spec:
           env:
             - name: SERVER_PORT
               value: "80"
+            - name: BLUEGENES_BACKEND_SERVICE_ROOT
+              value: {{ .Values.bluegenes.backendServiceRoot }}
             - name: BLUEGENES_DEFAULT_SERVICE_ROOT
               value: {{ .Values.bluegenes.serviceRoot }}
             - name: BLUEGENES_DEFAULT_MINE_NAME
