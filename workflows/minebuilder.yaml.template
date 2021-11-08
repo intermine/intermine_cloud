@@ -32,14 +32,14 @@ spec:
       accessModes: [ "ReadWriteOnce" ]
       resources:
         requests:
-          storage: 4Gi
+          storage: 1Gi
   - metadata:
       name: solr-data
     spec:
       accessModes: [ "ReadWriteOnce" ]
       resources:
         requests:
-          storage: 4Gi
+          storage: 1Gi
   templates:
   - name: build-mine
     steps:
@@ -103,7 +103,7 @@ spec:
     retryStrategy:
       limit: 3
     container:
-      image: intermine/postgres:latest
+      image: intermine/postgres:0.0.2 # WARNING - not on docker hub
       readinessProbe:
         exec:
           command:

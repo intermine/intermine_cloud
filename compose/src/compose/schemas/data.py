@@ -11,6 +11,6 @@ class Data(BaseModel):
 
     data_id: Optional[UUID4]
     name: str
-    ext: Optional[str]
+    ext: str
     file_type: str
     file_id: Optional[UUID4]

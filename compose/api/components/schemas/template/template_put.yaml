@@ -1,0 +1,12 @@
+description: Template update schema
+type: object
+properties:
+  template_id:
+    type: string
+  name:
+    type: string
+  description:
+    type: string
+required:
+  - "template_id"
+

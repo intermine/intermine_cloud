@@ -1,6 +1,6 @@
 ```
 make docker-build
-kind load docker-image intermine/helm-operator:0.0.1 --name kind-ingress
+kind load docker-image intermine/helm-operator:0.0.1
 make deploy
 kubectl apply -f config/samples/intermine_v1alpha1_intermineinstance.yaml
 # Play with it!

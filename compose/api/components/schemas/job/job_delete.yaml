@@ -1,0 +1,8 @@
+description: Job delete schema
+type: object
+properties:
+  job_id:
+    type: string
+required:
+  - "job_id"
+

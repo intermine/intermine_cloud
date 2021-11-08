@@ -1,11 +1,11 @@
 
-summary: job resource endpoint
-description: job endpoint
+summary: data resource endpoint
+description: data endpoint
 get:
   tags:
-    - job
-  operationId: job-get
-  summary: Get jobs
+    - data
+  operationId: data-get
+  summary: Get data
   security:
     - bearerAuth: []
   parameters:
@@ -14,14 +14,14 @@ get:
       schema:
         type: string
         enum:
-          - get_all_jobs
-          - get_job_by_id
-      description: type of job query to execute
+          - get_all_data
+          - get_data_by_id
+      description: type of data query to execute
     - in: query
-      name: job_id
+      name: data_id
       schema:
         type: string
-      description: id of the job to fetch
+      description: id of the data to fetch
   responses:
     "200":
       description: "Successfully retreived status"
@@ -37,9 +37,9 @@ get:
             $ref: "../components/schemas/401_response.yaml"
 post:
   tags:
-    - job
-  operationId: job-post
-  summary: Create jobs
+    - data
+  operationId: data-post
+  summary: Create data
   security:
     - bearerAuth: []
   requestBody:
@@ -48,10 +48,10 @@ post:
         schema:
           type: array
           items:
-            $ref: "../components/schemas/job/job_post.yaml"
+            $ref: "../components/schemas/data/data_post.yaml"
   responses:
     "200":
-      description: "Successfully created jobs"
+      description: "Successfully created data"
       content:
         application/json:
           schema:
@@ -64,9 +64,9 @@ post:
             $ref: "../components/schemas/401_response.yaml"
 put:
   tags:
-    - job
-  operationId: job-put
-  summary: Update jobs
+    - data
+  operationId: data-put
+  summary: Update data
   security:
     - bearerAuth: []
   requestBody:
@@ -75,10 +75,10 @@ put:
         schema:
           type: array
           items:
-            $ref: "../components/schemas/job/job_put.yaml"
+            $ref: "../components/schemas/data/data_put.yaml"
   responses:
     "200":
-      description: "Successfully updated jobs"
+      description: "Successfully updated data"
       content:
         application/json:
           schema:
@@ -91,9 +91,9 @@ put:
             $ref: "../components/schemas/401_response.yaml"
 delete:
   tags:
-    - job
-  operationId: job-delete
-  summary: Delete jobs
+    - data
+  operationId: data-delete
+  summary: Delete data
   security:
     - bearerAuth: []
   requestBody:
@@ -102,10 +102,10 @@ delete:
         schema:
           type: array
           items:
-            $ref: "../components/schemas/job/job_delete.yaml"
+            $ref: "../components/schemas/data/data_delete.yaml"
   responses:
     "200":
-      description: "Successfully deleted jobs"
+      description: "Successfully deleted data"
       content:
         application/json:
           schema:

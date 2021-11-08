@@ -26,6 +26,7 @@ def main():
 
     context = {
             'mine_name': mine_name,
+            'pretty_mine_name': mine_name.capitalize(),
             'minedir_path': bucket_path + '/mine-dir.tgz',
             'postgresdump_path': bucket_path + '/postgres-dump.tgz',
             'solrdump_path': bucket_path + '/solr-dump.tgz',

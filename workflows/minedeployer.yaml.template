@@ -3,7 +3,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Workflow
 metadata:
-  generateName: deploy-a-mine
+  generateName: deploy-a-mine-
 spec:
   entrypoint: deploy-mine
   volumeClaimTemplates:
@@ -20,14 +20,21 @@ spec:
       accessModes: [ "ReadWriteOnce" ]
       resources:
         requests:
-          storage: 4Gi
+          storage: 1Gi
   - metadata:
       name: solr-data
     spec:
       accessModes: [ "ReadWriteOnce" ]
       resources:
         requests:
-          storage: 4Gi
+          storage: 1Gi
+  - metadata:
+      name: tomcat-data
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 1Gi
   templates:
   - name: deploy-mine
     steps:
@@ -42,21 +49,17 @@ spec:
         arguments:
           parameters:
           - name: postgres-host
-            value: {% raw %}"mine-{{workflow.uid}}-postgres"{% endraw %}
+            value: {% raw %}"{{workflow.name}}-postgres"{% endraw %}
           - name: solr-host
-            value: {% raw %}"mine-{{workflow.uid}}-solr"{% endraw %}
+            value: {% raw %}"{{workflow.name}}-solr"{% endraw %}
           - name: tomcat-host
-            value: {% raw %}"mine-{{workflow.uid}}-tomcat"{% endraw %}
+            value: {% raw %}"{{workflow.name}}-tomcat"{% endraw %}
 
-    # TODO don't move onto the next step until tomcat is running
-    # https://github.com/argoproj/argo-workflows/blob/master/examples/README.md#sidecars
+    - - name: prepare-tomcat
+        template: tomcat
 
     - - name: deploy
-        template: builder
-        arguments:
-          parameters:
-          - name: task
-            value: cargoDeployRemote
+        template: war-builder
 
   - name: getter
     inputs:
@@ -70,11 +73,13 @@ spec:
         s3:
           key: {{ postgresdump_path }}
       - name: solr-data
-        path: /solr/solr
+        path: /solr/server/solr
         s3:
-          key: {{  solrdump_path }}
+          key: {{ solrdump_path }}
     container:
       image: alpine:3.8
+      command:  [sh, -c]
+      args: ["chown -R 1001:1001 /postgres/data /solr/server && mv -v /solr/server/solr/data/* /solr/server/solr"]
       volumeMounts:
       - name: workdir
         mountPath: /home/intermine
@@ -86,21 +91,40 @@ spec:
     resource:
       action: create
       manifest: |
-        apiVersion: intermine.intermine.org/v1alpha1
+        apiVersion: intermine.org/v1alpha1
         kind: IntermineInstance
         metadata:
-          name: {% raw %}"mine-{{workflow.uid}}-instance"{% endraw %}
+          name: {% raw %}"{{workflow.name}}"{% endraw %}
         spec:
           postgresql:
-            fullnameOverride: {% raw %}"mine-{{workflow.uid}}-postgres"{% endraw %}
+            fullnameOverride: {% raw %}"{{workflow.name}}-postgres"{% endraw %}
             persistence:
-              existingClaim: postgres-data
+              existingClaim: {% raw %}"{{workflow.name}}-postgres-data"{% endraw %}
+              mountPath: /bitnami/postgresql/data
+              subPath: data
           solr:
-            fullnameOverride: {% raw %}"mine-{{workflow.uid}}-solr"{% endraw %}
+            fullnameOverride: {% raw %}"{{workflow.name}}-solr"{% endraw %}
             persistence:
-              existingClaim: solr-data
+              existingClaim: {% raw %}"{{workflow.name}}-solr-data"{% endraw %}
           tomcat:
-            fullnameOverride: {% raw %}"mine-{{workflow.uid}}-tomcat"{% endraw %}
+            fullnameOverride: {% raw %}"{{workflow.name}}-tomcat"{% endraw %}
+            persistence:
+              existingClaim: {% raw %}"{{workflow.name}}-tomcat-data"{% endraw %}
+            livenessProbe:
+              httpGet:
+                path: /{{ mine_name }}/begin.do
+            readinessProbe:
+              httpGet:
+                path: /{{ mine_name }}/begin.do
+            initContainers:
+            - name: wait-for-pvc
+              image: bitnami/kubectl:1.20.12
+              command: ["kubectl"]
+              args: {% raw %}["wait", "--for=condition=Completed=True", "workflow/{{workflow.name}}", "--timeout=-1s"]{% endraw %}
+          bluegenes:
+            serviceRoot: {% raw %}{{workflow.name}}-tomcat:8080{% endraw %}/{{ mine_name }}
+            mineName: {{ pretty_mine_name }}
+            mineNamespace: {{ mine_name }}
   - name: prebuilder
     inputs:
       parameters:
@@ -122,15 +146,21 @@ spec:
       volumeMounts:
       - name: workdir
         mountPath: /home/intermine
-  - name: builder
-    inputs:
-      parameters:
-      - name: task
+  - name: tomcat
+    container:
+      image: intermine/tomcat:latest
+      # Copy Tomcat configs/libs/etc. excluding webapps.
+      command: ["sh", "-c", "cp -av $CATALINA_HOME/. /tomcat && rm -rvf /tomcat/webapps"]
+      volumeMounts:
+      - name: tomcat-data
+        mountPath: /tomcat
+  - name: war-builder
     container:
       image: intermine/build:latest
       workingDir: /home/intermine/{{ mine_name }}
       command: [sh, -c]
-      args: {% raw %}["./gradlew {{inputs.parameters.task}}"]{% endraw %}
+      # TODO support webapp.path set to nested directory
+      args: ["./gradlew war && mkdir -v /tomcat/webapps && cp -v webapp/build/libs/webapp.war /tomcat/webapps/{{ mine_name }}.war && chown -R 1001:1001 /tomcat/*"]
       resources:
         requests:
           memory: 4Gi
@@ -138,3 +168,5 @@ spec:
       volumeMounts:
       - name: workdir
         mountPath: /home/intermine
+      - name: tomcat-data
+        mountPath: /tomcat
