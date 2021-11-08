@@ -48,7 +48,7 @@ put:
         schema:
           type: array
           items:
-            $ref: "../components/schemas/file/put.yaml"
+            $ref: "../components/schemas/file/file_put.yaml"
   responses:
     "200":
       description: "Successfully updated file"

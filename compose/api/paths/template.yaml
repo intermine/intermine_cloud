@@ -48,7 +48,7 @@ post:
         schema:
           type: array
           items:
-            $ref: "../components/schemas/template/post.yaml"
+            $ref: "../components/schemas/template/template_post.yaml"
   responses:
     "200":
       description: "Successfully created template"
@@ -75,7 +75,7 @@ put:
         schema:
           type: array
           items:
-            $ref: "../components/schemas/template/put.yaml"
+            $ref: "../components/schemas/template/template_put.yaml"
   responses:
     "200":
       description: "Successfully updated template"
@@ -102,7 +102,7 @@ delete:
         schema:
           type: array
           items:
-            $ref: "../components/schemas/template/delete.yaml"
+            $ref: "../components/schemas/template/template_delete.yaml"
   responses:
     "200":
       description: "Successfully deleted template"

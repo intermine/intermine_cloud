@@ -48,7 +48,7 @@ post:
         schema:
           type: array
           items:
-            $ref: "../components/schemas/mine/post.yaml"
+            $ref: "../components/schemas/mine/mine_post.yaml"
   responses:
     "200":
       description: "Successfully created mine"
@@ -75,7 +75,7 @@ put:
         schema:
           type: array
           items:
-            $ref: "../components/schemas/mine/put.yaml"
+            $ref: "../components/schemas/mine/mine_put.yaml"
   responses:
     "200":
       description: "Successfully updated mine"
@@ -102,7 +102,7 @@ delete:
         schema:
           type: array
           items:
-            $ref: "../components/schemas/mine/delete.yaml"
+            $ref: "../components/schemas/mine/mine_delete.yaml"
   responses:
     "200":
       description: "Successfully deleted mine"

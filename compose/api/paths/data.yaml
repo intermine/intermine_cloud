@@ -48,7 +48,7 @@ post:
         schema:
           type: array
           items:
-            $ref: "../components/schemas/data/post.yaml"
+            $ref: "../components/schemas/data/data_post.yaml"
   responses:
     "200":
       description: "Successfully created data"
@@ -75,7 +75,7 @@ put:
         schema:
           type: array
           items:
-            $ref: "../components/schemas/data/put.yaml"
+            $ref: "../components/schemas/data/data_put.yaml"
   responses:
     "200":
       description: "Successfully updated data"
@@ -102,7 +102,7 @@ delete:
         schema:
           type: array
           items:
-            $ref: "../components/schemas/data/delete.yaml"
+            $ref: "../components/schemas/data/data_delete.yaml"
   responses:
     "200":
       description: "Successfully deleted data"
