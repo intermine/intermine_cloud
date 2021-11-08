@@ -69,7 +69,8 @@ export const GlobalModal = () => {
                 primaryAction = {},
                 secondaryAction = {},
                 type = 'warning'
-            }
+            },
+            closeGlobalModal
         }
     } = store
 
@@ -93,7 +94,11 @@ export const GlobalModal = () => {
     }
 
     return (
-        <Modal isOpen={isOpen} classes={classes}>
+        <Modal
+            isOpen={isOpen}
+            classes={classes}
+            onRequestClose={closeGlobalModal}
+        >
             <Box className={classes.iconContainer} variant="h3">
                 {getIcon()}
             </Box>

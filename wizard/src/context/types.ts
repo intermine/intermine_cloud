@@ -85,7 +85,7 @@ export type TGlobalModalReducer = {
     heading?: string
     type?: 'error' | 'warning' | 'success' | 'info'
     children?: React.ReactChild | React.ReactChild[]
-    isOpen?: boolean
+    isOpen: boolean
     primaryAction?: ButtonCommonProps
     secondaryAction?: ButtonCommonProps
 }
