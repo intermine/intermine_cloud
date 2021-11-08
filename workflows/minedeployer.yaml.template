@@ -121,11 +121,15 @@ spec:
               image: bitnami/kubectl:1.20.12
               command: ["kubectl"]
               args: {% raw %}["wait", "--for=condition=Completed=True", "workflow/{{workflow.name}}", "--timeout=-1s"]{% endraw %}
+            ingress:
+              hostname: legacy.localhost
           bluegenes:
-            backendServiceRoot: {% raw %}{{workflow.name}}-tomcat:8080{% endraw %}/{{ mine_name }}
-            serviceRoot: legacy.localhost/{{ mine_name }}
+            backendServiceRoot: {% raw %}http://{{workflow.name}}-tomcat:8080{% endraw %}/{{ mine_name }}
+            serviceRoot: http://legacy.localhost/{{ mine_name }}
             mineName: {{ pretty_mine_name }}
             mineNamespace: {{ mine_name }}
+          ingress:
+            hostname: localhost
   - name: prebuilder
     inputs:
       parameters:
