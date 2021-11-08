@@ -1,4 +1,4 @@
-description: Data delete schema
+description: Mine delete schema
 type: object
 properties:
   data_id:

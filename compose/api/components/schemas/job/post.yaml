@@ -1,20 +1,18 @@
-description: Site create schema
+description: Job create schema
 type: object
 properties:
-  country:
-    type: string
-  state:
-    type: string
-  district:
-    type: string
-  city:
-    type: string
   name:
     type: string
+  description:
+    type: string
+  job_type:
+    type: string
+  specification:
+    type: object
+  metadata:
+    type: object
+  script:
+    type: string
 required:
-  - "country"
-  - "state"
-  - "district"
-  - "city"
   - "name"
-
+  

@@ -1,0 +1,118 @@
+
+summary: template resource endpoint
+description: template endpoint
+get:
+  tags:
+    - template
+  operationId: template-get
+  summary: Get template
+  security:
+    - bearerAuth: []
+  parameters:
+    - in: query
+      name: query_type
+      schema:
+        type: string
+        enum:
+          - get_all_templates
+          - get_template_by_id
+      description: type of template query to execute
+    - in: query
+      name: template_id
+      schema:
+        type: string
+      description: id of the template to fetch
+  responses:
+    "200":
+      description: "Successfully retreived status"
+      content:
+        application/json:
+          schema:
+            $ref: "../components/schemas/200_response.yaml"
+    "401":
+      description: "Bad request"
+      content:
+        application/json:
+          schema:
+            $ref: "../components/schemas/401_response.yaml"
+post:
+  tags:
+    - template
+  operationId: template-post
+  summary: Create template
+  security:
+    - bearerAuth: []
+  requestBody:
+    content:
+      application/json:
+        schema:
+          type: array
+          items:
+            $ref: "../components/schemas/template/post.yaml"
+  responses:
+    "200":
+      description: "Successfully created template"
+      content:
+        application/json:
+          schema:
+            $ref: "../components/schemas/200_response.yaml"
+    "401":
+      description: "Bad request"
+      content:
+        application/json:
+          schema:
+            $ref: "../components/schemas/401_response.yaml"
+put:
+  tags:
+    - template
+  operationId: template-put
+  summary: Update template
+  security:
+    - bearerAuth: []
+  requestBody:
+    content:
+      application/json:
+        schema:
+          type: array
+          items:
+            $ref: "../components/schemas/template/put.yaml"
+  responses:
+    "200":
+      description: "Successfully updated template"
+      content:
+        application/json:
+          schema:
+            $ref: "../components/schemas/200_response.yaml"
+    "401":
+      description: "Bad request"
+      content:
+        application/json:
+          schema:
+            $ref: "../components/schemas/401_response.yaml"
+delete:
+  tags:
+    - template
+  operationId: template-delete
+  summary: Delete template
+  security:
+    - bearerAuth: []
+  requestBody:
+    content:
+      application/json:
+        schema:
+          type: array
+          items:
+            $ref: "../components/schemas/template/delete.yaml"
+  responses:
+    "200":
+      description: "Successfully deleted template"
+      content:
+        application/json:
+          schema:
+            $ref: "../components/schemas/200_response.yaml"
+    "401":
+      description: "Bad request"
+      content:
+        application/json:
+          schema:
+            $ref: "../components/schemas/401_response.yaml"

@@ -22,8 +22,16 @@ externalDocs:
 tags:
   - name: auth
     description: Auth operations
-  - name: user
-    description: User operations
+  - name: data
+    description: Data operations
+  - name: template
+    description: Template operations
+  - name: mine
+    description: Mine operations
+  - name: file
+    description: File operations
+  - name: job
+    description: Job operations
 servers:
   - url: "https://localhost:{port}/v1"
     description: Localhost server
@@ -48,9 +56,13 @@ paths:
     $ref: paths/job.yaml
   /data:
     $ref: paths/data.yaml
+  /template:
+    $ref: paths/template.yaml
+  /mine:
+    $ref: paths/mine.yaml
+  /file:
+    $ref: paths/file.yaml
 components:
   securitySchemes:
     bearerAuth:
-      type: http
-      scheme: bearer
-      bearerFormat: JWT
+      $ref: components/securitySchemes/bearer_auth.yaml

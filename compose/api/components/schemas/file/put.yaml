@@ -1,0 +1,12 @@
+description: File update schema
+type: object
+properties:
+  file_id:
+    type: string
+  name:
+    type: string
+  uploaded:
+    type: boolean
+required:
+  - "file_id"
+

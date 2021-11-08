@@ -1,0 +1,118 @@
+
+summary: mine resource endpoint
+description: mine endpoint
+get:
+  tags:
+    - mine
+  operationId: mine-get
+  summary: Get mine
+  security:
+    - bearerAuth: []
+  parameters:
+    - in: query
+      name: query_type
+      schema:
+        type: string
+        enum:
+          - get_all_mines
+          - get_mine_by_id
+      description: type of mine query to execute
+    - in: query
+      name: mine_id
+      schema:
+        type: string
+      description: id of the mine to fetch
+  responses:
+    "200":
+      description: "Successfully retreived status"
+      content:
+        application/json:
+          schema:
+            $ref: "../components/schemas/200_response.yaml"
+    "401":
+      description: "Bad request"
+      content:
+        application/json:
+          schema:
+            $ref: "../components/schemas/401_response.yaml"
+post:
+  tags:
+    - mine
+  operationId: mine-post
+  summary: Create mine
+  security:
+    - bearerAuth: []
+  requestBody:
+    content:
+      application/json:
+        schema:
+          type: array
+          items:
+            $ref: "../components/schemas/mine/post.yaml"
+  responses:
+    "200":
+      description: "Successfully created mine"
+      content:
+        application/json:
+          schema:
+            $ref: "../components/schemas/200_response.yaml"
+    "401":
+      description: "Bad request"
+      content:
+        application/json:
+          schema:
+            $ref: "../components/schemas/401_response.yaml"
+put:
+  tags:
+    - mine
+  operationId: mine-put
+  summary: Update mine
+  security:
+    - bearerAuth: []
+  requestBody:
+    content:
+      application/json:
+        schema:
+          type: array
+          items:
+            $ref: "../components/schemas/mine/put.yaml"
+  responses:
+    "200":
+      description: "Successfully updated mine"
+      content:
+        application/json:
+          schema:
+            $ref: "../components/schemas/200_response.yaml"
+    "401":
+      description: "Bad request"
+      content:
+        application/json:
+          schema:
+            $ref: "../components/schemas/401_response.yaml"
+delete:
+  tags:
+    - mine
+  operationId: mine-delete
+  summary: Delete mine
+  security:
+    - bearerAuth: []
+  requestBody:
+    content:
+      application/json:
+        schema:
+          type: array
+          items:
+            $ref: "../components/schemas/mine/delete.yaml"
+  responses:
+    "200":
+      description: "Successfully deleted mine"
+      content:
+        application/json:
+          schema:
+            $ref: "../components/schemas/200_response.yaml"
+    "401":
+      description: "Bad request"
+      content:
+        application/json:
+          schema:
+            $ref: "../components/schemas/401_response.yaml"

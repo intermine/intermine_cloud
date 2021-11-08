@@ -1,0 +1,13 @@
+description: Template create schema
+type: object
+properties:
+  name:
+    type: string
+  description:
+    type: string
+  template_vars:
+    type: arrays
+    items:
+      type: string
+required:
+  - "name"

@@ -1,0 +1,64 @@
+
+summary: file resource endpoint
+description: file endpoint
+get:
+  tags:
+    - file
+  operationId: file-get
+  summary: Get file
+  security:
+    - bearerAuth: []
+  parameters:
+    - in: query
+      name: query_type
+      schema:
+        type: string
+        enum:
+          - get_all_files
+          - get_file_by_id
+      description: type of file query to execute
+    - in: query
+      name: file_id
+      schema:
+        type: string
+      description: id of the file to fetch
+  responses:
+    "200":
+      description: "Successfully retreived status"
+      content:
+        application/json:
+          schema:
+            $ref: "../components/schemas/200_response.yaml"
+    "401":
+      description: "Bad request"
+      content:
+        application/json:
+          schema:
+            $ref: "../components/schemas/401_response.yaml"
+put:
+  tags:
+    - file
+  operationId: file-put
+  summary: Update file
+  security:
+    - bearerAuth: []
+  requestBody:
+    content:
+      application/json:
+        schema:
+          type: array
+          items:
+            $ref: "../components/schemas/file/put.yaml"
+  responses:
+    "200":
+      description: "Successfully updated file"
+      content:
+        application/json:
+          schema:
+            $ref: "../components/schemas/200_response.yaml"
+    "401":
+      description: "Bad request"
+      content:
+        application/json:
+          schema:
+            $ref: "../components/schemas/401_response.yaml"

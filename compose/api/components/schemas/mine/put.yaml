@@ -1,0 +1,13 @@
+description: Mine update schema
+type: object
+properties:
+  mine_id:
+    type: string
+  name:
+    type: string
+  description:
+    type: string
+  preference:
+    type: object
+required:
+  - "data_id"
