@@ -1,0 +1,118 @@
+
+summary: user resource endpoint
+description: user endpoint
+get:
+  tags:
+    - user
+  operationId: user-get
+  summary: Get user
+  security:
+    - bearerAuth: []
+  parameters:
+    - in: query
+      name: query_type
+      schema:
+        type: string
+        enum:
+          - get_all_users
+          - get_user_by_id
+      description: type of user query to execute
+    - in: query
+      name: user_id
+      schema:
+        type: string
+      description: id of the user to fetch
+  responses:
+    "200":
+      description: "Successfully retreived status"
+      content:
+        application/json:
+          schema:
+            $ref: "../components/schemas/200_response.yaml"
+    "401":
+      description: "Bad request"
+      content:
+        application/json:
+          schema:
+            $ref: "../components/schemas/401_response.yaml"
+post:
+  tags:
+    - user
+  operationId: user-post
+  summary: Create user
+  security:
+    - bearerAuth: []
+  requestBody:
+    content:
+      application/json:
+        schema:
+          type: array
+          items:
+            $ref: "../components/schemas/user/user_post.yaml"
+  responses:
+    "200":
+      description: "Successfully created user"
+      content:
+        application/json:
+          schema:
+            $ref: "../components/schemas/200_response.yaml"
+    "401":
+      description: "Bad request"
+      content:
+        application/json:
+          schema:
+            $ref: "../components/schemas/401_response.yaml"
+put:
+  tags:
+    - user
+  operationId: user-put
+  summary: Update user
+  security:
+    - bearerAuth: []
+  requestBody:
+    content:
+      application/json:
+        schema:
+          type: array
+          items:
+            $ref: "../components/schemas/user/user_put.yaml"
+  responses:
+    "200":
+      description: "Successfully updated user"
+      content:
+        application/json:
+          schema:
+            $ref: "../components/schemas/200_response.yaml"
+    "401":
+      description: "Bad request"
+      content:
+        application/json:
+          schema:
+            $ref: "../components/schemas/401_response.yaml"
+delete:
+  tags:
+    - user
+  operationId: user-delete
+  summary: Delete user
+  security:
+    - bearerAuth: []
+  requestBody:
+    content:
+      application/json:
+        schema:
+          type: array
+          items:
+            $ref: "../components/schemas/user/user_delete.yaml"
+  responses:
+    "200":
+      description: "Successfully deleted user"
+      content:
+        application/json:
+          schema:
+            $ref: "../components/schemas/200_response.yaml"
+    "401":
+      description: "Bad request"
+      content:
+        application/json:
+          schema:
+            $ref: "../components/schemas/401_response.yaml"

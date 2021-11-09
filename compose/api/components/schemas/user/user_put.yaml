@@ -1,0 +1,13 @@
+description: User update schema
+type: object
+properties:
+  user_id:
+    type: string
+  name:
+    type: string
+  organisation:
+    type: string
+  active:
+    type: boolean
+required:
+  - "user_id"

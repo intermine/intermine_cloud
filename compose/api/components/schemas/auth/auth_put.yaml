@@ -1,0 +1,11 @@
+description: Auth reset password schema
+type: object
+properties:
+  email:
+    type: string
+  password_reset_token:
+    type: string
+  new_password:
+    type: string
+required:
+  - "email"

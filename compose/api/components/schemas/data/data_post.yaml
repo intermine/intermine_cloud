@@ -10,7 +10,6 @@ properties:
   file_type:
     type: string
 required:
-  - "data_id"
   - "name"
   - "ext"
   - "file_type"

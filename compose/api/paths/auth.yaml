@@ -1,0 +1,104 @@
+
+summary: auth resource endpoint
+description: auth endpoint
+get:
+  tags:
+    - auth
+  operationId: auth-check
+  summary: Check auth
+  security:
+    - bearerAuth: []
+  responses:
+    "200":
+      description: "Successfully retreived status"
+      content:
+        application/json:
+          schema:
+            $ref: "../components/schemas/200_response.yaml"
+    "401":
+      description: "Bad request"
+      content:
+        application/json:
+          schema:
+            $ref: "../components/schemas/401_response.yaml"
+post:
+  tags:
+    - auth
+  operationId: auth-post
+  summary: Login
+  security:
+    - bearerAuth: []
+  requestBody:
+    content:
+      application/json:
+        schema:
+          type: array
+          items:
+            $ref: "../components/schemas/auth/auth_post.yaml"
+  responses:
+    "200":
+      description: "Successfully created auth"
+      content:
+        application/json:
+          schema:
+            $ref: "../components/schemas/200_response.yaml"
+    "401":
+      description: "Bad request"
+      content:
+        application/json:
+          schema:
+            $ref: "../components/schemas/401_response.yaml"
+put:
+  tags:
+    - auth
+  operationId: auth-put
+  summary: Creds reset
+  security:
+    - bearerAuth: []
+  requestBody:
+    content:
+      application/json:
+        schema:
+          type: array
+          items:
+            $ref: "../components/schemas/auth/auth_put.yaml"
+  responses:
+    "200":
+      description: "Successfully updated auth"
+      content:
+        application/json:
+          schema:
+            $ref: "../components/schemas/200_response.yaml"
+    "401":
+      description: "Bad request"
+      content:
+        application/json:
+          schema:
+            $ref: "../components/schemas/401_response.yaml"
+delete:
+  tags:
+    - auth
+  operationId: auth-delete
+  summary: Logout
+  security:
+    - bearerAuth: []
+  requestBody:
+    content:
+      application/json:
+        schema:
+          type: array
+          items:
+            $ref: "../components/schemas/auth/auth_delete.yaml"
+  responses:
+    "200":
+      description: "Successfully deleted auth"
+      content:
+        application/json:
+          schema:
+            $ref: "../components/schemas/200_response.yaml"
+    "401":
+      description: "Bad request"
+      content:
+        application/json:
+          schema:
+            $ref: "../components/schemas/401_response.yaml"
