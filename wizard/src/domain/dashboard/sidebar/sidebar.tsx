@@ -1,12 +1,16 @@
 import { useContext } from 'react'
+import { useLocation, useHistory } from 'react-router-dom'
+
 import { Box } from '@intermine/chromatin/box'
 import { List } from '@intermine/chromatin/list'
 import { ListItem } from '@intermine/chromatin/list-item'
-import { Button } from '@intermine/chromatin/button'
-import { useLocation, useHistory, NavLink } from 'react-router-dom'
+import { Button, ButtonCommonProps } from '@intermine/chromatin/button'
+import { Tooltip } from '@intermine/chromatin/tooltip'
+import { createStyle } from '@intermine/chromatin/styles'
 import OverviewIcon from '@intermine/chromatin/icons/System/apps-fill'
 import DataIcon from '@intermine/chromatin/icons/Device/database-2-fill'
 import MinesIcon from '@intermine/chromatin/icons/Business/bubble-chart-fill'
+import CollapseIcon from '@intermine/chromatin/icons/System/arrow-left-line'
 
 import { AppContext } from '../../../context'
 import {
@@ -14,7 +18,7 @@ import {
     DASHBOARD_DATA_PATH,
     DASHBOARD_MINES_PATH
 } from '../../../routes'
-import { createStyle } from '@intermine/chromatin/styles'
+import { Logo } from '../../../components/logo'
 
 const sidebarItems = [
     {
@@ -37,53 +41,94 @@ const sidebarItems = [
     }
 ]
 
+type TUseStyleProps = {
+    isOpen: boolean
+}
+
 const useStyles = createStyle((theme) => {
     const { spacing } = theme
 
     return {
-        container: {
-            padding: spacing(10, 6)
-        },
+        container: (props: TUseStyleProps) => ({
+            padding: props.isOpen ? spacing(10, 6) : spacing(10, 3)
+        }),
+        buttonContent: (props: TUseStyleProps) => ({
+            width: !props.isOpen ? 0 : '10rem',
+            overflow: 'hidden',
+            textAlign: 'left',
+            transition: '0.230s',
+            transitionDelay: '0.1s'
+        }),
         listItem: {
             '&&': {
                 marginBottom: spacing(1)
             }
         },
-        button: {
-            '&&': {
-                justifyContent: 'flex-start'
-            }
-        }
+        logo: (props: TUseStyleProps) => ({
+            height: '5rem',
+            padding: props.isOpen ? spacing(0, 0, 10, 7) : spacing(0, 0, 10, 4),
+            width: '20rem',
+            transition: '0.23s'
+        })
     }
 })
 
 export const Sidebar = () => {
-    const classes = useStyles()
     const location = useLocation()
     const history = useHistory()
     const store = useContext(AppContext)
-
     const {
-        sidebarReducer: { state: sidebarState }
+        sidebarReducer: {
+            state: {
+                isOpen,
+                isPageSwitchingAllowed,
+                onSidebarItemClick: _onSidebarItemClick
+            },
+            updateSidebarState
+        }
     } = store
+
+    const classes = useStyles({ isOpen })
 
     const isCurrentPath = (path: string): boolean => {
         return location.pathname.startsWith(path)
     }
 
     const onSidebarItemClick = (to: string) => {
-        const {
-            isPageSwitchingAllowed,
-            onSidebarItemClick: _onSidebarItemClick
-        } = sidebarState
         _onSidebarItemClick(to)
         if (isPageSwitchingAllowed) {
             history.push(to)
         }
     }
 
+    const getButtonCSX = (rotateIcons?: boolean): ButtonCommonProps['csx'] => {
+        return {
+            root: {
+                textOverflow: 'clip',
+                overflow: 'hidden',
+                whiteSpace: 'nowrap',
+                justifyContent: isOpen ? 'flex-start' : 'center',
+                ...(!isOpen && {
+                    padding: '1rem',
+                    transition: 'font-size 0'
+                })
+            },
+            iconContainerLeft: {
+                transition: '0.230s',
+                transform: 'rotate(0)',
+                ...(!isOpen && {
+                    margin: 0,
+                    ...(rotateIcons && {
+                        transform: 'rotate(180deg)'
+                    })
+                })
+            }
+        }
+    }
+
     return (
         <Box className={classes.container}>
+            <Logo className={classes.logo} hasText={isOpen} />
             <List csx={{ root: { background: 'transparent' } }}>
                 {sidebarItems.map(({ id, text, icon, to }) => {
                     const isActive = isCurrentPath(to)
@@ -94,21 +139,51 @@ export const Sidebar = () => {
                             hasPadding={false}
                             className={classes.listItem}
                         >
-                            <Button
-                                variant="ghost"
-                                onClick={() => onSidebarItemClick(to)}
-                                LeftIcon={icon}
-                                hasFullWidth
-                                className={classes.button}
-                                isHovered={isActive}
-                                hasHighlightOnFocus={false}
-                                hasHoverEffectOnFocus
+                            <Tooltip
+                                message={text}
+                                placement="right"
+                                isDisabled={isOpen}
                             >
-                                {text}
-                            </Button>
+                                <Button
+                                    variant="ghost"
+                                    onClick={() => onSidebarItemClick(to)}
+                                    LeftIcon={icon}
+                                    hasFullWidth
+                                    isHovered={isActive}
+                                    hasHighlightOnFocus={false}
+                                    hasHoverEffectOnFocus
+                                    csx={getButtonCSX()}
+                                >
+                                    <div className={classes.buttonContent}>
+                                        {text}
+                                    </div>
+                                </Button>
+                            </Tooltip>
                         </ListItem>
                     )
                 })}
+                <ListItem hasPadding={false} className={classes.listItem}>
+                    <Tooltip
+                        message="Expand Sidebar"
+                        placement="bottom-start"
+                        isDisabled={isOpen}
+                    >
+                        <Button
+                            variant="ghost"
+                            onClick={() =>
+                                updateSidebarState({ isOpen: !isOpen })
+                            }
+                            LeftIcon={<CollapseIcon />}
+                            hasFullWidth
+                            hasHighlightOnFocus={false}
+                            csx={getButtonCSX(true)}
+                        >
+                            <div className={classes.buttonContent}>
+                                Collapse Sidebar
+                            </div>
+                        </Button>
+                    </Tooltip>
+                </ListItem>
             </List>
         </Box>
     )

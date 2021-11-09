@@ -1,5 +1,5 @@
 export enum SidebarActions {
-    ChangePageSwitchStatus = 'ChangePageSwitchStatus',
+    UpdateSidebarState = 'UpdateSidebarState',
     UpdateOnSidebarClick = 'UpdateOnSidebarClick',
     RemoveOnSidebarClick = 'RemoveOnSidebarClick',
 }
