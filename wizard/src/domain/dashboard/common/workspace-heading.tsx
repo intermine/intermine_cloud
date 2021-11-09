@@ -46,7 +46,12 @@ export const WorkspaceHeading = (props: TWorkspaceHeadingProps) => {
                 <Typography variant="h1" {...heading} />
             </Box>
             {primaryAction && (
-                <Button color="primary" isDense {...primaryAction} />
+                <Button
+                    variant="outlined"
+                    color="primary"
+                    isDense
+                    {...primaryAction}
+                />
             )}
         </Box>
     )

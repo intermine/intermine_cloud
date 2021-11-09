@@ -13,7 +13,6 @@ import {
 import { RouteLoadingSpinner } from '../../components/route-loading-spinner'
 
 import { Sidebar } from './sidebar'
-import { Navbar } from './navbar'
 import { AdditionalSidebar } from './additional-sidebar'
 
 const Overview = lazy(() => import('./overview'))
@@ -40,6 +39,7 @@ const pages = [
 
 type TUseStyleProps = {
     isAdditionalSidebarOpen: boolean
+    isSidebarOpen: boolean
 }
 
 const useStyles = createStyle((theme) => {
@@ -58,17 +58,17 @@ const useStyles = createStyle((theme) => {
             backgroundColor: themeType === 'dark' ? dark.hex : grey[20]
         },
 
-        sidebarContainer: {
-            padding: '4.75rem 0 3rem',
-            width: '20rem'
-        },
+        sidebarContainer: (props: TUseStyleProps) => ({
+            width: props.isSidebarOpen ? '20rem' : '5rem',
+            transition: transitionDuration
+        }),
 
         workspaceContainer: (props: TUseStyleProps) => ({
             backgroundColor: themeType === 'dark' ? darkGrey[30] : light.hex,
             borderRadius: '1rem',
-            margin: '1rem',
+            margin: '1rem 0',
             marginRight: props.isAdditionalSidebarOpen ? '22rem' : '5rem',
-            padding: '6rem 2rem 3rem',
+            padding: '3rem 2rem',
             flex: 1,
             transition: transitionDuration
         }),
@@ -88,15 +88,6 @@ const useStyles = createStyle((theme) => {
             right: '1rem',
             position: 'fixed',
             transition: transitionDuration
-        }),
-
-        navbarContainer: (props: TUseStyleProps) => ({
-            left: 0,
-            position: 'fixed',
-            right: props.isAdditionalSidebarOpen ? '21rem' : '4rem',
-            top: 0,
-            transition: transitionDuration,
-            zIndex: 10
         })
     }
 })
@@ -106,16 +97,16 @@ const Dashboard = () => {
     const {
         additionalSidebarReducer: {
             state: { isOpen: isAdditionalSidebarOpen }
+        },
+        sidebarReducer: {
+            state: { isOpen: isSidebarOpen }
         }
     } = store
 
-    const classes = useStyles({ isAdditionalSidebarOpen })
+    const classes = useStyles({ isAdditionalSidebarOpen, isSidebarOpen })
 
     return (
         <Box className={classes.rootContainer}>
-            <Box className={classes.navbarContainer}>
-                <Navbar />
-            </Box>
             <Box
                 id={DomElementIDs.WorkspaceContainer}
                 csx={{ root: { display: 'flex', height: '100%' } }}

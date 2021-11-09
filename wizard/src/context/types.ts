@@ -62,6 +62,7 @@ export type TUsePreferencesReducer = {
  * Sidebar
  */
 export type TSidebarReducer = {
+    isOpen: boolean
     onSidebarItemClick: (to: string) => void
     isPageSwitchingAllowed: boolean
 }
@@ -73,8 +74,8 @@ export type TSidebarReducerAction = {
 
 export type TUseSidebarReducer = {
     state: TSidebarReducer
+    updateSidebarState: (data: Partial<TSidebarReducer>) => void
     onSidebarItemClick: (fn: TSidebarReducer['onSidebarItemClick']) => void
-    updatePageSwitchStatus: (status: boolean) => void
     removeOnSidebarItemClick: () => void
 }
 

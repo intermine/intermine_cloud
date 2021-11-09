@@ -22,7 +22,8 @@ type TUseStyleProps = {
     isOpen: boolean
 }
 
-const { EditProfileTab, PreferencesTab, ProgressTab } = AdditionalSidebarTabs
+const { EditProfileTab, PreferencesTab, ProgressTab, None } =
+    AdditionalSidebarTabs
 
 const actions = [
     {
@@ -45,7 +46,8 @@ const actions = [
     }
 ]
 
-const useStyles = createStyle(() => {
+const useStyles = createStyle((theme) => {
+    const { spacing } = theme
     return {
         root: {
             display: 'flex',
@@ -60,6 +62,10 @@ const useStyles = createStyle(() => {
             flexDirection: 'column',
             justifyContent: 'center',
             width: '3rem'
+        },
+
+        button: {
+            margin: spacing(1, 0)
         },
 
         actionSection: (props: TUseStyleProps) => ({
@@ -106,13 +112,17 @@ export const AdditionalSidebar = () => {
 
     const onClickActionIcon = (activeTab: AdditionalSidebarTabs) => {
         updateState({
-            isOpen: !isOpen,
+            isOpen: true,
             activeTab
         })
     }
 
     const handleLogout = () => {
         updateAuthState(AuthStates.NotAuthorize)
+        updateState({
+            isOpen: false,
+            activeTab: None
+        })
         history.push(LOGIN_PATH)
     }
 
@@ -122,13 +132,18 @@ export const AdditionalSidebar = () => {
                 {actions.map(({ tooltip, Icon, activeTab, id }) => (
                     <Tooltip message={tooltip} placement="left" key={id}>
                         <IconButton
+                            className={classes.button}
                             onClick={() => onClickActionIcon(activeTab)}
                             Icon={Icon}
                         />
                     </Tooltip>
                 ))}
                 <Tooltip message="Logout" placement="left">
-                    <IconButton Icon={<LogoutIcon />} onClick={handleLogout} />
+                    <IconButton
+                        className={classes.button}
+                        Icon={<LogoutIcon />}
+                        onClick={handleLogout}
+                    />
                 </Tooltip>
             </Box>
             <Box className={classes.actionSection}>{getComponent()}</Box>
