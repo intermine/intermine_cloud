@@ -26,7 +26,6 @@ const sidebarReducer = (
 ) => {
     const { type, data } = action
 
-    console.log('Type', type, data)
     switch (type) {
         case ChangePageSwitchStatus:
             state = { ...state, isPageSwitchingAllowed: data as boolean }
