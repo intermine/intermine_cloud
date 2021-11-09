@@ -1,6 +1,9 @@
 {{- if .Values.ingress.enabled -}}
 {{- $fullName := include "intermineinstance.fullname" . -}}
 {{- $svcPort := .Values.service.port -}}
+{{- $imService := .Values.tomcat.fullnameOverride -}}
+{{- $imServicePort := .Values.tomcat.service.port -}}
+{{- $mine := .Values.bluegenes.mineNamespace -}}
 {{- if and .Values.ingress.className (not (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion)) }}
   {{- if not (hasKey .Values.ingress.annotations "kubernetes.io/ingress.class") }}
   {{- $_ := set .Values.ingress.annotations "kubernetes.io/ingress.class" .Values.ingress.className}}
@@ -37,6 +40,65 @@ spec:
     {{- end }}
   {{- end }}
   rules:
+    - host: {{ .Values.ingress.hostname | quote }}
+      http:
+        paths:
+          - path: /
+            {{- if (semverCompare ">=1.18-0" $.Capabilities.KubeVersion.GitVersion) }}
+            pathType: Prefix
+            {{- end }}
+            backend:
+              {{- if semverCompare ">=1.19-0" $.Capabilities.KubeVersion.GitVersion }}
+              service:
+                name: {{ $fullName }}
+                port:
+                  number: {{ $svcPort }}
+              {{- else }}
+              serviceName: {{ $fullName }}
+              servicePort: {{ $svcPort }}
+              {{- end }}
+          - path: /{{ $mine }}/service
+            {{- if (semverCompare ">=1.18-0" $.Capabilities.KubeVersion.GitVersion) }}
+            pathType: Prefix
+            {{- end }}
+            backend:
+              {{- if semverCompare ">=1.19-0" $.Capabilities.KubeVersion.GitVersion }}
+              service:
+                name: {{ $imService }}
+                port:
+                  number: {{ $imServicePort }}
+              {{- else }}
+              serviceName: {{ $imService }}
+              servicePort: {{ $imServicePort }}
+              {{- end }}
+          - path: /{{ $mine }}/model
+            {{- if (semverCompare ">=1.18-0" $.Capabilities.KubeVersion.GitVersion) }}
+            pathType: Prefix
+            {{- end }}
+            backend:
+              {{- if semverCompare ">=1.19-0" $.Capabilities.KubeVersion.GitVersion }}
+              service:
+                name: {{ $imService }}
+                port:
+                  number: {{ $imServicePort }}
+              {{- else }}
+              serviceName: {{ $imService }}
+              servicePort: {{ $imServicePort }}
+              {{- end }}
+          - path: /{resource:[A-z0-9\-]+\.(xml|txt)}
+            {{- if (semverCompare ">=1.18-0" $.Capabilities.KubeVersion.GitVersion) }}
+            pathType: Exact
+            {{- end }}
+            backend:
+              {{- if semverCompare ">=1.19-0" $.Capabilities.KubeVersion.GitVersion }}
+              service:
+                name: {{ $imService }}
+                port:
+                  number: {{ $imServicePort }}
+              {{- else }}
+              serviceName: {{ $imService }}
+              servicePort: {{ $imServicePort }}
+              {{- end }}
     {{- range .Values.ingress.hosts }}
     - host: {{ .host | quote }}
       http:
