@@ -17,8 +17,8 @@ const { UpdateState } = AdditionalSidebarActions
  * Additional sidebar reducer initial state
  */
 const additionalSidebarInitialReducer: TAdditionalSidebarReducer = {
-    isOpen: true,
-    activeTab: AdditionalSidebarTabs.ProgressTab,
+    isOpen: false,
+    activeTab: AdditionalSidebarTabs.None,
 }
 
 const additionalSidebarReducer = (
