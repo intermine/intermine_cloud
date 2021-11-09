@@ -17,7 +17,7 @@ const useStyles = createStyle((theme) => {
             display: 'flex',
             justifyContent: 'space-between',
             left: 0,
-            padding: '1rem 2rem',
+            padding: '2rem',
             position: 'fixed',
             right: 0,
             top: 0,

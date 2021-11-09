@@ -13,6 +13,7 @@ import type {
     TUsePreferencesReducer,
 } from '../types'
 
+const { UpdateTheme } = PreferencesActions
 /**
  * Preferences reducer initial state
  */
@@ -24,7 +25,7 @@ const preferencesReducer = (
 ) => {
     const { type, data } = action
     switch (type) {
-        case PreferencesActions.UpdateTheme:
+        case UpdateTheme:
             state = { ...state, themeType: data as ThemeType }
             setPreferencesToLocalStorage(state)
             return state
@@ -49,7 +50,7 @@ export const usePreferencesReducer = (): TUsePreferencesReducer => {
 
     const updateTheme = (data: ThemeType) =>
         dispatch({
-            type: PreferencesActions.UpdateTheme,
+            type: UpdateTheme,
             data,
         })
 

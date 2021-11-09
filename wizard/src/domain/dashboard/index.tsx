@@ -58,14 +58,14 @@ const useStyles = createStyle((theme) => {
         },
 
         workspaceContainer: {
-            background: themeType === 'dark' ? darkGrey[30] : light.hex,
-            borderRadius: '3rem 0 0 3rem',
-            padding: '4.75rem 0 3rem',
+            backgroundColor: themeType === 'dark' ? darkGrey[30] : light.hex,
+            borderRadius: '1rem',
+            margin: '1rem',
+            padding: '6rem 2.5rem 3rem',
             flex: 1
         },
 
         pageContainer: {
-            padding: '3rem',
             position: 'relative',
             height: '100%',
             overflow: 'auto'

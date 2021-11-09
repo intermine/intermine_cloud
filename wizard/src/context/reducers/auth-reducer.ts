@@ -13,6 +13,7 @@ import type {
     TUserDetails,
 } from '../types'
 
+const { UpdateAuthState, UpdateUserDetails } = AuthActions
 /**
  * Auth reducer initial state
  */
@@ -21,12 +22,12 @@ const authReducerInitialState = getAuthStateFromLocalStorage()
 const authReducer = (state: TAuthReducer, action: TAuthReducerAction) => {
     const { type, data } = action
     switch (type) {
-        case AuthActions.UpdateAuthState:
+        case UpdateAuthState:
             state = { ...state, authState: data as AuthStates }
             setAuthStateToLocalStorage(state)
             return state
 
-        case AuthActions.UpdateUserDetails:
+        case UpdateUserDetails:
             state = { ...state, userDetails: data }
             return state
 
@@ -47,13 +48,13 @@ export const useAuthReducer = (): TUseAuthReducer => {
 
     const updateAuthState = (data: AuthStates) =>
         dispatch({
-            type: AuthActions.UpdateAuthState,
+            type: UpdateAuthState,
             data,
         })
 
     const updateUserDetails = (data: TUserDetails) =>
         dispatch({
-            type: AuthActions.UpdateUserDetails,
+            type: UpdateUserDetails,
             data,
         })
 

@@ -9,6 +9,7 @@ import { AppContext } from './context'
 import { RouteLoadingSpinner } from './components/route-loading-spinner'
 import { darkTheme, lightTheme } from './constants/theme'
 import { PageNotFound } from './components/page-not-found'
+import { GlobalModal } from './components/global-modal/global-modal'
 import {
     isAuthRoute,
     AUTH_PATH_BASE,
@@ -129,6 +130,7 @@ export const App = () => {
                     })
                 }}
             >
+                <GlobalModal />
                 <Suspense fallback={<RouteLoadingSpinner />}>
                     <Switch>
                         {routes.map(({ path, Component, id }) => (
