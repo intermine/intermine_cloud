@@ -1,3 +1,4 @@
+import { AlertProps } from '@intermine/chromatin/alert'
 import { ButtonCommonProps } from '@intermine/chromatin/button'
 import type { ThemeType } from '@intermine/chromatin/styles'
 import {
@@ -6,6 +7,7 @@ import {
 } from '../constants/additional-sidebar'
 
 import { AuthStates, AuthActions } from '../constants/auth'
+import { GlobalAlertsActions } from '../constants/global-alert'
 import { GlobalModalActions } from '../constants/global-modal'
 import { PreferencesActions } from '../constants/preferences'
 import { SidebarActions } from '../constants/sidebar'
@@ -132,6 +134,38 @@ export type TUseAdditionalSidebarReducer = {
  */
 
 /**
+ * Global Alert
+ */
+export type TAlert = {
+    id: string
+    type?: AlertProps['type']
+    message?: string
+    title?: string
+    onClose?: () => void
+    isOpen?: boolean
+}
+
+export type TGlobalAlertReducer = {
+    alerts: TAlert[]
+}
+
+export type TGlobalAlertReducerAction = {
+    type: GlobalAlertsActions
+    data: unknown
+}
+
+export type TUseGlobalAlertReducer = {
+    state: TGlobalAlertReducer
+    addAlert: (data: TAlert) => void
+    removeAlert: (id: string) => void
+    updateAlert: (data: TAlert) => void
+}
+
+/**
+ * Global Alert Ends
+ */
+
+/**
  * App Context
  */
 export type TAppContext = {
@@ -140,4 +174,5 @@ export type TAppContext = {
     sidebarReducer: TUseSidebarReducer
     globalModalReducer: TUseGlobalModalReducer
     additionalSidebarReducer: TUseAdditionalSidebarReducer
+    globalAlertReducer: TUseGlobalAlertReducer
 }
