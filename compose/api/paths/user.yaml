@@ -40,8 +40,6 @@ post:
     - user
   operationId: user-post
   summary: Create user
-  security:
-    - bearerAuth: []
   requestBody:
     content:
       application/json:
