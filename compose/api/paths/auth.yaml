@@ -26,8 +26,6 @@ post:
     - auth
   operationId: auth-post
   summary: Login
-  security:
-    - bearerAuth: []
   requestBody:
     content:
       application/json:
@@ -53,8 +51,6 @@ put:
     - auth
   operationId: auth-put
   summary: Creds reset
-  security:
-    - bearerAuth: []
   requestBody:
     content:
       application/json:
