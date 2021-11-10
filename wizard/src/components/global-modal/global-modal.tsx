@@ -78,7 +78,8 @@ export const GlobalModal = () => {
         const iconCSX: ChromatinIcon['csx'] = {
             root: ({ palette }) => ({
                 fill: palette[type].main,
-                height: '2rem'
+                height: '2rem',
+                width: '2rem'
             })
         }
         switch (type) {
