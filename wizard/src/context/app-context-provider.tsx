@@ -2,6 +2,7 @@ import { AppContext } from './index'
 // eslint-disable-next-line max-len
 import { useAdditionalSidebarReducer } from './reducers/additional-sidebar-reducer'
 import { useAuthReducer } from './reducers/auth-reducer'
+import { useGlobalAlertReducer } from './reducers/global-alert-reducer'
 import { useGlobalModalReducer } from './reducers/global-modal-reducer'
 import { usePreferencesReducer } from './reducers/preferences-reducer'
 import { useSidebarReducer } from './reducers/sidebar-reducer'
@@ -19,7 +20,8 @@ export const AppContextProvider = (props: AppContextProviderProps) => {
         preferencesReducer: usePreferencesReducer(),
         sidebarReducer: useSidebarReducer(),
         globalModalReducer: useGlobalModalReducer(),
-        additionalSidebarReducer: useAdditionalSidebarReducer()
+        additionalSidebarReducer: useAdditionalSidebarReducer(),
+        globalAlertReducer: useGlobalAlertReducer()
     }
 
     return <AppContext.Provider value={store}>{children}</AppContext.Provider>

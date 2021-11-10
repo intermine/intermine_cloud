@@ -16,7 +16,8 @@ export const Overview = () => {
             state,
             removeOnSidebarItemClick
         },
-        globalModalReducer: { updateGlobalModalProps, closeGlobalModal }
+        globalModalReducer: { updateGlobalModalProps, closeGlobalModal },
+        globalAlertReducer: { addAlert }
     } = store
 
     const openModal = (to: string) => {
@@ -55,7 +56,17 @@ export const Overview = () => {
             <Button onClick={() => onSidebarItemClick((to) => openModal(to))}>
                 Update onSidebar click
             </Button>
-            {/* <Button onClick={openModal}>Open Modal</Button> */}
+            <Button
+                onClick={() => {
+                    addAlert({
+                        id: Date.now().toString(),
+                        title: 'Test',
+                        message: 'Test Completed.'
+                    })
+                }}
+            >
+                Add alert
+            </Button>
             Page Change:{' '}
             {state.isPageSwitchingAllowed ? 'Allowed' : 'Not Allowed'}
         </Box>
