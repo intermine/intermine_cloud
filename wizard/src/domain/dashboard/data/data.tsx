@@ -1,18 +1,33 @@
-import { Box } from '@intermine/chromatin/box'
-import { WorkspaceHeading } from '../common/workspace-heading'
+import { Switch, Route } from 'react-router'
 
-import UploadIcon from '@intermine/chromatin/icons/System/upload-line'
+import {
+    DASHBOARD_DATA_LANDING_PATH,
+    DASHBOARD_DATA_UPLOAD_DATA_PATH
+} from '../../../routes'
+import { Landing } from './landing'
+import { UploadData } from './upload-data'
+
+const pages = [
+    {
+        id: 'landing',
+        path: DASHBOARD_DATA_LANDING_PATH,
+        Component: Landing
+    },
+    {
+        id: 'upload-data',
+        path: DASHBOARD_DATA_UPLOAD_DATA_PATH,
+        Component: UploadData
+    }
+]
 
 export const Data = () => {
     return (
-        <Box>
-            <WorkspaceHeading
-                heading="Data"
-                primaryAction={{
-                    children: 'Upload New Data',
-                    RightIcon: <UploadIcon />
-                }}
-            />
-        </Box>
+        <Switch>
+            {pages.map(({ id, path, Component }) => (
+                <Route path={path} key={id} exact>
+                    <Component />
+                </Route>
+            ))}
+        </Switch>
     )
 }

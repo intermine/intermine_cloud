@@ -1,6 +1,10 @@
 import { useReducer } from 'react'
 
 import { SidebarActions } from '../../constants/sidebar'
+import {
+    getSidebarStateFromLocalStorage,
+    setSidebarStateToLocalStorage,
+} from '../../utils/local-storage/sidebar'
 
 import type {
     TSidebarReducer,
@@ -8,13 +12,14 @@ import type {
     TUseSidebarReducer,
 } from '../types'
 
-const { ChangePageSwitchStatus, UpdateOnSidebarClick, RemoveOnSidebarClick } =
+const { UpdateSidebarState, UpdateOnSidebarClick, RemoveOnSidebarClick } =
     SidebarActions
 
 /**
  * Sidebar reducer initial state
  */
 const sidebarInitialReducer: TSidebarReducer = {
+    isOpen: getSidebarStateFromLocalStorage().isOpen,
     isPageSwitchingAllowed: true,
     // eslint-disable-next-line @typescript-eslint/no-empty-function
     onSidebarItemClick: () => {},
@@ -26,10 +31,10 @@ const sidebarReducer = (
 ) => {
     const { type, data } = action
 
-    console.log('Type', type, data)
     switch (type) {
-        case ChangePageSwitchStatus:
-            state = { ...state, isPageSwitchingAllowed: data as boolean }
+        case UpdateSidebarState:
+            state = { ...state, ...(data as TSidebarReducer) }
+            setSidebarStateToLocalStorage({ isOpen: state.isOpen })
             return state
 
         case UpdateOnSidebarClick:
@@ -64,9 +69,9 @@ const sidebarReducer = (
 export const useSidebarReducer = (): TUseSidebarReducer => {
     const [state, dispatch] = useReducer(sidebarReducer, sidebarInitialReducer)
 
-    const updatePageSwitchStatus = (data: boolean) =>
+    const updateSidebarState = (data: Partial<TSidebarReducer>) =>
         dispatch({
-            type: ChangePageSwitchStatus,
+            type: UpdateSidebarState,
             data,
         })
 
@@ -87,7 +92,7 @@ export const useSidebarReducer = (): TUseSidebarReducer => {
     return {
         state,
         onSidebarItemClick,
-        updatePageSwitchStatus,
+        updateSidebarState,
         removeOnSidebarItemClick,
     }
 }

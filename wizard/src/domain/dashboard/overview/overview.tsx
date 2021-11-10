@@ -12,7 +12,7 @@ export const Overview = () => {
     const {
         sidebarReducer: {
             onSidebarItemClick,
-            updatePageSwitchStatus,
+            updateSidebarState,
             state,
             removeOnSidebarItemClick
         },
@@ -44,7 +44,9 @@ export const Overview = () => {
             Overview Page
             <Button
                 onClick={() => {
-                    updatePageSwitchStatus(!state.isPageSwitchingAllowed)
+                    updateSidebarState({
+                        isPageSwitchingAllowed: !state.isPageSwitchingAllowed
+                    })
                     removeOnSidebarItemClick()
                 }}
             >

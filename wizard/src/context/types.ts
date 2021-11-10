@@ -1,5 +1,9 @@
 import { ButtonCommonProps } from '@intermine/chromatin/button'
 import type { ThemeType } from '@intermine/chromatin/styles'
+import {
+    AdditionalSidebarActions,
+    AdditionalSidebarTabs,
+} from '../constants/additional-sidebar'
 
 import { AuthStates, AuthActions } from '../constants/auth'
 import { GlobalModalActions } from '../constants/global-modal'
@@ -58,6 +62,7 @@ export type TUsePreferencesReducer = {
  * Sidebar
  */
 export type TSidebarReducer = {
+    isOpen: boolean
     onSidebarItemClick: (to: string) => void
     isPageSwitchingAllowed: boolean
 }
@@ -69,8 +74,8 @@ export type TSidebarReducerAction = {
 
 export type TUseSidebarReducer = {
     state: TSidebarReducer
+    updateSidebarState: (data: Partial<TSidebarReducer>) => void
     onSidebarItemClick: (fn: TSidebarReducer['onSidebarItemClick']) => void
-    updatePageSwitchStatus: (status: boolean) => void
     removeOnSidebarItemClick: () => void
 }
 
@@ -105,9 +110,34 @@ export type TUseGlobalModalReducer = {
  * Modal Ends
  */
 
+/**
+ * Additional Sidebar
+ */
+export type TAdditionalSidebarReducer = {
+    isOpen: boolean
+    activeTab: AdditionalSidebarTabs
+}
+
+export type TAdditionalSidebarReducerAction = {
+    type: AdditionalSidebarActions
+    data: Partial<TAdditionalSidebarReducer>
+}
+
+export type TUseAdditionalSidebarReducer = {
+    state: TAdditionalSidebarReducer
+    updateState: (data: Partial<TAdditionalSidebarReducer>) => void
+}
+/**
+ * Additional Sidebar Ends
+ */
+
+/**
+ * App Context
+ */
 export type TAppContext = {
     authReducer: TUseAuthReducer
     preferencesReducer: TUsePreferencesReducer
     sidebarReducer: TUseSidebarReducer
     globalModalReducer: TUseGlobalModalReducer
+    additionalSidebarReducer: TUseAdditionalSidebarReducer
 }

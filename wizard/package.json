@@ -53,7 +53,8 @@
         "webpack-merge": "^5.8.0"
     },
     "dependencies": {
-        "@intermine/chromatin": "0.0.12",
+        "@intermine/chromatin": "0.0.15",
+        "@intermine/compose-rest-client": "^1.0.0",
         "@types/axios": "^0.14.0",
         "@types/react": "^17.0.31",
         "@types/react-dom": "^17.0.10",

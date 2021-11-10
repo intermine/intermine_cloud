@@ -1,4 +1,4 @@
-import { Typography } from '@intermine/chromatin'
+import { Typography } from '@intermine/chromatin/typography'
 import { Box, BoxBaseProps } from '@intermine/chromatin/box'
 import { createStyle } from '@intermine/chromatin/styles'
 
@@ -14,6 +14,8 @@ export type TLogoProps = {
      * @default 4
      */
     spacing?: number
+    hasText?: boolean
+    className?: string
     csx?: BoxBaseProps['csx']
 }
 
@@ -29,18 +31,24 @@ const useStyles = createStyle((theme) => {
 })
 
 export const Logo = (props: TLogoProps) => {
-    const { height = '1.5rem', spacing = 4, csx = {} } = props
+    const {
+        height = '1.5rem',
+        spacing = 4,
+        csx = {},
+        hasText = true,
+        className
+    } = props
 
     const classes = useStyles({ height, spacing })
 
     return (
-        <Box isContentAlignCenter csx={csx}>
+        <Box isContentAlignCenter csx={csx} className={className}>
             <img
                 className={classes.logo}
                 src={IntermineLogo}
                 alt="intermine's logo"
             />
-            <Typography variant="h3">Intermine Cloud</Typography>
+            {hasText && <Typography variant="h3">Intermine Cloud</Typography>}
         </Box>
     )
 }

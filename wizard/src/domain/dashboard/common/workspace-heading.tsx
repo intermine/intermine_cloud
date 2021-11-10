@@ -1,14 +1,23 @@
 import { Box } from '@intermine/chromatin/box'
-import { Typography } from '@intermine/chromatin/typography'
+import {
+    Typography,
+    TypographyBaseProps
+} from '@intermine/chromatin/typography'
 import { Button, ButtonCommonProps } from '@intermine/chromatin/button'
+import {
+    IconButton,
+    IconButtonCommonProps
+} from '@intermine/chromatin/icon-button'
+import ArrowLeftIcon from '@intermine/chromatin/icons/System/arrow-left-s-line'
 
 export type TWorkspaceHeadingProps = {
-    heading: string
+    heading: TypographyBaseProps
     primaryAction?: ButtonCommonProps
+    backAction?: IconButtonCommonProps
 }
 
 export const WorkspaceHeading = (props: TWorkspaceHeadingProps) => {
-    const { heading, primaryAction } = props
+    const { heading, primaryAction, backAction } = props
 
     return (
         <Box
@@ -21,9 +30,28 @@ export const WorkspaceHeading = (props: TWorkspaceHeadingProps) => {
                 }
             }}
         >
-            <Typography variant="h1">{heading}</Typography>
+            <Box isContentAlignCenter>
+                {backAction && (
+                    <IconButton
+                        Icon={<ArrowLeftIcon />}
+                        csx={{
+                            root: ({ spacing }) => ({ margin: spacing(2) })
+                        }}
+                        color="neutral"
+                        size="large"
+                        isDense
+                        {...backAction}
+                    />
+                )}
+                <Typography variant="h1" {...heading} />
+            </Box>
             {primaryAction && (
-                <Button color="primary" isDense {...primaryAction} />
+                <Button
+                    variant="outlined"
+                    color="primary"
+                    isDense
+                    {...primaryAction}
+                />
             )}
         </Box>
     )
