@@ -11,7 +11,7 @@ from compose.configs import ComposeDefaultConfig
 
 
 def check_auth(config: ComposeDefaultConfig) -> User:
-    """Check authorization."""
+    """Check authorization in CLI."""
     user_access_token = config.USER_ACCESS_TOKEN
     auther = auther_registry.get_auther(config.AUTHER)
     try:
