@@ -95,11 +95,11 @@ const useStyles = createStyle((theme) => {
         },
         cell: {
             '&&': {
-                background: themeType === 'dark' ? darkGrey[40] : '#fdfdfd',
+                background: themeType === 'dark' ? darkGrey[40] : '#fefefe',
                 borderBottom: `1px solid ${
-                    themeType === 'dark' ? darkGrey[30] : white
+                    themeType === 'dark' ? darkGrey[30] : grey[20]
                 }`,
-                color: neutral[30]
+                color: neutral[40]
             }
         },
         headCell: {
