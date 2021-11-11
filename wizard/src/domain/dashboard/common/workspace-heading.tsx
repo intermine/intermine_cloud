@@ -25,6 +25,7 @@ export const WorkspaceHeading = (props: TWorkspaceHeadingProps) => {
                 root: {
                     alignItems: 'center',
                     display: 'flex',
+                    height: '3.5rem',
                     justifyContent: 'space-between',
                     paddingRight: '0.25rem'
                 }

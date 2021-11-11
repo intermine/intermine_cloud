@@ -85,6 +85,20 @@ spec:
               serviceName: {{ $imService }}
               servicePort: {{ $imServicePort }}
               {{- end }}
+          - path: /{{ $mine }}/portal.do
+            {{- if (semverCompare ">=1.18-0" $.Capabilities.KubeVersion.GitVersion) }}
+            pathType: Prefix
+            {{- end }}
+            backend:
+              {{- if semverCompare ">=1.19-0" $.Capabilities.KubeVersion.GitVersion }}
+              service:
+                name: {{ $imService }}
+                port:
+                  number: {{ $imServicePort }}
+              {{- else }}
+              serviceName: {{ $imService }}
+              servicePort: {{ $imServicePort }}
+              {{- end }}
           - path: /{resource:[A-z0-9\-]+\.(xml|txt)}
             {{- if (semverCompare ">=1.18-0" $.Capabilities.KubeVersion.GitVersion) }}
             pathType: Exact

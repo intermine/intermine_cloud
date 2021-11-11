@@ -1,6 +1,6 @@
 import { useContext } from 'react'
 import { Divider } from '@intermine/chromatin'
-import { Box } from '@intermine/chromatin/box'
+import { Box, BoxBaseProps } from '@intermine/chromatin/box'
 import { Typography } from '@intermine/chromatin/typography'
 import { IconButton } from '@intermine/chromatin/icon-button'
 import CloseIcon from '@intermine/chromatin/icons/System/close-line'
@@ -13,7 +13,16 @@ export type TActionSectionProps = {
     children: React.ReactChild | React.ReactChild[]
 }
 
-export const ActionSection = (props: TActionSectionProps) => {
+const ActionSectionContent = (props: BoxBaseProps) => {
+    return (
+        <Box
+            csx={{ root: ({ spacing }) => ({ padding: spacing(4, 0) }) }}
+            {...props}
+        />
+    )
+}
+
+const ActionSection = (props: TActionSectionProps) => {
     const { heading, children } = props
     const store = useContext(AppContext)
     const {
@@ -55,3 +64,7 @@ export const ActionSection = (props: TActionSectionProps) => {
         </Box>
     )
 }
+
+ActionSection.Content = ActionSectionContent
+
+export { ActionSection }

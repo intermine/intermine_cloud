@@ -125,7 +125,7 @@ spec:
               hostname: legacy.localhost
           bluegenes:
             backendServiceRoot: {% raw %}http://{{workflow.name}}-tomcat:8080{% endraw %}/{{ mine_name }}
-            serviceRoot: http://legacy.localhost/{{ mine_name }}
+            serviceRoot: http://localhost/{{ mine_name }}
             mineName: {{ pretty_mine_name }}
             mineNamespace: {{ mine_name }}
           ingress:

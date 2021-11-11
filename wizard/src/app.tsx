@@ -9,7 +9,7 @@ import { AppContext } from './context'
 import { RouteLoadingSpinner } from './components/route-loading-spinner'
 import { darkTheme, lightTheme } from './constants/theme'
 import { PageNotFound } from './components/page-not-found'
-import { GlobalModal } from './components/global-modal/global-modal'
+import { GlobalModal } from './components/global-modal'
 import {
     isAuthRoute,
     AUTH_PATH_BASE,
@@ -17,6 +17,7 @@ import {
     LOGIN_PATH,
     DASHBOARD_OVERVIEW_PATH
 } from './routes'
+import { GlobalAlert } from './components/global-alert'
 
 const Dashboard = lazy(() => import('./domain/dashboard'))
 const PreAuth = lazy(() => import('./domain/pre-auth'))
@@ -131,6 +132,7 @@ export const App = () => {
                 }}
             >
                 <GlobalModal />
+                <GlobalAlert />
                 <Suspense fallback={<RouteLoadingSpinner />}>
                     <Switch>
                         {routes.map(({ path, Component, id }) => (

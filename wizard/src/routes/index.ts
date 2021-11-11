@@ -16,4 +16,11 @@ export const DASHBOARD_MINES_PATH = `${AUTH_PATH_BASE}/mines`
 export const DASHBOARD_DATA_LANDING_PATH = DASHBOARD_DATA_PATH
 export const DASHBOARD_DATA_UPLOAD_DATA_PATH = `${DASHBOARD_DATA_PATH}/upload`
 
-export { isAuthRoute } from './validate'
+/**
+ *
+ * @param path path string, must starts with '/'
+ * @returns {boolean}
+ */
+export const isAuthRoute = (path: string): boolean => {
+    return path.startsWith(AUTH_PATH_BASE)
+}
