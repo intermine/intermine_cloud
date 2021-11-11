@@ -13,10 +13,9 @@ export const EditProfile = () => {
                         <Box display="flex">
                             <Input
                                 color="neutral.30"
-                                // csx={{ inputRoot: { borderRadius: 0 } }}
-                                LeftIcon={<CheckIcon />}
+                                csx={{ inputRoot: { borderRadius: 0 } }}
                             />
-                            {/* <IconButton
+                            <IconButton
                                 csx={{
                                     root: { borderRadius: '0', height: 'auto' }
                                 }}
@@ -24,7 +23,7 @@ export const EditProfile = () => {
                                 color="primary"
                                 Icon={<CheckIcon />}
                                 isDense
-                            /> */}
+                            />
                         </Box>
                     </Label>
                 </Box>

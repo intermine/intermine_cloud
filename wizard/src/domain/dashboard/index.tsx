@@ -116,7 +116,10 @@ const Dashboard = () => {
                     <Sidebar />
                 </Box>
                 <Box className={classes.workspaceContainer}>
-                    <Box className={classes.pageContainer}>
+                    <Box
+                        className={classes.pageContainer}
+                        id={DomElementIDs.WorkspacePageContainer}
+                    >
                         <DashboardErrorBoundary>
                             <Suspense
                                 fallback={

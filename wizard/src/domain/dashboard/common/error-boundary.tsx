@@ -7,6 +7,7 @@ type TState = {
 
 type TProps = {
     children?: React.ReactChild | React.ReactChild[]
+    errorMessage?: string
 }
 
 export class DashboardErrorBoundary extends Component<TProps, TState> {
@@ -26,7 +27,8 @@ export class DashboardErrorBoundary extends Component<TProps, TState> {
                     isContentCenter
                     csx={{ root: { height: '100%', padding: '2rem' } }}
                 >
-                    Something Went Wrong! Try to refresh this page.
+                    {this.props.errorMessage ??
+                        ' Something Went Wrong! Try to refresh this page.'}
                 </Box>
             )
         }
