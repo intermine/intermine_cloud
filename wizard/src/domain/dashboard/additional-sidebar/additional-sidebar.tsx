@@ -87,22 +87,6 @@ export const AdditionalSidebar = () => {
         isOpen
     })
 
-    const getComponent = (): JSX.Element => {
-        switch (activeTab) {
-            case PreferencesTab:
-                return <Preferences />
-
-            case EditProfileTab:
-                return <EditProfile />
-
-            case ProgressTab:
-                return <Progress />
-
-            default:
-                return <></>
-        }
-    }
-
     const onClickActionIcon = (activeTab: AdditionalSidebarTabs) => {
         updateState({
             isOpen: true,
@@ -133,7 +117,11 @@ export const AdditionalSidebar = () => {
                     }}
                 />
             </Box>
-            <Box className={classes.actionSection}>{getComponent()}</Box>
+            <Box className={classes.actionSection}>
+                <Preferences />
+                <EditProfile />
+                <Progress />
+            </Box>
         </Box>
     )
 }
