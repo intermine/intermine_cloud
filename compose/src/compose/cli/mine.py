@@ -14,7 +14,6 @@ from compose.blocs.mine import get_mine, create_mine, update_mine
 from compose.blocs.rendered_template import (
     create_rendered_template,
     update_rendered_template,
-    get_rendered_template,
 )
 from compose.blocs.template import get_template
 from compose.configs import config_registry
