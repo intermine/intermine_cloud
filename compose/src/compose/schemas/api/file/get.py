@@ -30,4 +30,4 @@ class FileGetQueryParams(BaseModel):
 
     query_type: FileQueryType
     file_id: Optional[UUID4]
-    protagonist_id: Optional[str]
+    protagonist_id: Optional[UUID4]

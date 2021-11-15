@@ -337,25 +337,25 @@ def get(mine_id, extract, path) -> None:
         click.style("Mine object:", fg="green") + f"\n\n{pformat(mine.dict())}\n"
     )
 
-    # get rendered template from mine
-    query_params = RenderedTemplateGetQueryParams(
-        query_type=RenderedTemplateQueryType.GET_RENDERED_TEMPLATE_BY_ID,
-        rendered_template_id=mine.rendered_template_id,
-    )
-    fetched_rendered_template = get_rendered_template(query_params, user)
-    if len(fetched_rendered_template) == 0:
-        click.secho(f"Rendered template not found!\n\n")
-        sys.exit(0)
-    rendered_template = fetched_rendered_template[0]
-    click.echo(
-        click.style("Rendered template object:", fg="green")
-        + f"\n\n{pformat(rendered_template.dict())}\n"
-    )
+    # # get rendered template from mine
+    # query_params = RenderedTemplateGetQueryParams(
+    #     query_type=RenderedTemplateQueryType.GET_RENDERED_TEMPLATE_BY_ID,
+    #     rendered_template_id=mine.rendered_template_id,
+    # )
+    # fetched_rendered_template = get_rendered_template(query_params, user)
+    # if len(fetched_rendered_template) == 0:
+    #     click.secho(f"Rendered template not found!\n\n")
+    #     sys.exit(0)
+    # rendered_template = fetched_rendered_template[0]
+    # click.echo(
+    #     click.style("Rendered template object:", fg="green")
+    #     + f"\n\n{pformat(rendered_template.dict())}\n"
+    # )
 
     # get file from rendered template
     query_params = FileGetQueryParams(
         query_type=FileQueryType.GET_FILE_BY_ID,
-        file_id=rendered_template.rendered_template_id,
+        file_id=mine.rendered_template_file_id,
     )
     fetched_file = get_file(query_params, user)
     if len(fetched_file) == 0:

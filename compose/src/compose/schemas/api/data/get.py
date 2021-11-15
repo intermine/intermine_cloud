@@ -30,4 +30,4 @@ class DataGetQueryParams(BaseModel):
 
     query_type: DataQueryType
     data_id: Optional[UUID4]
-    protagonist_id: Optional[str]
+    protagonist_id: Optional[UUID4]
