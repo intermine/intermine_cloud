@@ -10,6 +10,8 @@ import {
 } from '@intermine/chromatin/icon-button'
 import ArrowLeftIcon from '@intermine/chromatin/icons/System/arrow-left-s-line'
 
+import { DomElementIDs } from '../../../constants/ids'
+
 export type TWorkspaceHeadingProps = {
     heading: TypographyBaseProps
     primaryAction?: ButtonCommonProps
@@ -21,14 +23,16 @@ export const WorkspaceHeading = (props: TWorkspaceHeadingProps) => {
 
     return (
         <Box
+            id={DomElementIDs.WorkspaceHeadingContainer}
             csx={{
-                root: {
+                root: ({ spacing }) => ({
                     alignItems: 'center',
                     display: 'flex',
                     height: '3.5rem',
                     justifyContent: 'space-between',
-                    paddingRight: '0.25rem'
-                }
+                    marginBottom: spacing(10),
+                    paddingRight: spacing(1)
+                })
             }}
         >
             <Box isContentAlignCenter>

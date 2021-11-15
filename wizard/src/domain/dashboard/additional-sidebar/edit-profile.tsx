@@ -1,34 +1,23 @@
-import { Input, IconButton, Box, Label } from '@intermine/chromatin'
-import CheckIcon from '@intermine/chromatin/icons/System/check-line'
+import { useContext } from 'react'
+import { AdditionalSidebarTabs } from '../../../constants/additional-sidebar'
 
+import { AppContext } from '../../../context'
 import { ActionSection } from './action-section'
 
 export const EditProfile = () => {
+    const store = useContext(AppContext)
+    const {
+        additionalSidebarReducer: {
+            state: { activeTab }
+        }
+    } = store
+
     return (
-        <ActionSection heading="Edit Profile">
-            <ActionSection.Content>
-                <Box>
-                    <Label>
-                        Username
-                        <Box display="flex">
-                            <Input
-                                color="neutral.30"
-                                // csx={{ inputRoot: { borderRadius: 0 } }}
-                                LeftIcon={<CheckIcon />}
-                            />
-                            {/* <IconButton
-                                csx={{
-                                    root: { borderRadius: '0', height: 'auto' }
-                                }}
-                                variant="normal"
-                                color="primary"
-                                Icon={<CheckIcon />}
-                                isDense
-                            /> */}
-                        </Box>
-                    </Label>
-                </Box>
-            </ActionSection.Content>
+        <ActionSection
+            heading="Edit Profile"
+            isActive={activeTab === AdditionalSidebarTabs.EditProfileTab}
+        >
+            Edit Profile Section
         </ActionSection>
     )
 }

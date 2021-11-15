@@ -14,6 +14,7 @@ import { RouteLoadingSpinner } from '../../components/route-loading-spinner'
 
 import { Sidebar } from './sidebar'
 import { AdditionalSidebar } from './additional-sidebar'
+import { DashboardErrorBoundary } from './common/error-boundary'
 
 const Overview = lazy(() => import('./overview'))
 const Data = lazy(() => import('./data'))
@@ -115,21 +116,28 @@ const Dashboard = () => {
                     <Sidebar />
                 </Box>
                 <Box className={classes.workspaceContainer}>
-                    <Box className={classes.pageContainer}>
-                        <Suspense
-                            fallback={
-                                <RouteLoadingSpinner hasBackground={false} />
-                            }
-                        >
-                            {/* TODO: Add Page not found */}
-                            <Switch>
-                                {pages.map(({ id, path, Component }) => (
-                                    <Route path={path} key={id}>
-                                        <Component />
-                                    </Route>
-                                ))}
-                            </Switch>
-                        </Suspense>
+                    <Box
+                        className={classes.pageContainer}
+                        id={DomElementIDs.WorkspacePageContainer}
+                    >
+                        <DashboardErrorBoundary>
+                            <Suspense
+                                fallback={
+                                    <RouteLoadingSpinner
+                                        hasBackground={false}
+                                    />
+                                }
+                            >
+                                {/* TODO: Add Page not found */}
+                                <Switch>
+                                    {pages.map(({ id, path, Component }) => (
+                                        <Route path={path} key={id}>
+                                            <Component />
+                                        </Route>
+                                    ))}
+                                </Switch>
+                            </Suspense>
+                        </DashboardErrorBoundary>
                     </Box>
                 </Box>
 

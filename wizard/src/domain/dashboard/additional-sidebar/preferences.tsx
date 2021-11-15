@@ -4,14 +4,17 @@ import { Toggle } from '@intermine/chromatin/toggle'
 
 import { AppContext } from '../../../context'
 import { ActionSection } from './action-section'
+import { AdditionalSidebarTabs } from '../../../constants/additional-sidebar'
 
 export const Preferences = () => {
     const store = useContext(AppContext)
-
     const {
         preferencesReducer: {
             updateTheme,
             state: { themeType }
+        },
+        additionalSidebarReducer: {
+            state: { activeTab }
         }
     } = store
 
@@ -23,7 +26,10 @@ export const Preferences = () => {
         updateTheme('dark')
     }
     return (
-        <ActionSection heading="Preferences">
+        <ActionSection
+            heading="Preferences"
+            isActive={activeTab === AdditionalSidebarTabs.PreferencesTab}
+        >
             <ActionSection.Content>
                 <FormControlLabel
                     label="Dark Theme"

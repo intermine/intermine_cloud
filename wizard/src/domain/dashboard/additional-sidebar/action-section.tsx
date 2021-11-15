@@ -11,6 +11,7 @@ import { AdditionalSidebarTabs } from '../../../constants/additional-sidebar'
 export type TActionSectionProps = {
     heading: string
     children: React.ReactChild | React.ReactChild[]
+    isActive?: boolean
 }
 
 const ActionSectionContent = (props: BoxBaseProps) => {
@@ -23,7 +24,7 @@ const ActionSectionContent = (props: BoxBaseProps) => {
 }
 
 const ActionSection = (props: TActionSectionProps) => {
-    const { heading, children } = props
+    const { heading, children, isActive } = props
     const store = useContext(AppContext)
     const {
         additionalSidebarReducer: { updateState }
@@ -33,6 +34,7 @@ const ActionSection = (props: TActionSectionProps) => {
         <Box
             csx={{
                 root: ({ spacing }) => ({
+                    display: isActive ? 'block' : 'none',
                     padding: spacing(5, 3, 5, 0)
                 })
             }}
