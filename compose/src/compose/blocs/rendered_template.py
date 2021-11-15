@@ -44,7 +44,7 @@ def create_rendered_template(
             ]
             RenderedTemplateDB.bulk_create(rendered_template_db_create_list, session)
             return [
-                RenderedTemplate(template_id=obj.id, **obj.to_dict())
+                RenderedTemplate(rendered_template_id=obj.id, **obj.to_dict())
                 for obj in rendered_template_db_create_list  # noqa: E501
             ]
         except Exception as e:

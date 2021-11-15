@@ -14,6 +14,6 @@ class RenderedTemplateDB(DBModel, SurrogatePKUUID, TimestampMixin):
     description = Column(String)
     template_vars = Column(JSON)
     template_context = Column(JSON)
-    parent_mine_id = reference_col("mine")
-    file_id = reference_col("file")
+    parent_mine_id = reference_col("mine", nullable=True)
+    file_id = reference_col("file", nullable=True)
     protagonist_id = reference_col("protagonist")

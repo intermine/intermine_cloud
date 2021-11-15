@@ -1,6 +1,6 @@
 """Mine BLoCs."""
 
-from typing import List, Optional
+from typing import Dict, List, Optional
 
 from blackcap.db import DBSession
 from blackcap.schemas.user import User
@@ -15,13 +15,17 @@ from logzero import logger
 
 from sqlalchemy import select
 
+######################
+# CRUD BloCs
+######################
+
 
 def create_mine(mine_list: List[Mine], user_creds: Optional[User] = None) -> List[Mine]:
     """Create mine objects.
 
     Args:
         mine_list (List[Mine]): List of mine objects to create.
-        user_creds (Optional[User], optional): User credentials. Defaults to None.
+        user_creds (Optional[User], optional): User credentials. Defaults to None.=
 
     Returns:
         List[Mine]: Created mine objects
@@ -31,7 +35,7 @@ def create_mine(mine_list: List[Mine], user_creds: Optional[User] = None) -> Lis
             mine_db_create_list: List[MineDB] = [
                 MineDB(
                     protagonist_id=user_creds.user_id,
-                    **mine.dict(exclude={"mine_id"}),  # noqa: E501
+                    **mine.dict(exclude={"mine_id", "protagonist_id"}),  # noqa: E501
                 )
                 for mine in mine_list
             ]
@@ -148,3 +152,50 @@ def delete_mine(mine_delete: MineDelete, user_creds: Optional[User] = None) -> M
                 f"Unable to delete mine: {mine_delete.dict()} due to {e}"
             )  # noqa: E501
             raise e
+
+
+######################
+# Flow BloCs
+######################
+
+# TODO: Add `flow_graph` and `flow_state` data structures
+# TODO: Add `reverse_flow(flow_state)` function for each flow
+
+
+def create_mine_flow(
+    mine_list: List[Mine],
+    interface: str,
+    inteface_params: Dict,
+    user_creds: Optional[User] = None,
+) -> List[Mine]:
+    """Create mine flow.
+
+    Args:
+        mine_list (List[Mine]): List of mine objects to create.
+        interface (str): Interface used to initiate the request. options include "cli" and "rest".
+        inteface_params (Dict): Parameters specific to the interface.
+        user_creds (Optional[User], optional): [description]. Defaults to None.
+
+    Returns:
+        List[Mine]: Created mine objects
+    """
+    pass
+
+
+def create_mine_reverse_flow(
+    mine_list: List[Mine],
+    interface: str,
+    inteface_params: Dict,
+    flow_state: Dict,
+    user_creds: Optional[User] = None,
+) -> None:
+    """Create mine flow.
+
+    Args:
+        mine_list (List[Mine]): List of mine objects to create.
+        interface (str): Interface used to initiate the request. options include "cli" and "rest".
+        inteface_params (Dict): Parameters specific to the interface.
+        flow_state (Dict): FlowState object.
+        user_creds (Optional[User], optional): [description]. Defaults to None.
+    """
+    pass

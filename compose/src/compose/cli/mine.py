@@ -21,12 +21,17 @@ from compose.configs import config_registry
 from compose.schemas.api.data.get import DataGetQueryParams, DataQueryType
 from compose.schemas.api.file.get import FileGetQueryParams, FileQueryType
 from compose.schemas.api.file.put import FileUpdate
+from compose.schemas.api.mine.get import MineGetQueryParams, MineQueryType
 from compose.schemas.api.mine.put import MineUpdate
 from compose.schemas.api.template.get import TemplateGetQueryParams, TemplateQueryType
+from compose.schemas.api.rendered_template.get import (
+    RenderedTemplateGetQueryParams,
+    RenderedTemplateQueryType,
+)
 from compose.schemas.api.rendered_template.put import RenderedTemplateUpdate
 from compose.schemas.file import File
 from compose.schemas.mine import Mine
-from compose.schemas.template import Template, RenderedTemplate
+from compose.schemas.template import RenderedTemplate
 from compose.utils.auth import check_auth
 
 import click
@@ -65,6 +70,8 @@ def create(name, desc, pref, template_id, data_ids) -> None:
     """Create data object."""
     # Check Authorization
     user = check_auth(config)
+
+    # !TODO: Create a linked job as well
 
     # Check if template exist
     query_params = TemplateGetQueryParams(
@@ -121,23 +128,6 @@ def create(name, desc, pref, template_id, data_ids) -> None:
         )
         data_files.append(file)
 
-    # Create a mine in the db
-    mine = Mine(
-        name=name,
-        description=desc,
-        preference=json.loads(pref),
-        data_file_ids=data_files,
-    )
-    try:
-        created_mine = create_mine([mine], user)[0]
-    except Exception as e:
-        click.secho(f"Error occured: {e}\n\n Exiting....")
-        sys.exit(1)
-    click.echo(
-        click.style("Mine object created:", fg="green")
-        + f"\n\n{pformat(created_mine.dict())}\n"
-    )
-
     # Create archive of the rendered template in a temp dir
     with TemporaryDirectory() as tempd:
         click.echo(
@@ -177,9 +167,13 @@ def create(name, desc, pref, template_id, data_ids) -> None:
                 bar.update(size)
         # Unpack archive
         click.secho(f"Unpacking archive...", fg="green")
-        shutil.unpack_archive(Path(tempd).joinpath(f"template.tar"))
-        click.secho(f"All done!", fg="green")
-
+        shutil.unpack_archive(
+            Path(tempd).joinpath("template.tar"), Path(tempd).joinpath(f"template")
+        )
+        click.secho(
+            f"Archive unpacked at {Path(tempd).joinpath('template')}", fg="green"
+        )
+        click.secho(f"Rendering template...", fg="green")
         # Render the fetched template with provided template vars
         # TODO: Do it properly later, for now just cp the downloaded template
         shutil.copytree(
@@ -190,7 +184,7 @@ def create(name, desc, pref, template_id, data_ids) -> None:
             "rendered", Path(tempd).joinpath("rendered"), Path(tempd)
         )
         click.secho(
-            click.style("Archive created at: ", fg="green")
+            click.style("Rendered archive created at: ", fg="green")
             + f"{Path(archive_path).absolute()}\n"
         )
 
@@ -211,23 +205,29 @@ def create(name, desc, pref, template_id, data_ids) -> None:
             + f"\n\n{pformat(created_file.dict())}\n"
         )
 
-        # Update Mine and RenderedTemplate in db to link with file
-        mine_update = MineUpdate(
-            mine_id=created_mine.mine_id, file_id=created_file.file_id
+        # Create a mine in the db
+        mine = Mine(
+            name=name,
+            description=desc,
+            preference=json.loads(pref),
+            rendered_template_file_id=created_file.file_id,
+            data_file_ids=[str(file.file_id) for file in data_files],
         )
         try:
-            updated_mine = update_mine(mine_update)
+            created_mine = create_mine([mine], user)[0]
         except Exception as e:
             click.secho(f"Error occured: {e}\n\n Exiting....")
             sys.exit(1)
         click.echo(
-            click.style("Mine and file linked:", fg="green")
-            + f"\n\n{pformat(updated_mine.dict())}\n"
+            click.style("Mine object created:", fg="green")
+            + f"\n\n{pformat(created_mine.dict())}\n"
         )
 
+        # Update RenderedTemplate in db to link with file
         rendered_template_update = RenderedTemplateUpdate(
             rendered_template_id=created_rendered_template.rendered_template_id,
             file_id=created_file.file_id,
+            parent_mine_id=mine.mine_id,
         )
         try:
             updated_rendered_template = update_rendered_template(
@@ -237,7 +237,7 @@ def create(name, desc, pref, template_id, data_ids) -> None:
             click.secho(f"Error occured: {e}\n\n Exiting....")
             sys.exit(1)
         click.echo(
-            click.style("Rendered Template and file linked:", fg="green")
+            click.style("Rendered Template linked with mine and file:", fg="green")
             + f"\n\n{pformat(updated_rendered_template.dict())}\n"
         )
 
@@ -279,121 +279,83 @@ def create(name, desc, pref, template_id, data_ids) -> None:
 
 @click.command()
 @click.option("--mine_id", "-i", required=True)
-@click.argument("path")
-def update(mine_id, path) -> None:
+@click.option("--name")
+@click.option("--desc")
+@click.option("--pref", default="{}")
+def update(mine_id, name, desc, pref) -> None:
     """Update mine object."""
     # Check Authorization
     user = check_auth(config)
 
-    # fetch the data from the db
-    query_params = DataGetQueryParams(
-        query_type=DataQueryType.GET_DATA_BY_ID, data_id=data_id
+    # fetch the mine from the db
+    query_params = MineGetQueryParams(
+        query_type=MineQueryType.GET_MINE_BY_ID, mine_id=mine_id
     )
-    fetched_data = get_data(query_params, user)
-    if len(fetched_data) == 0:
-        click.secho(f"Data not found!\n\n")
+    fetched_mine = get_mine(query_params, user)
+    if len(fetched_mine) == 0:
+        click.secho(f"Mine not found!\n\n")
         sys.exit(0)
-    data = fetched_data[0]
-    # Create archive of the data in a temp dir
-    with TemporaryDirectory() as tempd:
-        click.echo(
-            click.style("\nCreated temporary dir at: ", fg="green")
-            + f"{Path(tempd).absolute()}"
-        )
-        archive_path = make_archive(data.name, path, Path(tempd))
-        click.secho(
-            click.style("Archive created at: ", fg="green")
-            + f"{Path(archive_path).absolute()}\n"
-        )
+    mine = fetched_mine[0]
+    click.echo(
+        click.style("\nMine found: ", fg="green") + f"\n\n{pformat(mine.dict())}\n"
+    )
 
-        # Create file in db
-        file = File(
-            name=data.name,
-            ext=data.ext,
-            file_type=data.file_type,
-            parent_id=data.data_id,
-        )
-        try:
-            created_file = create_file([file], user)[0]
-        except Exception as e:
-            click.secho(f"Error occured: {e}\n\n Exiting....")
-            sys.exit(1)
-
-        click.echo(
-            click.style("File object created:", fg="green")
-            + f"\n\n{pformat(created_file.dict())}\n"
-        )
-
-        # Update data in db to link with file
-        data_update = DataUpdate(data_id=data.data_id, file_id=created_file.file_id)
-        try:
-            updated_data = update_data(data_update)
-        except Exception as e:
-            click.secho(f"Error occured: {e}\n\n Exiting....")
-            sys.exit(1)
-
-        click.echo(
-            click.style("Data and file linked:", fg="green")
-            + f"\n\n{pformat(updated_data.dict())}\n"
-        )
-
-        # Upload file
-        click.secho(f"Starting file upload...", fg="green")
-        archive_file_size = os.stat(archive_path).st_size
-        try:
-            with open(archive_path, "rb") as f:
-                with tqdm(
-                    total=archive_file_size,
-                    unit="B",
-                    unit_scale=True,
-                    unit_divisor=1024,
-                ) as t:
-                    wrapped_file = CallbackIOWrapper(t.update, f, "read")
-                    requests.put(
-                        url=created_file.presigned_url,
-                        data=wrapped_file,
-                    )
-        except Exception as e:
-            click.secho(f"Error occured: {e}\n\n Exiting....")
-            sys.exit(1)
-
-        # Update file status to uploaded in db
-        file_update = FileUpdate(file_id=created_file.file_id, uploaded=True)
-        try:
-            updated_file = update_file(file_update)
-        except Exception as e:
-            click.secho(f"Error occured: {e}\n\n Exiting....")
-            sys.exit(1)
-        click.echo(
-            click.style("\nFile object updated: ", fg="green")
-            + f"\n\n{pformat(updated_file.dict())}\n"
-        )
-        click.secho("All done!", fg="green")
+    # Update mine
+    mine_update = MineUpdate(
+        mine_id=mine_id, name=name, description=desc, preference=pref
+    )
+    try:
+        updated_mine = update_mine(mine_update)
+    except Exception as e:
+        click.secho(f"Error occured: {e}\n\n Exiting....")
+        sys.exit(1)
+    click.echo(
+        click.style("\nMine object updated: ", fg="green")
+        + f"\n\n{pformat(updated_mine.dict())}\n"
+    )
+    click.secho("All done!", fg="green")
 
 
 @click.command()
-@click.option("--data_id", "-i", required=True)
+@click.option("--mine_id", "-i", required=True)
 @click.option("--extract", "-e", is_flag=True)
 @click.argument("path", default=".")
-def get(data_id, extract, path) -> None:
-    """Get data object."""
+def get(mine_id, extract, path) -> None:
+    """Get mine object."""
     # Check auth
     user = check_auth(config)
-    # fetch the data from the db
-    query_params = DataGetQueryParams(
-        query_type=DataQueryType.GET_DATA_BY_ID, data_id=data_id
+    # fetch the mine from the db
+    query_params = MineGetQueryParams(
+        query_type=MineQueryType.GET_MINE_BY_ID, mine_id=mine_id
     )
-    fetched_data = get_data(query_params, user)
-    if len(fetched_data) == 0:
-        click.secho(f"Data not found!\n\n")
+    fetched_mine = get_mine(query_params, user)
+    if len(fetched_mine) == 0:
+        click.secho(f"Mine not found!\n\n")
         sys.exit(0)
-    data = fetched_data[0]
+    mine = fetched_mine[0]
     click.echo(
-        click.style("Data object:", fg="green") + f"\n\n{pformat(data.dict())}\n"
+        click.style("Mine object:", fg="green") + f"\n\n{pformat(mine.dict())}\n"
     )
-    # get file from data
+
+    # get rendered template from mine
+    query_params = RenderedTemplateGetQueryParams(
+        query_type=RenderedTemplateQueryType.GET_RENDERED_TEMPLATE_BY_ID,
+        rendered_template_id=mine.rendered_template_id,
+    )
+    fetched_rendered_template = get_rendered_template(query_params, user)
+    if len(fetched_rendered_template) == 0:
+        click.secho(f"Rendered template not found!\n\n")
+        sys.exit(0)
+    rendered_template = fetched_rendered_template[0]
+    click.echo(
+        click.style("Rendered template object:", fg="green")
+        + f"\n\n{pformat(rendered_template.dict())}\n"
+    )
+
+    # get file from rendered template
     query_params = FileGetQueryParams(
-        query_type=FileQueryType.GET_FILE_BY_ID, file_id=data.file_id
+        query_type=FileQueryType.GET_FILE_BY_ID,
+        file_id=rendered_template.rendered_template_id,
     )
     fetched_file = get_file(query_params, user)
     if len(fetched_file) == 0:
@@ -423,15 +385,17 @@ def get(data_id, extract, path) -> None:
     if extract:
         click.secho(f"Unpacking archive...", fg="green")
         shutil.unpack_archive(Path(path).joinpath(f"{file.file_id}.{file.ext}"))
+
+    # TODO: Download related source data files and database dumps
     click.secho(f"All done!", fg="green")
 
 
 @click.group()
-def data() -> None:
-    """Data commands."""
+def mine() -> None:
+    """Mine commands."""
     pass
 
 
-data.add_command(create)
-data.add_command(update)
-data.add_command(get)
+mine.add_command(create)
+mine.add_command(update)
+mine.add_command(get)

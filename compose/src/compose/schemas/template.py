@@ -37,6 +37,6 @@ class RenderedTemplate(BaseModel):
     name: str
     description: Optional[str]
     template_vars: List[TemplateVar]
-    template_context: TemplateContext
-    parent_mine_id: UUID4
+    template_context: Optional[TemplateContext]
+    parent_mine_id: Optional[UUID4]
     file_id: Optional[UUID4]

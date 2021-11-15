@@ -14,6 +14,7 @@ class RenderedTemplateUpdate(BaseModel):
     rendered_template_id: UUID4
     name: Optional[str]
     status: Optional[str]
+    parent_mine_id: Optional[UUID4]
 
 
 class RenderedTemplatePUTRequest(BaseModel):
