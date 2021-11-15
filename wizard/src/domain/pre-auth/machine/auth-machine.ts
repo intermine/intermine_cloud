@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { createMachine, assign } from 'xstate'
 import { clone } from '@intermine/chromatin/utils'
 
@@ -129,4 +128,3 @@ export const authMachine = createMachine<
         },
     }
 )
-/* eslint-enable */

@@ -3,6 +3,7 @@ import { useHistory, useLocation, Switch, Route } from 'react-router-dom'
 import { ThemeProvider } from '@intermine/chromatin/styles'
 import { Box } from '@intermine/chromatin/box'
 import { createStyle } from '@intermine/chromatin/styles'
+import 'regenerator-runtime'
 
 import { AuthStates } from './constants/auth'
 import { AppContext } from './context'
