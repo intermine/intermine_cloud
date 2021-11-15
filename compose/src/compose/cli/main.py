@@ -17,6 +17,7 @@ from blackcap.auther import auther_registry
 from blackcap.schemas.api.auth.post import AuthUserCreds
 
 from compose.cli.data import data
+from compose.cli.mine import mine
 from compose.cli.template import template
 
 from .. import __version__
@@ -54,3 +55,4 @@ main.add_command(login)
 main.add_command(sub)
 main.add_command(data)
 main.add_command(template)
+main.add_command(mine)

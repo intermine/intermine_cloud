@@ -16,5 +16,5 @@ class MineDB(DBModel, SurrogatePKUUID, TimestampMixin):
     preference = Column(JSON, nullable=False)
     state = Column(JSON, nullable=False)
     protagonist_id = reference_col("protagonist")
-    rendered_template_id = reference_col("rendered_template")
+    rendered_template_file_id = reference_col("file")
     data_file_ids = Column(JSON)

@@ -7,6 +7,7 @@ from blackcap.schemas.api.common import ResponseSchema
 from compose.schemas.template import RenderedTemplate
 
 from pydantic import BaseModel
+from pydantic.types import UUID4
 
 
 class RenderedTemplateGetResponse(ResponseSchema):
@@ -30,5 +31,5 @@ class RenderedTemplateGetQueryParams(BaseModel):
     """RenderedTemplate GET request query params schema."""
 
     query_type: RenderedTemplateQueryType
-    template_id: Optional[str]
-    protagonist_id: Optional[str]
+    template_id: Optional[UUID4]
+    protagonist_id: Optional[UUID4]

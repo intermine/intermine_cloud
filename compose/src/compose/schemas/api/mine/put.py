@@ -12,6 +12,8 @@ class MineUpdate(BaseModel):
 
     mine_id: UUID4
     name: Optional[str]
+    description: Optional[str]
+    preference: Optional[str]
 
 
 class MinePUTRequest(BaseModel):
