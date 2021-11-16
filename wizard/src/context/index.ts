@@ -5,5 +5,5 @@ export {
     useGlobalModalReducer,
     usePreferencesReducer,
     useSidebarReducer,
-    useStore,
+    useProgressReducer,
 } from './store'

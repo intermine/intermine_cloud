@@ -1,6 +1,9 @@
 import { AlertProps } from '@intermine/chromatin/alert'
 import { ButtonCommonProps } from '@intermine/chromatin/button'
+
 import type { ThemeType } from '@intermine/chromatin/styles'
+import type { CancelTokenSource } from 'axios'
+
 import {
     AdditionalSidebarActions,
     AdditionalSidebarTabs,
@@ -10,6 +13,10 @@ import { AuthStates, AuthActions } from '../constants/auth'
 import { GlobalAlertsActions } from '../constants/global-alert'
 import { GlobalModalActions } from '../constants/global-modal'
 import { PreferencesActions } from '../constants/preferences'
+import {
+    ProgressActions,
+    ProgressItemUploadStatus,
+} from '../constants/progress'
 import { SidebarActions } from '../constants/sidebar'
 
 /**
@@ -166,6 +173,46 @@ export type TUseGlobalAlertReducer = {
  */
 
 /**
+ * Progress
+ */
+export type TProgressItem = {
+    totalSize: number
+    loadedSize: number
+    file: File
+    url: string
+    id: string
+    cancelSourceToken: CancelTokenSource
+    status: ProgressItemUploadStatus
+}
+
+export type TProgressReducer = {
+    progressItems: { [x: string]: TProgressItem }
+}
+
+export type TProgressReducerAction = {
+    type: ProgressActions
+    data: unknown
+}
+
+export type TUploadDataOptions = {
+    url: string
+    file: File
+    id?: string
+}
+
+export type TUseProgressReducer = {
+    state: TProgressReducer
+    uploadData: (options: TUploadDataOptions) => void
+    stopDataUploading: (id: string) => void
+    removeEntry: (id: string) => void
+    retryUpload: (id: string) => void
+}
+
+/**
+ * Progress Ends
+ */
+
+/**
  * App Context
  */
 export type TAppContext = {
@@ -175,4 +222,5 @@ export type TAppContext = {
     globalModalReducer: TUseGlobalModalReducer
     additionalSidebarReducer: TUseAdditionalSidebarReducer
     globalAlertReducer: TUseGlobalAlertReducer
+    progressReducer: TUseProgressReducer
 }

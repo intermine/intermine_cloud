@@ -6,6 +6,7 @@ import { useGlobalAlertReducer as _useGlobalAlertReducer } from './reducers/glob
 import { useGlobalModalReducer as _useGlobalModalReducer } from './reducers/global-modal-reducer'
 import { usePreferencesReducer as _usePreferencesReducer } from './reducers/preferences-reducer'
 import { useSidebarReducer as _useSidebarReducer } from './reducers/sidebar-reducer'
+import { useProgressReducer as _useProgressReducer } from './reducers/progress-reducer'
 /* eslint-enable max-len */
 
 import { AppContext } from './app-context'
@@ -37,6 +38,10 @@ export const useAdditionalSidebarReducer = () => {
     return store().additionalSidebarReducer
 }
 
+export const useProgressReducer = () => {
+    return store().progressReducer
+}
+
 export const useStore = (): TAppContext => {
     return {
         authReducer: _useAuthReducer(),
@@ -45,5 +50,6 @@ export const useStore = (): TAppContext => {
         globalModalReducer: _useGlobalModalReducer(),
         additionalSidebarReducer: _useAdditionalSidebarReducer(),
         globalAlertReducer: _useGlobalAlertReducer(),
+        progressReducer: _useProgressReducer(),
     }
 }
