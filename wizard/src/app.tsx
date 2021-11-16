@@ -36,7 +36,8 @@ const useStyles = createStyle({
             position: 'relative'
         },
         body: {
-            position: 'relative'
+            position: 'relative',
+            overflow: 'hidden'
         },
         '#root': {
             /**
@@ -127,8 +128,7 @@ export const App = () => {
                         color: neutral[50],
                         height: '100%',
                         position: 'relative',
-                        width: '100%',
-                        overflow: 'auto'
+                        width: '100%'
                     })
                 }}
             >

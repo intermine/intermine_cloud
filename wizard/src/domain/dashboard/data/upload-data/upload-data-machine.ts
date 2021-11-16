@@ -71,6 +71,7 @@ export const uploadDataMachine = createMachine<
                 entry: 'setFile',
                 on: {
                     UPLOADING_FILE: 'uploadingFile',
+                    FILE_SELECTED: 'fileSelected',
                 },
             },
             uploadingFile: {
@@ -123,6 +124,7 @@ export const uploadDataMachine = createMachine<
                     return event.data
                 },
             }),
+
             onUploadError: assign<TUploadDataMachineContext, any>({
                 errorMessage:
                     'Unexpected error occur. Please try after some time',

@@ -1,32 +1,35 @@
-import { useContext, useEffect, useState } from 'react'
-
+import { useEffect, useState } from 'react'
 import { useMachine } from '@xstate/react'
-
 import { InlineAlertProps } from '@intermine/chromatin/inline-alert'
-
-import { AppContext } from '../../../../context'
 
 import { uploadDataMachine } from './upload-data-machine'
 import { UploadDataView } from './upload-data-view'
+import {
+    useAdditionalSidebarReducer,
+    useProgressReducer
+} from '../../../../context'
+import { AdditionalSidebarTabs } from '../../../../constants/additional-sidebar'
 
 export const UploadData = () => {
-    const store = useContext(AppContext)
-    const {
-        additionalSidebarReducer: { updateState }
-    } = store
-
     const [uploadDataMachineState, dispatch] = useMachine(uploadDataMachine)
-
     const { context: uploadDataMachineContext, value: uploadDataMachineValue } =
         uploadDataMachineState
     const [inlineAlert, _setInlineAlertProps] = useState<InlineAlertProps>({
         isOpen: false
     })
 
+    const progressReducer = useProgressReducer()
+    const additionalSidebarReducer = useAdditionalSidebarReducer()
+
+    const { uploadData: _uploadData } = progressReducer
+    const { updateState: updateAdditionalSidebarState } =
+        additionalSidebarReducer
+
     const setInlineAlertProps = (p: InlineAlertProps) => {
         _setInlineAlertProps((prev) => ({
             ...prev,
             isOpen: true,
+            duration: 5000,
             onClose: () => setInlineAlertProps({ isOpen: false }),
             ...p
         }))
@@ -55,11 +58,16 @@ export const UploadData = () => {
         }
     }
 
-    const uploadFile = () => {
-        if (uploadDataMachineContext.putUrl) {
-            fetch(uploadDataMachineContext.putUrl, {
-                method: 'PUT',
-                body: uploadDataMachineContext.file
+    const uploadData = () => {
+        const { putUrl, file } = uploadDataMachineContext
+        if (putUrl && file) {
+            _uploadData({
+                file: file,
+                url: putUrl
+            })
+            updateAdditionalSidebarState({
+                isOpen: true,
+                activeTab: AdditionalSidebarTabs.ProgressTab
             })
         }
     }
@@ -79,7 +87,7 @@ export const UploadData = () => {
                     'Your file is uploading. Check progress in Progress Tab.'
             })
 
-            uploadFile()
+            uploadData()
             dispatch('RESET')
         }
     }, [uploadDataMachineValue])
