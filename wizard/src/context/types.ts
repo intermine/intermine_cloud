@@ -153,7 +153,7 @@ export type TAlert = {
 }
 
 export type TGlobalAlertReducer = {
-    alerts: TAlert[]
+    alerts: { [x: string]: TAlert }
 }
 
 export type TGlobalAlertReducerAction = {
@@ -183,6 +183,8 @@ export type TProgressItem = {
     id: string
     cancelSourceToken: CancelTokenSource
     status: ProgressItemUploadStatus
+    onUploadSuccessful?: (data: TProgressItem) => void
+    onUploadFailed?: (data: TProgressItem) => void
 }
 
 export type TProgressReducer = {
@@ -198,6 +200,8 @@ export type TUploadDataOptions = {
     url: string
     file: File
     id?: string
+    onUploadSuccessful?: (data: TProgressItem) => void
+    onUploadFailed?: (data: TProgressItem) => void
 }
 
 export type TUseProgressReducer = {
