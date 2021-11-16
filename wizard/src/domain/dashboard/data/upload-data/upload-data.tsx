@@ -6,6 +6,7 @@ import { uploadDataMachine } from './upload-data-machine'
 import { UploadDataView } from './upload-data-view'
 import {
     useAdditionalSidebarReducer,
+    useGlobalAlertReducer,
     useProgressReducer
 } from '../../../../context'
 import { AdditionalSidebarTabs } from '../../../../constants/additional-sidebar'
@@ -20,10 +21,12 @@ export const UploadData = () => {
 
     const progressReducer = useProgressReducer()
     const additionalSidebarReducer = useAdditionalSidebarReducer()
+    const globalAlertReducer = useGlobalAlertReducer()
 
     const { uploadData: _uploadData } = progressReducer
     const { updateState: updateAdditionalSidebarState } =
         additionalSidebarReducer
+    const { addAlert } = globalAlertReducer
 
     const setInlineAlertProps = (p: InlineAlertProps) => {
         _setInlineAlertProps((prev) => ({
@@ -63,7 +66,22 @@ export const UploadData = () => {
         if (putUrl && file) {
             _uploadData({
                 file: file,
-                url: putUrl
+                url: putUrl,
+                onUploadFailed: () =>
+                    addAlert({
+                        id: putUrl,
+                        isOpen: true,
+                        type: 'error',
+                        message: 'Failed to upload ' + file.name
+                    }),
+                onUploadSuccessful: () => {
+                    addAlert({
+                        id: putUrl,
+                        isOpen: true,
+                        type: 'success',
+                        message: file.name + ' uploaded successfully.'
+                    })
+                }
             })
             updateAdditionalSidebarState({
                 isOpen: true,
@@ -81,12 +99,6 @@ export const UploadData = () => {
         }
 
         if (uploadDataMachineValue === 'successful') {
-            setInlineAlertProps({
-                type: 'success',
-                message:
-                    'Your file is uploading. Check progress in Progress Tab.'
-            })
-
             uploadData()
             dispatch('RESET')
         }

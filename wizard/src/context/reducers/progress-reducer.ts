@@ -82,7 +82,13 @@ export const useProgressReducer = (): TUseProgressReducer => {
     const uploadData = (options: TUploadDataOptions) => {
         const CancelToken = axios.CancelToken
         const source = CancelToken.source()
-        const { url, file, id = shortid.generate() } = options
+        const {
+            url,
+            file,
+            id = shortid.generate(),
+            onUploadFailed,
+            onUploadSuccessful,
+        } = options
 
         const throttleUpdate = throttle((event) => {
             updateDataProgress({
@@ -98,12 +104,21 @@ export const useProgressReducer = (): TUseProgressReducer => {
                 onUploadProgress: throttleUpdate,
             })
             .then(() => {
-                return updateDataProgress({
+                updateDataProgress({
                     id,
                     status: Uploaded,
                     loadedSize: file.size,
                     totalSize: file.size,
                 })
+                if (onUploadSuccessful) {
+                    onUploadSuccessful({
+                        ...state.progressItems[id],
+                        status: Uploaded,
+                        loadedSize: file.size,
+                        totalSize: file.size,
+                    })
+                }
+                return
             })
             .catch((error) => {
                 if (error.message !== Canceled) {
@@ -111,6 +126,13 @@ export const useProgressReducer = (): TUseProgressReducer => {
                         id,
                         status: Failed,
                     })
+
+                    if (onUploadFailed) {
+                        onUploadFailed({
+                            ...state.progressItems[id],
+                            status: Failed,
+                        })
+                    }
                 }
             })
 
@@ -124,6 +146,8 @@ export const useProgressReducer = (): TUseProgressReducer => {
                 url,
                 cancelSourceToken: source,
                 status: Uploading,
+                onUploadSuccessful,
+                onUploadFailed,
             } as TProgressItem,
         })
     }
@@ -132,6 +156,8 @@ export const useProgressReducer = (): TUseProgressReducer => {
         uploadData({
             url: state.progressItems[id].url,
             file: state.progressItems[id].file,
+            onUploadFailed: state.progressItems[id].onUploadFailed,
+            onUploadSuccessful: state.progressItems[id].onUploadSuccessful,
             id,
         })
     }
