@@ -1,13 +1,12 @@
-import { useContext } from 'react'
 import { FormControlLabel } from '@intermine/chromatin/form-control-label'
 import { Toggle } from '@intermine/chromatin/toggle'
 
-import { AppContext } from '../../../context'
+import { useStore } from '../../../context'
 import { ActionSection } from './action-section'
 import { AdditionalSidebarTabs } from '../../../constants/additional-sidebar'
 
 export const Preferences = () => {
-    const store = useContext(AppContext)
+    const store = useStore()
     const {
         preferencesReducer: {
             updateTheme,

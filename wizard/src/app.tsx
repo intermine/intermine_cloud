@@ -1,4 +1,4 @@
-import { useContext, lazy, Suspense, useEffect } from 'react'
+import { lazy, Suspense, useEffect } from 'react'
 import { useHistory, useLocation, Switch, Route } from 'react-router-dom'
 import { ThemeProvider } from '@intermine/chromatin/styles'
 import { Box } from '@intermine/chromatin/box'
@@ -6,7 +6,7 @@ import { createStyle } from '@intermine/chromatin/styles'
 import 'regenerator-runtime'
 
 import { AuthStates } from './constants/auth'
-import { AppContext } from './context'
+import { useStore } from './context'
 import { RouteLoadingSpinner } from './components/route-loading-spinner'
 import { darkTheme, lightTheme } from './constants/theme'
 import { PageNotFound } from './components/page-not-found'
@@ -70,7 +70,7 @@ export const App = () => {
     const history = useHistory()
     const { pathname } = useLocation()
 
-    const store = useContext(AppContext)
+    const store = useStore()
     const {
         authReducer: { state: auth },
         preferencesReducer: {

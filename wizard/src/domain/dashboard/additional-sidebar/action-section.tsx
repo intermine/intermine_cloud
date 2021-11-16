@@ -1,11 +1,10 @@
-import { useContext } from 'react'
 import { Divider } from '@intermine/chromatin'
 import { Box, BoxBaseProps } from '@intermine/chromatin/box'
 import { Typography } from '@intermine/chromatin/typography'
 import { IconButton } from '@intermine/chromatin/icon-button'
 import CloseIcon from '@intermine/chromatin/icons/System/close-line'
 
-import { AppContext } from '../../../context'
+import { useStore } from '../../../context'
 import { AdditionalSidebarTabs } from '../../../constants/additional-sidebar'
 
 export type TActionSectionProps = {
@@ -25,7 +24,7 @@ const ActionSectionContent = (props: BoxBaseProps) => {
 
 const ActionSection = (props: TActionSectionProps) => {
     const { heading, children, isActive } = props
-    const store = useContext(AppContext)
+    const store = useStore()
     const {
         additionalSidebarReducer: { updateState }
     } = store

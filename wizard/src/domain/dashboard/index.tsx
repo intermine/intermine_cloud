@@ -1,9 +1,8 @@
-import { lazy, Suspense, useContext } from 'react'
+import { lazy, Suspense } from 'react'
 import { Switch, Route } from 'react-router-dom'
 import { Box } from '@intermine/chromatin/box'
 import { createStyle } from '@intermine/chromatin/styles'
 
-import { AppContext } from '../../context'
 import { DomElementIDs } from '../../constants/ids'
 import {
     DASHBOARD_OVERVIEW_PATH,
@@ -15,6 +14,7 @@ import { RouteLoadingSpinner } from '../../components/route-loading-spinner'
 import { Sidebar } from './sidebar'
 import { AdditionalSidebar } from './additional-sidebar'
 import { DashboardErrorBoundary } from './common/error-boundary'
+import { useStore } from '../../context'
 
 const Overview = lazy(() => import('./overview'))
 const Data = lazy(() => import('./data'))
@@ -94,7 +94,7 @@ const useStyles = createStyle((theme) => {
 })
 
 const Dashboard = () => {
-    const store = useContext(AppContext)
+    const store = useStore()
     const {
         additionalSidebarReducer: {
             state: { isOpen: isAdditionalSidebarOpen }
