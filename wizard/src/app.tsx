@@ -6,7 +6,7 @@ import { createStyle } from '@intermine/chromatin/styles'
 import 'regenerator-runtime'
 
 import { AuthStates } from './constants/auth'
-import { useStore } from './context'
+import { useAuthReducer, usePreferencesReducer } from './context'
 import { RouteLoadingSpinner } from './components/route-loading-spinner'
 import { darkTheme, lightTheme } from './constants/theme'
 import { PageNotFound } from './components/page-not-found'
@@ -70,13 +70,13 @@ export const App = () => {
     const history = useHistory()
     const { pathname } = useLocation()
 
-    const store = useStore()
+    const authReducer = useAuthReducer()
+    const preferenceReducer = usePreferencesReducer()
+
+    const { state: auth } = authReducer
     const {
-        authReducer: { state: auth },
-        preferencesReducer: {
-            state: { themeType }
-        }
-    } = store
+        state: { themeType }
+    } = preferenceReducer
 
     const onLocationChange = () => {
         if (auth.authState !== Authorize && isAuthRoute(pathname)) {
