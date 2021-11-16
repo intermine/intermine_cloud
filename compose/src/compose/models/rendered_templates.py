@@ -1,9 +1,8 @@
-"""RenderedTemplateDB model"""
+"""RenderedTemplateDB model."""
 
 from blackcap.models.meta.mixins import DBModel, SurrogatePKUUID, TimestampMixin
 from blackcap.models.meta.orm import reference_col
-
-from sqlalchemy import Column, String, JSON
+from sqlalchemy import Column, JSON, String
 
 
 class RenderedTemplateDB(DBModel, SurrogatePKUUID, TimestampMixin):

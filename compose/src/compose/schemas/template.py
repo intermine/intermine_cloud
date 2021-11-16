@@ -1,6 +1,6 @@
-""""Template schema."""
+"""Template schema."""
 
-from typing import Any, List, Optional
+from typing import List, Optional
 
 from pydantic import BaseModel
 from pydantic.types import UUID4
@@ -13,7 +13,7 @@ class TemplateContext(BaseModel):
 
 
 class TemplateVar(BaseModel):
-    """Template vars schema"""
+    """Template vars schema."""
 
     name: str
     var_type: str

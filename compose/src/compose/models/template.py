@@ -1,9 +1,8 @@
-"""TemplaeDB model"""
+"""TemplaeDB model."""
 
 from blackcap.models.meta.mixins import DBModel, SurrogatePKUUID, TimestampMixin
 from blackcap.models.meta.orm import reference_col
-
-from sqlalchemy import Column, String, JSON
+from sqlalchemy import Column, JSON, String
 
 
 class TemplateDB(DBModel, SurrogatePKUUID, TimestampMixin):

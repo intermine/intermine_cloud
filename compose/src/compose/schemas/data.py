@@ -1,4 +1,4 @@
-""""Data schema."""
+"""Data schema."""
 
 from typing import Optional
 

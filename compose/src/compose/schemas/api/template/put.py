@@ -2,11 +2,10 @@
 from typing import List, Optional
 
 from blackcap.schemas.user import User
-
-from compose.schemas.template import TemplateVar
-
 from pydantic import BaseModel
 from pydantic.types import UUID4
+
+from compose.schemas.template import TemplateVar
 
 
 class TemplateUpdate(BaseModel):

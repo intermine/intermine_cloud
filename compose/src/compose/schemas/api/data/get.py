@@ -4,10 +4,10 @@ from enum import Enum, unique
 from typing import List, Optional
 
 from blackcap.schemas.api.common import ResponseSchema
-from compose.schemas.data import Data
-
 from pydantic import BaseModel
 from pydantic.types import UUID4
+
+from compose.schemas.data import Data
 
 
 class DataGetResponse(ResponseSchema):

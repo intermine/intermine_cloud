@@ -2,10 +2,10 @@
 
 from typing import List, Optional
 
-from compose.schemas.mine import Mine
 from blackcap.schemas.user import User
-
 from pydantic import BaseModel
+
+from compose.schemas.mine import Mine
 
 
 class MinePOSTResponse(BaseModel):

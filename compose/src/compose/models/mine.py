@@ -1,10 +1,8 @@
-"""MineDB model"""
+"""MineDB model."""
 
 from blackcap.models.meta.mixins import DBModel, SurrogatePKUUID, TimestampMixin
 from blackcap.models.meta.orm import reference_col
-from blackcap.models.meta.helpers import GUID
-
-from sqlalchemy import Column, String, JSON, ARRAY
+from sqlalchemy import Column, JSON, String
 
 
 class MineDB(DBModel, SurrogatePKUUID, TimestampMixin):

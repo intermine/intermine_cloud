@@ -2,10 +2,10 @@
 
 from typing import List, Optional
 
-from compose.schemas.file import File
 from blackcap.schemas.user import User
-
 from pydantic import BaseModel
+
+from compose.schemas.file import File
 
 
 class FilePOSTResponse(BaseModel):

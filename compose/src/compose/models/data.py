@@ -1,9 +1,7 @@
-"""DataDB model"""
+"""DataDB model."""
 
 from blackcap.models.meta.mixins import DBModel, SurrogatePKUUID, TimestampMixin
-from blackcap.models.meta.helpers import GUID
 from blackcap.models.meta.orm import reference_col
-
 from sqlalchemy import Column, String
 
 

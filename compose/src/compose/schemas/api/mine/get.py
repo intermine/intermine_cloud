@@ -4,10 +4,10 @@ from enum import Enum, unique
 from typing import List, Optional
 
 from blackcap.schemas.api.common import ResponseSchema
-from compose.schemas.mine import Mine
-
 from pydantic import BaseModel
 from pydantic.types import UUID4
+
+from compose.schemas.mine import Mine
 
 
 class MineGetResponse(ResponseSchema):
