@@ -1,4 +1,3 @@
-import { useContext } from 'react'
 import { Box } from '@intermine/chromatin/box'
 import { Tooltip } from '@intermine/chromatin/tooltip'
 import { IconButton } from '@intermine/chromatin/icon-button'
@@ -7,7 +6,7 @@ import PreferencesIcon from '@intermine/chromatin/icons/Design/tools-line'
 import EditProfileIcon from '@intermine/chromatin/icons/user/user-settings-line'
 import { createStyle } from '@intermine/chromatin/styles'
 
-import { AppContext } from '../../../context'
+import { useAdditionalSidebarReducer } from '../../../context'
 import { AdditionalSidebarTabs } from '../../../constants/additional-sidebar'
 
 import { Progress } from './progress'
@@ -74,14 +73,11 @@ const useStyles = createStyle((theme) => {
 })
 
 export const AdditionalSidebar = () => {
-    const store = useContext(AppContext)
-
+    const additionalSidebarReducer = useAdditionalSidebarReducer()
     const {
-        additionalSidebarReducer: {
-            updateState,
-            state: { isOpen, activeTab }
-        }
-    } = store
+        updateState,
+        state: { isOpen, activeTab }
+    } = additionalSidebarReducer
 
     const classes = useStyles({
         isOpen

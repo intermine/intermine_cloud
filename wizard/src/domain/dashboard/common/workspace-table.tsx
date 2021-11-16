@@ -71,6 +71,15 @@ const useStyles = createStyle((theme) => {
             position: 'relative'
         },
 
+        table: {
+            '& tr:last-child td:first-child': {
+                borderBottomLeftRadius: '0.5rem'
+            },
+            '& tr:last-child td:last-child': {
+                borderBottomRightRadius: '0.5rem'
+            }
+        },
+
         emptyTableMessage: {
             color: neutral[30],
             height: '100%',
@@ -95,7 +104,7 @@ const useStyles = createStyle((theme) => {
         },
         cell: {
             '&&': {
-                background: themeType === 'dark' ? darkGrey[40] : '#fefefe',
+                background: themeType === 'dark' ? darkGrey[40] : white,
                 borderBottom: `1px solid ${
                     themeType === 'dark' ? darkGrey[30] : grey[20]
                 }`,
@@ -133,7 +142,6 @@ export const WorkspaceTable = (props: TWorkspaceTableProps) => {
         )
 
         if (pageContainer && heading && tableContainer) {
-            console.log(pageContainer.clientHeight, heading.clientHeight)
             tableContainer.style.height = `${pageContainer.clientHeight - 96}px`
         }
     }
@@ -164,7 +172,7 @@ export const WorkspaceTable = (props: TWorkspaceTableProps) => {
             )
         }
         return (
-            <Table hasStickyHeader className={classes.shape}>
+            <Table hasStickyHeader className={classes.table}>
                 <TableHead>
                     <TableRow onClick={header.row.onClick}>
                         {header.row.cells.map(({ id, value, onClick }) => {

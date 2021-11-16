@@ -1,22 +1,25 @@
-import { useContext } from 'react'
 import { FormControlLabel } from '@intermine/chromatin/form-control-label'
 import { Toggle } from '@intermine/chromatin/toggle'
 
-import { AppContext } from '../../../context'
+import {
+    useAdditionalSidebarReducer,
+    usePreferencesReducer
+} from '../../../context'
 import { ActionSection } from './action-section'
 import { AdditionalSidebarTabs } from '../../../constants/additional-sidebar'
 
 export const Preferences = () => {
-    const store = useContext(AppContext)
+    const preferencesReducer = usePreferencesReducer()
+    const additionalSidebarReducer = useAdditionalSidebarReducer()
+
     const {
-        preferencesReducer: {
-            updateTheme,
-            state: { themeType }
-        },
-        additionalSidebarReducer: {
-            state: { activeTab }
-        }
-    } = store
+        updateTheme,
+        state: { themeType }
+    } = preferencesReducer
+
+    const {
+        state: { activeTab }
+    } = additionalSidebarReducer
 
     const onDarkThemeToggle = () => {
         if (themeType === 'dark') {

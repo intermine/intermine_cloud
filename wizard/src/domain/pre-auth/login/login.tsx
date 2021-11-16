@@ -1,11 +1,11 @@
-import { useContext, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useHistory } from 'react-router-dom'
 import { useMachine } from '@xstate/react'
 import { InlineAlert } from '@intermine/chromatin/inline-alert'
 import { Button } from '@intermine/chromatin/button'
 import { clone } from '@intermine/chromatin/utils'
 
-import { AppContext } from '../../../context'
+import { useAuthReducer } from '../../../context'
 import { AuthStates } from '../../../constants/auth'
 import { DomElementIDs } from '../../../constants/ids'
 import {
@@ -37,11 +37,10 @@ const defaultFieldValue: TInputField = {
 }
 
 export const Login = () => {
-    const store = useContext(AppContext)
+    const authReducer = useAuthReducer()
     const history = useHistory()
-    const {
-        authReducer: { updateAuthState }
-    } = store
+
+    const { updateAuthState } = authReducer
 
     const [{ password, username }, setFields] = useState<TInputFields>({
         password: clone(defaultFieldValue),

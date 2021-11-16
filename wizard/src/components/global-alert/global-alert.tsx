@@ -1,17 +1,14 @@
-import { useContext } from 'react'
 import { AlertGroup } from '@intermine/chromatin/alert-group'
 import { Alert } from '@intermine/chromatin/alert'
 
-import { AppContext } from '../../context'
+import { useGlobalAlertReducer } from '../../context'
 
 export const GlobalAlert = () => {
-    const store = useContext(AppContext)
+    const globalAlertReducer = useGlobalAlertReducer()
     const {
-        globalAlertReducer: {
-            state: { alerts },
-            removeAlert
-        }
-    } = store
+        state: { alerts },
+        removeAlert
+    } = globalAlertReducer
 
     return (
         <AlertGroup isOpen={alerts.length > 0} origin="bottom-right">

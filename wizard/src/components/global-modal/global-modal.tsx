@@ -1,4 +1,3 @@
-import { useContext } from 'react'
 import { Modal } from '@intermine/chromatin/modal'
 import { Box } from '@intermine/chromatin/box'
 import { Typography } from '@intermine/chromatin/typography'
@@ -10,8 +9,7 @@ import InfoIcon from '@intermine/chromatin/icons/System/information-line'
 import SuccessIcon from '@intermine/chromatin/icons/System/check-line'
 import ErrorIcon from '@intermine/chromatin/icons/System/error-warning-line'
 import { ChromatinIcon } from '@intermine/chromatin/icons/types'
-
-import { AppContext } from '../../context'
+import { useGlobalModalReducer } from '../../context'
 
 const useStyles = createStyle((theme) => {
     const { themeType, palette, elevation, spacing } = theme
@@ -59,20 +57,18 @@ const useStyles = createStyle((theme) => {
 
 export const GlobalModal = () => {
     const classes = useStyles()
-    const store = useContext(AppContext)
+    const globalModalReducer = useGlobalModalReducer()
     const {
-        globalModalReducer: {
-            state: {
-                isOpen,
-                heading,
-                children,
-                primaryAction = {},
-                secondaryAction = {},
-                type = 'warning'
-            },
-            closeGlobalModal
-        }
-    } = store
+        state: {
+            isOpen,
+            heading,
+            children,
+            primaryAction = {},
+            secondaryAction = {},
+            type = 'warning'
+        },
+        closeGlobalModal
+    } = globalModalReducer
 
     const getIcon = (): JSX.Element => {
         const iconCSX: ChromatinIcon['csx'] = {

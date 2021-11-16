@@ -14,12 +14,13 @@ import { DomElementIDs } from '../../../constants/ids'
 
 export type TWorkspaceHeadingProps = {
     heading: TypographyBaseProps
+    subHeading?: TypographyBaseProps
     primaryAction?: ButtonCommonProps
     backAction?: IconButtonCommonProps
 }
 
 export const WorkspaceHeading = (props: TWorkspaceHeadingProps) => {
-    const { heading, primaryAction, backAction } = props
+    const { heading, primaryAction, backAction, subHeading } = props
 
     return (
         <Box
@@ -48,7 +49,18 @@ export const WorkspaceHeading = (props: TWorkspaceHeadingProps) => {
                         {...backAction}
                     />
                 )}
-                <Typography variant="h1" {...heading} />
+                <Box
+                    csx={{ root: { display: 'flex', flexDirection: 'column' } }}
+                >
+                    <Typography variant="h1" {...heading} />
+                    {subHeading && (
+                        <Typography
+                            variant="bodySm"
+                            color="neutral.30"
+                            {...subHeading}
+                        />
+                    )}
+                </Box>
             </Box>
             {primaryAction && (
                 <Button

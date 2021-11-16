@@ -1,4 +1,3 @@
-import { useContext } from 'react'
 import { useLocation, useHistory } from 'react-router-dom'
 
 import { Box } from '@intermine/chromatin/box'
@@ -12,7 +11,7 @@ import DataIcon from '@intermine/chromatin/icons/Device/database-2-fill'
 import MinesIcon from '@intermine/chromatin/icons/Business/bubble-chart-fill'
 import CollapseIcon from '@intermine/chromatin/icons/System/arrow-left-line'
 
-import { AppContext } from '../../../context'
+import { useSidebarReducer } from '../../../context'
 import {
     DASHBOARD_OVERVIEW_PATH,
     DASHBOARD_DATA_PATH,
@@ -76,17 +75,15 @@ const useStyles = createStyle((theme) => {
 export const Sidebar = () => {
     const location = useLocation()
     const history = useHistory()
-    const store = useContext(AppContext)
+    const sidebarReducer = useSidebarReducer()
     const {
-        sidebarReducer: {
-            state: {
-                isOpen,
-                isPageSwitchingAllowed,
-                onSidebarItemClick: _onSidebarItemClick
-            },
-            updateSidebarState
-        }
-    } = store
+        state: {
+            isOpen,
+            isPageSwitchingAllowed,
+            onSidebarItemClick: _onSidebarItemClick
+        },
+        updateSidebarState
+    } = sidebarReducer
 
     const classes = useStyles({ isOpen })
 

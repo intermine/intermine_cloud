@@ -1,13 +1,5 @@
-import { AppContext } from './index'
-// eslint-disable-next-line max-len
-import { useAdditionalSidebarReducer } from './reducers/additional-sidebar-reducer'
-import { useAuthReducer } from './reducers/auth-reducer'
-import { useGlobalAlertReducer } from './reducers/global-alert-reducer'
-import { useGlobalModalReducer } from './reducers/global-modal-reducer'
-import { usePreferencesReducer } from './reducers/preferences-reducer'
-import { useSidebarReducer } from './reducers/sidebar-reducer'
-
-import type { TAppContext } from './types'
+import { AppContext } from './app-context'
+import { useStore } from './store'
 
 export interface AppContextProviderProps {
     children?: React.ReactChild
@@ -15,14 +7,7 @@ export interface AppContextProviderProps {
 
 export const AppContextProvider = (props: AppContextProviderProps) => {
     const { children } = props
-    const store: TAppContext = {
-        authReducer: useAuthReducer(),
-        preferencesReducer: usePreferencesReducer(),
-        sidebarReducer: useSidebarReducer(),
-        globalModalReducer: useGlobalModalReducer(),
-        additionalSidebarReducer: useAdditionalSidebarReducer(),
-        globalAlertReducer: useGlobalAlertReducer()
-    }
+    const store = useStore()
 
     return <AppContext.Provider value={store}>{children}</AppContext.Provider>
 }
