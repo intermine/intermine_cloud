@@ -2,9 +2,7 @@
 
 from typing import List, Optional
 
-from compose.schemas.data import Data
 from blackcap.schemas.user import User
-
 from pydantic import BaseModel
 from pydantic.types import UUID4
 

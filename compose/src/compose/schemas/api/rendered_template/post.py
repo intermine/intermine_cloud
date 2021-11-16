@@ -2,10 +2,10 @@
 
 from typing import List, Optional
 
-from compose.schemas.template import RenderedTemplate
 from blackcap.schemas.user import User
-
 from pydantic import BaseModel
+
+from compose.schemas.template import RenderedTemplate
 
 
 class RenderedTemplatePOSTResponse(BaseModel):

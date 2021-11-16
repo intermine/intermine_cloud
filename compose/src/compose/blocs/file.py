@@ -1,25 +1,21 @@
 """File BLoCs."""
 
-from datetime import datetime, timedelta
-from typing import Dict, List
+from datetime import timedelta
+from typing import List
+
 from blackcap.db import DBSession
 from blackcap.schemas.user import User
+from logzero import logger
+from minio.api import Minio
+from sqlalchemy import select
 
 from compose.configs import config_registry
 from compose.models.file import FileDB
-from compose.schemas.api.file.get import FileGetQueryParams, FileQueryType
 from compose.schemas.api.file.delete import FileDelete
+from compose.schemas.api.file.get import FileGetQueryParams, FileQueryType
 from compose.schemas.api.file.put import FileUpdate
 from compose.schemas.file import File
 
-from logzero import logger
-
-
-from minio.api import Minio
-
-from pydantic.types import UUID4
-
-from sqlalchemy import select
 
 config = config_registry.get_config()
 
@@ -33,8 +29,16 @@ minio_client = Minio(
 
 
 def create_presigned_post_url(file: FileDB, user_creds: User, method: str) -> str:
-    """Create presigned post url for the file."""
+    """Create presigned post url for the file.
 
+    Args:
+        file (FileDB): File object from db
+        user_creds (User): User credentials.
+        method (str): HTTP Method
+
+    Returns:
+        str: Presigned url
+    """
     return minio_client.get_presigned_url(
         method,
         f"imcloud-{user_creds.user_id}",
@@ -48,12 +52,14 @@ def create_file(file_list: List[File], user_creds: User) -> List[File]:
 
     Args:
         file_list (List[File]): List of file objects to create.
-        user_creds (Optional[User], optional): User credentials. Defaults to None.
+        user_creds (User): User credentials.
+
+    Raises:
+        Exception: Database error
 
     Returns:
         List[File]: Created file objects
     """
-
     with DBSession() as session:
         try:
             file_db_create_list: List[FileDB] = [
@@ -84,6 +90,7 @@ def get_file(query_params: FileGetQueryParams, user_creds: User = None) -> List[
 
     Args:
         query_params (FileGetQueryParams): Query params from request
+        user_creds (User): User credentials.
 
     Raises:
         Exception: error
@@ -128,6 +135,7 @@ def update_file(file_update: FileUpdate, user_creds: User = None) -> File:
 
     Args:
         file_update (FileUpdate): FileUpdate request
+        user_creds (User): User credentials.
 
     Raises:
         Exception: error
@@ -164,6 +172,7 @@ def delete_file(file_delete: FileDelete, user_creds: User = None) -> File:
 
     Args:
         file_delete (FileDelete): FileDelete request
+        user_creds (User): User credentials.
 
     Raises:
         Exception: error

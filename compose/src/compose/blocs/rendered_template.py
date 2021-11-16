@@ -4,19 +4,17 @@ from typing import List, Optional
 
 from blackcap.db import DBSession
 from blackcap.schemas.user import User
+from logzero import logger
+from sqlalchemy import select
 
 from compose.models.rendered_templates import RenderedTemplateDB
+from compose.schemas.api.rendered_template.delete import RenderedTemplateDelete
 from compose.schemas.api.rendered_template.get import (
     RenderedTemplateGetQueryParams,
     RenderedTemplateQueryType,
 )
 from compose.schemas.api.rendered_template.put import RenderedTemplateUpdate
-from compose.schemas.api.rendered_template.delete import RenderedTemplateDelete
 from compose.schemas.template import RenderedTemplate
-
-from logzero import logger
-
-from sqlalchemy import select
 
 
 def create_rendered_template(
@@ -27,6 +25,9 @@ def create_rendered_template(
     Args:
         rendered_template_list (List[RenderedTemplate]): List of rendered template objects to create.
         user_creds (Optional[User], optional): User credentials. Defaults to None.
+
+    Raises:
+        Exception: database error
 
     Returns:
         List[RenderedTemplate]: Created rendered template objects
@@ -60,6 +61,7 @@ def get_rendered_template(
 
     Args:
         query_params (RenderedTemplateGetQueryParams): Query params from request
+        user_creds (Optional[User], optional): User credentials. Defaults to None.
 
     Raises:
         Exception: error
@@ -67,7 +69,6 @@ def get_rendered_template(
     Returns:
         List[RenderedTemplate]: List of RenderedTemplates returned from DB
     """
-
     stmt = ""
 
     if query_params.query_type == RenderedTemplateQueryType.GET_ALL_RENDERED_TEMPLATES:
@@ -106,6 +107,7 @@ def update_rendered_template(
 
     Args:
         rendered_template_update (RenderedTemplateUpdate): RenderedTemplateUpdate request
+        user_creds (Optional[User], optional): User credentials. Defaults to None.
 
     Raises:
         Exception: error
@@ -151,6 +153,7 @@ def delete_rendered_template(
 
     Args:
         rendered_template_delete (RenderedTemplateDelete): RenderedTemplateDelete request
+        user_creds (Optional[User], optional): User credentials. Defaults to None.
 
     Raises:
         Exception: error

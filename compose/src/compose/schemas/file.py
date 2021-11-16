@@ -1,7 +1,6 @@
-""""File schema."""
+"""File schema."""
 
-from typing import Dict, Optional
-from uuid import uuid4
+from typing import Optional
 
 from pydantic import BaseModel
 from pydantic.types import UUID4

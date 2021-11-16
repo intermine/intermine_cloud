@@ -1,11 +1,6 @@
 """Command-line interface."""
 
-# flake8: noqa
-
-import os
-
-import click
-
+from blackcap.auther import auther_registry
 from blackcap.cli.create import create
 from blackcap.cli.db import db
 from blackcap.cli.get import get
@@ -13,14 +8,14 @@ from blackcap.cli.publish import pub
 from blackcap.cli.schedule import sched
 from blackcap.cli.subscribe import sub
 from blackcap.configs import config_registry
-from blackcap.auther import auther_registry
 from blackcap.schemas.api.auth.post import AuthUserCreds
+import click
 
 from compose.cli.data import data
 from compose.cli.mine import mine
 from compose.cli.template import template
-
 from .. import __version__
+
 
 config = config_registry.get_config()
 
@@ -28,9 +23,11 @@ config = config_registry.get_config()
 @click.command()
 @click.option("--email", required=True, help="email of user")
 @click.option("--password", required=True, help="password of user")
-def login(email, password) -> None:
+def login(email, password) -> None:  # noqa: C901, ANN001
+    """Login CLI."""
     auth_creds = AuthUserCreds(email=email, password=password)
     auther = auther_registry.get_auther(config.AUTHER)
+    # noqa: DAR101
     login_tuple = auther.login_user(auth_creds)
     if login_tuple is None:
         click.secho("Login failed!", fg="red")

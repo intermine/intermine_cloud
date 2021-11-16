@@ -4,16 +4,15 @@ from typing import Dict, List, Optional
 
 from blackcap.db import DBSession
 from blackcap.schemas.user import User
+from logzero import logger
+from sqlalchemy import select
 
 from compose.models.mine import MineDB
+from compose.schemas.api.mine.delete import MineDelete
 from compose.schemas.api.mine.get import MineGetQueryParams, MineQueryType
 from compose.schemas.api.mine.put import MineUpdate
-from compose.schemas.api.mine.delete import MineDelete
 from compose.schemas.mine import Mine
 
-from logzero import logger
-
-from sqlalchemy import select
 
 ######################
 # CRUD BloCs
@@ -25,7 +24,10 @@ def create_mine(mine_list: List[Mine], user_creds: Optional[User] = None) -> Lis
 
     Args:
         mine_list (List[Mine]): List of mine objects to create.
-        user_creds (Optional[User], optional): User credentials. Defaults to None.=
+        user_creds (Optional[User], optional): User credentials. Defaults to None.
+
+    Raises:
+        Exception: Database error
 
     Returns:
         List[Mine]: Created mine objects
@@ -57,6 +59,7 @@ def get_mine(
 
     Args:
         query_params (MineGetQueryParams): Query params from request
+        user_creds (Optional[User], optional): User credentials. Defaults to None.
 
     Raises:
         Exception: error
@@ -64,7 +67,6 @@ def get_mine(
     Returns:
         List[Mine]: List of Mines returned from DB
     """
-
     stmt = ""
 
     if query_params.query_type == MineQueryType.GET_ALL_MINES:
@@ -91,6 +93,7 @@ def update_mine(mine_update: MineUpdate, user_creds: Optional[User] = None) -> M
 
     Args:
         mine_update (MineUpdate): MineUpdate request
+        user_creds (Optional[User], optional): User credentials. Defaults to None.
 
     Raises:
         Exception: error
@@ -126,7 +129,8 @@ def delete_mine(mine_delete: MineDelete, user_creds: Optional[User] = None) -> M
     """Delete Mine in the DB from MineDelete request.
 
     Args:
-        Mine_delete (MineDelete): MineDelete request
+        mine_delete (MineDelete): MineDelete request
+        user_creds (Optional[User], optional): User credentials. Defaults to None.
 
     Raises:
         Exception: error
@@ -176,7 +180,7 @@ def create_mine_flow(
         inteface_params (Dict): Parameters specific to the interface.
         user_creds (Optional[User], optional): [description]. Defaults to None.
 
-    Returns:
+    Returns: # noqa: DAR202
         List[Mine]: Created mine objects
     """
     pass

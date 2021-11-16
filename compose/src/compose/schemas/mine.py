@@ -1,4 +1,4 @@
-""""Mine schema."""
+"""Mine schema."""
 
 from typing import Dict, List, Optional
 

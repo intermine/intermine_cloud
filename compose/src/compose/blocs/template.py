@@ -4,16 +4,14 @@ from typing import List, Optional
 
 from blackcap.db import DBSession
 from blackcap.schemas.user import User
+from logzero import logger
+from sqlalchemy import select
 
 from compose.models.template import TemplateDB
+from compose.schemas.api.template.delete import TemplateDelete
 from compose.schemas.api.template.get import TemplateGetQueryParams, TemplateQueryType
 from compose.schemas.api.template.put import TemplateUpdate
-from compose.schemas.api.template.delete import TemplateDelete
 from compose.schemas.template import Template
-
-from logzero import logger
-
-from sqlalchemy import select
 
 
 def create_template(
@@ -24,6 +22,9 @@ def create_template(
     Args:
         template_list (List[Template]): List of template objects to create.
         user_creds (Optional[User], optional): User credentials. Defaults to None.
+
+    Raises:
+        Exception: database error
 
     Returns:
         List[Template]: Created template objects
@@ -55,6 +56,7 @@ def get_template(
 
     Args:
         query_params (TemplateGetQueryParams): Query params from request
+        user_creds (Optional[User], optional): User credentials. Defaults to None.
 
     Raises:
         Exception: error
@@ -96,6 +98,7 @@ def update_template(
 
     Args:
         template_update (TemplateUpdate): TemplateUpdate request
+        user_creds (Optional[User], optional): User credentials. Defaults to None.
 
     Raises:
         Exception: error
@@ -136,6 +139,7 @@ def delete_template(
 
     Args:
         template_delete (TemplateDelete): TemplateDelete request
+        user_creds (Optional[User], optional): User credentials. Defaults to None.
 
     Raises:
         Exception: error

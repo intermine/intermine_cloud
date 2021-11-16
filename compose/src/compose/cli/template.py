@@ -1,31 +1,28 @@
 """Template commands."""
 
+import os
 from pathlib import Path
 from pprint import pformat
-from shutil import make_archive
 import shutil
 import sys
 from tempfile import TemporaryDirectory
 
-from compose.blocs.template import create_template, update_template, get_template
-from compose.blocs.file import create_file, update_file, get_file
-from compose.configs import config_registry
-from compose.schemas.api.template.get import TemplateGetQueryParams, TemplateQueryType
-from compose.schemas.api.template.put import TemplateUpdate
-from compose.schemas.api.file.get import FileGetQueryParams, FileQueryType
-from compose.schemas.api.file.put import FileUpdate
-from compose.schemas.template import Template
-from compose.schemas.file import File
-from compose.utils.auth import check_auth
-
 import click
-
-import os
-
 import requests
-
 from tqdm import tqdm
 from tqdm.utils import CallbackIOWrapper
+
+from compose.blocs.file import create_file, get_file, update_file
+from compose.blocs.template import create_template, get_template, update_template
+from compose.configs import config_registry
+from compose.schemas.api.file.get import FileGetQueryParams, FileQueryType
+from compose.schemas.api.file.put import FileUpdate
+from compose.schemas.api.template.get import TemplateGetQueryParams, TemplateQueryType
+from compose.schemas.api.template.put import TemplateUpdate
+from compose.schemas.file import File
+from compose.schemas.template import Template
+from compose.utils.auth import check_auth
+
 
 config = config_registry.get_config()
 
@@ -48,11 +45,12 @@ def make_archive(name: str, in_path: Path, out_path: Path) -> str:
 @click.option("--name", required=True)
 @click.option("--desc")
 @click.argument("path")
-def create(name, desc, path) -> None:
+def create(name, desc, path) -> None:  # noqa: C901, ANN001
     """Create template object."""
     # Check Authorization
     user = check_auth(config)
 
+    # noqa: DAR101
     # Create archive of the template in a temp dir
     with TemporaryDirectory() as tempd:
         click.echo(
@@ -109,7 +107,7 @@ def create(name, desc, path) -> None:
         )
 
         # Upload file
-        click.secho(f"Starting file upload...", fg="green")
+        click.secho("Starting file upload...", fg="green")
         archive_file_size = os.stat(archive_path).st_size
         try:
             with open(archive_path, "rb") as f:
@@ -147,18 +145,18 @@ def create(name, desc, path) -> None:
 @click.command()
 @click.option("--template_id", "-i", required=True)
 @click.argument("path")
-def update(template_id, path) -> None:
+def update(template_id, path) -> None:  # noqa: C901, ANN001
     """Update template object."""
     # Check Authorization
     user = check_auth(config)
-
+    # noqa: DAR101
     # fetch the template from the db
     query_params = TemplateGetQueryParams(
         query_type=TemplateQueryType.GET_TEMPLATE_BY_ID, template_id=template_id
     )
     fetched_template = get_template(query_params, user)
     if len(fetched_template) == 0:
-        click.secho(f"Template not found!\n\n")
+        click.secho("Template not found!\n\n")
         sys.exit(0)
     template = fetched_template[0]
     # Create archive of the template in a temp dir
@@ -207,7 +205,7 @@ def update(template_id, path) -> None:
         )
 
         # Upload file
-        click.secho(f"Starting file upload...", fg="green")
+        click.secho("Starting file upload...", fg="green")
         archive_file_size = os.stat(archive_path).st_size
         try:
             with open(archive_path, "rb") as f:
@@ -222,16 +220,16 @@ def update(template_id, path) -> None:
                         url=created_file.presigned_url,
                         data=wrapped_file,
                     )
-        except Exception as e:
-            click.secho(f"Error occured: {e}\n\n Exiting....")
+        except Exception:
+            click.secho("Error occured: {e}\n\n Exiting....")
             sys.exit(1)
 
         # Update file status to uploaded in db
         file_update = FileUpdate(file_id=created_file.file_id, uploaded=True)
         try:
             updated_file = update_file(file_update)
-        except Exception as e:
-            click.secho(f"Error occured: {e}\n\n Exiting....")
+        except Exception:
+            click.secho("Error occured: {e}\n\n Exiting....")
             sys.exit(1)
         click.echo(
             click.style("\nFile object updated: ", fg="green")
@@ -244,17 +242,18 @@ def update(template_id, path) -> None:
 @click.option("--template_id", "-i", required=True)
 @click.option("--extract", "-e", is_flag=True)
 @click.argument("path", default=".")
-def get(template_id, extract, path) -> None:
+def get(template_id, extract, path) -> None:  # noqa: C901, ANN001
     """Get template object."""
     # Check auth
     user = check_auth(config)
     # fetch the template from the db
+    # noqa: DAR101
     query_params = TemplateGetQueryParams(
         query_type=TemplateQueryType.GET_TEMPLATE_BY_ID, template_id=template_id
     )
     fetched_template = get_template(query_params, user)
     if len(fetched_template) == 0:
-        click.secho(f"Template not found!\n\n")
+        click.secho("Template not found!\n\n")
         sys.exit(0)
     template = fetched_template[0]
     click.echo(
@@ -267,14 +266,14 @@ def get(template_id, extract, path) -> None:
     )
     fetched_file = get_file(query_params, user)
     if len(fetched_file) == 0:
-        click.secho(f"File not found!\n\n")
+        click.secho("File not found!\n\n")
         sys.exit(0)
     file = fetched_file[0]
     click.echo(
         click.style("File object:", fg="green") + f"\n\n{pformat(file.dict())}\n"
     )
     # Download file
-    click.secho(f"Starting file download...", fg="green")
+    click.secho("Starting file download...", fg="green")
     resp = requests.get(file.presigned_url, stream=True)
     total = int(resp.headers.get("content-length", 0))
     with open(
@@ -291,9 +290,9 @@ def get(template_id, extract, path) -> None:
             bar.update(size)
     # Unpack archive
     if extract:
-        click.secho(f"Unpacking archive...", fg="green")
+        click.secho("Unpacking archive...", fg="green")
         shutil.unpack_archive(Path(path).joinpath(f"{file.file_id}.{file.ext}"))
-    click.secho(f"All done!", fg="green")
+    click.secho("All done!", fg="green")
 
 
 @click.group()

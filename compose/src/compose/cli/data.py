@@ -1,14 +1,19 @@
 """Data commands."""
 
+import os
 from pathlib import Path
 from pprint import pformat
-from shutil import make_archive
 import shutil
 import sys
 from tempfile import TemporaryDirectory
 
-from compose.blocs.data import create_data, update_data, get_data
-from compose.blocs.file import create_file, update_file, get_file
+import click
+import requests
+from tqdm import tqdm
+from tqdm.utils import CallbackIOWrapper
+
+from compose.blocs.data import create_data, get_data, update_data
+from compose.blocs.file import create_file, get_file, update_file
 from compose.configs import config_registry
 from compose.schemas.api.data.get import DataGetQueryParams, DataQueryType
 from compose.schemas.api.data.put import DataUpdate
@@ -18,14 +23,6 @@ from compose.schemas.data import Data
 from compose.schemas.file import File
 from compose.utils.auth import check_auth
 
-import click
-
-import os
-
-import requests
-
-from tqdm import tqdm
-from tqdm.utils import CallbackIOWrapper
 
 config = config_registry.get_config()
 
@@ -49,12 +46,13 @@ def make_archive(name: str, in_path: Path, out_path: Path) -> str:
 @click.option("--ext", required=True)
 @click.option("--file_type", required=True)
 @click.argument("path")
-def create(name, ext, file_type, path) -> None:
+def create(name, ext, file_type, path) -> None:  # noqa: C901, ANN001
     """Create data object."""
     # Check Authorization
     user = check_auth(config)
 
     # Create archive of the data in a temp dir
+    # noqa: DAR101
     with TemporaryDirectory() as tempd:
         click.echo(
             click.style("\nCreated temporary dir at: ", fg="green")
@@ -106,7 +104,7 @@ def create(name, ext, file_type, path) -> None:
         )
 
         # Upload file
-        click.secho(f"Starting file upload...", fg="green")
+        click.secho("Starting file upload...", fg="green")
         archive_file_size = os.stat(archive_path).st_size
         try:
             with open(archive_path, "rb") as f:
@@ -144,18 +142,18 @@ def create(name, ext, file_type, path) -> None:
 @click.command()
 @click.option("--data_id", "-i", required=True)
 @click.argument("path")
-def update(data_id, path) -> None:
+def update(data_id, path) -> None:  # noqa: C901, ANN001
     """Update data object."""
     # Check Authorization
     user = check_auth(config)
-
+    # noqa: DAR101
     # fetch the data from the db
     query_params = DataGetQueryParams(
         query_type=DataQueryType.GET_DATA_BY_ID, data_id=data_id
     )
     fetched_data = get_data(query_params, user)
     if len(fetched_data) == 0:
-        click.secho(f"Data not found!\n\n")
+        click.secho("Data not found!\n\n")
         sys.exit(0)
     data = fetched_data[0]
     # Create archive of the data in a temp dir
@@ -202,7 +200,7 @@ def update(data_id, path) -> None:
         )
 
         # Upload file
-        click.secho(f"Starting file upload...", fg="green")
+        click.secho("Starting file upload...", fg="green")
         archive_file_size = os.stat(archive_path).st_size
         try:
             with open(archive_path, "rb") as f:
@@ -239,17 +237,18 @@ def update(data_id, path) -> None:
 @click.option("--data_id", "-i", required=True)
 @click.option("--extract", "-e", is_flag=True)
 @click.argument("path", default=".")
-def get(data_id, extract, path) -> None:
+def get(data_id, extract, path) -> None:  # noqa: C901, ANN001
     """Get data object."""
     # Check auth
     user = check_auth(config)
     # fetch the data from the db
+    # noqa: DAR101
     query_params = DataGetQueryParams(
         query_type=DataQueryType.GET_DATA_BY_ID, data_id=data_id
     )
     fetched_data = get_data(query_params, user)
     if len(fetched_data) == 0:
-        click.secho(f"Data not found!\n\n")
+        click.secho("Data not found!\n\n")
         sys.exit(0)
     data = fetched_data[0]
     click.echo(
@@ -261,14 +260,14 @@ def get(data_id, extract, path) -> None:
     )
     fetched_file = get_file(query_params, user)
     if len(fetched_file) == 0:
-        click.secho(f"File not found!\n\n")
+        click.secho("File not found!\n\n")
         sys.exit(0)
     file = fetched_file[0]
     click.echo(
         click.style("File object:", fg="green") + f"\n\n{pformat(file.dict())}\n"
     )
     # Download file
-    click.secho(f"Starting file download...", fg="green")
+    click.secho("Starting file download...", fg="green")
     resp = requests.get(file.presigned_url, stream=True)
     total = int(resp.headers.get("content-length", 0))
     with open(
@@ -285,9 +284,9 @@ def get(data_id, extract, path) -> None:
             bar.update(size)
     # Unpack archive
     if extract:
-        click.secho(f"Unpacking archive...", fg="green")
+        click.secho("Unpacking archive...", fg="green")
         shutil.unpack_archive(Path(path).joinpath(f"{file.file_id}.{file.ext}"))
-    click.secho(f"All done!", fg="green")
+    click.secho("All done!", fg="green")
 
 
 @click.group()

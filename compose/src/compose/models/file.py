@@ -1,12 +1,9 @@
-"""FileDB model"""
+"""FileDB model."""
 
-from blackcap.models.meta.mixins import DBModel, SurrogatePKUUID, TimestampMixin
 from blackcap.models.meta.helpers import GUID
+from blackcap.models.meta.mixins import DBModel, SurrogatePKUUID, TimestampMixin
 from blackcap.models.meta.orm import reference_col
-
-
-from sqlalchemy import Column, String, Boolean
-from sqlalchemy.sql.sqltypes import JSON
+from sqlalchemy import Boolean, Column, String
 
 
 class FileDB(DBModel, SurrogatePKUUID, TimestampMixin):

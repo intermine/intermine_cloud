@@ -1,16 +1,21 @@
 """Mine commands."""
 
 import json
+import os
 from pathlib import Path
 from pprint import pformat
-from shutil import make_archive
 import shutil
 import sys
 from tempfile import TemporaryDirectory
 
+import click
+import requests
+from tqdm import tqdm
+from tqdm.utils import CallbackIOWrapper
+
 from compose.blocs.data import get_data
-from compose.blocs.file import create_file, update_file, get_file
-from compose.blocs.mine import get_mine, create_mine, update_mine
+from compose.blocs.file import create_file, get_file, update_file
+from compose.blocs.mine import create_mine, get_mine, update_mine
 from compose.blocs.rendered_template import (
     create_rendered_template,
     update_rendered_template,
@@ -22,21 +27,13 @@ from compose.schemas.api.file.get import FileGetQueryParams, FileQueryType
 from compose.schemas.api.file.put import FileUpdate
 from compose.schemas.api.mine.get import MineGetQueryParams, MineQueryType
 from compose.schemas.api.mine.put import MineUpdate
-from compose.schemas.api.template.get import TemplateGetQueryParams, TemplateQueryType
 from compose.schemas.api.rendered_template.put import RenderedTemplateUpdate
+from compose.schemas.api.template.get import TemplateGetQueryParams, TemplateQueryType
 from compose.schemas.file import File
 from compose.schemas.mine import Mine
 from compose.schemas.template import RenderedTemplate
 from compose.utils.auth import check_auth
 
-import click
-
-import os
-
-import requests
-
-from tqdm import tqdm
-from tqdm.utils import CallbackIOWrapper
 
 config = config_registry.get_config()
 
@@ -61,20 +58,21 @@ def make_archive(name: str, in_path: Path, out_path: Path) -> str:
 @click.option("--pref", default="{}")
 @click.option("--template_id", "-t", required=True)
 @click.option("--data_ids", "-d", required=True, multiple=True)
-def create(name, desc, pref, template_id, data_ids) -> None:
+def create(name, desc, pref, template_id, data_ids) -> None:  # noqa: C901, ANN001
     """Create data object."""
     # Check Authorization
     user = check_auth(config)
 
     # !TODO: Create a linked job as well
 
+    # noqa: DAR101
     # Check if template exist
     query_params = TemplateGetQueryParams(
         query_type=TemplateQueryType.GET_TEMPLATE_BY_ID, template_id=template_id
     )
     fetched_template = get_template(query_params, user)
     if len(fetched_template) == 0:
-        click.secho(f"Template not found!\n\n")
+        click.secho("Template not found!\n\n")
         sys.exit(0)
     template = fetched_template[0]
     click.echo(
@@ -88,7 +86,7 @@ def create(name, desc, pref, template_id, data_ids) -> None:
     )
     fetched_file = get_file(query_params, user)
     if len(fetched_file) == 0:
-        click.secho(f"File not found!\n\n")
+        click.secho("File not found!\n\n")
         sys.exit(0)
     file = fetched_file[0]
     click.echo(
@@ -115,7 +113,7 @@ def create(name, desc, pref, template_id, data_ids) -> None:
         )
         fetched_file = get_file(query_params, user)
         if len(fetched_file) == 0:
-            click.secho(f"File not found!\n\n")
+            click.secho("File not found!\n\n")
             sys.exit(0)
         file = fetched_file[0]
         click.echo(
@@ -147,10 +145,10 @@ def create(name, desc, pref, template_id, data_ids) -> None:
         )
 
         # Download template
-        click.secho(f"Starting template download...", fg="green")
+        click.secho("Starting template download...", fg="green")
         resp = requests.get(file.presigned_url, stream=True)
         total = int(resp.headers.get("content-length", 0))
-        with open(Path(tempd).joinpath(f"template.tar"), "wb") as download_file, tqdm(
+        with open(Path(tempd).joinpath("template.tar"), "wb") as download_file, tqdm(
             desc=str(file.file_id),
             total=total,
             unit="iB",
@@ -161,14 +159,14 @@ def create(name, desc, pref, template_id, data_ids) -> None:
                 size = download_file.write(data)
                 bar.update(size)
         # Unpack archive
-        click.secho(f"Unpacking archive...", fg="green")
+        click.secho("Unpacking archive...", fg="green")
         shutil.unpack_archive(
-            Path(tempd).joinpath("template.tar"), Path(tempd).joinpath(f"template")
+            Path(tempd).joinpath("template.tar"), Path(tempd).joinpath("template")
         )
         click.secho(
             f"Archive unpacked at {Path(tempd).joinpath('template')}", fg="green"
         )
-        click.secho(f"Rendering template...", fg="green")
+        click.secho("Rendering template...", fg="green")
         # Render the fetched template with provided template vars
         # TODO: Do it properly later, for now just cp the downloaded template
         shutil.copytree(
@@ -237,7 +235,7 @@ def create(name, desc, pref, template_id, data_ids) -> None:
         )
 
         # Upload file
-        click.secho(f"Starting file upload...", fg="green")
+        click.secho("Starting file upload...", fg="green")
         archive_file_size = os.stat(archive_path).st_size
         try:
             with open(archive_path, "rb") as f:
@@ -277,18 +275,19 @@ def create(name, desc, pref, template_id, data_ids) -> None:
 @click.option("--name")
 @click.option("--desc")
 @click.option("--pref", default="{}")
-def update(mine_id, name, desc, pref) -> None:
+def update(mine_id, name, desc, pref) -> None:  # noqa: C901, ANN001
     """Update mine object."""
     # Check Authorization
     user = check_auth(config)
 
     # fetch the mine from the db
+    # noqa: DAR101
     query_params = MineGetQueryParams(
         query_type=MineQueryType.GET_MINE_BY_ID, mine_id=mine_id
     )
     fetched_mine = get_mine(query_params, user)
     if len(fetched_mine) == 0:
-        click.secho(f"Mine not found!\n\n")
+        click.secho("Mine not found!\n\n")
         sys.exit(0)
     mine = fetched_mine[0]
     click.echo(
@@ -315,17 +314,18 @@ def update(mine_id, name, desc, pref) -> None:
 @click.option("--mine_id", "-i", required=True)
 @click.option("--extract", "-e", is_flag=True)
 @click.argument("path", default=".")
-def get(mine_id, extract, path) -> None:
+def get(mine_id, extract, path) -> None:  # noqa: c901, ANN001
     """Get mine object."""
     # Check auth
     user = check_auth(config)
     # fetch the mine from the db
+    # noqa: DAR101
     query_params = MineGetQueryParams(
         query_type=MineQueryType.GET_MINE_BY_ID, mine_id=mine_id
     )
     fetched_mine = get_mine(query_params, user)
     if len(fetched_mine) == 0:
-        click.secho(f"Mine not found!\n\n")
+        click.secho("Mine not found!\n\n")
         sys.exit(0)
     mine = fetched_mine[0]
     click.echo(
@@ -339,14 +339,14 @@ def get(mine_id, extract, path) -> None:
     )
     fetched_file = get_file(query_params, user)
     if len(fetched_file) == 0:
-        click.secho(f"File not found!\n\n")
+        click.secho("File not found!\n\n")
         sys.exit(0)
     file = fetched_file[0]
     click.echo(
         click.style("File object:", fg="green") + f"\n\n{pformat(file.dict())}\n"
     )
     # Download file
-    click.secho(f"Starting file download...", fg="green")
+    click.secho("Starting file download...", fg="green")
     resp = requests.get(file.presigned_url, stream=True)
     total = int(resp.headers.get("content-length", 0))
     with open(
@@ -363,11 +363,11 @@ def get(mine_id, extract, path) -> None:
             bar.update(size)
     # Unpack archive
     if extract:
-        click.secho(f"Unpacking archive...", fg="green")
+        click.secho("Unpacking archive...", fg="green")
         shutil.unpack_archive(Path(path).joinpath(f"{file.file_id}.{file.ext}"))
 
     # TODO: Download related source data files and database dumps
-    click.secho(f"All done!", fg="green")
+    click.secho("All done!", fg="green")
 
 
 @click.group()
