@@ -1,21 +1,45 @@
 import { AlertGroup } from '@intermine/chromatin/alert-group'
 import { Alert } from '@intermine/chromatin/alert'
 
-import { useGlobalAlertReducer } from '../../context'
+import {
+    useAdditionalSidebarReducer,
+    useGlobalAlertReducer
+} from '../../context'
 
 export const GlobalAlert = () => {
     const globalAlertReducer = useGlobalAlertReducer()
+    const additionalSidebarReducer = useAdditionalSidebarReducer()
+
     const {
         state: { alerts },
         removeAlert
     } = globalAlertReducer
+
+    const {
+        state: { isOpen: isAdditionalSidebarOpen }
+    } = additionalSidebarReducer
+
+    const getOrigin = (): { top: string; right: string } => {
+        if (isAdditionalSidebarOpen) {
+            return {
+                top: '1.5rem',
+                right: '22.5rem'
+            }
+        }
+
+        return {
+            top: '1.5rem',
+            right: '5.5rem'
+        }
+    }
 
     const alertsKey = Object.keys(alerts)
 
     return (
         <AlertGroup
             isOpen={alertsKey.length > 0}
-            origin="bottom-right"
+            origin="top-right"
+            csx={{ root: { ...getOrigin(), transition: '0.2s' } }}
             alertChildProps={{
                 csx: { root: { wordBreak: 'break-all' } }
             }}
@@ -33,6 +57,7 @@ export const GlobalAlert = () => {
                             }
                             removeAlert(id)
                         }}
+                        duration={5000}
                         {...alert}
                     />
                 )
