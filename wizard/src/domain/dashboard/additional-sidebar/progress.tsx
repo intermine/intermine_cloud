@@ -1,12 +1,38 @@
 import { Typography } from '@intermine/chromatin/typography'
 
 import { AdditionalSidebarTabs } from '../../../constants/additional-sidebar'
+import { ProgressItemUploadStatus } from '../../../constants/progress'
 import {
     useAdditionalSidebarReducer,
     useProgressReducer
 } from '../../../context'
+import { TProgressItem } from '../../../context/types'
+import { uploadDataset } from '../datasets/upload-dataset/utils'
 import { ActionSection } from './action-section'
 import { ProgressItemView } from './progress-item-view'
+
+const { Canceled, Running } = ProgressItemUploadStatus
+
+const handleOnCancelUpload = (item: TProgressItem) => {
+    const { cancelSourceToken } = item
+    cancelSourceToken.cancel(Canceled)
+}
+
+const handleOnRetryClick = (
+    item: TProgressItem,
+    cb: (data: Partial<TProgressItem>) => void
+) => {
+    const { cancelSourceToken } = uploadDataset({
+        ...item
+    })
+
+    cb({
+        ...item,
+        status: Running,
+        loadedSize: 0,
+        cancelSourceToken
+    })
+}
 
 export const Progress = () => {
     const additionalSidebarReducer = useAdditionalSidebarReducer()
@@ -18,9 +44,8 @@ export const Progress = () => {
 
     const {
         state: { progressItems },
-        stopDataUploading,
-        removeEntry,
-        retryUpload
+        updateDataset,
+        removeEntry
     } = progressReducer
 
     return (
@@ -38,9 +63,16 @@ export const Progress = () => {
                 {Object.keys(progressItems).map((key) => (
                     <ProgressItemView
                         key={progressItems[key].id}
-                        onCancelUpload={stopDataUploading}
+                        onCancelUpload={() =>
+                            handleOnCancelUpload(progressItems[key])
+                        }
                         onRemoveClick={removeEntry}
-                        onRetryClick={retryUpload}
+                        onRetryClick={() =>
+                            handleOnRetryClick(
+                                progressItems[key],
+                                updateDataset
+                            )
+                        }
                         {...progressItems[key]}
                     />
                 ))}

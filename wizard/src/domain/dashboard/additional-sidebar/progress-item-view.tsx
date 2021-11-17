@@ -7,12 +7,12 @@ import { Tooltip, TooltipProps } from '@intermine/chromatin/tooltip'
 import { Box } from '@intermine/chromatin/box'
 import { createStyle } from '@intermine/chromatin/styles'
 
-import RemoveIcon from '@intermine/chromatin/icons/System/delete-bin-6-line'
-import CancelIcon from '@intermine/chromatin/icons/System/close-line'
+import RemoveIcon from '@intermine/chromatin/icons/System/close-line'
+import CancelIcon from '@intermine/chromatin/icons/System/delete-bin-6-line'
 import RetryIcon from '@intermine/chromatin/icons/System/arrow-go-forward-line'
 
 import { TProgressItem } from '../../../context/types'
-import { getDataSize } from '../data/utils'
+import { getDataSize } from '../../../utils/get'
 import { ProgressItemUploadStatus } from '../../../constants/progress'
 
 type TProgressItemViewProps = TProgressItem & {
@@ -25,7 +25,7 @@ type TUseStyleProps = {
     uploadPercentage: string
 }
 
-const { Uploaded, Uploading, Canceled, Failed } = ProgressItemUploadStatus
+const { Completed, Running, Canceled, Failed } = ProgressItemUploadStatus
 
 const useStyle = createStyle((theme) => {
     const {
@@ -93,7 +93,7 @@ export const ProgressItemView = (props: TProgressItemViewProps) => {
     } = props
 
     const getPrimaryAction = (): JSX.Element => {
-        if (status === Uploading) {
+        if (status === Running) {
             return (
                 <Tooltip
                     {...defaultTooltipProps}
@@ -166,7 +166,7 @@ export const ProgressItemView = (props: TProgressItemViewProps) => {
             }
         }
 
-        if (status === Uploaded) {
+        if (status === Completed) {
             return {
                 children: 'Completed',
                 color: 'primary'
@@ -174,7 +174,7 @@ export const ProgressItemView = (props: TProgressItemViewProps) => {
         }
 
         return {
-            children: 'Uploading',
+            children: 'Progress',
             color: 'info'
         }
     }
@@ -201,10 +201,10 @@ export const ProgressItemView = (props: TProgressItemViewProps) => {
                     {uploadPercentage}
                 </Typography>
             </Box>
-            {status !== Uploading && (
+            {status !== Running && (
                 <Typography variant="caption" {...getStatusTextProps()} />
             )}
-            {status === Uploading && (
+            {status === Running && (
                 <Box className={classes.progressContainer}>
                     <Box className={classes.progressIndicator}></Box>
                 </Box>

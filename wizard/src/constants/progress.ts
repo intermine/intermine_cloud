@@ -1,14 +1,12 @@
 export enum ProgressActions {
-    UploadData = 'UploadData',
-    UpdateDataProgress = 'UpdateDataProgress',
-    StopDataUploading = 'StopDataUploading',
+    AddDataset = 'AddDataset',
+    UpdateDataset = 'UpdateDataset',
     RemoveEntry = 'RemoveEntry',
-    BuildMine = 'BuildMine',
 }
 
 export enum ProgressItemUploadStatus {
-    Uploading = 'Uploading',
+    Running = 'Running',
     Canceled = 'Canceled',
-    Uploaded = 'Uploaded',
+    Completed = 'Completed',
     Failed = 'Failed',
 }

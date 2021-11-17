@@ -183,8 +183,9 @@ export type TProgressItem = {
     id: string
     cancelSourceToken: CancelTokenSource
     status: ProgressItemUploadStatus
-    onUploadSuccessful?: (data: TProgressItem) => void
-    onUploadFailed?: (data: TProgressItem) => void
+    onUploadSuccessful?: (data: any) => void
+    onUploadFailed?: (data: any) => void
+    onUploadProgress?: (data: any) => void
 }
 
 export type TProgressReducer = {
@@ -196,20 +197,11 @@ export type TProgressReducerAction = {
     data: unknown
 }
 
-export type TUploadDataOptions = {
-    url: string
-    file: File
-    id?: string
-    onUploadSuccessful?: (data: TProgressItem) => void
-    onUploadFailed?: (data: TProgressItem) => void
-}
-
 export type TUseProgressReducer = {
     state: TProgressReducer
-    uploadData: (options: TUploadDataOptions) => void
-    stopDataUploading: (id: string) => void
+    addDataset: (data: TProgressItem) => void
+    updateDataset: (data: Partial<TProgressItem>) => void
     removeEntry: (id: string) => void
-    retryUpload: (id: string) => void
 }
 
 /**

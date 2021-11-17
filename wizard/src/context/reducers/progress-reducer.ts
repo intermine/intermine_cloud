@@ -1,24 +1,14 @@
 import { useReducer } from 'react'
-import axios from 'axios'
-import shortid from 'shortid'
 
-import {
-    ProgressActions,
-    ProgressItemUploadStatus,
-} from '../../constants/progress'
+import { ProgressActions } from '../../constants/progress'
 import type {
     TProgressReducer,
     TUseProgressReducer,
     TProgressReducerAction,
-    TUploadDataOptions,
     TProgressItem,
 } from '../types'
-import { throttle } from '../../domain/dashboard/data/utils'
 
-const { UploadData, StopDataUploading, UpdateDataProgress, RemoveEntry } =
-    ProgressActions
-
-const { Failed, Canceled, Uploading, Uploaded } = ProgressItemUploadStatus
+const { AddDataset, UpdateDataset, RemoveEntry } = ProgressActions
 
 const progressReducerInitialState: TProgressReducer = {
     progressItems: {},
@@ -31,26 +21,20 @@ const progressReducer = (
     const { type, data } = action
 
     switch (type) {
-        case UploadData:
+        case AddDataset:
             const progressItems = {
                 ...state.progressItems,
                 [(data as TProgressItem).id]: data as TProgressItem,
             }
+
             return { progressItems }
 
-        case UpdateDataProgress:
+        case UpdateDataset:
             state.progressItems[(data as TProgressItem).id] = {
                 ...state.progressItems[(data as TProgressItem).id],
                 ...(data as TProgressItem),
             }
 
-            return { ...state }
-
-        case StopDataUploading:
-            state.progressItems[data as string].cancelSourceToken.cancel(
-                Canceled
-            )
-            state.progressItems[data as string].status = Canceled
             return { ...state }
 
         case RemoveEntry:
@@ -75,97 +59,14 @@ export const useProgressReducer = (): TUseProgressReducer => {
         progressReducerInitialState
     )
 
-    const updateDataProgress = (data: Partial<TProgressItem>) => {
-        dispatch({ type: UpdateDataProgress, data })
+    const updateDataset = (data: Partial<TProgressItem>) => {
+        dispatch({ type: UpdateDataset, data })
     }
 
-    const uploadData = (options: TUploadDataOptions) => {
-        const CancelToken = axios.CancelToken
-        const source = CancelToken.source()
-        const {
-            url,
-            file,
-            id = shortid.generate(),
-            onUploadFailed,
-            onUploadSuccessful,
-        } = options
-
-        const throttleUpdate = throttle((event) => {
-            updateDataProgress({
-                id,
-                loadedSize: event.loaded,
-                totalSize: event.total,
-            })
-        }, 60)
-
-        axios
-            .put(url, file, {
-                cancelToken: source.token,
-                onUploadProgress: throttleUpdate,
-            })
-            .then(() => {
-                updateDataProgress({
-                    id,
-                    status: Uploaded,
-                    loadedSize: file.size,
-                    totalSize: file.size,
-                })
-                if (onUploadSuccessful) {
-                    onUploadSuccessful({
-                        ...state.progressItems[id],
-                        status: Uploaded,
-                        loadedSize: file.size,
-                        totalSize: file.size,
-                    })
-                }
-                return
-            })
-            .catch((error) => {
-                if (error.message !== Canceled) {
-                    updateDataProgress({
-                        id,
-                        status: Failed,
-                    })
-
-                    if (onUploadFailed) {
-                        onUploadFailed({
-                            ...state.progressItems[id],
-                            status: Failed,
-                        })
-                    }
-                }
-            })
-
+    const addDataset = (data: TProgressItem) => {
         dispatch({
-            type: UploadData,
-            data: {
-                id,
-                totalSize: file.size,
-                loadedSize: 0,
-                file,
-                url,
-                cancelSourceToken: source,
-                status: Uploading,
-                onUploadSuccessful,
-                onUploadFailed,
-            } as TProgressItem,
-        })
-    }
-
-    const retryUpload = (id: string) => {
-        uploadData({
-            url: state.progressItems[id].url,
-            file: state.progressItems[id].file,
-            onUploadFailed: state.progressItems[id].onUploadFailed,
-            onUploadSuccessful: state.progressItems[id].onUploadSuccessful,
-            id,
-        })
-    }
-
-    const stopDataUploading = (id: string) => {
-        dispatch({
-            type: StopDataUploading,
-            data: id,
+            type: AddDataset,
+            data,
         })
     }
 
@@ -178,9 +79,8 @@ export const useProgressReducer = (): TUseProgressReducer => {
 
     return {
         state,
-        uploadData,
-        stopDataUploading,
+        updateDataset,
+        addDataset,
         removeEntry,
-        retryUpload,
     }
 }
