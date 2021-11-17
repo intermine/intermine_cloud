@@ -67,6 +67,7 @@ const useStyles = createStyle((theme) => {
         actionSection: (props: TUseStyleProps) => ({
             flex: '1',
             opacity: props.isOpen ? 1 : 0,
+            overflow: 'hidden',
             transition: '0.23s'
         })
     }

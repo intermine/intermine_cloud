@@ -4,7 +4,7 @@ import { Box } from '@intermine/chromatin/box'
 import { WorkspaceHeading } from '../common/workspace-heading'
 import UploadIcon from '@intermine/chromatin/icons/System/upload-line'
 
-import { DASHBOARD_DATA_UPLOAD_DATA_PATH } from '../../../routes'
+import { DASHBOARD_UPLOAD_DATASET_PATH } from '../../../routes'
 import { WorkspaceTable } from '../common/workspace-table'
 import { DashboardErrorBoundary } from '../common/error-boundary'
 
@@ -13,7 +13,7 @@ export const Landing = () => {
     const [isLoadingData, setIsLoadingData] = useState(true)
 
     const handleUploadClick = () => {
-        history.push(DASHBOARD_DATA_UPLOAD_DATA_PATH)
+        history.push(DASHBOARD_UPLOAD_DATASET_PATH)
     }
 
     useEffect(() => {
@@ -23,9 +23,9 @@ export const Landing = () => {
     return (
         <Box>
             <WorkspaceHeading
-                heading={{ children: 'Data' }}
+                heading={{ children: 'Datasets' }}
                 primaryAction={{
-                    children: 'Upload New Data',
+                    children: 'Upload New Dataset',
                     RightIcon: <UploadIcon />,
                     onClick: handleUploadClick
                 }}

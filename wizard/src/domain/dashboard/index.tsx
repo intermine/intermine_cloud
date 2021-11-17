@@ -6,7 +6,7 @@ import { createStyle } from '@intermine/chromatin/styles'
 import { DomElementIDs } from '../../constants/ids'
 import {
     DASHBOARD_OVERVIEW_PATH,
-    DASHBOARD_DATA_PATH,
+    DASHBOARD_DATASETS_PATH,
     DASHBOARD_MINES_PATH
 } from '../../routes'
 import { RouteLoadingSpinner } from '../../components/route-loading-spinner'
@@ -17,7 +17,7 @@ import { DashboardErrorBoundary } from './common/error-boundary'
 import { useAdditionalSidebarReducer, useSidebarReducer } from '../../context'
 
 const Overview = lazy(() => import('./overview'))
-const Data = lazy(() => import('./data'))
+const Datasets = lazy(() => import('./datasets'))
 const Mines = lazy(() => import('./mines'))
 
 const pages = [
@@ -27,9 +27,9 @@ const pages = [
         Component: Overview
     },
     {
-        id: 'data',
-        path: DASHBOARD_DATA_PATH,
-        Component: Data
+        id: 'dataset',
+        path: DASHBOARD_DATASETS_PATH,
+        Component: Datasets
     },
     {
         id: 'mines',

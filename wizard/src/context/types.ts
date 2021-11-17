@@ -1,6 +1,9 @@
 import { AlertProps } from '@intermine/chromatin/alert'
 import { ButtonCommonProps } from '@intermine/chromatin/button'
+
 import type { ThemeType } from '@intermine/chromatin/styles'
+import type { CancelTokenSource } from 'axios'
+
 import {
     AdditionalSidebarActions,
     AdditionalSidebarTabs,
@@ -10,6 +13,10 @@ import { AuthStates, AuthActions } from '../constants/auth'
 import { GlobalAlertsActions } from '../constants/global-alert'
 import { GlobalModalActions } from '../constants/global-modal'
 import { PreferencesActions } from '../constants/preferences'
+import {
+    ProgressActions,
+    ProgressItemUploadStatus,
+} from '../constants/progress'
 import { SidebarActions } from '../constants/sidebar'
 
 /**
@@ -146,7 +153,7 @@ export type TAlert = {
 }
 
 export type TGlobalAlertReducer = {
-    alerts: TAlert[]
+    alerts: { [x: string]: TAlert }
 }
 
 export type TGlobalAlertReducerAction = {
@@ -166,6 +173,42 @@ export type TUseGlobalAlertReducer = {
  */
 
 /**
+ * Progress
+ */
+export type TProgressItem = {
+    totalSize: number
+    loadedSize: number
+    file: File
+    url: string
+    id: string
+    cancelSourceToken: CancelTokenSource
+    status: ProgressItemUploadStatus
+    onUploadSuccessful?: (data: any) => void
+    onUploadFailed?: (data: any) => void
+    onUploadProgress?: (data: any) => void
+}
+
+export type TProgressReducer = {
+    progressItems: { [x: string]: TProgressItem }
+}
+
+export type TProgressReducerAction = {
+    type: ProgressActions
+    data: unknown
+}
+
+export type TUseProgressReducer = {
+    state: TProgressReducer
+    addDataset: (data: TProgressItem) => void
+    updateDataset: (data: Partial<TProgressItem>) => void
+    removeEntry: (id: string) => void
+}
+
+/**
+ * Progress Ends
+ */
+
+/**
  * App Context
  */
 export type TAppContext = {
@@ -175,4 +218,5 @@ export type TAppContext = {
     globalModalReducer: TUseGlobalModalReducer
     additionalSidebarReducer: TUseAdditionalSidebarReducer
     globalAlertReducer: TUseGlobalAlertReducer
+    progressReducer: TUseProgressReducer
 }

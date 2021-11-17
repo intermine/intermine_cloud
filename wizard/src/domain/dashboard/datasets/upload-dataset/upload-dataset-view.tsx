@@ -12,10 +12,10 @@ import {
 } from '@intermine/chromatin/inline-alert'
 import { createStyle } from '@intermine/chromatin/styles'
 
-import { DASHBOARD_DATA_LANDING_PATH } from '../../../../routes'
+import { DASHBOARD_DATASETS_LANDING_PATH } from '../../../../routes'
 
 import { WorkspaceHeading } from '../../common/workspace-heading'
-import { getDataSize } from '../utils'
+import { getDataSize } from '../../../../utils/get'
 
 type TUploadDataView = {
     isUploadingFile: boolean
@@ -81,7 +81,7 @@ const useStyles = createStyle((theme) => {
     }
 })
 
-export const UploadDataView = (props: TUploadDataView) => {
+export const UploadDatasetView = (props: TUploadDataView) => {
     const history = useHistory()
     const {
         isUploadingFile,
@@ -96,10 +96,10 @@ export const UploadDataView = (props: TUploadDataView) => {
     return (
         <Box>
             <WorkspaceHeading
-                heading={{ variant: 'h2', children: 'Data' }}
+                heading={{ variant: 'h2', children: 'Dataset' }}
                 backAction={{
                     onClick: () => {
-                        history.push(DASHBOARD_DATA_LANDING_PATH)
+                        history.push(DASHBOARD_DATASETS_LANDING_PATH)
                     }
                 }}
             />
@@ -111,7 +111,7 @@ export const UploadDataView = (props: TUploadDataView) => {
                         {...inlineAlert}
                     />
                     <Box className={classes.stackCenter}>
-                        <Typography variant="h4">Upload New Data</Typography>
+                        <Typography variant="h4">Upload New Dataset</Typography>
                         <Typography variant="bodySm" color="neutral.30">
                             You can select .fasta, .tsv, .csv, .etc
                         </Typography>

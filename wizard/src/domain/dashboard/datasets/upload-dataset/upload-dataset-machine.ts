@@ -1,42 +1,42 @@
 import { createMachine, assign } from 'xstate'
 
-export type TUploadDataMachineContext = {
+export type TUploadDatasetMachineContext = {
     file?: File
     errorMessage?: string
     putUrl?: string
 }
 
-export type TUploadDataState =
+export type TUploadDatasetState =
     | {
           value: 'start'
-          context: TUploadDataMachineContext
+          context: TUploadDatasetMachineContext
       }
     | {
           value: 'fileMissing'
-          context: TUploadDataMachineContext
+          context: TUploadDatasetMachineContext
       }
     | {
           value: 'fileSelected'
-          context: TUploadDataMachineContext
+          context: TUploadDatasetMachineContext
       }
     | {
           value: 'uploadingFile'
-          context: TUploadDataMachineContext
+          context: TUploadDatasetMachineContext
       }
     | {
           value: 'serverError'
-          context: TUploadDataMachineContext
+          context: TUploadDatasetMachineContext
       }
     | {
           value: 'successful'
-          context: TUploadDataMachineContext
+          context: TUploadDatasetMachineContext
       }
     | {
           value: 'reset'
-          context: TUploadDataMachineContext
+          context: TUploadDatasetMachineContext
       }
 
-export type TUploadDataMachineEvents =
+export type TUploadDatasetMachineEvents =
     | { type: 'START' }
     | { type: 'FILE_MISSING' }
     | { type: 'FILE_SELECTED'; file: File }
@@ -45,10 +45,10 @@ export type TUploadDataMachineEvents =
     | { type: 'SUCCESSFUL' }
     | { type: 'RESET' }
 
-export const uploadDataMachine = createMachine<
-    TUploadDataMachineContext,
-    TUploadDataMachineEvents,
-    TUploadDataState
+export const uploadDatasetMachine = createMachine<
+    TUploadDatasetMachineContext,
+    TUploadDatasetMachineEvents,
+    TUploadDatasetState
 >(
     {
         id: 'upload-data-machine',
@@ -71,6 +71,7 @@ export const uploadDataMachine = createMachine<
                 entry: 'setFile',
                 on: {
                     UPLOADING_FILE: 'uploadingFile',
+                    FILE_SELECTED: 'fileSelected',
                 },
             },
             uploadingFile: {
@@ -102,8 +103,8 @@ export const uploadDataMachine = createMachine<
     {
         actions: {
             setFile: assign<
-                TUploadDataMachineContext,
-                TUploadDataMachineEvents
+                TUploadDatasetMachineContext,
+                TUploadDatasetMachineEvents
             >({
                 file: (ctx, event) => {
                     if (event.type === 'FILE_SELECTED') {
@@ -112,18 +113,22 @@ export const uploadDataMachine = createMachine<
                     return ctx.file
                 },
             }),
-            reset: assign<TUploadDataMachineContext, TUploadDataMachineEvents>({
+            reset: assign<
+                TUploadDatasetMachineContext,
+                TUploadDatasetMachineEvents
+            >({
                 file: undefined,
                 putUrl: undefined,
                 errorMessage: undefined,
             }),
 
-            onUploadSuccessful: assign<TUploadDataMachineContext, any>({
+            onUploadSuccessful: assign<TUploadDatasetMachineContext, any>({
                 putUrl: (_, event) => {
                     return event.data
                 },
             }),
-            onUploadError: assign<TUploadDataMachineContext, any>({
+
+            onUploadError: assign<TUploadDatasetMachineContext, any>({
                 errorMessage:
                     'Unexpected error occur. Please try after some time',
             }),

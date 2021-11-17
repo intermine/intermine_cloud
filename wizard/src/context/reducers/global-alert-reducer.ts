@@ -12,7 +12,7 @@ import {
 const { AddAlert, RemoveAlert, UpdateAlert } = GlobalAlertsActions
 
 const globalAlertInitialReducer: TGlobalAlertReducer = {
-    alerts: [],
+    alerts: {},
 }
 
 const globalAlertReducer = (
@@ -21,30 +21,21 @@ const globalAlertReducer = (
 ) => {
     const { type, data } = action
 
-    const filterAlert = (id: string) => {
-        return state.alerts.filter((alert) => alert.id !== id)
-    }
-
-    const modifyAlert = (a: TAlert) => {
-        return state.alerts.map((alert) => {
-            if (alert.id === a.id) {
-                return { ...alert, ...a }
-            }
-            return alert
-        })
-    }
-
     switch (type) {
         case AddAlert:
-            state.alerts.push({ isOpen: true, ...(data as TAlert) })
+            state.alerts[(data as TAlert).id] = data as TAlert
             return { ...state }
 
         case RemoveAlert:
-            state.alerts = filterAlert(data as string)
+            delete state.alerts[data as string]
             return { ...state }
 
         case UpdateAlert:
-            state.alerts = modifyAlert(data as TAlert)
+            state.alerts[(data as TAlert).id] = {
+                ...state.alerts[(data as TAlert).id],
+                ...(data as TAlert),
+            }
+
             return { ...state }
 
         /* istanbul ignore next */
