@@ -1,26 +1,26 @@
 import { Switch, Route } from 'react-router'
 
 import {
-    DASHBOARD_DATA_LANDING_PATH,
-    DASHBOARD_DATA_UPLOAD_DATA_PATH
+    DASHBOARD_DATASETS_LANDING_PATH,
+    DASHBOARD_UPLOAD_DATASET_PATH
 } from '../../../routes'
 import { Landing } from './landing'
-import { UploadData } from './upload-data'
+import { UploadDataset } from './upload-dataset'
 
 const pages = [
     {
         id: 'landing',
-        path: DASHBOARD_DATA_LANDING_PATH,
+        path: DASHBOARD_DATASETS_LANDING_PATH,
         Component: Landing
     },
     {
-        id: 'upload-data',
-        path: DASHBOARD_DATA_UPLOAD_DATA_PATH,
-        Component: UploadData
+        id: 'upload-dataset',
+        path: DASHBOARD_UPLOAD_DATASET_PATH,
+        Component: UploadDataset
     }
 ]
 
-export const Data = () => {
+export const Datasets = () => {
     return (
         <Switch>
             {pages.map(({ id, path, Component }) => (

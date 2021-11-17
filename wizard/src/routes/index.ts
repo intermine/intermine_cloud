@@ -9,12 +9,13 @@ export const FORGOT_PASSWORD_PATH = `${PRE_AUTH_PATH_BASE}/forgot-password`
 // Auth Paths
 export const AUTH_PATH_BASE = `${BASE_PATH}/app`
 export const DASHBOARD_OVERVIEW_PATH = `${AUTH_PATH_BASE}/overview`
-export const DASHBOARD_DATA_PATH = `${AUTH_PATH_BASE}/data`
+export const DASHBOARD_DATASETS_PATH = `${AUTH_PATH_BASE}/datasets`
 export const DASHBOARD_MINES_PATH = `${AUTH_PATH_BASE}/mines`
 
 // Data
-export const DASHBOARD_DATA_LANDING_PATH = DASHBOARD_DATA_PATH
-export const DASHBOARD_DATA_UPLOAD_DATA_PATH = `${DASHBOARD_DATA_PATH}/upload`
+export const DASHBOARD_DATASETS_LANDING_PATH = DASHBOARD_DATASETS_PATH
+// eslint-disable-next-line max-len
+export const DASHBOARD_UPLOAD_DATASET_PATH = `${DASHBOARD_DATASETS_PATH}/upload-dataset`
 
 /**
  *

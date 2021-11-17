@@ -14,7 +14,7 @@ import CollapseIcon from '@intermine/chromatin/icons/System/arrow-left-line'
 import { useSidebarReducer } from '../../../context'
 import {
     DASHBOARD_OVERVIEW_PATH,
-    DASHBOARD_DATA_PATH,
+    DASHBOARD_DATASETS_PATH,
     DASHBOARD_MINES_PATH
 } from '../../../routes'
 import { Logo } from '../../../components/logo'
@@ -27,9 +27,9 @@ const sidebarItems = [
         icon: <OverviewIcon />
     },
     {
-        id: 'data',
-        to: DASHBOARD_DATA_PATH,
-        text: 'Data',
+        id: 'datasets',
+        to: DASHBOARD_DATASETS_PATH,
+        text: 'Datasets',
         icon: <DataIcon />
     },
     {
