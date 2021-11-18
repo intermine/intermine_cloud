@@ -128,6 +128,7 @@ export const UploadDataset = () => {
                         inlineAlertProps,
                         uploadEventHandler,
                         onInputChange,
+                        onDropHandler,
                         uploadMachineState
                     }) => (
                         <>
@@ -149,6 +150,7 @@ export const UploadDataset = () => {
                                 }}
                             />
                             <Upload.Box
+                                onDropHandler={onDropHandler}
                                 onInputChange={onInputChange}
                                 isDisabled={
                                     uploadMachineState.value === 'uploadingFile'

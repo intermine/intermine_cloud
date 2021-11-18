@@ -4,29 +4,41 @@ import { Label } from '@intermine/chromatin/label'
 import { InputBase } from '@intermine/chromatin/input-base'
 import UploadIcon from '@intermine/chromatin/icons/System/upload-cloud-2-line'
 import { createStyle } from '@intermine/chromatin/styles'
+import { useState } from 'react'
 
 export type TUploadBoxProps = {
     isDisabled?: boolean
     onInputChange: (event: React.FormEvent<HTMLInputElement>) => void
+    onDropHandler: (event: React.DragEvent) => void
 }
 
 type TUseStyleProps = {
     isDisabled: boolean
+    dragEvent: {
+        isDragOver: boolean
+    }
 }
 
 const useBoxStyles = createStyle((theme) => {
     const {
-        palette: { neutral, info, themeType, disable },
+        palette: { neutral, info, themeType, disable, grey },
         spacing
     } = theme
+
     return {
         uploadBox: (props: TUseStyleProps) => ({
-            border: '5px dashed ' + neutral[themeType === 'dark' ? 20 : 10],
+            border:
+                '5px dashed ' + (themeType === 'dark' ? neutral[20] : grey[50]),
             borderRadius: '0.5rem',
             height: '8rem',
             margin: spacing(10, 0),
             maxWidth: '25rem',
             width: '100%',
+            transition: '0.3s',
+            ...(props.dragEvent.isDragOver && {
+                transform: 'scale(1.1)',
+                background: themeType === 'dark' ? neutral[10] : grey[20]
+            }),
             ...(props.isDisabled && {
                 background: disable.main,
                 pointerEvents: 'none'
@@ -49,13 +61,50 @@ const useBoxStyles = createStyle((theme) => {
     }
 })
 
-export const UploadBox = (props: TUploadBoxProps) => {
-    const { isDisabled, onInputChange } = props
+const preventAndStopEvent = (event: React.DragEvent) => {
+    event.preventDefault()
+    event.stopPropagation()
+}
 
-    const classes = useBoxStyles()
+export const UploadBox = (props: TUploadBoxProps) => {
+    const {
+        isDisabled = false,
+        onInputChange,
+        onDropHandler: _onDropHandler
+    } = props
+    const [dragEvent, setDragEvent] = useState({
+        isDragOver: false
+    })
+
+    const onDragOver = (event: React.DragEvent) => {
+        preventAndStopEvent(event)
+        setDragEvent({ isDragOver: true })
+    }
+
+    const onDragLeave = (event: React.DragEvent) => {
+        preventAndStopEvent(event)
+        setDragEvent({ isDragOver: false })
+    }
+
+    const onDropHandler = (event: React.DragEvent) => {
+        preventAndStopEvent(event)
+        setDragEvent({ isDragOver: false })
+        _onDropHandler(event)
+    }
+
+    const classes = useBoxStyles({ isDisabled, dragEvent })
 
     return (
-        <Box className={classes.uploadBox}>
+        <Box
+            className={classes.uploadBox}
+            onDrag={preventAndStopEvent}
+            onDragStart={preventAndStopEvent}
+            onDragEnd={preventAndStopEvent}
+            onDragLeave={onDragLeave}
+            onDragOver={onDragOver}
+            onDragEnter={preventAndStopEvent}
+            onDrop={onDropHandler}
+        >
             <Label className={classes.label}>
                 <UploadIcon
                     className={classes.icon}

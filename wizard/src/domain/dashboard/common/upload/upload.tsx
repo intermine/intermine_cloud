@@ -21,6 +21,7 @@ type TUploaderHandlerOption = {
 type ChildrenProps = {
     inlineAlertProps: InlineAlertProps
     uploadEventHandler: () => void
+    onDropHandler: (event: React.DragEvent) => void
     onInputChange: (event: React.FormEvent<HTMLInputElement>) => void
     uploadMachineState: State<
         TUploadMachineContext,
@@ -77,11 +78,30 @@ const Upload = (props: TUploadProps) => {
         }
     }
 
-    const onInputChange = (event: React.FormEvent<HTMLInputElement>) => {
+    const setFile = (file: File) => {
         setInlineAlertProps({ isOpen: false })
-        const files = event.currentTarget.files
-        if (files) {
-            dispatch('FILE_SELECTED', { file: files[0] })
+        dispatch('FILE_SELECTED', { file })
+    }
+
+    const onInputChange = (event: React.FormEvent<HTMLInputElement>) => {
+        try {
+            const files = event.currentTarget.files
+            if (files) {
+                setFile(files[0])
+            }
+        } catch (error) {
+            console.error(error)
+        }
+    }
+
+    const onDropHandler = (event: React.DragEvent) => {
+        try {
+            const files = event.dataTransfer.files
+            if (files) {
+                setFile(files[0])
+            }
+        } catch (error) {
+            console.error(error)
         }
     }
 
@@ -108,7 +128,8 @@ const Upload = (props: TUploadProps) => {
                 inlineAlertProps,
                 onInputChange,
                 uploadEventHandler,
-                uploadMachineState
+                uploadMachineState,
+                onDropHandler
             })}
         </Box>
     )
