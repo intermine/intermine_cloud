@@ -7,7 +7,7 @@ import {
     useProgressReducer
 } from '../../../context'
 import { TProgressItem } from '../../../context/types'
-import { uploadDataset } from '../datasets/upload-dataset/utils'
+import { uploadService } from '../common/upload'
 import { ActionSection } from './action-section'
 import { ProgressItemView } from './progress-item-view'
 
@@ -22,7 +22,7 @@ const handleOnRetryClick = (
     item: TProgressItem,
     cb: (data: Partial<TProgressItem>) => void
 ) => {
-    const { cancelSourceToken } = uploadDataset({
+    const { cancelSourceToken } = uploadService({
         ...item
     })
 

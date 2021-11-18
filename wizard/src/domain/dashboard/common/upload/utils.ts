@@ -36,7 +36,7 @@ export type TUploadDatasetReturn = {
     id: string
 }
 
-export const uploadDataset = (
+export const uploadService = (
     options: TUploadDatasetOptions
 ): TUploadDatasetReturn => {
     const CancelToken = axios.CancelToken
