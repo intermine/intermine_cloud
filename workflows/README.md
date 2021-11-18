@@ -62,6 +62,8 @@ Finally, you can start the workflow.
 argo submit --watch minebuilder.yaml
 ```
 
+*Note:* If your mine requires additional bio sources, you can install those by adding the `--bio-path ~/testbio/biotestmine-bio-sources` argument to the `./make_minebuilder.py` invocation.
+
 Once the minebuilder workflow has finished, you can move on to run the minedeployer workflow. Before you do that, you should follow *intermine_cloud/helm-operator/README.md* to deploy the InterMine operator (make sure to stop after the `make deploy` step). Once that's done, you'll need permissions to create an IntermineInstance CRD.
 
 ```

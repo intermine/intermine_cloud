@@ -59,6 +59,17 @@ spec:
           - name: solr-host
             value: {% raw %}"{{steps.start-solr.ip}}"{% endraw %}
 
+    {% if bio %}
+    - - name: install-bio-sources
+        template: builder
+        arguments:
+          parameters:
+          - name: task
+            value: install
+          - name: working-dir
+            value: /home/intermine/{{ bio }}
+    {% endif %}
+
     - - name: clean
         template: builder
         arguments:
@@ -143,6 +154,12 @@ spec:
         path: /data/{{ source_name }}
         s3:
           key: source.tgz
+      {% if bio %}
+      - name: bio
+        path: /home/intermine/{{ bio }}
+        s3:
+          key: bio.tgz
+      {% endif %}
     container:
       image: alpine:3.8
       volumeMounts:
@@ -172,9 +189,11 @@ spec:
     inputs:
       parameters:
       - name: task
+      - name: working-dir
+        value: "/home/intermine/{{ mine_name }}"
     container:
       image: intermine/build:latest
-      workingDir: /home/intermine/{{ mine_name }}
+      workingDir: {% raw %}"{{inputs.parameters.working-dir}}"{% endraw %}
       command: [sh, -c]
       args: {% raw %}["./gradlew {{inputs.parameters.task}}"]{% endraw %}
       resources:
