@@ -139,7 +139,7 @@ spec:
     container:
       image: intermine/prebuild:latest
       command: ["builder_prepare"]
-      args: ["--mine-path", "/home/intermine/{{ mine_name }}"]
+      args: ["--mine-path", "/home/intermine/{{ mine_name }}", "--override", "webapp.path={{ mine_name }}", "--override", "project.title={{ pretty_mine_name }}"]
       # TODO support property overrides in a way secrets aren't visible
       env:
       - name: PGHOST
