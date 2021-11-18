@@ -7,6 +7,7 @@ import { DomElementIDs } from '../../constants/ids'
 import {
     DASHBOARD_OVERVIEW_PATH,
     DASHBOARD_DATASETS_PATH,
+    DASHBOARD_TEMPLATES_PATH,
     DASHBOARD_MINES_PATH
 } from '../../routes'
 import { RouteLoadingSpinner } from '../../components/route-loading-spinner'
@@ -18,6 +19,7 @@ import { useAdditionalSidebarReducer, useSidebarReducer } from '../../context'
 
 const Overview = lazy(() => import('./overview'))
 const Datasets = lazy(() => import('./datasets'))
+const Templates = lazy(() => import('./templates'))
 const Mines = lazy(() => import('./mines'))
 
 const pages = [
@@ -30,6 +32,11 @@ const pages = [
         id: 'dataset',
         path: DASHBOARD_DATASETS_PATH,
         Component: Datasets
+    },
+    {
+        id: 'template',
+        path: DASHBOARD_TEMPLATES_PATH,
+        Component: Templates
     },
     {
         id: 'mines',

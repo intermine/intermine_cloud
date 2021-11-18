@@ -7,7 +7,8 @@ import { Button, ButtonCommonProps } from '@intermine/chromatin/button'
 import { Tooltip } from '@intermine/chromatin/tooltip'
 import { createStyle } from '@intermine/chromatin/styles'
 import OverviewIcon from '@intermine/chromatin/icons/System/apps-fill'
-import DataIcon from '@intermine/chromatin/icons/Device/database-2-fill'
+import DatasetIcon from '@intermine/chromatin/icons/Device/database-2-fill'
+import TemplateIcon from '@intermine/chromatin/icons/Design/paint-brush-line'
 import MinesIcon from '@intermine/chromatin/icons/Business/bubble-chart-fill'
 import CollapseIcon from '@intermine/chromatin/icons/System/arrow-left-line'
 
@@ -15,6 +16,7 @@ import { useSidebarReducer } from '../../../context'
 import {
     DASHBOARD_OVERVIEW_PATH,
     DASHBOARD_DATASETS_PATH,
+    DASHBOARD_TEMPLATES_PATH,
     DASHBOARD_MINES_PATH
 } from '../../../routes'
 import { Logo } from '../../../components/logo'
@@ -30,7 +32,13 @@ const sidebarItems = [
         id: 'datasets',
         to: DASHBOARD_DATASETS_PATH,
         text: 'Datasets',
-        icon: <DataIcon />
+        icon: <DatasetIcon />
+    },
+    {
+        id: 'templates',
+        to: DASHBOARD_TEMPLATES_PATH,
+        text: 'Templates',
+        icon: <TemplateIcon />
     },
     {
         id: 'mine',
