@@ -4,8 +4,13 @@ import { Button } from '@intermine/chromatin/button'
 
 import { Upload, TUploadProps } from '../../common/upload'
 
-export const UploadBox = (props: Omit<TUploadProps, 'children'>) => {
-    const { uploadHandler, uploadBaseUrl } = props
+type TUploadBoxProps = Omit<TUploadProps, 'children'> & {
+    heading: string
+    sub: string
+}
+
+export const UploadBox = (props: TUploadBoxProps) => {
+    const { uploadHandler, uploadBaseUrl, heading, sub } = props
 
     return (
         <Box isContentCenter>
@@ -28,12 +33,8 @@ export const UploadBox = (props: Omit<TUploadProps, 'children'>) => {
                             {...inlineAlertProps}
                         />
                         <Upload.Heading
-                            heading={{ children: 'Upload New Dataset' }}
-                            sub={{
-                                children:
-                                    // eslint-disable-next-line max-len
-                                    'You can select .fasta, .tsv, .csv, .etc'
-                            }}
+                            heading={{ children: heading }}
+                            sub={{ children: sub }}
                         />
                         <Upload.Box
                             onDropHandler={onDropHandler}

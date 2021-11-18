@@ -15,6 +15,8 @@ export const UploadDataset = () => {
                         heading="Datasets"
                     />
                     <UploadPage.UploadBox
+                        heading="Upload New Dataset"
+                        sub="You can select .fasta, .tsv, .csv, .etc"
                         uploadBaseUrl={uploadEndpoint}
                         uploadHandler={uploadHandler}
                     />
