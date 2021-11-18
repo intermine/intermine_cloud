@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
 import { useMachine } from '@xstate/react'
-import { Box } from '@intermine/chromatin/box'
 import { InlineAlertProps } from '@intermine/chromatin/inline-alert'
 
 import { UploadBox } from './upload-box'
@@ -122,17 +121,13 @@ const Upload = (props: TUploadProps) => {
         }
     }, [value])
 
-    return (
-        <Box csx={{ root: { maxWidth: '26rem', width: '100%' } }}>
-            {children({
-                inlineAlertProps,
-                onInputChange,
-                uploadEventHandler,
-                uploadMachineState,
-                onDropHandler
-            })}
-        </Box>
-    )
+    return children({
+        inlineAlertProps,
+        onInputChange,
+        uploadEventHandler,
+        uploadMachineState,
+        onDropHandler
+    })
 }
 
 Upload.Box = UploadBox
