@@ -3,7 +3,7 @@ import { Tooltip } from '@intermine/chromatin/tooltip'
 import { IconButton } from '@intermine/chromatin/icon-button'
 import ProgressIcon from '@intermine/chromatin/icons/System/refresh-line'
 import PreferencesIcon from '@intermine/chromatin/icons/Design/tools-line'
-import EditProfileIcon from '@intermine/chromatin/icons/user/user-settings-line'
+import EditProfileIcon from '@intermine/chromatin/icons/User/user-settings-line'
 import { createStyle } from '@intermine/chromatin/styles'
 
 import { useAdditionalSidebarReducer } from '../../../context'
