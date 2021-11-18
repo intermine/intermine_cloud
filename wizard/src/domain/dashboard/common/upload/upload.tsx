@@ -115,6 +115,7 @@ const Upload = (props: TUploadProps) => {
         if (value === 'successful') {
             const { putUrl, file } = context
             if (putUrl && file) {
+                setInlineAlertProps({ isOpen: false })
                 uploadHandler({ file, presignedURL: putUrl })
             }
             dispatch('RESET')
