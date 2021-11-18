@@ -16,7 +16,7 @@ helm repo update
 helm install traefik traefik/traefik -n traefik --create-namespace -f traefik.values.yaml
 ```
 
-If you wish, you can access the Traefik dashboard by running `kubectl -n traefik port-forward svc/traefik 9090:9000` and opening: http://127.0.0.1:9090/dashboard/#/
+If you wish, you can access the Traefik dashboard by running `kubectl -n traefik port-forward svc/traefik 9090:9000` and opening: http://127.0.0.1:9090/dashboard/#/ (*Warning*: You **need** to use this URL including the path, otherwise you'll get a 404)
 
 Argo Workflows runs in kubernetes and can be installed using its manifest.
 
