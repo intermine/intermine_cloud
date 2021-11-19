@@ -44,8 +44,8 @@ export const Progress = () => {
 
     const {
         state: { progressItems },
-        updateDataset,
-        removeEntry
+        updateProgressItem,
+        removeItemFromProgress
     } = progressReducer
 
     return (
@@ -66,11 +66,11 @@ export const Progress = () => {
                         onCancelUpload={() =>
                             handleOnCancelUpload(progressItems[key])
                         }
-                        onRemoveClick={removeEntry}
+                        onRemoveClick={removeItemFromProgress}
                         onRetryClick={() =>
                             handleOnRetryClick(
                                 progressItems[key],
-                                updateDataset
+                                updateProgressItem
                             )
                         }
                         {...progressItems[key]}

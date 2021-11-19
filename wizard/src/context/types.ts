@@ -199,9 +199,9 @@ export type TProgressReducerAction = {
 
 export type TUseProgressReducer = {
     state: TProgressReducer
-    addDataset: (data: TProgressItem) => void
-    updateDataset: (data: Partial<TProgressItem>) => void
-    removeEntry: (id: string) => void
+    addItemToProgress: (data: TProgressItem) => void
+    updateProgressItem: (data: Partial<TProgressItem>) => void
+    removeItemFromProgress: (id: string) => void
 }
 
 /**
