@@ -2,6 +2,8 @@ export enum ProgressActions {
     AddItemToProgress = 'AddItemToProgress',
     UpdateProgressItem = 'UpdateProgressItem',
     RemoveItemFromProgress = 'RemoveItemFromProgress',
+    AddActiveItem = 'AddActiveItem',
+    RemoveActiveItem = 'RemoveActiveItem',
 }
 
 export enum ProgressItemUploadStatus {

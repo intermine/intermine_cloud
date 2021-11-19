@@ -33,13 +33,19 @@ export const UploadPage = (props: TUploadPageProps) => {
     const additionalSidebarReducer = useAdditionalSidebarReducer()
     const globalAlertReducer = useGlobalAlertReducer()
 
-    const { addItemToProgress, updateProgressItem } = progressReducer
+    const {
+        addItemToProgress,
+        updateProgressItem,
+        addActiveItem,
+        removeActiveItem
+    } = progressReducer
     const { updateState: updateAdditionalSidebarState } =
         additionalSidebarReducer
     const { addAlert } = globalAlertReducer
 
     const onUploadFailed = (event: TOnUploadFailedEvent) => {
         const { id, error, file } = event
+        removeActiveItem(id)
         if (error.message === Canceled) {
             updateProgressItem({
                 id,
@@ -63,6 +69,7 @@ export const UploadPage = (props: TUploadPageProps) => {
 
     const onUploadSuccessful = (event: TOnUploadSuccessfulEvent) => {
         const { id, totalSize, loadedSize, file } = event
+        removeActiveItem(id)
         updateProgressItem({ id, status: Completed, totalSize, loadedSize })
         addAlert({
             id: id + 'success',
@@ -103,6 +110,8 @@ export const UploadPage = (props: TUploadPageProps) => {
             onUploadProgress,
             onUploadSuccessful
         })
+
+        addActiveItem(id)
 
         updateAdditionalSidebarState({
             isOpen: true,

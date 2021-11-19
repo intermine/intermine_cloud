@@ -189,7 +189,8 @@ export type TProgressItem = {
 }
 
 export type TProgressReducer = {
-    progressItems: { [x: string]: TProgressItem }
+    progressItems: { [id: string]: TProgressItem }
+    activeItems: { [id: string]: string }
 }
 
 export type TProgressReducerAction = {
@@ -202,6 +203,8 @@ export type TUseProgressReducer = {
     addItemToProgress: (data: TProgressItem) => void
     updateProgressItem: (data: Partial<TProgressItem>) => void
     removeItemFromProgress: (id: string) => void
+    addActiveItem: (id: string) => void
+    removeActiveItem: (id: string) => void
 }
 
 /**

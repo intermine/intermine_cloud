@@ -8,11 +8,17 @@ import type {
     TProgressItem,
 } from '../types'
 
-const { AddItemToProgress, RemoveItemFromProgress, UpdateProgressItem } =
-    ProgressActions
+const {
+    AddItemToProgress,
+    RemoveItemFromProgress,
+    UpdateProgressItem,
+    AddActiveItem,
+    RemoveActiveItem,
+} = ProgressActions
 
 const progressReducerInitialState: TProgressReducer = {
     progressItems: {},
+    activeItems: {},
 }
 
 const progressReducer = (
@@ -40,6 +46,18 @@ const progressReducer = (
 
         case RemoveItemFromProgress:
             delete state.progressItems[data as string]
+            return { ...state }
+
+        case AddActiveItem:
+            state.activeItems = {
+                ...state.activeItems,
+                [data as string]: data as string,
+            }
+
+            return { ...state }
+
+        case RemoveActiveItem:
+            delete state.activeItems[data as string]
             return { ...state }
 
         /* istanbul ignore next */
@@ -78,10 +96,25 @@ export const useProgressReducer = (): TUseProgressReducer => {
         })
     }
 
+    const addActiveItem = (id: string) => {
+        dispatch({
+            type: AddActiveItem,
+            data: id,
+        })
+    }
+    const removeActiveItem = (id: string) => {
+        dispatch({
+            type: RemoveActiveItem,
+            data: id,
+        })
+    }
+
     return {
         state,
         updateProgressItem,
         addItemToProgress,
         removeItemFromProgress,
+        addActiveItem,
+        removeActiveItem,
     }
 }

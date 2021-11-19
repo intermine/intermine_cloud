@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { Typography } from '@intermine/chromatin/typography'
 
 import { AdditionalSidebarTabs } from '../../../constants/additional-sidebar'
@@ -18,20 +19,13 @@ const handleOnCancelUpload = (item: TProgressItem) => {
     cancelSourceToken.cancel(Canceled)
 }
 
-const handleOnRetryClick = (
-    item: TProgressItem,
-    cb: (data: Partial<TProgressItem>) => void
-) => {
-    const { cancelSourceToken } = uploadService({
-        ...item
-    })
+const handleOnBeforeUnload = (event: Event) => {
+    event.preventDefault()
 
-    cb({
-        ...item,
-        status: Running,
-        loadedSize: 0,
-        cancelSourceToken
-    })
+    // @ts-expect-error Chrome requires returnValue to be set
+    event.returnValue = ''
+
+    return 'Are you sure? Some file(s) are still uploading.'
 }
 
 export const Progress = () => {
@@ -43,10 +37,34 @@ export const Progress = () => {
     } = additionalSidebarReducer
 
     const {
-        state: { progressItems },
+        state: { progressItems, activeItems },
         updateProgressItem,
-        removeItemFromProgress
+        removeItemFromProgress,
+        addActiveItem
     } = progressReducer
+
+    const handleOnRetryClick = (item: TProgressItem) => {
+        const { cancelSourceToken } = uploadService({
+            ...item
+        })
+
+        addActiveItem(item.id)
+
+        updateProgressItem({
+            ...item,
+            status: Running,
+            loadedSize: 0,
+            cancelSourceToken
+        })
+    }
+
+    useEffect(() => {
+        if (Object.keys(activeItems).length === 0) {
+            window.removeEventListener('beforeunload', handleOnBeforeUnload)
+        } else {
+            window.addEventListener('beforeunload', handleOnBeforeUnload)
+        }
+    }, [Object.keys(activeItems).length])
 
     return (
         <ActionSection
@@ -68,10 +86,7 @@ export const Progress = () => {
                         }
                         onRemoveClick={removeItemFromProgress}
                         onRetryClick={() =>
-                            handleOnRetryClick(
-                                progressItems[key],
-                                updateProgressItem
-                            )
+                            handleOnRetryClick(progressItems[key])
                         }
                         {...progressItems[key]}
                     />
