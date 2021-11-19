@@ -6,7 +6,7 @@ export enum ProgressActions {
     RemoveActiveItem = 'RemoveActiveItem',
 }
 
-export enum ProgressItemUploadStatus {
+export enum ProgressItemStatus {
     Running = 'Running',
     Canceled = 'Canceled',
     Completed = 'Completed',

@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 import { Typography } from '@intermine/chromatin/typography'
 
 import { AdditionalSidebarTabs } from '../../../constants/additional-sidebar'
-import { ProgressItemUploadStatus } from '../../../constants/progress'
+import { ProgressItemStatus } from '../../../constants/progress'
 import {
     useAdditionalSidebarReducer,
     useProgressReducer
@@ -12,7 +12,7 @@ import { uploadService } from '../common/upload'
 import { ActionSection } from './action-section'
 import { ProgressItemView } from './progress-item-view'
 
-const { Canceled, Running } = ProgressItemUploadStatus
+const { Canceled, Running } = ProgressItemStatus
 
 const handleOnCancelUpload = (item: TProgressItem) => {
     const { cancelSourceToken } = item
