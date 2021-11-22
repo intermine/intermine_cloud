@@ -1,14 +1,7 @@
 import { Box } from '@intermine/chromatin/box'
 import { createStyle } from '@intermine/chromatin/styles'
-import { Label } from '@intermine/chromatin/label'
-import { Input, InputProps } from '@intermine/chromatin/input'
-import {
-    Typography,
-    TypographyBaseProps
-} from '@intermine/chromatin/typography'
-import { FormSelect } from '../../../../components/form/form-select'
-import { Button } from '@intermine/chromatin'
-import clsx from 'clsx'
+
+import { DashboardForm } from '../../common/dashboard-form'
 
 const dummyTemplateOptions = [
     { label: 'HumanMine', value: 'template-1' },
@@ -37,26 +30,6 @@ const useStyles = createStyle((theme) => {
     } = theme
 
     return {
-        form: {
-            alignItems: 'center',
-            display: 'flex',
-            justifyContent: 'center',
-            padding: spacing(0, 12),
-            width: '100%'
-        },
-        formWrapper: {
-            maxWidth: '120rem',
-            width: '100%'
-        },
-        formGroupContainer: {
-            margin: spacing(6, 0)
-        },
-        formGroup: {
-            display: 'block',
-            margin: spacing(0, 0, 8, 0),
-            maxWidth: '35rem',
-            width: '100%'
-        },
         subdomainInput: {
             '&&': {
                 borderRadius: '0.25rem 0 0 0.25rem',
@@ -68,101 +41,64 @@ const useStyles = createStyle((theme) => {
             background: themeType === 'dark' ? neutral[10] : grey[20],
             borderRadius: '0 0.25rem 0.25rem 0',
             padding: spacing(1, 2, 1, 1)
-        },
-        actionContainer: {
-            display: 'flex',
-            justifyContent: 'flex-end',
-            paddingTop: spacing(20)
         }
     }
 })
-
-const FormTypography = (props: TypographyBaseProps) => {
-    return <Typography csx={{ root: { fontWeight: 100 } }} {...props} />
-}
-
-const FormInput = (props: InputProps) => {
-    return (
-        <Input
-            hasFullWidth
-            hasTransparentBackground
-            csx={{
-                inputRoot: {
-                    ':hover': { background: 'transparent' }
-                }
-            }}
-            {...props}
-        />
-    )
-}
 
 export const Form = () => {
     const classes = useStyles()
 
     return (
-        <form id="create-mine-form" className={classes.form}>
-            <Box className={classes.formWrapper}>
-                <FormTypography variant="h1">Create a Mine</FormTypography>
-                <Box className={classes.formGroupContainer}>
-                    <Label className={classes.formGroup}>
-                        <FormTypography variant="h3">
-                            Select a template
-                        </FormTypography>
-                        <FormTypography variant="body" color="neutral.20">
-                            Make sure you have already uploaded the template.
-                            There are also some of the pre-existing templates.
-                        </FormTypography>
-                        <FormSelect options={dummyTemplateOptions} />
-                    </Label>
-                    <Label className={classes.formGroup}>
-                        <FormTypography variant="h3">
-                            Select dataset(s)
-                        </FormTypography>
-                        <FormTypography variant="body" color="neutral.20">
-                            Make sure you have already uploaded the dataset. You
-                            can select multiple dataset.
-                        </FormTypography>
-                        <FormSelect
+        <DashboardForm>
+            <DashboardForm.Wrapper>
+                <DashboardForm.Heading>Create a Mine</DashboardForm.Heading>
+                <Box>
+                    <DashboardForm.Label
+                        main="Select a template"
+                        sub="Make sure you have already uploaded the template.
+                            There are also some of the pre-existing templates."
+                    >
+                        <DashboardForm.Select options={dummyTemplateOptions} />
+                    </DashboardForm.Label>
+                    <DashboardForm.Label
+                        main="Select dataset(s)"
+                        sub="Make sure you have already uploaded the dataset.
+                        You can select multiple dataset."
+                    >
+                        <DashboardForm.Select
                             closeMenuOnSelect={false}
                             options={dummyDatasetsOptions}
                             isMulti
                         />
-                    </Label>
-                    <Label className={classes.formGroup}>
-                        <FormTypography variant="h3">
-                            Name your new Mine
-                        </FormTypography>
-                        <FormTypography variant="body" color="neutral.20">
-                            This will be the name under which your mine is
+                    </DashboardForm.Label>
+                    <DashboardForm.Label
+                        main="Name of your new Mine"
+                        sub="This will be the name under which your mine is
                             publicly available. Some examples are HumanMine,
-                            FlyMine, CovidMine, etc.
-                        </FormTypography>
-                        <FormInput placeholder="Enter mine name" />
-                    </Label>
-                    <Label className={classes.formGroup}>
-                        <FormTypography variant="h3">
-                            Description of your Mine
-                        </FormTypography>
-                        <FormTypography variant="body" color="neutral.20">
-                            This will help other users to get an idea about your
-                            mine. You can write something like: An integrated
-                            data warehouse for...
-                        </FormTypography>
-                        <FormInput
+                            FlyMine, CovidMine, etc."
+                    >
+                        <DashboardForm.Input placeholder="Enter mine name" />
+                    </DashboardForm.Label>
+                    <DashboardForm.Label
+                        main="Describe your Mine"
+                        sub="This will help other users to get an idea about 
+                            your mine. You can write something like: 
+                            An integrated data warehouse for..."
+                    >
+                        <DashboardForm.Input
                             rows={5}
                             Component="textarea"
                             placeholder="Description of your mine"
                         />
-                    </Label>
-                    <Label className={classes.formGroup}>
-                        <FormTypography variant="h3">Sub Domain</FormTypography>
-                        <FormTypography variant="body" color="neutral.20">
-                            We will host your newly built mine under this
+                    </DashboardForm.Label>
+                    <DashboardForm.Label
+                        main="Sub Domain"
+                        sub="We will host your newly built mine under this
                             sub-domain. Please don't include any special
-                            character.
-                        </FormTypography>
+                            character."
+                    >
                         <Box display="flex">
-                            <FormInput
+                            <DashboardForm.Input
                                 classes={{ inputRoot: classes.subdomainInput }}
                                 placeholder="my-first-intermine-database"
                             />
@@ -173,27 +109,16 @@ export const Form = () => {
                                 .intermine.org
                             </Box>
                         </Box>
-                    </Label>
-                    <Box
-                        className={clsx(
-                            classes.actionContainer,
-                            classes.formGroup
-                        )}
-                    >
-                        <Button
-                            color="warning"
-                            csx={{
-                                root: ({ spacing }) => ({
-                                    marginRight: spacing(10)
-                                })
-                            }}
-                        >
-                            Reset
-                        </Button>
-                        <Button color="primary">Create Mine</Button>
-                    </Box>
+                    </DashboardForm.Label>
+
+                    <DashboardForm.Actions
+                        actions={[
+                            { color: 'warning', children: 'Reset' },
+                            { color: 'primary', children: 'Create Mine' }
+                        ]}
+                    />
                 </Box>
-            </Box>
-        </form>
+            </DashboardForm.Wrapper>
+        </DashboardForm>
     )
 }

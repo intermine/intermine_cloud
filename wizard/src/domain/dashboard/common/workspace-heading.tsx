@@ -31,7 +31,7 @@ export const WorkspaceHeading = (props: TWorkspaceHeadingProps) => {
                     display: 'flex',
                     height: '3.5rem',
                     justifyContent: 'space-between',
-                    marginBottom: spacing(10),
+                    marginBottom: spacing(4),
                     paddingRight: spacing(1)
                 })
             }}

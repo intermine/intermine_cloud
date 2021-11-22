@@ -1,7 +1,7 @@
 import { Select, SelectProps } from '@intermine/chromatin'
 import { useTheme } from '@intermine/chromatin/styles'
 
-interface GroupBase<Option> {
+export interface GroupBase<Option> {
     readonly options: readonly Option[]
     readonly label?: string
 }
@@ -11,9 +11,9 @@ export const FormSelect = <
     IsMulti extends boolean,
     Group extends GroupBase<Option>
 >(
-    props: SelectProps<Option, IsMulti, Group>
+    props: SelectProps<Option, IsMulti, Group> & { isError?: boolean }
 ) => {
-    const { csx = {}, ...rest } = props
+    const { csx = {}, isError = false, ...rest } = props
     const theme = useTheme()
 
     const {
@@ -32,6 +32,12 @@ export const FormSelect = <
         <Select
             color="neutral"
             csx={{
+                control: {
+                    ...(isError && {
+                        borderColor: error.main
+                    })
+                },
+
                 multiValue: {
                     background:
                         themeType === 'dark' ? darkGrey[50] : neutral[10]
@@ -45,7 +51,7 @@ export const FormSelect = <
                 },
                 option: {
                     borderRadius: '0.25rem',
-                    padding: '0.5rem 0.25rem'
+                    padding: '0.5rem'
                 },
                 menu: {
                     background: themeType === 'dark' ? darkGrey[40] : white,
