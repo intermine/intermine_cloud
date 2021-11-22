@@ -6,7 +6,10 @@ import PreferencesIcon from '@intermine/chromatin/icons/Design/tools-line'
 import EditProfileIcon from '@intermine/chromatin/icons/User/user-settings-line'
 import { createStyle } from '@intermine/chromatin/styles'
 
-import { useAdditionalSidebarReducer } from '../../../context'
+import {
+    useAdditionalSidebarReducer,
+    useProgressReducer
+} from '../../../context'
 import { AdditionalSidebarTabs } from '../../../constants/additional-sidebar'
 
 import { Progress } from './progress'
@@ -43,7 +46,11 @@ const actions = [
 ]
 
 const useStyles = createStyle((theme) => {
-    const { spacing } = theme
+    const {
+        spacing,
+        typography: { small },
+        palette: { primary }
+    } = theme
     return {
         root: {
             display: 'flex',
@@ -69,7 +76,20 @@ const useStyles = createStyle((theme) => {
             opacity: props.isOpen ? 1 : 0,
             overflow: 'hidden',
             transition: '0.23s'
-        })
+        }),
+
+        badge: {
+            '&&': {
+                background: primary.main,
+                borderRadius: '0.25rem',
+                color: primary.text,
+                padding: spacing('0.1rem', 1),
+                position: 'absolute',
+                top: '0.25rem',
+                right: '0.25rem',
+                ...small
+            }
+        }
     }
 })
 
@@ -79,6 +99,11 @@ export const AdditionalSidebar = () => {
         updateState,
         state: { isOpen, activeTab }
     } = additionalSidebarReducer
+
+    const progressReducer = useProgressReducer()
+    const {
+        state: { activeItems }
+    } = progressReducer
 
     const classes = useStyles({
         isOpen
@@ -96,12 +121,24 @@ export const AdditionalSidebar = () => {
             <Box className={classes.actionContainer}>
                 {actions.map(({ tooltip, Icon, activeTab: _activeTab, id }) => (
                     <Tooltip message={tooltip} placement="left" key={id}>
-                        <IconButton
-                            className={classes.button}
-                            onClick={() => onClickActionIcon(_activeTab)}
-                            Icon={Icon}
-                            isHovered={activeTab === _activeTab}
-                        />
+                        <Box csx={{ root: { position: 'relative' } }}>
+                            <IconButton
+                                className={classes.button}
+                                onClick={() => onClickActionIcon(_activeTab)}
+                                Icon={Icon}
+                                isHovered={activeTab === _activeTab}
+                            />
+                            {/* 
+                                // TODO: Find a better way to show 
+                                // TODO: notification badge 
+                            */}
+                            {_activeTab === ProgressTab &&
+                                Object.keys(activeItems).length > 0 && (
+                                    <Box className={classes.badge}>
+                                        {Object.keys(activeItems).length}
+                                    </Box>
+                                )}
+                        </Box>
                     </Tooltip>
                 ))}
                 <Logout
