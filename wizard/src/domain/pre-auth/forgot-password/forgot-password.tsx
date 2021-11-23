@@ -21,8 +21,9 @@ import {
 import { Logo } from '../../../components/logo'
 import { authMachine } from '../machine/auth-machine'
 
+import { scrollTo } from '../../../utils/misc'
 import { isValidEmail } from '../../../components/form/utils'
-import { scrollTo, TInputField, updateError, updateValue } from '../utils'
+import { TInputField, updateError, updateValue } from '../utils'
 
 type TInputFields = {
     email: TInputField

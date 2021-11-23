@@ -20,7 +20,8 @@ import {
 import { Logo } from '../../../components/logo'
 import { authMachine } from '../machine/auth-machine'
 
-import { scrollTo, TInputField, updateError, updateValue } from '../utils'
+import { scrollTo } from '../../../utils/misc'
+import { TInputField, updateError, updateValue } from '../utils'
 import { isValidEmail, isValueSame } from '../../../components/form/utils'
 
 type TInputFields = {
