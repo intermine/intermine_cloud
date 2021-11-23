@@ -1,7 +1,8 @@
+import { useEffect } from 'react'
 import { Typography } from '@intermine/chromatin/typography'
 
 import { AdditionalSidebarTabs } from '../../../constants/additional-sidebar'
-import { ProgressItemUploadStatus } from '../../../constants/progress'
+import { ProgressItemStatus } from '../../../constants/progress'
 import {
     useAdditionalSidebarReducer,
     useProgressReducer
@@ -11,27 +12,20 @@ import { uploadService } from '../common/upload'
 import { ActionSection } from './action-section'
 import { ProgressItemView } from './progress-item-view'
 
-const { Canceled, Running } = ProgressItemUploadStatus
+const { Canceled, Running } = ProgressItemStatus
 
 const handleOnCancelUpload = (item: TProgressItem) => {
     const { cancelSourceToken } = item
     cancelSourceToken.cancel(Canceled)
 }
 
-const handleOnRetryClick = (
-    item: TProgressItem,
-    cb: (data: Partial<TProgressItem>) => void
-) => {
-    const { cancelSourceToken } = uploadService({
-        ...item
-    })
+const handleOnBeforeUnload = (event: Event) => {
+    event.preventDefault()
 
-    cb({
-        ...item,
-        status: Running,
-        loadedSize: 0,
-        cancelSourceToken
-    })
+    // @ts-expect-error Chrome requires returnValue to be set
+    event.returnValue = ''
+
+    return 'Are you sure? Some file(s) are still uploading.'
 }
 
 export const Progress = () => {
@@ -43,10 +37,34 @@ export const Progress = () => {
     } = additionalSidebarReducer
 
     const {
-        state: { progressItems },
-        updateDataset,
-        removeEntry
+        state: { progressItems, activeItems },
+        updateProgressItem,
+        removeItemFromProgress,
+        addActiveItem
     } = progressReducer
+
+    const handleOnRetryClick = (item: TProgressItem) => {
+        const { cancelSourceToken } = uploadService({
+            ...item
+        })
+
+        addActiveItem(item.id)
+
+        updateProgressItem({
+            ...item,
+            status: Running,
+            loadedSize: 0,
+            cancelSourceToken
+        })
+    }
+
+    useEffect(() => {
+        if (Object.keys(activeItems).length === 0) {
+            window.removeEventListener('beforeunload', handleOnBeforeUnload)
+        } else {
+            window.addEventListener('beforeunload', handleOnBeforeUnload)
+        }
+    }, [Object.keys(activeItems).length])
 
     return (
         <ActionSection
@@ -66,12 +84,9 @@ export const Progress = () => {
                         onCancelUpload={() =>
                             handleOnCancelUpload(progressItems[key])
                         }
-                        onRemoveClick={removeEntry}
+                        onRemoveClick={removeItemFromProgress}
                         onRetryClick={() =>
-                            handleOnRetryClick(
-                                progressItems[key],
-                                updateDataset
-                            )
+                            handleOnRetryClick(progressItems[key])
                         }
                         {...progressItems[key]}
                     />

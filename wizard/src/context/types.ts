@@ -13,10 +13,7 @@ import { AuthStates, AuthActions } from '../constants/auth'
 import { GlobalAlertsActions } from '../constants/global-alert'
 import { GlobalModalActions } from '../constants/global-modal'
 import { PreferencesActions } from '../constants/preferences'
-import {
-    ProgressActions,
-    ProgressItemUploadStatus,
-} from '../constants/progress'
+import { ProgressActions, ProgressItemStatus } from '../constants/progress'
 import { SidebarActions } from '../constants/sidebar'
 
 /**
@@ -182,14 +179,15 @@ export type TProgressItem = {
     url: string
     id: string
     cancelSourceToken: CancelTokenSource
-    status: ProgressItemUploadStatus
-    onUploadSuccessful?: (data: any) => void
-    onUploadFailed?: (data: any) => void
-    onUploadProgress?: (data: any) => void
+    status: ProgressItemStatus
+    onSuccessful?: (data: any) => void
+    onFailed?: (data: any) => void
+    onProgress?: (data: any) => void
 }
 
 export type TProgressReducer = {
-    progressItems: { [x: string]: TProgressItem }
+    progressItems: { [id: string]: TProgressItem }
+    activeItems: { [id: string]: string }
 }
 
 export type TProgressReducerAction = {
@@ -199,9 +197,11 @@ export type TProgressReducerAction = {
 
 export type TUseProgressReducer = {
     state: TProgressReducer
-    addDataset: (data: TProgressItem) => void
-    updateDataset: (data: Partial<TProgressItem>) => void
-    removeEntry: (id: string) => void
+    addItemToProgress: (data: TProgressItem) => void
+    updateProgressItem: (data: Partial<TProgressItem>) => void
+    removeItemFromProgress: (id: string) => void
+    addActiveItem: (id: string) => void
+    removeActiveItem: (id: string) => void
 }
 
 /**

@@ -8,10 +8,17 @@ import type {
     TProgressItem,
 } from '../types'
 
-const { AddDataset, UpdateDataset, RemoveEntry } = ProgressActions
+const {
+    AddItemToProgress,
+    RemoveItemFromProgress,
+    UpdateProgressItem,
+    AddActiveItem,
+    RemoveActiveItem,
+} = ProgressActions
 
 const progressReducerInitialState: TProgressReducer = {
     progressItems: {},
+    activeItems: {},
 }
 
 const progressReducer = (
@@ -21,15 +28,15 @@ const progressReducer = (
     const { type, data } = action
 
     switch (type) {
-        case AddDataset:
-            const progressItems = {
+        case AddItemToProgress:
+            state.progressItems = {
                 ...state.progressItems,
                 [(data as TProgressItem).id]: data as TProgressItem,
             }
 
-            return { progressItems }
+            return { ...state }
 
-        case UpdateDataset:
+        case UpdateProgressItem:
             state.progressItems[(data as TProgressItem).id] = {
                 ...state.progressItems[(data as TProgressItem).id],
                 ...(data as TProgressItem),
@@ -37,8 +44,20 @@ const progressReducer = (
 
             return { ...state }
 
-        case RemoveEntry:
+        case RemoveItemFromProgress:
             delete state.progressItems[data as string]
+            return { ...state }
+
+        case AddActiveItem:
+            state.activeItems = {
+                ...state.activeItems,
+                [data as string]: data as string,
+            }
+
+            return { ...state }
+
+        case RemoveActiveItem:
+            delete state.activeItems[data as string]
             return { ...state }
 
         /* istanbul ignore next */
@@ -59,28 +78,43 @@ export const useProgressReducer = (): TUseProgressReducer => {
         progressReducerInitialState
     )
 
-    const updateDataset = (data: Partial<TProgressItem>) => {
-        dispatch({ type: UpdateDataset, data })
+    const updateProgressItem = (data: Partial<TProgressItem>) => {
+        dispatch({ type: UpdateProgressItem, data })
     }
 
-    const addDataset = (data: TProgressItem) => {
+    const addItemToProgress = (data: TProgressItem) => {
         dispatch({
-            type: AddDataset,
+            type: AddItemToProgress,
             data,
         })
     }
 
-    const removeEntry = (id: string) => {
+    const removeItemFromProgress = (id: string) => {
         dispatch({
-            type: RemoveEntry,
+            type: RemoveItemFromProgress,
+            data: id,
+        })
+    }
+
+    const addActiveItem = (id: string) => {
+        dispatch({
+            type: AddActiveItem,
+            data: id,
+        })
+    }
+    const removeActiveItem = (id: string) => {
+        dispatch({
+            type: RemoveActiveItem,
             data: id,
         })
     }
 
     return {
         state,
-        updateDataset,
-        addDataset,
-        removeEntry,
+        updateProgressItem,
+        addItemToProgress,
+        removeItemFromProgress,
+        addActiveItem,
+        removeActiveItem,
     }
 }

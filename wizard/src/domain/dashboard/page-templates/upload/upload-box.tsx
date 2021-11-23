@@ -55,7 +55,7 @@ export const UploadBox = (props: TUploadBoxProps) => {
                                     uploadMachineState.value === 'uploadingFile'
                                 }
                             >
-                                Upload Dataset
+                                Upload
                             </Button>
                         </Box>
                     </Box>

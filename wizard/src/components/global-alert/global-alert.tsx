@@ -57,7 +57,7 @@ export const GlobalAlert = () => {
                             }
                             removeAlert(id)
                         }}
-                        duration={5000}
+                        duration={10_000}
                         {...alert}
                     />
                 )

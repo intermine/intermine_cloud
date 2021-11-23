@@ -26,9 +26,9 @@ export type TUploadDatasetOptions = {
     url: string
     file: File
     id?: string
-    onUploadSuccessful?: (event: TOnUploadSuccessfulEvent) => void
-    onUploadFailed?: (event: TOnUploadFailedEvent) => void
-    onUploadProgress?: (event: TOnUploadProgressEvent) => void
+    onSuccessful?: (event: TOnUploadSuccessfulEvent) => void
+    onFailed?: (event: TOnUploadFailedEvent) => void
+    onProgress?: (event: TOnUploadProgressEvent) => void
 }
 
 export type TUploadDatasetReturn = {
@@ -45,14 +45,14 @@ export const uploadService = (
         id = shortid.generate(),
         url,
         file,
-        onUploadFailed,
-        onUploadSuccessful,
-        onUploadProgress,
+        onFailed,
+        onSuccessful,
+        onProgress,
     } = options
 
     const throttleUpdate = throttle((event) => {
-        if (onUploadProgress) {
-            onUploadProgress({
+        if (onProgress) {
+            onProgress({
                 loadedSize: event.loaded,
                 totalSize: event.total,
                 file,
@@ -67,8 +67,8 @@ export const uploadService = (
             onUploadProgress: throttleUpdate,
         })
         .then(() => {
-            if (onUploadSuccessful) {
-                onUploadSuccessful({
+            if (onSuccessful) {
+                onSuccessful({
                     loadedSize: file.size,
                     totalSize: file.size,
                     file,
@@ -78,8 +78,8 @@ export const uploadService = (
             return
         })
         .catch((error) => {
-            if (onUploadFailed) {
-                onUploadFailed({ error, file, id })
+            if (onFailed) {
+                onFailed({ error, file, id })
             }
         })
 

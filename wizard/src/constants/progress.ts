@@ -1,10 +1,12 @@
 export enum ProgressActions {
-    AddDataset = 'AddDataset',
-    UpdateDataset = 'UpdateDataset',
-    RemoveEntry = 'RemoveEntry',
+    AddItemToProgress = 'AddItemToProgress',
+    UpdateProgressItem = 'UpdateProgressItem',
+    RemoveItemFromProgress = 'RemoveItemFromProgress',
+    AddActiveItem = 'AddActiveItem',
+    RemoveActiveItem = 'RemoveActiveItem',
 }
 
-export enum ProgressItemUploadStatus {
+export enum ProgressItemStatus {
     Running = 'Running',
     Canceled = 'Canceled',
     Completed = 'Completed',

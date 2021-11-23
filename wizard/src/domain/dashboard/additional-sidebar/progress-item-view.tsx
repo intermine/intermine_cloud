@@ -13,7 +13,7 @@ import RetryIcon from '@intermine/chromatin/icons/System/arrow-go-forward-line'
 
 import { TProgressItem } from '../../../context/types'
 import { getDataSize } from '../../../utils/get'
-import { ProgressItemUploadStatus } from '../../../constants/progress'
+import { ProgressItemStatus } from '../../../constants/progress'
 
 type TProgressItemViewProps = TProgressItem & {
     onCancelUpload: (id: string) => void
@@ -25,7 +25,7 @@ type TUseStyleProps = {
     uploadPercentage: string
 }
 
-const { Completed, Running, Canceled, Failed } = ProgressItemUploadStatus
+const { Completed, Running, Canceled, Failed } = ProgressItemStatus
 
 const useStyle = createStyle((theme) => {
     const {

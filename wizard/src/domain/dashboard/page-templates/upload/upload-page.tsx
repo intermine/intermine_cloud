@@ -12,11 +12,11 @@ import {
     useProgressReducer
 } from '../../../../context'
 import { AdditionalSidebarTabs } from '../../../../constants/additional-sidebar'
-import { ProgressItemUploadStatus } from '../../../../constants/progress'
+import { ProgressItemStatus } from '../../../../constants/progress'
 import { UploadBox } from './upload-box'
 import { UploadPageHeading } from './upload-page-heading'
 
-const { Canceled, Failed, Completed, Running } = ProgressItemUploadStatus
+const { Canceled, Failed, Completed, Running } = ProgressItemStatus
 
 type TUploadPageChildrenProps = {
     uploadHandler: TUploadProps['uploadHandler']
@@ -33,22 +33,28 @@ export const UploadPage = (props: TUploadPageProps) => {
     const additionalSidebarReducer = useAdditionalSidebarReducer()
     const globalAlertReducer = useGlobalAlertReducer()
 
-    const { addDataset, updateDataset } = progressReducer
+    const {
+        addItemToProgress,
+        updateProgressItem,
+        addActiveItem,
+        removeActiveItem
+    } = progressReducer
     const { updateState: updateAdditionalSidebarState } =
         additionalSidebarReducer
     const { addAlert } = globalAlertReducer
 
-    const onUploadFailed = (event: TOnUploadFailedEvent) => {
+    const onFailed = (event: TOnUploadFailedEvent) => {
         const { id, error, file } = event
+        removeActiveItem(id)
         if (error.message === Canceled) {
-            updateDataset({
+            updateProgressItem({
                 id,
                 status: Canceled
             })
             return
         }
 
-        updateDataset({
+        updateProgressItem({
             id,
             status: Failed
         })
@@ -61,9 +67,10 @@ export const UploadPage = (props: TUploadPageProps) => {
         })
     }
 
-    const onUploadSuccessful = (event: TOnUploadSuccessfulEvent) => {
+    const onSuccessful = (event: TOnUploadSuccessfulEvent) => {
         const { id, totalSize, loadedSize, file } = event
-        updateDataset({ id, status: Completed, totalSize, loadedSize })
+        removeActiveItem(id)
+        updateProgressItem({ id, status: Completed, totalSize, loadedSize })
         addAlert({
             id: id + 'success',
             isOpen: true,
@@ -72,9 +79,9 @@ export const UploadPage = (props: TUploadPageProps) => {
         })
     }
 
-    const onUploadProgress = (event: TOnUploadProgressEvent) => {
+    const onProgress = (event: TOnUploadProgressEvent) => {
         const { id, loadedSize, totalSize } = event
-        updateDataset({
+        updateProgressItem({
             id,
             loadedSize,
             totalSize
@@ -86,12 +93,12 @@ export const UploadPage = (props: TUploadPageProps) => {
         const { cancelSourceToken, id } = uploadService({
             file,
             url: presignedURL,
-            onUploadFailed,
-            onUploadProgress,
-            onUploadSuccessful
+            onFailed,
+            onProgress,
+            onSuccessful
         })
 
-        addDataset({
+        addItemToProgress({
             cancelSourceToken,
             id,
             file,
@@ -99,10 +106,12 @@ export const UploadPage = (props: TUploadPageProps) => {
             totalSize: file.size,
             status: Running,
             url: presignedURL,
-            onUploadFailed,
-            onUploadProgress,
-            onUploadSuccessful
+            onFailed,
+            onProgress,
+            onSuccessful
         })
+
+        addActiveItem(id)
 
         updateAdditionalSidebarState({
             isOpen: true,

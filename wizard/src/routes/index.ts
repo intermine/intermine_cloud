@@ -23,6 +23,11 @@ export const DASHBOARD_TEMPLATES_LANDING_PATH = DASHBOARD_TEMPLATES_PATH
 // eslint-disable-next-line max-len
 export const DASHBOARD_UPLOAD_TEMPLATE_PATH = `${DASHBOARD_TEMPLATES_PATH}/upload-template`
 
+// Templates
+export const DASHBOARD_MINES_LANDING_PATH = DASHBOARD_MINES_PATH
+// eslint-disable-next-line max-len
+export const DASHBOARD_CREATE_MINE_PATH = `${DASHBOARD_MINES_PATH}/create-mine`
+
 /**
  *
  * @param path path string, must starts with '/'
