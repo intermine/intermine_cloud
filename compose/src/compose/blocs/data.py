@@ -34,7 +34,7 @@ def create_data(data_list: List[Data], user_creds: Optional[User] = None) -> Lis
             data_db_create_list: List[DataDB] = [
                 DataDB(
                     protagonist_id=user_creds.user_id,
-                    **data.dict(exclude={"data_id"}),
+                    **data.dict(exclude={"data_id", "presigned_url"}),
                 )
                 for data in data_list
             ]
