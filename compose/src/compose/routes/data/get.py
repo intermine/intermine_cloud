@@ -2,20 +2,24 @@
 
 from http import HTTPStatus
 
+from blackcap.schemas.user import User
+from flask import make_response, request, Response
+from pydantic import ValidationError
+from sqlalchemy.exc import SQLAlchemyError
+
 from compose.blocs.data import get_data
 from compose.routes.data import data_bp
 from compose.schemas.api.data.get import DataGetQueryParams, DataGetResponse
-
-from flask import Response, make_response, request
-
-from pydantic import ValidationError
-
-from sqlalchemy.exc import SQLAlchemyError
+from compose.utils.auth import check_authentication
 
 
 @data_bp.get("/")
-def get() -> Response:
+@check_authentication
+def get(user: User) -> Response:
     """Get data.
+
+    Args:
+        user (User): user extracted from token.
 
     Returns:
         Response: Flask response
@@ -38,7 +42,7 @@ def get() -> Response:
 
     # Get data from the DB
     try:
-        data = get_data(query_params)
+        data = get_data(query_params, user)
     except SQLAlchemyError:
         response_body = DataGetResponse(
             msg="internal databse error", errors=["internal database error"]
