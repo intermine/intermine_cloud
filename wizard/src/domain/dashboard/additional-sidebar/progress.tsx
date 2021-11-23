@@ -8,7 +8,7 @@ import {
     useProgressReducer
 } from '../../../context'
 import { TProgressItem } from '../../../context/types'
-import { uploadService } from '../common/upload'
+import { uploadService } from '../common/dashboard-form'
 import { ActionSection } from './action-section'
 import { ProgressItemView } from './progress-item-view'
 

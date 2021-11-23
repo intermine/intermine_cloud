@@ -4,7 +4,7 @@ import {
     TOnUploadFailedEvent,
     TOnUploadProgressEvent,
     TOnUploadSuccessfulEvent
-} from '../../common/upload'
+} from '../../common/dashboard-form'
 
 import {
     useAdditionalSidebarReducer,

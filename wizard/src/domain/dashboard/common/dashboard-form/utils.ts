@@ -1,0 +1,218 @@
+import { clone } from '@intermine/chromatin/utils'
+import axios, { CancelTokenSource } from 'axios'
+import { useState } from 'react'
+import shortid from 'shortid'
+
+import { throttle } from '../../../../utils/throttle'
+
+export type TOnUploadSuccessfulEvent = {
+    file: File
+    loadedSize: number
+    totalSize: number
+    id: string
+}
+export type TOnUploadFailedEvent = {
+    error: { message: string }
+    file: File
+    id: string
+}
+
+export type TOnUploadProgressEvent = {
+    file: File
+    loadedSize: number
+    totalSize: number
+    id: string
+}
+
+export type TUploadDatasetOptions = {
+    url: string
+    file: File
+    id?: string
+    onSuccessful?: (event: TOnUploadSuccessfulEvent) => void
+    onFailed?: (event: TOnUploadFailedEvent) => void
+    onProgress?: (event: TOnUploadProgressEvent) => void
+}
+
+export type TUploadDatasetReturn = {
+    cancelSourceToken: CancelTokenSource
+    id: string
+}
+
+export const uploadService = (
+    options: TUploadDatasetOptions
+): TUploadDatasetReturn => {
+    const CancelToken = axios.CancelToken
+    const source = CancelToken.source()
+    const {
+        id = shortid.generate(),
+        url,
+        file,
+        onFailed,
+        onSuccessful,
+        onProgress,
+    } = options
+
+    const throttleUpdate = throttle((event) => {
+        if (onProgress) {
+            onProgress({
+                loadedSize: event.loaded,
+                totalSize: event.total,
+                file,
+                id,
+            })
+        }
+    }, 60)
+
+    axios
+        .put(url, file, {
+            cancelToken: source.token,
+            onUploadProgress: throttleUpdate,
+        })
+        .then(() => {
+            if (onSuccessful) {
+                onSuccessful({
+                    loadedSize: file.size,
+                    totalSize: file.size,
+                    file,
+                    id,
+                })
+            }
+            return
+        })
+        .catch((error) => {
+            if (onFailed) {
+                onFailed({ error, file, id })
+            }
+        })
+
+    return {
+        id,
+        cancelSourceToken: source,
+    }
+}
+
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
+/* eslint-disable @typescript-eslint/no-explicit-any*/
+export type TUseDashboardFormFieldOptions = {
+    isRequired?: boolean
+    validator?: (value: any) => boolean
+}
+
+export type TUseDashboardFormField = {
+    value: any
+    options?: TUseDashboardFormFieldOptions
+}
+
+export type TUseDashboardFormFields<T extends string = string> = Record<
+    T,
+    TUseDashboardFormField
+>
+
+export type TUseDashboardFormReturn<T extends TUseDashboardFormFields> = {
+    state: {
+        [X in keyof T]: {
+            value: TUseDashboardFormField['value']
+            isError: boolean
+            options?: TUseDashboardFormFieldOptions
+        }
+    }
+    errorFields: Partial<{
+        [X in keyof T]: { type: keyof TUseDashboardFormFieldOptions }
+    }>
+    updateState: (key: keyof T, value: any) => void
+    handleFormSubmit: (
+        cb: (state: {
+            [X in keyof T]: {
+                value: TUseDashboardFormField['value']
+            }
+        }) => void
+    ) => boolean
+}
+
+export const useDashboardForm = <T extends TUseDashboardFormFields>(
+    fields: T
+): TUseDashboardFormReturn<T> => {
+    const getInitialValue = () => {
+        const newState: TUseDashboardFormReturn<T>['state'] = Object.create({})!
+
+        for (const key of Object.keys(fields)) {
+            newState[key as keyof T] = {
+                ...fields[key],
+                isError: false,
+            }
+        }
+        return newState
+    }
+
+    const [state, setState] = useState<TUseDashboardFormReturn<T>['state']>(
+        getInitialValue()
+    )
+    const [errorFields, setErrorFields] = useState<
+        TUseDashboardFormReturn<T>['errorFields']
+    >({})
+
+    const updateState = (key: keyof T, value: any) => {
+        delete errorFields[key]
+        setErrorFields(errorFields)
+        setState((prev) => ({
+            ...prev,
+            [key]: {
+                ...prev[key],
+                value,
+                isError: false,
+            },
+        }))
+    }
+
+    const handleFormSubmit: TUseDashboardFormReturn<T>['handleFormSubmit'] = (
+        cb
+    ) => {
+        let isValid = true
+        const newState: TUseDashboardFormReturn<T>['state'] = clone(state)
+        const newErrorFields: TUseDashboardFormReturn<T>['errorFields'] = {}
+
+        for (const key of Object.keys(newState)) {
+            const field = newState[key]
+            if (field.options && field.options.isRequired) {
+                const {
+                    value,
+                    options: { validator },
+                } = field
+                let errorType: keyof TUseDashboardFormFieldOptions =
+                    'isRequired'
+                if (
+                    (validator &&
+                        !validator(value) &&
+                        (errorType = 'validator')) ||
+                    value === ''
+                ) {
+                    isValid = false
+                    newState[key as keyof T] = {
+                        ...field,
+                        isError: true,
+                    }
+                    newErrorFields[key as keyof T] = {
+                        type: errorType,
+                    }
+                }
+            }
+        }
+
+        setState(newState)
+        setErrorFields(newErrorFields)
+
+        if (isValid) {
+            cb(newState)
+        }
+        return isValid
+    }
+
+    return {
+        state,
+        errorFields,
+        handleFormSubmit,
+        updateState,
+    }
+    /* eslint-enable @typescript-eslint/no-non-null-assertion */
+    /* eslint-enable @typescript-eslint/no-explicit-any*/
+}
