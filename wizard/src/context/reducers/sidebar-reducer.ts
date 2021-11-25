@@ -20,8 +20,7 @@ const { UpdateSidebarState } = SidebarActions
 const sidebarInitialReducer: TSidebarReducer = {
     isOpen: getSidebarStateFromLocalStorage().isOpen,
     isPageSwitchingAllowed: true,
-    // eslint-disable-next-line @typescript-eslint/no-empty-function
-    onSidebarItemClick: () => {},
+    onSidebarItemClick: () => false,
 }
 
 const sidebarReducer = (

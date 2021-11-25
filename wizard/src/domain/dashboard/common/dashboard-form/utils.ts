@@ -136,6 +136,7 @@ export type TUseDashboardFormReturn<T extends TUseDashboardFormFields> = {
     handleFormSubmit: (
         cb: (state: TUseDashboardFormState<T>) => void
     ) => boolean
+    isDirty: boolean
 }
 
 const defaultValidator = (v: any) => {
@@ -170,6 +171,8 @@ export const useDashboardForm = <T extends TUseDashboardFormFields>(
     const [state, setState] = useState<TUseDashboardFormReturn<T>['state']>(
         getInitialValue()
     )
+    const [isDirty, setIsDirty] = useState(false)
+
     const [errorFields, setErrorFields] = useState<
         TUseDashboardFormReturn<T>['errorFields']
     >({})
@@ -177,6 +180,7 @@ export const useDashboardForm = <T extends TUseDashboardFormFields>(
     const updateState = (key: keyof T, value: any) => {
         delete errorFields[key]
         setErrorFields(errorFields)
+        setIsDirty(true)
         setState((prev) => ({
             ...prev,
             [key]: {
@@ -233,6 +237,7 @@ export const useDashboardForm = <T extends TUseDashboardFormFields>(
         errorFields,
         handleFormSubmit,
         updateState,
+        isDirty,
     }
     /* eslint-enable @typescript-eslint/no-non-null-assertion */
     /* eslint-enable @typescript-eslint/no-explicit-any*/

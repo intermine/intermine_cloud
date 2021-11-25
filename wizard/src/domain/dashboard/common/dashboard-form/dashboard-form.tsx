@@ -1,6 +1,5 @@
-import clsx from 'clsx'
-import { createStyle } from '@intermine/chromatin/styles'
-
+import { useContext, useEffect } from 'react'
+import { useHistory } from 'react-router'
 import { FormSelect } from './select'
 import {
     FormInput,
@@ -12,29 +11,97 @@ import {
 import { Upload } from './upload'
 import { UploadBox } from './upload-box'
 import { UploadFileInfo } from './upload-file-info'
+import { WorkspaceHeading } from '../workspace-heading'
+import { DashboardFormContext } from './dashboard-form-context'
+import { useDashboardWarningModal } from '../../utils/hooks'
+import { useAuthReducer, useSidebarReducer } from '../../../../context'
+import { useAdditionalSidebarReducer } from '../../../../context'
+import { LOGIN_PATH } from '../../../../routes'
+import { AuthStates } from '../../../../constants/auth'
 
-export type TDashboardFormProps = React.FormHTMLAttributes<HTMLFormElement>
-
-const useStyles = createStyle((theme) => {
-    const { spacing } = theme
-
-    return {
-        form: {
-            alignItems: 'center',
-            display: 'flex',
-            justifyContent: 'center',
-            padding: spacing(0, 12),
-            width: '100%'
-        }
-    }
-})
-
-export const DashboardForm = (props: TDashboardFormProps) => {
-    const classes = useStyles()
-    const { className, ...rest } = props
-    return <form className={clsx(classes.form, className)} {...rest} />
+export type TDashboardFormProps = React.FormHTMLAttributes<HTMLFormElement> & {
+    isDirty: boolean
 }
 
+export const DashboardForm = (props: TDashboardFormProps) => {
+    const { isDirty, ...rest } = props
+
+    const { updateSidebarState } = useSidebarReducer()
+    const { updateState: updateAdditionalSidebarState } =
+        useAdditionalSidebarReducer()
+    const { showWarningModal } = useDashboardWarningModal()
+    const { updateAuthState } = useAuthReducer()
+
+    const handleLogout = () => {
+        updateAuthState(AuthStates.NotAuthorize)
+    }
+
+    useEffect(() => {
+        if (isDirty) {
+            updateSidebarState({
+                isPageSwitchingAllowed: false,
+                onSidebarItemClick: (to) => showWarningModal({ to })
+            })
+
+            updateAdditionalSidebarState({
+                logout: {
+                    isLogoutAllowed: false,
+                    onLogoutClick: () => {
+                        showWarningModal({
+                            to: LOGIN_PATH,
+                            primaryActionTitle: 'Logout',
+                            primaryActionCallback: handleLogout
+                        })
+                    }
+                }
+            })
+        }
+
+        return () => {
+            updateSidebarState({
+                isPageSwitchingAllowed: true,
+                onSidebarItemClick: () => false
+            })
+            updateAdditionalSidebarState({
+                logout: { isLogoutAllowed: true, onLogoutClick: () => false }
+            })
+        }
+    }, [isDirty])
+    return (
+        <DashboardFormContext.Provider value={{ isDirty }}>
+            <form {...rest} />
+        </DashboardFormContext.Provider>
+    )
+}
+
+type TFormPageHeading = {
+    landingPageUrl: string
+    pageHeading: string
+}
+
+export const FormPageHeading = (props: TFormPageHeading) => {
+    const { landingPageUrl, pageHeading } = props
+    const history = useHistory()
+    const { isDirty } = useContext(DashboardFormContext)
+    const { showWarningModal } = useDashboardWarningModal()
+
+    const handleOnClickBack = () => {
+        if (isDirty) {
+            showWarningModal({ to: landingPageUrl })
+        } else {
+            history.push(landingPageUrl)
+        }
+    }
+
+    return (
+        <WorkspaceHeading
+            heading={{ variant: 'h2', children: pageHeading }}
+            backAction={{ onClick: handleOnClickBack }}
+        />
+    )
+}
+
+DashboardForm.PageHeading = FormPageHeading
 DashboardForm.Wrapper = FormWrapper
 DashboardForm.Label = FormLabel
 DashboardForm.Select = FormSelect

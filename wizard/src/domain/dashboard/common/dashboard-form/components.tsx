@@ -16,6 +16,14 @@ const useStyles = createStyle((theme) => {
     const { spacing } = theme
 
     return {
+        formOuterWrapper: {
+            alignItems: 'center',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            padding: spacing(0, 12),
+            width: '100%'
+        },
         formWrapper: {
             maxWidth: '120rem',
             width: '100%'
@@ -31,8 +39,7 @@ const useStyles = createStyle((theme) => {
         },
         actionContainer: {
             display: 'flex',
-            justifyContent: 'flex-end',
-            paddingTop: spacing(20)
+            justifyContent: 'flex-end'
         },
         actionButton: {
             marginRight: spacing(10),
@@ -46,11 +53,16 @@ const useStyles = createStyle((theme) => {
 export const FormWrapper = (props: BoxBaseProps) => {
     const { className, ...rest } = props
     const classes = useStyles()
-    return <Box className={clsx(className, classes.formWrapper)} {...rest} />
+    return (
+        <Box className={classes.formOuterWrapper}>
+            <Box className={clsx(className, classes.formWrapper)} {...rest} />
+        </Box>
+    )
 }
 
 type TFormLabelProps = LabelProps & {
     isError?: boolean
+    isDisabled?: boolean
     main?: string
     sub?: string
     errorMsg?: string
@@ -83,12 +95,17 @@ export const FormLabel = (props: TFormLabelProps) => {
         errorMsg,
         hasAsterisk,
         isError,
+        isDisabled,
         ...rest
     } = props
     const classes = useStyles()
 
     return (
-        <Label className={clsx(className, classes.formLabel)} {...rest}>
+        <Label
+            style={{ pointerEvents: isDisabled ? 'none' : undefined }}
+            className={clsx(className, classes.formLabel)}
+            {...rest}
+        >
             {main && (
                 <FormTypography
                     color={isError ? 'error' : 'undefined'}
@@ -108,7 +125,7 @@ export const FormLabel = (props: TFormLabelProps) => {
                 </FormTypography>
             )}
             {Children.map(children, (child: any) =>
-                cloneElement(child, { ...child.props, isError })
+                cloneElement(child, { ...child.props, isError, isDisabled })
             )}
             {isError && (
                 <FormTypography color="error" variant="bodySm">

@@ -12,6 +12,7 @@ type TLogoutProps = {
     className?: string
     handleLogoutClick?: () => void
     tooltipPlacement?: 'left' | 'bottom'
+    isLogoutAllowed: boolean
 }
 
 export const Logout = (props: TLogoutProps) => {
@@ -22,17 +23,21 @@ export const Logout = (props: TLogoutProps) => {
     const {
         className,
         handleLogoutClick: _handleLogoutClick,
-        tooltipPlacement = 'left'
+        tooltipPlacement = 'left',
+        isLogoutAllowed = true
     } = props
     const [isMakingPostRequest, setIsMakingPostRequest] = useState(false)
 
     const handleLogout = () => {
-        setIsMakingPostRequest(true)
-        updateAuthState(AuthStates.NotAuthorize)
+        if (isLogoutAllowed) {
+            setIsMakingPostRequest(true)
+            updateAuthState(AuthStates.NotAuthorize)
+            history.push(LOGIN_PATH)
+        }
+
         if (typeof _handleLogoutClick === 'function') {
             _handleLogoutClick()
         }
-        history.push(LOGIN_PATH)
     }
 
     return (
