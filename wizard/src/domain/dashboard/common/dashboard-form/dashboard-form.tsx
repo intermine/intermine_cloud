@@ -6,9 +6,9 @@ import {
     FormActions,
     FormHeading,
     FormLabel,
-    FormWrapper
+    FormWrapper,
+    FormInlineAlert
 } from './components'
-import { Upload } from './upload'
 import { UploadBox } from './upload-box'
 import { UploadFileInfo } from './upload-file-info'
 import { WorkspaceHeading } from '../workspace-heading'
@@ -18,6 +18,7 @@ import { useAuthReducer, useSidebarReducer } from '../../../../context'
 import { useAdditionalSidebarReducer } from '../../../../context'
 import { LOGIN_PATH } from '../../../../routes'
 import { AuthStates } from '../../../../constants/auth'
+import { handleOnBeforeUnload } from '../../utils/misc'
 
 export type TDashboardFormProps = React.FormHTMLAttributes<HTMLFormElement> & {
     isDirty: boolean
@@ -54,6 +55,7 @@ export const DashboardForm = (props: TDashboardFormProps) => {
                     }
                 }
             })
+            window.addEventListener('beforeunload', handleOnBeforeUnload)
         }
 
         return () => {
@@ -64,6 +66,8 @@ export const DashboardForm = (props: TDashboardFormProps) => {
             updateAdditionalSidebarState({
                 logout: { isLogoutAllowed: true, onLogoutClick: () => false }
             })
+
+            window.removeEventListener('beforeunload', handleOnBeforeUnload)
         }
     }, [isDirty])
     return (
@@ -107,6 +111,6 @@ DashboardForm.Select = FormSelect
 DashboardForm.Input = FormInput
 DashboardForm.Actions = FormActions
 DashboardForm.Heading = FormHeading
-DashboardForm.Upload = Upload
 DashboardForm.UploadBox = UploadBox
 DashboardForm.UploadFileInfo = UploadFileInfo
+DashboardForm.InlineAlert = FormInlineAlert
