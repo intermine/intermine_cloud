@@ -50,16 +50,26 @@ const useStyles = createStyle((theme) => {
 
 export const CreateMine = () => {
     const classes = useStyles()
-    const { state, errorFields, isDirty, updateState, handleFormSubmit } =
-        useDashboardForm(initialFormFieldsValue)
+    const {
+        state,
+        errorFields,
+        isDirty,
+        updateDashboardFormState,
+        handleFormSubmit,
+        resetToInitialState
+    } = useDashboardForm(initialFormFieldsValue)
 
-    const { subDomain, name, description } = state
+    const { subDomain, name, description, template, datasets } = state
     const {
         datasets: eDatasets,
         name: eName,
         subDomain: eSubDomain,
         template: eTemplate
     } = errorFields
+
+    const resetForm = () => {
+        resetToInitialState()
+    }
 
     return (
         <DForm isDirty={isDirty}>
@@ -80,9 +90,12 @@ export const CreateMine = () => {
                         hasAsterisk
                     >
                         <DForm.Select
+                            value={template.value}
                             options={dummyTemplateOptions}
                             placeholder="Select template"
-                            onChange={(val) => updateState('template', val)}
+                            onChange={(val) =>
+                                updateDashboardFormState('template', val)
+                            }
                         />
                     </DForm.Label>
                     <DForm.Label
@@ -95,9 +108,12 @@ export const CreateMine = () => {
                     >
                         <DForm.Select
                             closeMenuOnSelect={false}
+                            value={datasets.value}
                             options={dummyDatasetsOptions}
                             isMulti
-                            onChange={(val) => updateState('datasets', val)}
+                            onChange={(val) =>
+                                updateDashboardFormState('datasets', val)
+                            }
                         />
                     </DForm.Label>
                     <DForm.Label
@@ -112,7 +128,10 @@ export const CreateMine = () => {
                         <DForm.Input
                             value={name.value}
                             onChange={(event) =>
-                                updateState('name', event.currentTarget.value)
+                                updateDashboardFormState(
+                                    'name',
+                                    event.currentTarget.value
+                                )
                             }
                             placeholder="Enter mine name"
                             isError={Boolean(eName)}
@@ -130,7 +149,7 @@ export const CreateMine = () => {
                             placeholder="Description of your mine"
                             value={description.value}
                             onChange={(event) =>
-                                updateState(
+                                updateDashboardFormState(
                                     'description',
                                     event.currentTarget.value
                                 )
@@ -155,7 +174,7 @@ export const CreateMine = () => {
                                 value={subDomain.value}
                                 isError={Boolean(eSubDomain)}
                                 onChange={(event) =>
-                                    updateState(
+                                    updateDashboardFormState(
                                         'subDomain',
                                         event.currentTarget.value
                                     )
@@ -175,7 +194,8 @@ export const CreateMine = () => {
                             {
                                 color: 'warning',
                                 children: 'Reset',
-                                key: 'reset'
+                                key: 'reset',
+                                onClick: resetForm
                             },
                             {
                                 color: 'primary',

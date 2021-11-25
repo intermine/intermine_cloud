@@ -77,11 +77,11 @@ export const initialFormFieldsValue: TUseDashboardFormFields<
         options: {},
     },
     template: {
-        value: { value: '', label: '' },
+        value: {},
         options: {
             isRequired: true,
             validator: (v) => {
-                if (v.label === '') {
+                if (!v.label || v.label === '') {
                     return {
                         isError: true,
                         errorMsg: 'Template is required',

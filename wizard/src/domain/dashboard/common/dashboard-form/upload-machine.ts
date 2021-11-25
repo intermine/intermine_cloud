@@ -21,7 +21,7 @@ export type TUploadMachineState =
           context: TUploadMachineContext
       }
     | {
-          value: 'uploadingFile'
+          value: 'generatePresignedURL'
           context: TUploadMachineContext
       }
     | {
@@ -41,7 +41,7 @@ export type TUploadMachineEvents =
     | { type: 'START' }
     | { type: 'FILE_MISSING' }
     | { type: 'FILE_SELECTED'; file: File }
-    | { type: 'UPLOADING_FILE' }
+    | { type: 'GENERATE_PRESIGNED_URL' }
     | { type: 'SERVER_ERROR' }
     | { type: 'SUCCESSFUL' }
     | { type: 'RESET' }
@@ -68,32 +68,35 @@ export const uploadMachine = createMachine<
             fileMissing: {
                 on: {
                     FILE_SELECTED: 'fileSelected',
+                    RESET: 'start',
                 },
             },
             fileSelected: {
                 entry: 'setFile',
                 on: {
-                    UPLOADING_FILE: 'uploadingFile',
+                    GENERATE_PRESIGNED_URL: 'generatePresignedURL',
                     FILE_SELECTED: 'fileSelected',
+                    RESET: 'start',
                 },
             },
-            uploadingFile: {
+            generatePresignedURL: {
                 invoke: {
-                    src: 'uploadFile',
+                    src: 'generatePresignedURL',
                     onDone: {
                         target: 'successful',
-                        actions: 'onUploadSuccessful',
+                        actions: 'onPresignedURLGenerated',
                     },
                     onError: {
                         target: 'serverError',
-                        actions: 'onUploadError',
+                        actions: 'OnServerError',
                     },
                 },
             },
             serverError: {
                 on: {
                     FILE_SELECTED: 'fileSelected',
-                    UPLOADING_FILE: 'uploadingFile',
+                    GENERATE_PRESIGNED_URL: 'generatePresignedURL',
+                    RESET: 'start',
                 },
             },
             successful: {
@@ -119,19 +122,19 @@ export const uploadMachine = createMachine<
                 errorMessage: undefined,
             }),
 
-            onUploadSuccessful: assign<TUploadMachineContext, any>({
+            onPresignedURLGenerated: assign<TUploadMachineContext, any>({
                 putUrl: (_, event) => {
                     return event.data
                 },
             }),
 
-            onUploadError: assign<TUploadMachineContext, any>({
+            OnServerError: assign<TUploadMachineContext, any>({
                 errorMessage:
                     'Unexpected error occur. Please try after some time',
             }),
         },
         services: {
-            uploadFile: (ctx) =>
+            generatePresignedURL: (ctx) =>
                 fetch(ctx.baseURL + ctx.file?.name)
                     .then((response) => response.text())
                     .then((url) => url),
