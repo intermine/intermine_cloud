@@ -46,6 +46,23 @@ def get_conda_env_dict() -> Dict:
 
 @click.command()
 @click.argument("options", nargs=-1)
+def argo(options) -> None:
+    """Argo CLI wrapper"""
+    conda_env = get_conda_env_dict()
+    cmd_arr = ["argo"] + list(options)
+    run(
+        cmd_arr,
+        env={
+            **os.environ,
+            **conda_env,
+            "POETRY_HOME": f"{tools_path / 'poetry'}",
+            "PATH": f"{conda_env['ADD_TO_PATH']}:{(tools_path / 'argo')}:{os.environ['PATH']}",
+        },
+    )
+
+
+@click.command()
+@click.argument("options", nargs=-1)
 def flux(options) -> None:
     """FluxCD wrapper"""
     conda_env = get_conda_env_dict()
@@ -405,3 +422,4 @@ main.add_command(tf)
 main.add_command(gitea)
 main.add_command(flux)
 main.add_command(dev)
+main.add_command(argo)

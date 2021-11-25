@@ -3,6 +3,7 @@
 """Setup scripts."""
 
 import argparse
+import gzip
 import os
 from pathlib import Path
 import platform
@@ -795,6 +796,70 @@ def setup_gitea() -> None:
     print(f"Using Gitea at {(tools_path / 'gitea')} \n{out.stdout.decode('utf-8')}")
 
 
+def setup_argo() -> None:
+    """Setup Argo CLI."""
+    print("+++++++++++ Argo CLI +++++++++++++")
+    if os.path.isfile((tools_path / "argo" / "argo")) is False:
+        print(f"Creating argo dir at {(tools_path / 'argo')}")
+        os.makedirs((tools_path / "argo"), exist_ok=True)
+
+        print("Installing Argo CLI\n")
+        local_system = current_system.lower()
+
+        # Decide platform architecture
+        if current_machine == "x86_64":
+            local_machine = "amd64"
+        elif current_machine == "aarch64":
+            local_machine = "arm64"
+        else:
+            raise "Machine not supported"
+
+        # Decide download extension
+        if local_system == "linux" or local_system == "darwin":
+            local_ext = ""
+        elif local_system == "windows":
+            local_ext = ".exe"
+
+        # Build url
+        url = f"https://github.com/argoproj/argo-workflows/releases/download/v3.2.4/argo-{local_system}-{local_machine}.gz"
+
+        # Download argo cli
+        resp = client.request("GET", url, preload_content=False)
+        with open((tools_path / "argo" / "argo.gz"), "wb") as f:
+            while True:
+                data = resp.read()
+                if not data:
+                    break
+                f.write(data)
+        resp.release_conn()
+
+        # extract compressed file
+        with gzip.open((tools_path / "argo" / "argo.gz")) as archive:
+            with open((tools_path / "argo" / "argo"), "wb") as out:
+                shutil.copyfileobj(archive, out)
+
+        # # rename argo binary
+        # shutil.move(
+        #     (tools_path / "argo" / f"argo-{local_system}-{local_machine}"),
+        #     (tools_path / "argo" / "argo"),
+        # )
+
+        # make binary executable
+        if local_system != "windows":
+            run(["chmod", "+x", "argo"], cwd=(tools_path / "argo"))
+        else:
+            # !TODO: Check equivalent in windows
+            pass
+
+    # Print the info about argo cli
+    out_argo = run(
+        ["./argo", "version"],
+        capture_output=True,
+        cwd=(tools_path / "argo"),
+    )
+    print(f"Using argo at {(tools_path / 'argo')} \n{out_argo.stdout.decode('utf-8')}")
+
+
 def setup_tools() -> None:
     """Check if tools are present."""
     print("\n\n+++++++++++ Tools +++++++++++++")
@@ -813,6 +878,7 @@ def setup_tools() -> None:
         setup_terraform()
         setup_fluxcd()
         setup_gitea()
+        setup_argo()
 
 
 def write_env() -> None:

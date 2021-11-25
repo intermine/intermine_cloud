@@ -1,12 +1,19 @@
 """Auth utils."""
 
+from functools import wraps
+from http import HTTPStatus
 import sys
+from typing import Callable
 
+from blackcap.schemas.api.common import ResponseSchema
 from blackcap.schemas.user import User
 import click
+from flask import make_response, request
 
 from compose.auther import auther_registry
-from compose.configs import ComposeDefaultConfig
+from compose.configs import ComposeDefaultConfig, config_registry
+
+config = config_registry.get_config()
 
 
 def check_auth(config: ComposeDefaultConfig) -> User:
@@ -29,3 +36,51 @@ def check_auth(config: ComposeDefaultConfig) -> User:
         click.secho("Authorization failed\n\n Exiting....")
         sys.exit(1)
     return user
+
+
+def check_authentication(flask_route: Callable) -> Callable:
+    """Decorator to check authentication in flask routes.
+
+    Args:
+        flask_route (Callable): Flask route
+
+    Returns:
+        Callable: Flask route
+    """
+
+    @wraps(flask_route)
+    def wrapper() -> Callable:
+        """Flask route wrapper.
+
+        Returns:
+            Callable: Flask route or Authentication error
+        """
+        # Extract token from cookie
+        # Cookie example:
+        # {"imcloud": "Bearer ey0038295.8kjfdfkd.kjfslusnv"}
+        try:
+            token_from_cookie = request.cookies.get("imcloud").split(" ")[1]
+            # Try to extract user from token
+            user = auther_registry.get_auther(config.AUTHER).extract_user_from_token(
+                token_from_cookie
+            )
+            # Return Authentication error if user is none
+            if user is None:
+                raise Exception("User not found")
+        except Exception:
+            response_body = ResponseSchema(
+                msg="unauthorized",
+                errors=[
+                    {
+                        "loc": "creds",
+                        "msg": "unauthorized",
+                        "type": "authentication",
+                    }
+                ],
+            )
+            return make_response(response_body.json(), HTTPStatus.UNAUTHORIZED)
+
+        # Return flask route if auth is successful
+        return flask_route(user)
+
+    return wrapper
