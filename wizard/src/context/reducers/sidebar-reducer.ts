@@ -12,8 +12,7 @@ import type {
     TUseSidebarReducer,
 } from '../types'
 
-const { UpdateSidebarState, UpdateOnSidebarClick, RemoveOnSidebarClick } =
-    SidebarActions
+const { UpdateSidebarState } = SidebarActions
 
 /**
  * Sidebar reducer initial state
@@ -37,23 +36,6 @@ const sidebarReducer = (
             setSidebarStateToLocalStorage({ isOpen: state.isOpen })
             return state
 
-        case UpdateOnSidebarClick:
-            state = {
-                ...state,
-                onSidebarItemClick:
-                    data as TSidebarReducer['onSidebarItemClick'],
-            }
-            return state
-
-        case RemoveOnSidebarClick:
-            state = {
-                ...state,
-                // eslint-disable-next-line @typescript-eslint/no-empty-function
-                onSidebarItemClick: () => {},
-            }
-
-            return state
-
         /* istanbul ignore next */
         default:
             throw new Error(
@@ -75,24 +57,8 @@ export const useSidebarReducer = (): TUseSidebarReducer => {
             data,
         })
 
-    const onSidebarItemClick = (fn: TSidebarReducer['onSidebarItemClick']) => {
-        dispatch({
-            type: UpdateOnSidebarClick,
-            data: fn,
-        })
-    }
-
-    const removeOnSidebarItemClick = () => {
-        dispatch({
-            type: RemoveOnSidebarClick,
-            data: {},
-        })
-    }
-
     return {
         state,
-        onSidebarItemClick,
         updateSidebarState,
-        removeOnSidebarItemClick,
     }
 }
