@@ -20,7 +20,7 @@ import {
 import { Logo } from '../../../components/logo'
 import { authMachine } from '../machine/auth-machine'
 
-import { scrollTo } from '../../../utils/misc'
+import { scrollIntoView } from '../../../utils/misc'
 import { TInputField, updateError, updateValue } from '../utils'
 import { isValidEmail, isValueSame } from '../../../components/form/utils'
 
@@ -71,14 +71,14 @@ export const Register = () => {
 
         if (name.value.length === 0) {
             errorFields.push(['name', 'Name is required'])
-            scrollTo('name')
+            scrollIntoView('name')
             canScroll = false
         }
 
         if (organisation.value.length === 0) {
             errorFields.push(['organisation', 'Organisation is required'])
             if (canScroll) {
-                scrollTo('organisation')
+                scrollIntoView('organisation')
                 canScroll = false
             }
         }
@@ -86,7 +86,7 @@ export const Register = () => {
         if (email.value.length === 0) {
             errorFields.push(['email', 'Email is required'])
             if (canScroll) {
-                scrollTo('email')
+                scrollIntoView('email')
                 canScroll = false
             }
         }
@@ -94,7 +94,7 @@ export const Register = () => {
         if (email.value.length > 0 && !isValidEmail(email.value)) {
             errorFields.push(['email', 'Please enter a valid email address.'])
             if (canScroll) {
-                scrollTo('email')
+                scrollIntoView('email')
                 canScroll = false
             }
         }
@@ -102,7 +102,7 @@ export const Register = () => {
         if (username.value.length === 0) {
             errorFields.push(['username', 'Username is required'])
             if (canScroll) {
-                scrollTo('username')
+                scrollIntoView('username')
                 canScroll = false
             }
         }
@@ -110,7 +110,7 @@ export const Register = () => {
         if (password.value.length === 0) {
             errorFields.push(['password', 'Password is required'])
             if (canScroll) {
-                scrollTo('password')
+                scrollIntoView('password')
                 canScroll = false
             }
         }
@@ -121,7 +121,7 @@ export const Register = () => {
                 'Confirm Password is required'
             ])
             if (canScroll) {
-                scrollTo('confirmPassword')
+                scrollIntoView('confirmPassword')
                 canScroll = false
             }
         }
@@ -136,7 +136,7 @@ export const Register = () => {
                 ['confirmPassword', "Password doesn't match"]
             )
             if (canScroll) {
-                scrollTo('password')
+                scrollIntoView('password')
                 canScroll = false
             }
         }
@@ -160,7 +160,7 @@ export const Register = () => {
             setTimeout(() => {
                 history.push(LOGIN_PATH)
             }, 5000)
-            scrollTo(DomElementIDs.RegisterForm)
+            scrollIntoView(DomElementIDs.RegisterForm)
         }
 
         if (authMachineState.context.isRequestFailed) {
@@ -172,7 +172,7 @@ export const Register = () => {
                 type: 'error',
                 isOpen: true
             })
-            scrollTo(DomElementIDs.RegisterForm)
+            scrollIntoView(DomElementIDs.RegisterForm)
         }
     }, [authMachineState.value])
 

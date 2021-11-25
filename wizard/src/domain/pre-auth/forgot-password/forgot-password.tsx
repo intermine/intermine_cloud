@@ -21,7 +21,7 @@ import {
 import { Logo } from '../../../components/logo'
 import { authMachine } from '../machine/auth-machine'
 
-import { scrollTo } from '../../../utils/misc'
+import { scrollIntoView } from '../../../utils/misc'
 import { isValidEmail } from '../../../components/form/utils'
 import { TInputField, updateError, updateValue } from '../utils'
 
@@ -55,7 +55,7 @@ export const ForgotPassword = () => {
 
         if (email.value.length === 0) {
             updateError(setFields, [['email', 'Email is required']])
-            scrollTo(DomElementIDs.ForgotPasswordForm)
+            scrollIntoView(DomElementIDs.ForgotPasswordForm)
             return
         }
 
@@ -63,7 +63,7 @@ export const ForgotPassword = () => {
             updateError(setFields, [
                 ['email', 'Please enter a valid email address.']
             ])
-            scrollTo(DomElementIDs.ForgotPasswordForm)
+            scrollIntoView(DomElementIDs.ForgotPasswordForm)
             return
         }
 
@@ -92,7 +92,7 @@ export const ForgotPassword = () => {
                 type: 'error',
                 isOpen: true
             })
-            scrollTo(DomElementIDs.ForgotPasswordForm)
+            scrollIntoView(DomElementIDs.ForgotPasswordForm)
         }
     }, [authMachineState.value])
 

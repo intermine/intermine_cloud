@@ -24,7 +24,7 @@ import { Logo } from '../../../components/logo'
 import { authMachine } from '../machine/auth-machine'
 
 import { TInputField, updateError, updateValue } from '../utils'
-import { scrollTo } from '../../../utils/misc'
+import { scrollIntoView } from '../../../utils/misc'
 
 type TInputFields = {
     username: TInputField
@@ -69,7 +69,7 @@ export const Login = () => {
          */
         if (errorFields.length > 0) {
             updateError(setFields, errorFields)
-            scrollTo(DomElementIDs.LoginForm)
+            scrollIntoView(DomElementIDs.LoginForm)
             return
         }
 
@@ -85,7 +85,7 @@ export const Login = () => {
             /**
              * Failed request.
              */
-            scrollTo(DomElementIDs.LoginForm)
+            scrollIntoView(DomElementIDs.LoginForm)
 
             setIsInlineAlertOpen(true)
         }
