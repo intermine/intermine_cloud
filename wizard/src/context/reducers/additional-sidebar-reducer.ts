@@ -19,6 +19,10 @@ const { UpdateState } = AdditionalSidebarActions
 const additionalSidebarInitialReducer: TAdditionalSidebarReducer = {
     isOpen: false,
     activeTab: AdditionalSidebarTabs.None,
+    logout: {
+        isLogoutAllowed: true,
+        onLogoutClick: () => false,
+    },
 }
 
 const additionalSidebarReducer = (

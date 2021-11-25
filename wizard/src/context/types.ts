@@ -120,6 +120,10 @@ export type TUseGlobalModalReducer = {
 export type TAdditionalSidebarReducer = {
     isOpen: boolean
     activeTab: AdditionalSidebarTabs
+    logout: {
+        isLogoutAllowed: boolean
+        onLogoutClick: () => void
+    }
 }
 
 export type TAdditionalSidebarReducerAction = {
