@@ -1,9 +1,18 @@
+import { useMachine } from '@xstate/react'
 import { clone } from '@intermine/chromatin/utils'
 import axios, { CancelTokenSource } from 'axios'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import shortid from 'shortid'
 
+import type { State } from 'xstate'
+
 import { throttle } from '../../../../utils/throttle'
+import {
+    TUploadMachineContext,
+    TUploadMachineEvents,
+    TUploadMachineState,
+    uploadMachine,
+} from './upload-machine'
 
 export type TOnUploadSuccessfulEvent = {
     file: File
@@ -132,11 +141,12 @@ export type TUseDashboardFormFields<
 export type TUseDashboardFormReturn<T extends TUseDashboardFormFields> = {
     state: TUseDashboardFormState<T>
     errorFields: TUseDashboardFormErrorFields<T>
-    updateState: (key: keyof T, value: any) => void
+    updateDashboardFormState: (key: keyof T, value: any) => void
     handleFormSubmit: (
         cb: (state: TUseDashboardFormState<T>) => void
     ) => boolean
     isDirty: boolean
+    resetToInitialState: () => void
 }
 
 const defaultValidator = (v: any) => {
@@ -177,7 +187,7 @@ export const useDashboardForm = <T extends TUseDashboardFormFields>(
         TUseDashboardFormReturn<T>['errorFields']
     >({})
 
-    const updateState = (key: keyof T, value: any) => {
+    const updateDashboardFormState = (key: keyof T, value: any) => {
         delete errorFields[key]
         setErrorFields(errorFields)
         setIsDirty(true)
@@ -232,13 +242,129 @@ export const useDashboardForm = <T extends TUseDashboardFormFields>(
         return isValid
     }
 
+    const resetToInitialState = () => {
+        setState(getInitialValue())
+        setIsDirty(false)
+    }
+
     return {
         state,
         errorFields,
         handleFormSubmit,
-        updateState,
+        updateDashboardFormState,
         isDirty,
+        resetToInitialState,
     }
     /* eslint-enable @typescript-eslint/no-non-null-assertion */
     /* eslint-enable @typescript-eslint/no-explicit-any*/
+}
+
+type TUseDashboardUploadMachineState = State<
+    TUploadMachineContext,
+    TUploadMachineEvents,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    any,
+    TUploadMachineState
+>
+
+export type TUseDashboardUploadProps = {
+    uploadBaseUrl: string
+    runWhenPresignedURLGenerated: (ctx: TUseDashboardUploadMachineState) => void
+    runWhenPresignedURLGenerationFailed: (
+        ctx: TUseDashboardUploadMachineState
+    ) => void
+}
+
+export type TUseDashboardUploadReturn = {
+    isDirty: boolean
+    isGeneratingPresignedURL: boolean
+    onDropHandler: (event: React.DragEvent) => void
+    onInputChange: (event: React.FormEvent<HTMLInputElement>) => void
+    uploadMachineState: TUseDashboardUploadMachineState
+    generatePresignedURL: () => boolean
+    reset: () => boolean
+}
+
+export const useDashboardUpload = (
+    props: TUseDashboardUploadProps
+): TUseDashboardUploadReturn => {
+    const {
+        uploadBaseUrl,
+        runWhenPresignedURLGenerated,
+        runWhenPresignedURLGenerationFailed,
+    } = props
+    const [isDirty, setIsDirty] = useState(false)
+
+    const [uploadMachineState, dispatch] = useMachine(uploadMachine, {
+        context: { baseURL: uploadBaseUrl },
+    })
+
+    const { value } = uploadMachineState
+
+    const setFile = (file: File) => {
+        setIsDirty(true)
+        dispatch('FILE_SELECTED', { file })
+    }
+
+    const onInputChange = (event: React.FormEvent<HTMLInputElement>) => {
+        try {
+            const files = event.currentTarget.files
+            if (files) {
+                setFile(files[0])
+            }
+        } catch (error) {
+            console.error(error)
+        }
+    }
+
+    const onDropHandler = (event: React.DragEvent) => {
+        try {
+            const files = event.dataTransfer.files
+            if (files) {
+                setFile(files[0])
+            }
+        } catch (error) {
+            console.error(error)
+        }
+    }
+
+    const generatePresignedURL = () => {
+        if (uploadMachineState.can('GENERATE_PRESIGNED_URL')) {
+            dispatch('GENERATE_PRESIGNED_URL')
+            return true
+        }
+
+        if (uploadMachineState.can('FILE_MISSING')) {
+            dispatch('FILE_MISSING')
+        }
+        return false
+    }
+
+    const reset = () => {
+        if (uploadMachineState.can('RESET')) {
+            dispatch('RESET')
+            setIsDirty(false)
+            return true
+        }
+        return false
+    }
+
+    useEffect(() => {
+        if (value === 'serverError') {
+            runWhenPresignedURLGenerationFailed(uploadMachineState)
+        } else if (value === 'successful') {
+            runWhenPresignedURLGenerated(uploadMachineState)
+            dispatch('RESET')
+        }
+    }, [value])
+
+    return {
+        isDirty,
+        isGeneratingPresignedURL: value === 'generatePresignedURL',
+        onDropHandler,
+        onInputChange,
+        uploadMachineState,
+        generatePresignedURL,
+        reset,
+    }
 }
