@@ -49,11 +49,16 @@ const useStyles = createStyle((theme) => {
 
 export const Form = () => {
     const classes = useStyles()
-    const { state, updateState, handleFormSubmit } = useDashboardForm(
-        initialFormFieldsValue
-    )
+    const { state, errorFields, updateState, handleFormSubmit } =
+        useDashboardForm(initialFormFieldsValue)
 
-    const { subDomain, name, template, datasets, description } = state
+    const { subDomain, name, description } = state
+    const {
+        datasets: eDatasets,
+        name: eName,
+        subDomain: eSubDomain,
+        template: eTemplate
+    } = errorFields
 
     return (
         <DForm>
@@ -64,8 +69,8 @@ export const Form = () => {
                         main="Select a template"
                         sub="Make sure you have already uploaded the template.
                             There are also some of the pre-existing templates."
-                        isError={template.isError}
-                        errorMsg="Template is required"
+                        isError={Boolean(eTemplate)}
+                        errorMsg={eTemplate?.errorMsg}
                         hasAsterisk
                     >
                         <DForm.Select
@@ -78,8 +83,8 @@ export const Form = () => {
                         main="Select dataset(s)"
                         sub="Make sure you have already uploaded the dataset.
                         You can select multiple dataset."
-                        isError={datasets.isError}
-                        errorMsg="Dataset is required"
+                        isError={Boolean(eDatasets)}
+                        errorMsg={eDatasets?.errorMsg}
                         hasAsterisk
                     >
                         <DForm.Select
@@ -94,7 +99,7 @@ export const Form = () => {
                         sub="This will be the name under which your mine is
                             publicly available. Some examples are HumanMine,
                             FlyMine, CovidMine, etc."
-                        isError={name.isError}
+                        isError={Boolean(eName)}
                         hasAsterisk
                         errorMsg="Name is required"
                     >
@@ -104,7 +109,7 @@ export const Form = () => {
                                 updateState('name', event.currentTarget.value)
                             }
                             placeholder="Enter mine name"
-                            isError={name.isError}
+                            isError={Boolean(eName)}
                         />
                     </DForm.Label>
                     <DForm.Label
@@ -132,20 +137,15 @@ export const Form = () => {
                         sub="We will host your newly built mine under this
                             sub-domain. Please don't include any special
                             character."
-                        isError={subDomain.isError}
-                        errorMsg={
-                            subDomain.value.length > 0
-                                ? `Please enter a valid sub domain. 
-                                Don't add special characters.`
-                                : 'Sub Domain is required'
-                        }
+                        isError={Boolean(eSubDomain)}
+                        errorMsg={eSubDomain?.errorMsg}
                     >
                         <Box display="flex">
                             <DForm.Input
                                 classes={{ inputRoot: classes.subdomainInput }}
                                 placeholder="my-first-intermine-database"
                                 value={subDomain.value}
-                                isError={subDomain.isError}
+                                isError={Boolean(eSubDomain)}
                                 onChange={(event) =>
                                     updateState(
                                         'subDomain',

@@ -93,40 +93,64 @@ export const uploadService = (
 
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 /* eslint-disable @typescript-eslint/no-explicit-any*/
-export type TUseDashboardFormFieldOptions = {
+export type TUseDashboardFormState<T extends TUseDashboardFormFields> = {
+    [X in keyof T]: {
+        value: TUseDashboardFormField<T>['value']
+    }
+}
+
+export type TUseDashboardFormFieldOptions<T extends TUseDashboardFormFields> = {
     isRequired?: boolean
-    validator?: (value: any) => boolean
+    validator?: (
+        value: any,
+        state: TUseDashboardFormState<T>
+    ) => {
+        isError: boolean
+        type?: string
+        errorMsg?: string
+    }
 }
 
-export type TUseDashboardFormField = {
+export type TUseDashboardFormErrorFields<T extends TUseDashboardFormFields> =
+    Partial<{
+        [X in keyof T]: {
+            errorMsg: string
+            type: string
+        }
+    }>
+
+export type TUseDashboardFormField<T extends TUseDashboardFormFields = any> = {
     value: any
-    options?: TUseDashboardFormFieldOptions
+    options?: TUseDashboardFormFieldOptions<T>
 }
 
-export type TUseDashboardFormFields<T extends string = string> = Record<
-    T,
-    TUseDashboardFormField
->
+export type TUseDashboardFormFields<
+    U extends string = string,
+    T extends TUseDashboardFormState<any> = any
+> = Record<U, TUseDashboardFormField<T>>
 
 export type TUseDashboardFormReturn<T extends TUseDashboardFormFields> = {
-    state: {
-        [X in keyof T]: {
-            value: TUseDashboardFormField['value']
-            isError: boolean
-            options?: TUseDashboardFormFieldOptions
-        }
-    }
-    errorFields: Partial<{
-        [X in keyof T]: { type: keyof TUseDashboardFormFieldOptions }
-    }>
+    state: TUseDashboardFormState<T>
+    errorFields: TUseDashboardFormErrorFields<T>
     updateState: (key: keyof T, value: any) => void
     handleFormSubmit: (
-        cb: (state: {
-            [X in keyof T]: {
-                value: TUseDashboardFormField['value']
-            }
-        }) => void
+        cb: (state: TUseDashboardFormState<T>) => void
     ) => boolean
+}
+
+const defaultValidator = (v: any) => {
+    if (v === '') {
+        return {
+            isError: true,
+            type: 'isRequired',
+            errorMsg: 'Required',
+        }
+    }
+    return {
+        isError: false,
+        type: '',
+        errorMsg: '',
+    }
 }
 
 export const useDashboardForm = <T extends TUseDashboardFormFields>(
@@ -137,8 +161,7 @@ export const useDashboardForm = <T extends TUseDashboardFormFields>(
 
         for (const key of Object.keys(fields)) {
             newState[key as keyof T] = {
-                ...fields[key],
-                isError: false,
+                value: fields[key].value,
             }
         }
         return newState
@@ -172,33 +195,31 @@ export const useDashboardForm = <T extends TUseDashboardFormFields>(
         const newErrorFields: TUseDashboardFormReturn<T>['errorFields'] = {}
 
         for (const key of Object.keys(newState)) {
-            const field = newState[key]
+            const field = { ...fields[key], ...newState[key] }
             if (field.options && field.options.isRequired) {
                 const {
                     value,
-                    options: { validator },
+                    options: { validator: _validator },
                 } = field
-                let errorType: keyof TUseDashboardFormFieldOptions =
-                    'isRequired'
-                if (
-                    (validator &&
-                        !validator(value) &&
-                        (errorType = 'validator')) ||
-                    value === ''
-                ) {
+
+                const validator = _validator ?? defaultValidator
+                const {
+                    isError,
+                    type = '',
+                    errorMsg = '',
+                } = validator(value, state)
+
+                if (isError) {
                     isValid = false
-                    newState[key as keyof T] = {
-                        ...field,
-                        isError: true,
-                    }
+
                     newErrorFields[key as keyof T] = {
-                        type: errorType,
+                        errorMsg,
+                        type,
                     }
                 }
             }
         }
 
-        setState(newState)
         setErrorFields(newErrorFields)
 
         if (isValid) {
