@@ -1,14 +1,20 @@
-import { Children, cloneElement } from 'react'
+import { Children, cloneElement, useEffect } from 'react'
 import clsx from 'clsx'
 import { Button, ButtonCommonProps } from '@intermine/chromatin/button'
 import { Box, BoxBaseProps } from '@intermine/chromatin/box'
 import { Label, LabelProps } from '@intermine/chromatin/label'
+import {
+    InlineAlertProps,
+    InlineAlert
+} from '@intermine/chromatin/inline-alert'
 import {
     Typography,
     TypographyBaseProps
 } from '@intermine/chromatin/typography'
 import { Input, InputProps } from '@intermine/chromatin/input'
 import { createStyle } from '@intermine/chromatin/styles'
+import { scrollToTop } from '../../../../utils/misc'
+import { DomElementIDs } from '../../../../constants/ids'
 
 export type TDashboardFormProps = React.FormHTMLAttributes<HTMLFormElement>
 
@@ -27,6 +33,9 @@ const useStyles = createStyle((theme) => {
         formWrapper: {
             maxWidth: '120rem',
             width: '100%'
+        },
+        formInlineAlert: {
+            marginBottom: spacing(5)
         },
         formHeading: {
             marginBottom: spacing(6)
@@ -171,5 +180,25 @@ export const FormActions = (props: TFormActionsProps) => {
                 )
             })}
         </Box>
+    )
+}
+
+type TFormInlineAlertProps = InlineAlertProps
+export const FormInlineAlert = (props: TFormInlineAlertProps) => {
+    const { className, isOpen, ...rest } = props
+    const classes = useStyles()
+
+    useEffect(() => {
+        if (isOpen) {
+            scrollToTop(DomElementIDs.WorkspacePageContainer)
+        }
+    }, [isOpen])
+    return (
+        <InlineAlert
+            isOpen={isOpen}
+            csx={{ root: { maxWidth: '35rem' } }}
+            className={clsx(className, classes.formInlineAlert)}
+            {...rest}
+        />
     )
 }
