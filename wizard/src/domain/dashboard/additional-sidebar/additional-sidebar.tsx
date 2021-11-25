@@ -96,7 +96,7 @@ const useStyles = createStyle((theme) => {
 export const AdditionalSidebar = () => {
     const additionalSidebarReducer = useAdditionalSidebarReducer()
     const {
-        updateState,
+        updateAdditionalSidebarState,
         state: { isOpen, activeTab, logout }
     } = additionalSidebarReducer
 
@@ -110,7 +110,7 @@ export const AdditionalSidebar = () => {
     })
 
     const onClickActionIcon = (activeTab: AdditionalSidebarTabs) => {
-        updateState({
+        updateAdditionalSidebarState({
             isOpen: true,
             activeTab
         })
@@ -118,7 +118,7 @@ export const AdditionalSidebar = () => {
 
     const handleLogoutClick = () => {
         if (logout.isLogoutAllowed) {
-            updateState({
+            updateAdditionalSidebarState({
                 isOpen: false,
                 activeTab: None
             })

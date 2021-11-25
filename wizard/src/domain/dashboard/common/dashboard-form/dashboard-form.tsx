@@ -27,8 +27,7 @@ export const DashboardForm = (props: TDashboardFormProps) => {
     const { isDirty, ...rest } = props
 
     const { updateSidebarState } = useSidebarReducer()
-    const { updateState: updateAdditionalSidebarState } =
-        useAdditionalSidebarReducer()
+    const { updateAdditionalSidebarState } = useAdditionalSidebarReducer()
     const { showWarningModal } = useDashboardWarningModal()
     const { updateAuthState } = useAuthReducer()
 

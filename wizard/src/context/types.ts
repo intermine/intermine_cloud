@@ -133,7 +133,9 @@ export type TAdditionalSidebarReducerAction = {
 
 export type TUseAdditionalSidebarReducer = {
     state: TAdditionalSidebarReducer
-    updateState: (data: Partial<TAdditionalSidebarReducer>) => void
+    updateAdditionalSidebarState: (
+        data: Partial<TAdditionalSidebarReducer>
+    ) => void
 }
 /**
  * Additional Sidebar Ends
