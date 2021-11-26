@@ -1,6 +1,5 @@
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { useMachine } from '@xstate/react'
-import { InlineAlertProps } from '@intermine/chromatin/inline-alert'
 
 import { UploadBox } from './upload-box'
 import { UploadFileInfo } from './upload-file-info'
@@ -18,7 +17,6 @@ type TUploaderHandlerOption = {
     presignedURL: string
 }
 type ChildrenProps = {
-    inlineAlertProps: InlineAlertProps
     uploadEventHandler: () => void
     onDropHandler: (event: React.DragEvent) => void
     onInputChange: (event: React.FormEvent<HTMLInputElement>) => void
@@ -46,22 +44,6 @@ const Upload = (props: TUploadProps) => {
 
     const { context, value } = uploadMachineState
 
-    const [inlineAlertProps, _setInlineAlertProps] = useState<InlineAlertProps>(
-        {
-            isOpen: false
-        }
-    )
-
-    const setInlineAlertProps = (p: InlineAlertProps) => {
-        _setInlineAlertProps((prev) => ({
-            ...prev,
-            isOpen: true,
-            duration: 5000,
-            onClose: () => setInlineAlertProps({ isOpen: false }),
-            ...p
-        }))
-    }
-
     const uploadEventHandler = () => {
         if (uploadMachineState.can('UPLOADING_FILE')) {
             dispatch('UPLOADING_FILE')
@@ -70,15 +52,10 @@ const Upload = (props: TUploadProps) => {
 
         if (uploadMachineState.can('FILE_MISSING')) {
             dispatch('FILE_MISSING')
-            setInlineAlertProps({
-                type: 'error',
-                message: 'Please select a file.'
-            })
         }
     }
 
     const setFile = (file: File) => {
-        setInlineAlertProps({ isOpen: false })
         dispatch('FILE_SELECTED', { file })
     }
 
@@ -106,16 +83,11 @@ const Upload = (props: TUploadProps) => {
 
     useEffect(() => {
         if (value === 'serverError') {
-            setInlineAlertProps({
-                message: context.errorMessage,
-                type: 'error'
-            })
         }
 
         if (value === 'successful') {
             const { putUrl, file } = context
             if (putUrl && file) {
-                setInlineAlertProps({ isOpen: false })
                 uploadHandler({ file, presignedURL: putUrl })
             }
             dispatch('RESET')
@@ -123,7 +95,6 @@ const Upload = (props: TUploadProps) => {
     }, [value])
 
     return children({
-        inlineAlertProps,
         onInputChange,
         uploadEventHandler,
         uploadMachineState,

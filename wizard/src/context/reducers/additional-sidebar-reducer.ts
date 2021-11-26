@@ -19,6 +19,10 @@ const { UpdateState } = AdditionalSidebarActions
 const additionalSidebarInitialReducer: TAdditionalSidebarReducer = {
     isOpen: false,
     activeTab: AdditionalSidebarTabs.None,
+    logout: {
+        isLogoutAllowed: true,
+        onLogoutClick: () => false,
+    },
 }
 
 const additionalSidebarReducer = (
@@ -50,7 +54,9 @@ export const useAdditionalSidebarReducer = (): TUseAdditionalSidebarReducer => {
         additionalSidebarInitialReducer
     )
 
-    const updateState = (data: Partial<TAdditionalSidebarReducer>) => {
+    const updateAdditionalSidebarState = (
+        data: Partial<TAdditionalSidebarReducer>
+    ) => {
         dispatch({
             type: UpdateState,
             data,
@@ -59,6 +65,6 @@ export const useAdditionalSidebarReducer = (): TUseAdditionalSidebarReducer => {
 
     return {
         state,
-        updateState,
+        updateAdditionalSidebarState,
     }
 }

@@ -1,179 +1,116 @@
-import { Children, cloneElement } from 'react'
-import clsx from 'clsx'
-import { Button, ButtonCommonProps } from '@intermine/chromatin/button'
-import { Box, BoxBaseProps } from '@intermine/chromatin/box'
-import { Label, LabelProps } from '@intermine/chromatin/label'
-import {
-    Typography,
-    TypographyBaseProps
-} from '@intermine/chromatin/typography'
-import { Input, InputProps } from '@intermine/chromatin/input'
-import { createStyle } from '@intermine/chromatin/styles'
+import { useContext, useEffect } from 'react'
+import { useHistory } from 'react-router'
 import { FormSelect } from './select'
+import {
+    FormInput,
+    FormActions,
+    FormHeading,
+    FormLabel,
+    FormWrapper,
+    FormInlineAlert
+} from './components'
+import { UploadBox } from './upload-box'
+import { UploadFileInfo } from './upload-file-info'
+import { WorkspaceHeading } from '../workspace-heading'
+import { DashboardFormContext } from './dashboard-form-context'
+import { useDashboardWarningModal } from '../../utils/hooks'
+import { useAuthReducer, useSidebarReducer } from '../../../../context'
+import { useAdditionalSidebarReducer } from '../../../../context'
+import { LOGIN_PATH } from '../../../../routes'
+import { AuthStates } from '../../../../constants/auth'
+import { handleOnBeforeUnload } from '../../utils/misc'
 
-export type TDashboardFormProps = React.FormHTMLAttributes<HTMLFormElement>
-
-const useStyles = createStyle((theme) => {
-    const { spacing } = theme
-
-    return {
-        form: {
-            alignItems: 'center',
-            display: 'flex',
-            justifyContent: 'center',
-            padding: spacing(0, 12),
-            width: '100%'
-        },
-        formWrapper: {
-            maxWidth: '120rem',
-            width: '100%'
-        },
-        formHeading: {
-            marginBottom: spacing(6)
-        },
-        formLabel: {
-            display: 'block',
-            margin: spacing(0, 0, 8, 0),
-            maxWidth: '35rem',
-            width: '100%'
-        },
-        actionContainer: {
-            display: 'flex',
-            justifyContent: 'flex-end',
-            paddingTop: spacing(20)
-        },
-        actionButton: {
-            marginRight: spacing(10),
-            '&:last-child': {
-                marginRight: 0
-            }
-        }
-    }
-})
+export type TDashboardFormProps = React.FormHTMLAttributes<HTMLFormElement> & {
+    isDirty: boolean
+}
 
 export const DashboardForm = (props: TDashboardFormProps) => {
-    const classes = useStyles()
-    const { className, ...rest } = props
-    return <form className={clsx(classes.form, className)} {...rest} />
-}
+    const { isDirty, ...rest } = props
 
-const FormWrapper = (props: BoxBaseProps) => {
-    const { className, ...rest } = props
-    const classes = useStyles()
-    return <Box className={clsx(className, classes.formWrapper)} {...rest} />
-}
+    const { updateSidebarState } = useSidebarReducer()
+    const { updateAdditionalSidebarState } = useAdditionalSidebarReducer()
+    const { showWarningModal } = useDashboardWarningModal()
+    const { updateAuthState } = useAuthReducer()
 
-type TFormLabelProps = LabelProps & {
-    isError?: boolean
-    main?: string
-    sub?: string
-    errorMsg?: string
-    hasAsterisk?: boolean
-}
+    const handleLogout = () => {
+        updateAuthState(AuthStates.NotAuthorize)
+    }
 
-const FormTypography = (props: TypographyBaseProps) => {
-    return <Typography csx={{ root: { fontWeight: 100 } }} {...props} />
-}
+    useEffect(() => {
+        if (isDirty) {
+            updateSidebarState({
+                isPageSwitchingAllowed: false,
+                onSidebarItemClick: (to) => showWarningModal({ to })
+            })
 
-const FormHeading = (props: TypographyBaseProps) => {
-    const { className, ...rest } = props
-    const classes = useStyles()
-
-    return (
-        <FormTypography
-            className={clsx(classes.formHeading, className)}
-            variant="h1"
-            {...rest}
-        />
-    )
-}
-
-const FormLabel = (props: TFormLabelProps) => {
-    const {
-        children,
-        className,
-        main,
-        sub,
-        errorMsg,
-        hasAsterisk,
-        isError,
-        ...rest
-    } = props
-    const classes = useStyles()
-
-    return (
-        <Label className={clsx(className, classes.formLabel)} {...rest}>
-            {main && (
-                <FormTypography
-                    color={isError ? 'error' : 'undefined'}
-                    variant="h3"
-                >
-                    {main}
-                    {hasAsterisk && (
-                        <Typography Component="span" variant="h3" color="error">
-                            *
-                        </Typography>
-                    )}
-                </FormTypography>
-            )}
-            {sub && (
-                <FormTypography variant="body" color="neutral.20">
-                    {sub}
-                </FormTypography>
-            )}
-            {Children.map(children, (child: any) =>
-                cloneElement(child, { ...child.props, isError })
-            )}
-            {isError && (
-                <FormTypography color="error" variant="bodySm">
-                    {errorMsg}
-                </FormTypography>
-            )}
-        </Label>
-    )
-}
-
-const FormInput = (props: InputProps & { isError?: boolean }) => {
-    const { isError, ...rest } = props
-    return (
-        <Input
-            hasFullWidth
-            hasTransparentBackground
-            csx={{
-                inputRoot: {
-                    ':hover': { background: 'transparent' }
+            updateAdditionalSidebarState({
+                logout: {
+                    isLogoutAllowed: false,
+                    onLogoutClick: () => {
+                        showWarningModal({
+                            to: LOGIN_PATH,
+                            primaryActionTitle: 'Logout',
+                            primaryActionCallback: handleLogout
+                        })
+                    }
                 }
-            }}
-            color={isError ? 'error' : 'undefined'}
-            {...rest}
+            })
+            window.addEventListener('beforeunload', handleOnBeforeUnload)
+        }
+
+        return () => {
+            updateSidebarState({
+                isPageSwitchingAllowed: true,
+                onSidebarItemClick: () => false
+            })
+            updateAdditionalSidebarState({
+                logout: { isLogoutAllowed: true, onLogoutClick: () => false }
+            })
+
+            window.removeEventListener('beforeunload', handleOnBeforeUnload)
+        }
+    }, [isDirty])
+    return (
+        <DashboardFormContext.Provider value={{ isDirty }}>
+            <form {...rest} />
+        </DashboardFormContext.Provider>
+    )
+}
+
+type TFormPageHeading = {
+    landingPageUrl: string
+    pageHeading: string
+}
+
+export const FormPageHeading = (props: TFormPageHeading) => {
+    const { landingPageUrl, pageHeading } = props
+    const history = useHistory()
+    const { isDirty } = useContext(DashboardFormContext)
+    const { showWarningModal } = useDashboardWarningModal()
+
+    const handleOnClickBack = () => {
+        if (isDirty) {
+            showWarningModal({ to: landingPageUrl })
+        } else {
+            history.push(landingPageUrl)
+        }
+    }
+
+    return (
+        <WorkspaceHeading
+            heading={{ variant: 'h2', children: pageHeading }}
+            backAction={{ onClick: handleOnClickBack }}
         />
     )
 }
 
-type TFormActionsProps = {
-    actions: ButtonCommonProps[]
-}
-
-const FormActions = (props: TFormActionsProps) => {
-    const { actions } = props
-    const classes = useStyles()
-    return (
-        <Box className={clsx(classes.actionContainer, classes.formLabel)}>
-            {actions.map((action) => {
-                return (
-                    <Button
-                        {...action}
-                        className={clsx(classes.actionButton, action.className)}
-                    />
-                )
-            })}
-        </Box>
-    )
-}
-
+DashboardForm.PageHeading = FormPageHeading
 DashboardForm.Wrapper = FormWrapper
 DashboardForm.Label = FormLabel
 DashboardForm.Select = FormSelect
 DashboardForm.Input = FormInput
 DashboardForm.Actions = FormActions
 DashboardForm.Heading = FormHeading
+DashboardForm.UploadBox = UploadBox
+DashboardForm.UploadFileInfo = UploadFileInfo
+DashboardForm.InlineAlert = FormInlineAlert

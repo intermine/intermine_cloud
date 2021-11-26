@@ -12,7 +12,6 @@ import CancelIcon from '@intermine/chromatin/icons/System/delete-bin-6-line'
 import RetryIcon from '@intermine/chromatin/icons/System/arrow-go-forward-line'
 
 import { TProgressItem } from '../../../context/types'
-import { getDataSize } from '../../../utils/get'
 import { ProgressItemStatus } from '../../../constants/progress'
 
 type TProgressItemViewProps = TProgressItem & {
@@ -82,14 +81,15 @@ const defaultTooltipProps: Omit<TooltipProps, 'children'> = {
 
 export const ProgressItemView = (props: TProgressItemViewProps) => {
     const {
-        file,
+        name,
         loadedSize,
         totalSize,
         id,
         status,
         onCancelUpload,
         onRemoveClick,
-        onRetryClick
+        onRetryClick,
+        getProgressText
     } = props
 
     const getPrimaryAction = (): JSX.Element => {
@@ -186,7 +186,7 @@ export const ProgressItemView = (props: TProgressItemViewProps) => {
         <Box className={classes.root}>
             <Box className={classes.textContainer}>
                 <Typography isTruncateText variant="bodySm">
-                    {file.name}
+                    {name}
                 </Typography>
 
                 {getSecondaryAction()}
@@ -194,7 +194,7 @@ export const ProgressItemView = (props: TProgressItemViewProps) => {
             </Box>
             <Box className={classes.textContainer}>
                 <Typography isTruncateText variant="small" color="neutral.30">
-                    {getDataSize(loadedSize)} / {getDataSize(totalSize)}
+                    {getProgressText(loadedSize, totalSize)}
                 </Typography>
 
                 <Typography Component="span" variant="small" color="neutral.30">

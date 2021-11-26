@@ -1,27 +1,155 @@
+import { useState } from 'react'
 import { Box } from '@intermine/chromatin/box'
+import { InlineAlertProps } from '@intermine/chromatin/inline-alert'
 
 import { DASHBOARD_DATASETS_LANDING_PATH } from '../../../routes'
-import { UploadPage } from '../page-templates/upload'
+import { DashboardForm as DForm } from '../common/dashboard-form'
+import {
+    useDashboardForm,
+    useDashboardUpload
+} from '../common/dashboard-form/utils'
 
 const uploadEndpoint = 'http://localhost:3000/presignedUrl/dataset?name='
 
 export const UploadDataset = () => {
+    const [inlineAlertProps, setInlineAlertProps] = useState<InlineAlertProps>(
+        {}
+    )
+
+    const _setInlineAlert = (p: InlineAlertProps) => {
+        setInlineAlertProps({
+            onClose: () => setInlineAlertProps({ isOpen: false }),
+            isOpen: true,
+            ...p
+        })
+    }
+
+    const {
+        state: { name, description },
+        isDirty,
+        resetToInitialState,
+        updateDashboardFormState
+    } = useDashboardForm({
+        name: {
+            value: ''
+        },
+        description: {
+            value: ''
+        }
+    })
+
+    const {
+        generatePresignedURL,
+        isDirty: isUploadDirty,
+        isGeneratingPresignedURL,
+        onDropHandler,
+        onInputChange,
+        uploadMachineState,
+        reset: resetUpload
+    } = useDashboardUpload({
+        uploadBaseUrl: uploadEndpoint,
+        runWhenPresignedURLGenerated: () => {
+            _setInlineAlert({
+                message: 'Your file is uploading.',
+                type: 'success'
+            })
+            resetForm()
+        },
+        runWhenPresignedURLGenerationFailed: () =>
+            _setInlineAlert({
+                message:
+                    'Unexpected Error occurred. Please try after sometime.',
+                type: 'error'
+            })
+    })
+
+    const resetForm = () => {
+        resetToInitialState()
+        resetUpload()
+    }
+
     return (
-        <UploadPage>
-            {({ uploadHandler }) => (
-                <Box>
-                    <UploadPage.UploadPageHeading
-                        prevPageUrl={DASHBOARD_DATASETS_LANDING_PATH}
-                        heading="Datasets"
+        <Box>
+            <DForm isDirty={isDirty || isUploadDirty}>
+                <DForm.PageHeading
+                    landingPageUrl={DASHBOARD_DATASETS_LANDING_PATH}
+                    pageHeading="Datasets"
+                />
+                <DForm.Wrapper>
+                    <DForm.InlineAlert {...inlineAlertProps} />
+                    <DForm.Heading>Upload New Dataset</DForm.Heading>
+                    <DForm.Label main="Name" sub="Name of your dataset.">
+                        <DForm.Input
+                            value={name.value}
+                            onChange={(event) =>
+                                updateDashboardFormState(
+                                    'name',
+                                    event.currentTarget.value
+                                )
+                            }
+                            placeholder="Dataset Name"
+                        />
+                    </DForm.Label>
+                    <DForm.Label
+                        main="Describe your Dataset"
+                        sub="This will help other users to get an idea about
+                        this dataset. You can write something like: A dataset 
+                        having information about..."
+                    >
+                        <DForm.Input
+                            rows={5}
+                            value={description.value}
+                            Component="textarea"
+                            placeholder="Description of your mine"
+                            onChange={(event) =>
+                                updateDashboardFormState(
+                                    'description',
+                                    event.currentTarget.value
+                                )
+                            }
+                        />
+                    </DForm.Label>
+
+                    <DForm.Label
+                        main="Select a file"
+                        sub="You can select .fasta, .tsv, .cst, .etc"
+                        hasAsterisk
+                        isError={uploadMachineState.value === 'fileMissing'}
+                        errorMsg="Please select a file."
+                    >
+                        <DForm.UploadBox
+                            onInputChange={onInputChange}
+                            onDropHandler={onDropHandler}
+                        />
+                    </DForm.Label>
+                    <DForm.UploadFileInfo
+                        file={uploadMachineState.context.file}
                     />
-                    <UploadPage.UploadBox
-                        heading="Upload New Dataset"
-                        sub="You can select .fasta, .tsv, .csv, .etc"
-                        uploadBaseUrl={uploadEndpoint}
-                        uploadHandler={uploadHandler}
-                    />
-                </Box>
-            )}
-        </UploadPage>
+
+                    <Box>
+                        <DForm.Actions
+                            actions={[
+                                {
+                                    key: 'reset',
+                                    children: 'Reset',
+                                    color: 'warning',
+                                    type: 'reset',
+                                    isDisabled: isGeneratingPresignedURL,
+                                    onClick: resetForm
+                                },
+                                {
+                                    key: 'upload',
+                                    color: 'primary',
+                                    children: 'Upload Dataset',
+                                    onClick: generatePresignedURL,
+                                    isDisabled: isGeneratingPresignedURL,
+                                    isLoading: isGeneratingPresignedURL
+                                }
+                            ]}
+                        />
+                    </Box>
+                </DForm.Wrapper>
+            </DForm>
+        </Box>
     )
 }

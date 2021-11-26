@@ -25,7 +25,7 @@ const ActionSectionContent = (props: BoxBaseProps) => {
 const ActionSection = (props: TActionSectionProps) => {
     const { heading, children, isActive } = props
     const additionalSidebarReducer = useAdditionalSidebarReducer()
-    const { updateState } = additionalSidebarReducer
+    const { updateAdditionalSidebarState } = additionalSidebarReducer
 
     return (
         <Box
@@ -51,7 +51,7 @@ const ActionSection = (props: TActionSectionProps) => {
                     color="error"
                     isDense
                     onClick={() =>
-                        updateState({
+                        updateAdditionalSidebarState({
                             isOpen: false,
                             activeTab: AdditionalSidebarTabs.None
                         })

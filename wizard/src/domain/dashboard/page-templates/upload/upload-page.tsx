@@ -4,7 +4,7 @@ import {
     TOnUploadFailedEvent,
     TOnUploadProgressEvent,
     TOnUploadSuccessfulEvent
-} from '../../common/upload'
+} from '../../common/dashboard-form'
 
 import {
     useAdditionalSidebarReducer,
@@ -39,8 +39,7 @@ export const UploadPage = (props: TUploadPageProps) => {
         addActiveItem,
         removeActiveItem
     } = progressReducer
-    const { updateState: updateAdditionalSidebarState } =
-        additionalSidebarReducer
+    const { updateAdditionalSidebarState } = additionalSidebarReducer
     const { addAlert } = globalAlertReducer
 
     const onFailed = (event: TOnUploadFailedEvent) => {

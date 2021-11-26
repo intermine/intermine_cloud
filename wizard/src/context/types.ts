@@ -81,8 +81,6 @@ export type TSidebarReducerAction = {
 export type TUseSidebarReducer = {
     state: TSidebarReducer
     updateSidebarState: (data: Partial<TSidebarReducer>) => void
-    onSidebarItemClick: (fn: TSidebarReducer['onSidebarItemClick']) => void
-    removeOnSidebarItemClick: () => void
 }
 
 /**
@@ -122,6 +120,10 @@ export type TUseGlobalModalReducer = {
 export type TAdditionalSidebarReducer = {
     isOpen: boolean
     activeTab: AdditionalSidebarTabs
+    logout: {
+        isLogoutAllowed: boolean
+        onLogoutClick: () => void
+    }
 }
 
 export type TAdditionalSidebarReducerAction = {
@@ -131,7 +133,9 @@ export type TAdditionalSidebarReducerAction = {
 
 export type TUseAdditionalSidebarReducer = {
     state: TAdditionalSidebarReducer
-    updateState: (data: Partial<TAdditionalSidebarReducer>) => void
+    updateAdditionalSidebarState: (
+        data: Partial<TAdditionalSidebarReducer>
+    ) => void
 }
 /**
  * Additional Sidebar Ends
@@ -175,8 +179,10 @@ export type TUseGlobalAlertReducer = {
 export type TProgressItem = {
     totalSize: number
     loadedSize: number
-    file: File
-    url: string
+    getProgressText: (loadedSize: number, totalSize: number) => string
+    name: string
+    file?: File
+    url?: string
     id: string
     cancelSourceToken: CancelTokenSource
     status: ProgressItemStatus

@@ -34,7 +34,14 @@ export const FormSelect = <
             csx={{
                 control: {
                     ...(isError && {
-                        borderColor: error.main
+                        borderColor: error.main,
+                        boxShadow: 'none !important',
+                        ':hover': {
+                            borderColor: error.main
+                        },
+                        ':focus': {
+                            borderColor: error.main
+                        }
                     })
                 },
 

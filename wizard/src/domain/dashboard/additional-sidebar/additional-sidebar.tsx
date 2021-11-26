@@ -96,8 +96,8 @@ const useStyles = createStyle((theme) => {
 export const AdditionalSidebar = () => {
     const additionalSidebarReducer = useAdditionalSidebarReducer()
     const {
-        updateState,
-        state: { isOpen, activeTab }
+        updateAdditionalSidebarState,
+        state: { isOpen, activeTab, logout }
     } = additionalSidebarReducer
 
     const progressReducer = useProgressReducer()
@@ -110,10 +110,20 @@ export const AdditionalSidebar = () => {
     })
 
     const onClickActionIcon = (activeTab: AdditionalSidebarTabs) => {
-        updateState({
+        updateAdditionalSidebarState({
             isOpen: true,
             activeTab
         })
+    }
+
+    const handleLogoutClick = () => {
+        if (logout.isLogoutAllowed) {
+            updateAdditionalSidebarState({
+                isOpen: false,
+                activeTab: None
+            })
+        }
+        logout.onLogoutClick()
     }
 
     return (
@@ -142,13 +152,9 @@ export const AdditionalSidebar = () => {
                     </Tooltip>
                 ))}
                 <Logout
+                    isLogoutAllowed={logout.isLogoutAllowed}
                     className={classes.button}
-                    handleLogoutClick={() => {
-                        updateState({
-                            isOpen: false,
-                            activeTab: None
-                        })
-                    }}
+                    handleLogoutClick={handleLogoutClick}
                 />
             </Box>
             <Box className={classes.actionSection}>
