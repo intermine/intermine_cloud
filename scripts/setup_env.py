@@ -936,6 +936,7 @@ def main() -> None:
     setup_tools()
     create_conda_env()
     install_projects(compose_path)
+    install_projects(demon_path)
     install_projects(minectl_path)
     write_env()
 
