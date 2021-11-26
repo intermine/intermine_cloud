@@ -182,8 +182,8 @@ export type TProgressItem = {
     totalSize: number
     loadedSize: number
     getProgressText: (loadedSize: number, totalSize: number) => string
-    onRetry: (data: any) => void
-    onCancel: (data: any) => void
+    onRetry: () => void
+    onCancel: () => void
 }
 
 export type TProgressItems = {
@@ -192,7 +192,7 @@ export type TProgressItems = {
 
 export type TProgressActiveItem = {
     id: string
-    isRestrictUnmount: boolean
+    isDependentOnBrowser: boolean
 }
 
 export type TProgressActiveItems = {
