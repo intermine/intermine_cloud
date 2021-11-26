@@ -15,7 +15,7 @@ RUN apk add --no-cache build-base libffi-dev
 RUN pip install "poetry==$POETRY_VERSION"
 
 WORKDIR /code
-COPY . /code/
+COPY poetry.lock pyproject.toml src /code/
 
 RUN poetry config virtualenvs.create false \
   && poetry install --no-dev --no-interaction --no-ansi
