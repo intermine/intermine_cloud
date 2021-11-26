@@ -26,7 +26,7 @@ const progressReducerInitialState: TProgressReducer = {
 
 const hasToRestrictUnmount = (activeItems: TProgressActiveItems) => {
     for (const key in activeItems) {
-        if (activeItems[key].isRestrictUnmount) {
+        if (activeItems[key].isDependentOnBrowser) {
             return true
         }
     }
@@ -61,10 +61,10 @@ const progressReducer = (
             return { ...state }
 
         case AddActiveItem:
-            const { id, isRestrictUnmount } = data as TProgressActiveItem
+            const { id, isDependentOnBrowser } = data as TProgressActiveItem
             state.activeItems[id] = {
                 id,
-                isRestrictUnmount,
+                isDependentOnBrowser,
             }
 
             state.isRestrictUnmount = hasToRestrictUnmount(state.activeItems)

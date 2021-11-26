@@ -83,7 +83,7 @@ export const useUploadPageTemplate = () => {
         const { cancelTokenSource } = uploadFile(upload, id)
         onProgressRetry({
             id,
-            isRestrictUnmount: true,
+            isDependentOnBrowser: true,
             onCancel: () => {
                 onCancelRequest(id, cancelTokenSource)
             },
@@ -102,7 +102,7 @@ export const useUploadPageTemplate = () => {
                 onCancelRequest(id, cancelTokenSource)
             },
             getProgressText: (l, t) => `${getDataSize(l)}/${getDataSize(t)}`,
-            isRestrictUnmount: true,
+            isDependentOnBrowser: true,
             name: file.name,
             totalSize: file.size,
             loadedSize: 0,

@@ -80,14 +80,14 @@ export type TOnProgressFailedProps = Partial<TProgressItem> & {
     id: string
 }
 export type TOnProgressStartProps = Omit<TProgressItem, 'status'> & {
-    isRestrictUnmount: boolean
+    isDependentOnBrowser: boolean
 }
 export type TOnProgressCancel = {
     id: string
 }
 export type TOnProgressRetry = {
     id: string
-    isRestrictUnmount: boolean
+    isDependentOnBrowser: boolean
     onCancel: () => void
 }
 
@@ -132,8 +132,8 @@ export const useOnProgress = () => {
     }
 
     const onProgressStart = (props: TOnProgressStartProps) => {
-        const { id, isRestrictUnmount, ...rest } = props
-        addActiveItem({ id, isRestrictUnmount })
+        const { id, isDependentOnBrowser, ...rest } = props
+        addActiveItem({ id, isDependentOnBrowser })
         updateAdditionalSidebarState({
             isOpen: true,
             activeTab: AdditionalSidebarTabs.ProgressTab,
@@ -152,8 +152,8 @@ export const useOnProgress = () => {
     }
 
     const onProgressRetry = (props: TOnProgressRetry) => {
-        const { id, isRestrictUnmount, onCancel } = props
-        addActiveItem({ id, isRestrictUnmount })
+        const { id, isDependentOnBrowser, onCancel } = props
+        addActiveItem({ id, isDependentOnBrowser })
         updateProgressItem({ id, status: Running, onCancel })
     }
 
