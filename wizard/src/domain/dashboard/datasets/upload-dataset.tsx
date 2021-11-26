@@ -1,6 +1,4 @@
-import { useState } from 'react'
 import { Box } from '@intermine/chromatin/box'
-import { InlineAlertProps } from '@intermine/chromatin/inline-alert'
 
 import { DASHBOARD_DATASETS_LANDING_PATH } from '../../../routes'
 import { DashboardForm as DForm } from '../common/dashboard-form'
@@ -8,21 +6,16 @@ import {
     useDashboardForm,
     useDashboardUpload
 } from '../common/dashboard-form/utils'
+import { useUploadPageTemplate } from '../page-templates/hooks'
 
 const uploadEndpoint = 'http://localhost:3000/presignedUrl/dataset?name='
 
 export const UploadDataset = () => {
-    const [inlineAlertProps, setInlineAlertProps] = useState<InlineAlertProps>(
-        {}
-    )
-
-    const _setInlineAlert = (p: InlineAlertProps) => {
-        setInlineAlertProps({
-            onClose: () => setInlineAlertProps({ isOpen: false }),
-            isOpen: true,
-            ...p
-        })
-    }
+    const {
+        runWhenPresignedURLGenerationFailed,
+        runWhenPresignedURLGenerated,
+        inlineAlertProps
+    } = useUploadPageTemplate()
 
     const {
         state: { name, description },
@@ -48,19 +41,11 @@ export const UploadDataset = () => {
         reset: resetUpload
     } = useDashboardUpload({
         uploadBaseUrl: uploadEndpoint,
-        runWhenPresignedURLGenerated: () => {
-            _setInlineAlert({
-                message: 'Your file is uploading.',
-                type: 'success'
-            })
+        runWhenPresignedURLGenerated: (upload) => {
+            runWhenPresignedURLGenerated(upload)
             resetForm()
         },
-        runWhenPresignedURLGenerationFailed: () =>
-            _setInlineAlert({
-                message:
-                    'Unexpected Error occurred. Please try after sometime.',
-                type: 'error'
-            })
+        runWhenPresignedURLGenerationFailed
     })
 
     const resetForm = () => {
@@ -100,7 +85,7 @@ export const UploadDataset = () => {
                             rows={5}
                             value={description.value}
                             Component="textarea"
-                            placeholder="Description of your mine"
+                            placeholder="Description of your dataset"
                             onChange={(event) =>
                                 updateDashboardFormState(
                                     'description',

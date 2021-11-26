@@ -7,6 +7,7 @@ import { createStyle } from '@intermine/chromatin/styles'
 import { useState } from 'react'
 
 export type TUploadBoxProps = {
+    isError?: boolean
     isDisabled?: boolean
     onInputChange: (event: React.FormEvent<HTMLInputElement>) => void
     onDropHandler: (event: React.DragEvent) => void
@@ -14,6 +15,7 @@ export type TUploadBoxProps = {
 
 type TUseStyleProps = {
     isDisabled: boolean
+    isError: boolean
     dragEvent: {
         isDragOver: boolean
     }
@@ -21,7 +23,7 @@ type TUseStyleProps = {
 
 const useBoxStyles = createStyle((theme) => {
     const {
-        palette: { neutral, info, themeType, disable, grey },
+        palette: { neutral, info, themeType, disable, grey, error },
         spacing
     } = theme
 
@@ -41,6 +43,9 @@ const useBoxStyles = createStyle((theme) => {
             ...(props.isDisabled && {
                 background: disable.main,
                 pointerEvents: 'none'
+            }),
+            ...(props.isError && {
+                borderColor: error.main
             })
         }),
         label: {
@@ -68,6 +73,7 @@ const preventAndStopEvent = (event: React.DragEvent) => {
 export const UploadBox = (props: TUploadBoxProps) => {
     const {
         isDisabled = false,
+        isError = false,
         onInputChange,
         onDropHandler: _onDropHandler
     } = props
@@ -91,7 +97,7 @@ export const UploadBox = (props: TUploadBoxProps) => {
         _onDropHandler(event)
     }
 
-    const classes = useBoxStyles({ isDisabled, dragEvent })
+    const classes = useBoxStyles({ isDisabled, dragEvent, isError })
 
     return (
         <Box

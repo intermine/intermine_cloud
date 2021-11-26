@@ -14,36 +14,33 @@ import {
     uploadMachine,
 } from './upload-machine'
 
-export type TOnUploadSuccessfulEvent = {
-    file: File
-    loadedSize: number
-    totalSize: number
-    id: string
-}
-export type TOnUploadFailedEvent = {
-    error: { message: string }
-    file: File
-    id: string
-}
+import type {
+    TOnProgressCancel,
+    TOnProgressFailedProps,
+    TOnProgressSuccessfulProps,
+    TOnProgressUpdateProps,
+} from '../../utils/hooks'
 
-export type TOnUploadProgressEvent = {
-    file: File
-    loadedSize: number
-    totalSize: number
-    id: string
-}
+export type TOnUploadSuccessfulEvent = Omit<
+    TOnProgressSuccessfulProps,
+    'successMsg'
+>
+export type TOnUploadFailedEvent = Omit<TOnProgressFailedProps, 'failedMsg'>
+export type TOnUploadProgressEvent = TOnProgressUpdateProps
+export type TOnUploadCancelEvent = TOnProgressCancel
 
 export type TUploadDatasetOptions = {
     url: string
     file: File
     id?: string
+    onCancel?: (event: TOnUploadCancelEvent) => void
     onSuccessful?: (event: TOnUploadSuccessfulEvent) => void
     onFailed?: (event: TOnUploadFailedEvent) => void
     onProgress?: (event: TOnUploadProgressEvent) => void
 }
 
 export type TUploadDatasetReturn = {
-    cancelSourceToken: CancelTokenSource
+    cancelTokenSource: CancelTokenSource
     id: string
 }
 
@@ -59,6 +56,7 @@ export const uploadService = (
         onFailed,
         onSuccessful,
         onProgress,
+        onCancel,
     } = options
 
     const throttleUpdate = throttle((event) => {
@@ -66,7 +64,6 @@ export const uploadService = (
             onProgress({
                 loadedSize: event.loaded,
                 totalSize: event.total,
-                file,
                 id,
             })
         }
@@ -82,21 +79,24 @@ export const uploadService = (
                 onSuccessful({
                     loadedSize: file.size,
                     totalSize: file.size,
-                    file,
                     id,
                 })
             }
             return
         })
         .catch((error) => {
+            if (axios.isCancel(error)) {
+                onCancel && onCancel({ id })
+                return
+            }
             if (onFailed) {
-                onFailed({ error, file, id })
+                onFailed({ id })
             }
         })
 
     return {
         id,
-        cancelSourceToken: source,
+        cancelTokenSource: source,
     }
 }
 
@@ -259,7 +259,7 @@ export const useDashboardForm = <T extends TUseDashboardFormFields>(
     /* eslint-enable @typescript-eslint/no-explicit-any*/
 }
 
-type TUseDashboardUploadMachineState = State<
+export type TUseDashboardUploadMachineState = State<
     TUploadMachineContext,
     TUploadMachineEvents,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

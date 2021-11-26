@@ -1,9 +1,9 @@
 import { createMachine, assign } from 'xstate'
 
 export type TUploadMachineContext = {
-    file?: File
+    file: File
     errorMessage?: string
-    putUrl?: string
+    putUrl: string
     baseURL: string
 }
 
@@ -56,6 +56,8 @@ export const uploadMachine = createMachine<
         initial: 'start',
         context: {
             baseURL: '',
+            putUrl: '',
+            file: new File([], ''),
         },
         states: {
             start: {
