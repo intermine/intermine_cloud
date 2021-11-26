@@ -9,8 +9,7 @@ import {
 import { ActionSection } from './action-section'
 import { ProgressItemView } from './progress-item-view'
 import { handleOnBeforeUnload } from '../utils/misc'
-import { useDashboardWarningModal, useLogout } from '../utils/hooks'
-import { LOGIN_PATH } from '../../../routes'
+import { RestrictLogoutRestrictions, useLogout } from '../utils/hooks'
 
 const _handleOnBeforeUnload = (event: Event) => {
     handleOnBeforeUnload(event)
@@ -21,8 +20,7 @@ export const Progress = () => {
     const progressReducer = useProgressReducer()
 
     const {
-        state: { activeTab },
-        updateAdditionalSidebarState
+        state: { activeTab }
     } = additionalSidebarReducer
 
     const {
@@ -30,8 +28,10 @@ export const Progress = () => {
         removeItemFromProgress
     } = progressReducer
 
-    const { showWarningModal } = useDashboardWarningModal()
-    const { logout } = useLogout()
+    const {
+        removeAdditionalSidebarLogoutWithModalRestriction,
+        restrictAdditionalSidebarLogoutWithModal
+    } = useLogout()
 
     const cancelBrowserDependentRequests = () => {
         const _active = { ...activeItems }
@@ -47,29 +47,16 @@ export const Progress = () => {
     useEffect(() => {
         if (isRestrictUnmount) {
             window.addEventListener('beforeunload', _handleOnBeforeUnload)
-            updateAdditionalSidebarState({
-                logout: {
-                    isLogoutAllowed: false,
-                    onLogoutClick: () => {
-                        showWarningModal({
-                            to: LOGIN_PATH,
-                            primaryActionTitle: 'Logout',
-                            primaryActionCallback: () => {
-                                logout()
-                                cancelBrowserDependentRequests()
-                            },
-                            msg: `If you logout, then all the uploads
-                            in progress will be lost.`
-                        })
-                    }
-                }
+            restrictAdditionalSidebarLogoutWithModal({
+                type: RestrictLogoutRestrictions.Uploading,
+                primaryActionCallback: cancelBrowserDependentRequests
             })
         }
 
         return () => {
             window.removeEventListener('beforeunload', _handleOnBeforeUnload)
-            updateAdditionalSidebarState({
-                logout: { isLogoutAllowed: true, onLogoutClick: () => false }
+            removeAdditionalSidebarLogoutWithModalRestriction({
+                type: RestrictLogoutRestrictions.Uploading
             })
         }
     }, [isRestrictUnmount, Object.keys(activeItems).length])

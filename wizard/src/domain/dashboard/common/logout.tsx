@@ -11,7 +11,7 @@ type TLogoutProps = {
     className?: string
     handleLogoutClick?: () => void
     tooltipPlacement?: 'left' | 'bottom'
-    isLogoutAllowed: boolean
+    isLogoutAllowed?: boolean
 }
 
 export const Logout = (props: TLogoutProps) => {
