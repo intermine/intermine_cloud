@@ -13,7 +13,11 @@ import { UploadBox } from './upload-box'
 import { UploadFileInfo } from './upload-file-info'
 import { WorkspaceHeading } from '../workspace-heading'
 import { DashboardFormContext } from './dashboard-form-context'
-import { useDashboardWarningModal } from '../../utils/hooks'
+import {
+    RestrictLogoutRestrictions,
+    useDashboardWarningModal,
+    useLogout
+} from '../../utils/hooks'
 import { useSidebarReducer } from '../../../../context'
 import { handleOnBeforeUnload } from '../../utils/misc'
 
@@ -30,6 +34,10 @@ export const DashboardForm = (props: TDashboardFormProps) => {
 
     const { updateSidebarState } = useSidebarReducer()
     const { showWarningModal } = useDashboardWarningModal()
+    const {
+        removeAdditionalSidebarLogoutWithModalRestriction,
+        restrictAdditionalSidebarLogoutWithModal
+    } = useLogout()
 
     useEffect(() => {
         if (isDirty) {
@@ -38,6 +46,9 @@ export const DashboardForm = (props: TDashboardFormProps) => {
                 onSidebarItemClick: (to) => showWarningModal({ to })
             })
             window.addEventListener('beforeunload', _handleOnBeforeUnload)
+            restrictAdditionalSidebarLogoutWithModal({
+                type: RestrictLogoutRestrictions.FormIsDirty
+            })
         }
 
         return () => {
@@ -46,6 +57,9 @@ export const DashboardForm = (props: TDashboardFormProps) => {
                 onSidebarItemClick: () => false
             })
 
+            removeAdditionalSidebarLogoutWithModalRestriction({
+                type: RestrictLogoutRestrictions.FormIsDirty
+            })
             window.removeEventListener('beforeunload', _handleOnBeforeUnload)
         }
     }, [isDirty])
