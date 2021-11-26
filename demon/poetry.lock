@@ -160,7 +160,7 @@ uvloop = ["uvloop (>=0.15.2)"]
 
 [[package]]
 name = "blackcap"
-version = "0.17.0"
+version = "0.18.0"
 description = "Shared library for Orchestra"
 category = "main"
 optional = false
@@ -1616,7 +1616,7 @@ testing = ["pytest (>=4.6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytes
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "6cbfa904e041eac5c323c8099a0320eccd44237cd4a800225640676e53709198"
+content-hash = "f1ef9b39ac0c159ab5ad4d597dbe0c3a5a2195ca32becbfdc57758c249d03ea6"
 
 [metadata.files]
 alembic = [
@@ -1673,8 +1673,8 @@ black = [
     {file = "black-21.11b1.tar.gz", hash = "sha256:a042adbb18b3262faad5aff4e834ff186bb893f95ba3a8013f09de1e5569def2"},
 ]
 blackcap = [
-    {file = "blackcap-0.17.0-py3-none-any.whl", hash = "sha256:35b2c07470f444246cda445552933450228cf2bd2db46ba90d62f431aed01c17"},
-    {file = "blackcap-0.17.0.tar.gz", hash = "sha256:bc3f48e9b973423a61a6e7df3983f24b46ef802af7cc2478b3970d6e68f7ed0a"},
+    {file = "blackcap-0.18.0-py3-none-any.whl", hash = "sha256:96906d97f006ec9af4738f5d264bae3e973c18bc3b28156a6ba28e49c1b160cc"},
+    {file = "blackcap-0.18.0.tar.gz", hash = "sha256:1cc0164f23eeb02b64b231c894f62ac9bfedef1d9eeda89899bf5822d39c2d3a"},
 ]
 cachetools = [
     {file = "cachetools-4.2.4-py3-none-any.whl", hash = "sha256:92971d3cb7d2a97efff7c7bb1657f21a8f5fb309a37530537c71b1774189f2d1"},
