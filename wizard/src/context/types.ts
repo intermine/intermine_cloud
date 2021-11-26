@@ -116,24 +116,32 @@ export type TUseGlobalModalReducer = {
 /**
  * Additional Sidebar
  */
+export type TAdditionalSidebarLogout = {
+    isEditingForm: boolean
+    isUploading: boolean
+    onLogoutClickCallbacks: {
+        editingFormCallback?: () => void
+        uploadingFormCallback?: () => void
+    }
+}
 export type TAdditionalSidebarReducer = {
     isOpen: boolean
     activeTab: AdditionalSidebarTabs
-    logout: {
-        isLogoutAllowed: boolean
-        onLogoutClick: () => void
-    }
+    logout: TAdditionalSidebarLogout
 }
 
 export type TAdditionalSidebarReducerAction = {
     type: AdditionalSidebarActions
-    data: Partial<TAdditionalSidebarReducer>
+    data: Partial<TAdditionalSidebarReducer | TAdditionalSidebarLogout>
 }
 
 export type TUseAdditionalSidebarReducer = {
     state: TAdditionalSidebarReducer
     updateAdditionalSidebarState: (
         data: Partial<TAdditionalSidebarReducer>
+    ) => void
+    updateAdditionalSidebarLogoutState: (
+        data: Partial<TAdditionalSidebarLogout>
     ) => void
 }
 /**

@@ -109,6 +109,8 @@ export const AdditionalSidebar = () => {
         isOpen
     })
 
+    const isLogoutAllowed = !logout.isUploading && !logout.isEditingForm
+
     const onClickActionIcon = (activeTab: AdditionalSidebarTabs) => {
         updateAdditionalSidebarState({
             isOpen: true,
@@ -117,13 +119,26 @@ export const AdditionalSidebar = () => {
     }
 
     const handleLogoutClick = () => {
-        if (logout.isLogoutAllowed) {
+        if (isLogoutAllowed) {
             updateAdditionalSidebarState({
                 isOpen: false,
                 activeTab: None
             })
+            return
         }
-        logout.onLogoutClick()
+
+        const { onLogoutClickCallbacks, isEditingForm, isUploading } = logout
+
+        const { editingFormCallback, uploadingFormCallback } =
+            onLogoutClickCallbacks
+
+        if (isEditingForm && editingFormCallback) {
+            editingFormCallback()
+        }
+
+        if (isUploading && uploadingFormCallback) {
+            uploadingFormCallback()
+        }
     }
 
     return (
@@ -152,7 +167,7 @@ export const AdditionalSidebar = () => {
                     </Tooltip>
                 ))}
                 <Logout
-                    isLogoutAllowed={logout.isLogoutAllowed}
+                    isLogoutAllowed={isLogoutAllowed}
                     className={classes.button}
                     handleLogoutClick={handleLogoutClick}
                 />

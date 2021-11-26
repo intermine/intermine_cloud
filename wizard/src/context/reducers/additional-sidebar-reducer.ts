@@ -9,9 +9,10 @@ import type {
     TAdditionalSidebarReducer,
     TAdditionalSidebarReducerAction,
     TUseAdditionalSidebarReducer,
+    TAdditionalSidebarLogout,
 } from '../types'
 
-const { UpdateState } = AdditionalSidebarActions
+const { UpdateState, UpdateLogoutState } = AdditionalSidebarActions
 
 /**
  * Additional sidebar reducer initial state
@@ -20,8 +21,9 @@ const additionalSidebarInitialReducer: TAdditionalSidebarReducer = {
     isOpen: false,
     activeTab: AdditionalSidebarTabs.None,
     logout: {
-        isLogoutAllowed: true,
-        onLogoutClick: () => false,
+        isUploading: false,
+        isEditingForm: false,
+        onLogoutClickCallbacks: {},
     },
 }
 
@@ -34,7 +36,22 @@ const additionalSidebarReducer = (
     switch (type) {
         case UpdateState:
             state = { ...state, ...data }
-            return state
+
+            return { ...state }
+
+        case UpdateLogoutState:
+            const { onLogoutClickCallbacks, ...rest } =
+                data as TAdditionalSidebarLogout
+            const { logout } = state
+            state.logout = {
+                ...logout,
+                ...rest,
+                onLogoutClickCallbacks: {
+                    ...logout.onLogoutClickCallbacks,
+                    ...onLogoutClickCallbacks,
+                },
+            }
+            return { ...state }
 
         /* istanbul ignore next */
         default:
@@ -63,8 +80,18 @@ export const useAdditionalSidebarReducer = (): TUseAdditionalSidebarReducer => {
         })
     }
 
+    const updateAdditionalSidebarLogoutState = (
+        data: Partial<TAdditionalSidebarLogout>
+    ) => {
+        dispatch({
+            type: UpdateLogoutState,
+            data,
+        })
+    }
+
     return {
         state,
         updateAdditionalSidebarState,
+        updateAdditionalSidebarLogoutState,
     }
 }
