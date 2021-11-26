@@ -13,11 +13,10 @@ import { UploadBox } from './upload-box'
 import { UploadFileInfo } from './upload-file-info'
 import { WorkspaceHeading } from '../workspace-heading'
 import { DashboardFormContext } from './dashboard-form-context'
-import { useDashboardWarningModal } from '../../utils/hooks'
-import { useAuthReducer, useSidebarReducer } from '../../../../context'
+import { useDashboardWarningModal, useLogout } from '../../utils/hooks'
+import { useSidebarReducer } from '../../../../context'
 import { useAdditionalSidebarReducer } from '../../../../context'
 import { LOGIN_PATH } from '../../../../routes'
-import { AuthStates } from '../../../../constants/auth'
 import { handleOnBeforeUnload } from '../../utils/misc'
 
 export type TDashboardFormProps = React.FormHTMLAttributes<HTMLFormElement> & {
@@ -30,11 +29,7 @@ export const DashboardForm = (props: TDashboardFormProps) => {
     const { updateSidebarState } = useSidebarReducer()
     const { updateAdditionalSidebarState } = useAdditionalSidebarReducer()
     const { showWarningModal } = useDashboardWarningModal()
-    const { updateAuthState } = useAuthReducer()
-
-    const handleLogout = () => {
-        updateAuthState(AuthStates.NotAuthorize)
-    }
+    const { logout } = useLogout()
 
     useEffect(() => {
         if (isDirty) {
@@ -50,7 +45,7 @@ export const DashboardForm = (props: TDashboardFormProps) => {
                         showWarningModal({
                             to: LOGIN_PATH,
                             primaryActionTitle: 'Logout',
-                            primaryActionCallback: handleLogout
+                            primaryActionCallback: logout
                         })
                     }
                 }

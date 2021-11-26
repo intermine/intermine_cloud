@@ -1,5 +1,6 @@
 import { useHistory } from 'react-router'
-import { useGlobalModalReducer } from '../../../context'
+import { useGlobalModalReducer, useAuthReducer } from '../../../context'
+import { AuthStates } from '../../../constants/auth'
 
 type TUseDashboardWarningModalProps = {
     msg?: string
@@ -45,5 +46,17 @@ export const useDashboardWarningModal = () => {
 
     return {
         showWarningModal,
+    }
+}
+
+export const useLogout = () => {
+    const { updateAuthState } = useAuthReducer()
+
+    const logout = () => {
+        updateAuthState(AuthStates.NotAuthorize)
+    }
+
+    return {
+        logout,
     }
 }

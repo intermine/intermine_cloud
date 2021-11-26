@@ -4,9 +4,8 @@ import { Tooltip } from '@intermine/chromatin/tooltip'
 import { IconButton } from '@intermine/chromatin/icon-button'
 import LogoutIcon from '@intermine/chromatin/icons/Device/shut-down-line'
 
-import { useAuthReducer } from '../../../context'
 import { LOGIN_PATH } from '../../../routes'
-import { AuthStates } from '../../../constants/auth'
+import { useLogout } from '../utils/hooks'
 
 type TLogoutProps = {
     className?: string
@@ -17,8 +16,7 @@ type TLogoutProps = {
 
 export const Logout = (props: TLogoutProps) => {
     const history = useHistory()
-    const authReducer = useAuthReducer()
-    const { updateAuthState } = authReducer
+    const { logout } = useLogout()
 
     const {
         className,
@@ -31,7 +29,7 @@ export const Logout = (props: TLogoutProps) => {
     const handleLogout = () => {
         if (isLogoutAllowed) {
             setIsMakingPostRequest(true)
-            updateAuthState(AuthStates.NotAuthorize)
+            logout()
             history.push(LOGIN_PATH)
         }
 
