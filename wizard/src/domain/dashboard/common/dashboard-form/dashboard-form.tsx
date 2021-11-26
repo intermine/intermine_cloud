@@ -21,6 +21,10 @@ export type TDashboardFormProps = React.FormHTMLAttributes<HTMLFormElement> & {
     isDirty: boolean
 }
 
+const _handleOnBeforeUnload = (event: Event) => {
+    handleOnBeforeUnload(event)
+}
+
 export const DashboardForm = (props: TDashboardFormProps) => {
     const { isDirty, ...rest } = props
 
@@ -33,7 +37,7 @@ export const DashboardForm = (props: TDashboardFormProps) => {
                 isPageSwitchingAllowed: false,
                 onSidebarItemClick: (to) => showWarningModal({ to })
             })
-            window.addEventListener('beforeunload', handleOnBeforeUnload)
+            window.addEventListener('beforeunload', _handleOnBeforeUnload)
         }
 
         return () => {
@@ -42,7 +46,7 @@ export const DashboardForm = (props: TDashboardFormProps) => {
                 onSidebarItemClick: () => false
             })
 
-            window.removeEventListener('beforeunload', handleOnBeforeUnload)
+            window.removeEventListener('beforeunload', _handleOnBeforeUnload)
         }
     }, [isDirty])
     return (

@@ -121,9 +121,7 @@ export const authMachine = createMachine<
         },
         services: {
             login: () => {
-                return new Promise((resolve, reject) =>
-                    setTimeout(resolve, 4000)
-                )
+                return new Promise((resolve, reject) => setTimeout(resolve, 0))
             },
         },
     }

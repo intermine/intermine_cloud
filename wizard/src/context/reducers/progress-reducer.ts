@@ -46,6 +46,8 @@ const progressReducer = (
                 [(data as TProgressItem).id]: data as TProgressItem,
             }
 
+            console.log(state)
+
             return { ...state }
 
         case UpdateProgressItem:
@@ -67,7 +69,7 @@ const progressReducer = (
                 isDependentOnBrowser,
             }
 
-            state.isRestrictUnmount = hasToRestrictUnmount(state.activeItems)
+            state.isRestrictUnmount ||= hasToRestrictUnmount(state.activeItems)
 
             return { ...state }
 
