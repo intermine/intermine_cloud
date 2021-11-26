@@ -13,10 +13,8 @@ import { UploadBox } from './upload-box'
 import { UploadFileInfo } from './upload-file-info'
 import { WorkspaceHeading } from '../workspace-heading'
 import { DashboardFormContext } from './dashboard-form-context'
-import { useDashboardWarningModal, useLogout } from '../../utils/hooks'
+import { useDashboardWarningModal } from '../../utils/hooks'
 import { useSidebarReducer } from '../../../../context'
-import { useAdditionalSidebarReducer } from '../../../../context'
-import { LOGIN_PATH } from '../../../../routes'
 import { handleOnBeforeUnload } from '../../utils/misc'
 
 export type TDashboardFormProps = React.FormHTMLAttributes<HTMLFormElement> & {
@@ -27,28 +25,13 @@ export const DashboardForm = (props: TDashboardFormProps) => {
     const { isDirty, ...rest } = props
 
     const { updateSidebarState } = useSidebarReducer()
-    const { updateAdditionalSidebarState } = useAdditionalSidebarReducer()
     const { showWarningModal } = useDashboardWarningModal()
-    const { logout } = useLogout()
 
     useEffect(() => {
         if (isDirty) {
             updateSidebarState({
                 isPageSwitchingAllowed: false,
                 onSidebarItemClick: (to) => showWarningModal({ to })
-            })
-
-            updateAdditionalSidebarState({
-                logout: {
-                    isLogoutAllowed: false,
-                    onLogoutClick: () => {
-                        showWarningModal({
-                            to: LOGIN_PATH,
-                            primaryActionTitle: 'Logout',
-                            primaryActionCallback: logout
-                        })
-                    }
-                }
             })
             window.addEventListener('beforeunload', handleOnBeforeUnload)
         }
@@ -57,9 +40,6 @@ export const DashboardForm = (props: TDashboardFormProps) => {
             updateSidebarState({
                 isPageSwitchingAllowed: true,
                 onSidebarItemClick: () => false
-            })
-            updateAdditionalSidebarState({
-                logout: { isLogoutAllowed: true, onLogoutClick: () => false }
             })
 
             window.removeEventListener('beforeunload', handleOnBeforeUnload)
