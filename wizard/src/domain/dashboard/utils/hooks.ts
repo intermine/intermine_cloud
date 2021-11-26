@@ -10,6 +10,7 @@ import { AuthStates } from '../../../constants/auth'
 import { TProgressItem } from '../../../context/types'
 import { AdditionalSidebarTabs } from '../../../constants/additional-sidebar'
 import { ProgressItemStatus } from '../../../constants/progress'
+import { LOGIN_PATH } from '../../../routes'
 
 type TUseDashboardWarningModalProps = {
     msg?: string
@@ -25,7 +26,7 @@ export const useDashboardWarningModal = () => {
 
     const showWarningModal = (props: TUseDashboardWarningModalProps) => {
         const {
-            msg = 'All your work will be lost',
+            msg = 'All your work will be lost.',
             primaryActionTitle = 'Proceed',
             secondaryActionTitle = 'Cancel',
             to = '/',
@@ -58,15 +59,105 @@ export const useDashboardWarningModal = () => {
     }
 }
 
+export enum RestrictLogoutRestrictions {
+    FormIsDirty = 'FormIsDirty',
+    Uploading = 'Uploading',
+}
+
+export type TRestrictAdditionalSidebarLogoutWithModalProps =
+    TUseDashboardWarningModalProps & {
+        type: RestrictLogoutRestrictions
+    }
+
 export const useLogout = () => {
+    const { FormIsDirty, Uploading } = RestrictLogoutRestrictions
+
     const { updateAuthState } = useAuthReducer()
+    const { updateAdditionalSidebarLogoutState } = useAdditionalSidebarReducer()
+    const { showWarningModal } = useDashboardWarningModal()
 
     const logout = () => {
         updateAuthState(AuthStates.NotAuthorize)
     }
 
+    const restrictAdditionalSidebarLogoutWithModal = (
+        props: TRestrictAdditionalSidebarLogoutWithModalProps
+    ) => {
+        const { type, primaryActionCallback, ...rest } = props
+
+        if (type === FormIsDirty) {
+            updateAdditionalSidebarLogoutState({
+                isEditingForm: true,
+                onLogoutClickCallbacks: {
+                    editingFormCallback: () => {
+                        showWarningModal({
+                            to: LOGIN_PATH,
+                            primaryActionTitle: 'Logout',
+                            primaryActionCallback: () => {
+                                logout()
+                                primaryActionCallback && primaryActionCallback()
+                            },
+                            ...rest,
+                        })
+                    },
+                },
+            })
+
+            return
+        }
+
+        if (type === Uploading) {
+            updateAdditionalSidebarLogoutState({
+                isUploading: true,
+                onLogoutClickCallbacks: {
+                    uploadingFormCallback: () => {
+                        showWarningModal({
+                            to: LOGIN_PATH,
+                            primaryActionTitle: 'Logout',
+                            primaryActionCallback: () => {
+                                logout()
+                                primaryActionCallback && primaryActionCallback()
+                            },
+                            msg: `If you logout, then all the uploads
+                            in progress will be lost.`,
+                            ...rest,
+                        })
+                    },
+                },
+            })
+            return
+        }
+    }
+
+    const removeAdditionalSidebarLogoutWithModalRestriction = (props: {
+        type: RestrictLogoutRestrictions
+    }) => {
+        const { type } = props
+        if (type === FormIsDirty) {
+            updateAdditionalSidebarLogoutState({
+                isEditingForm: false,
+                onLogoutClickCallbacks: {
+                    editingFormCallback: () => false,
+                },
+            })
+
+            return
+        }
+
+        if (type === Uploading) {
+            updateAdditionalSidebarLogoutState({
+                isUploading: false,
+                onLogoutClickCallbacks: {
+                    uploadingFormCallback: () => false,
+                },
+            })
+        }
+    }
+
     return {
         logout,
+        restrictAdditionalSidebarLogoutWithModal,
+        removeAdditionalSidebarLogoutWithModalRestriction,
     }
 }
 
