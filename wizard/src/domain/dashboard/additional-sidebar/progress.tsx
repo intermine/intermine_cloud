@@ -2,31 +2,13 @@ import { useEffect } from 'react'
 import { Typography } from '@intermine/chromatin/typography'
 
 import { AdditionalSidebarTabs } from '../../../constants/additional-sidebar'
-import { ProgressItemStatus } from '../../../constants/progress'
 import {
     useAdditionalSidebarReducer,
     useProgressReducer
 } from '../../../context'
-import { TProgressItem } from '../../../context/types'
-import { uploadService } from '../common/dashboard-form'
 import { ActionSection } from './action-section'
 import { ProgressItemView } from './progress-item-view'
-
-const { Canceled, Running } = ProgressItemStatus
-
-const handleOnCancelUpload = (item: TProgressItem) => {
-    const { cancelSourceToken } = item
-    cancelSourceToken.cancel(Canceled)
-}
-
-const handleOnBeforeUnload = (event: Event) => {
-    event.preventDefault()
-
-    // @ts-expect-error Chrome requires returnValue to be set
-    event.returnValue = ''
-
-    return 'Are you sure? Some file(s) are still uploading.'
-}
+import { handleOnBeforeUnload } from '../utils/misc'
 
 export const Progress = () => {
     const additionalSidebarReducer = useAdditionalSidebarReducer()
@@ -37,34 +19,21 @@ export const Progress = () => {
     } = additionalSidebarReducer
 
     const {
-        state: { progressItems, activeItems },
-        updateProgressItem,
-        removeItemFromProgress,
-        addActiveItem
+        state: { progressItems, isRestrictUnmount },
+        removeItemFromProgress
     } = progressReducer
 
-    const handleOnRetryClick = (item: TProgressItem) => {
-        const { cancelSourceToken } = uploadService({
-            ...item
-        })
-
-        addActiveItem(item.id)
-
-        updateProgressItem({
-            ...item,
-            status: Running,
-            loadedSize: 0,
-            cancelSourceToken
-        })
-    }
-
     useEffect(() => {
-        if (Object.keys(activeItems).length === 0) {
+        if (isRestrictUnmount) {
             window.removeEventListener('beforeunload', handleOnBeforeUnload)
         } else {
             window.addEventListener('beforeunload', handleOnBeforeUnload)
         }
-    }, [Object.keys(activeItems).length])
+
+        return () => {
+            window.addEventListener('beforeunload', handleOnBeforeUnload)
+        }
+    }, [isRestrictUnmount])
 
     return (
         <ActionSection
@@ -78,19 +47,16 @@ export const Progress = () => {
                     </Typography>
                 )}
 
-                {Object.keys(progressItems).map((key) => (
-                    <ProgressItemView
-                        key={progressItems[key].id}
-                        onCancelUpload={() =>
-                            handleOnCancelUpload(progressItems[key])
-                        }
-                        onRemoveClick={removeItemFromProgress}
-                        onRetryClick={() =>
-                            handleOnRetryClick(progressItems[key])
-                        }
-                        {...progressItems[key]}
-                    />
-                ))}
+                {Object.keys(progressItems).map((key) => {
+                    const { id } = progressItems[key]
+                    return (
+                        <ProgressItemView
+                            key={id}
+                            onRemoveItem={removeItemFromProgress}
+                            {...progressItems[key]}
+                        />
+                    )
+                })}
             </ActionSection.Content>
         </ActionSection>
     )

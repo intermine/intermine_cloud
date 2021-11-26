@@ -6,6 +6,8 @@ import type {
     TUseProgressReducer,
     TProgressReducerAction,
     TProgressItem,
+    TProgressActiveItem,
+    TProgressActiveItems,
 } from '../types'
 
 const {
@@ -19,6 +21,16 @@ const {
 const progressReducerInitialState: TProgressReducer = {
     progressItems: {},
     activeItems: {},
+    isRestrictUnmount: false,
+}
+
+const hasToRestrictUnmount = (activeItems: TProgressActiveItems) => {
+    for (const key in activeItems) {
+        if (activeItems[key].isRestrictUnmount) {
+            return true
+        }
+    }
+    return false
 }
 
 const progressReducer = (
@@ -49,15 +61,19 @@ const progressReducer = (
             return { ...state }
 
         case AddActiveItem:
-            state.activeItems = {
-                ...state.activeItems,
-                [data as string]: data as string,
+            const { id, isRestrictUnmount } = data as TProgressActiveItem
+            state.activeItems[id] = {
+                id,
+                isRestrictUnmount,
             }
+
+            state.isRestrictUnmount = hasToRestrictUnmount(state.activeItems)
 
             return { ...state }
 
         case RemoveActiveItem:
             delete state.activeItems[data as string]
+            state.isRestrictUnmount = hasToRestrictUnmount(state.activeItems)
             return { ...state }
 
         /* istanbul ignore next */
@@ -96,10 +112,10 @@ export const useProgressReducer = (): TUseProgressReducer => {
         })
     }
 
-    const addActiveItem = (id: string) => {
+    const addActiveItem = (data: TProgressActiveItem) => {
         dispatch({
             type: AddActiveItem,
-            data: id,
+            data,
         })
     }
     const removeActiveItem = (id: string) => {

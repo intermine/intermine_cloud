@@ -2,7 +2,6 @@ import { AlertProps } from '@intermine/chromatin/alert'
 import { ButtonCommonProps } from '@intermine/chromatin/button'
 
 import type { ThemeType } from '@intermine/chromatin/styles'
-import type { CancelTokenSource } from 'axios'
 
 import {
     AdditionalSidebarActions,
@@ -177,23 +176,33 @@ export type TUseGlobalAlertReducer = {
  * Progress
  */
 export type TProgressItem = {
+    id: string
+    name: string
+    status: ProgressItemStatus
     totalSize: number
     loadedSize: number
     getProgressText: (loadedSize: number, totalSize: number) => string
-    name: string
-    file?: File
-    url?: string
+    onRetry: (data: any) => void
+    onCancel: (data: any) => void
+}
+
+export type TProgressItems = {
+    [X in string]: TProgressItem
+}
+
+export type TProgressActiveItem = {
     id: string
-    cancelSourceToken: CancelTokenSource
-    status: ProgressItemStatus
-    onSuccessful?: (data: any) => void
-    onFailed?: (data: any) => void
-    onProgress?: (data: any) => void
+    isRestrictUnmount: boolean
+}
+
+export type TProgressActiveItems = {
+    [X in string]: TProgressActiveItem
 }
 
 export type TProgressReducer = {
-    progressItems: { [id: string]: TProgressItem }
-    activeItems: { [id: string]: string }
+    progressItems: TProgressItems
+    activeItems: TProgressActiveItems
+    isRestrictUnmount: boolean
 }
 
 export type TProgressReducerAction = {
@@ -206,7 +215,7 @@ export type TUseProgressReducer = {
     addItemToProgress: (data: TProgressItem) => void
     updateProgressItem: (data: Partial<TProgressItem>) => void
     removeItemFromProgress: (id: string) => void
-    addActiveItem: (id: string) => void
+    addActiveItem: (data: TProgressActiveItem) => void
     removeActiveItem: (id: string) => void
 }
 

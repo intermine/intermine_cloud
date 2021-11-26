@@ -15,9 +15,7 @@ import { TProgressItem } from '../../../context/types'
 import { ProgressItemStatus } from '../../../constants/progress'
 
 type TProgressItemViewProps = TProgressItem & {
-    onCancelUpload: (id: string) => void
-    onRemoveClick: (id: string) => void
-    onRetryClick: (id: string) => void
+    onRemoveItem: (id: string) => void
 }
 
 type TUseStyleProps = {
@@ -86,9 +84,9 @@ export const ProgressItemView = (props: TProgressItemViewProps) => {
         totalSize,
         id,
         status,
-        onCancelUpload,
-        onRemoveClick,
-        onRetryClick,
+        onCancel = () => false,
+        onRetry = () => false,
+        onRemoveItem = () => false,
         getProgressText
     } = props
 
@@ -106,7 +104,7 @@ export const ProgressItemView = (props: TProgressItemViewProps) => {
                         size="small"
                         isDense
                         Icon={<CancelIcon />}
-                        onClick={() => onCancelUpload(id)}
+                        onClick={() => onCancel(id)}
                     />
                 </Tooltip>
             )
@@ -124,7 +122,7 @@ export const ProgressItemView = (props: TProgressItemViewProps) => {
                     size="small"
                     isDense
                     Icon={<RemoveIcon />}
-                    onClick={() => onRemoveClick(id)}
+                    onClick={() => onRemoveItem(id)}
                 />
             </Tooltip>
         )
@@ -143,7 +141,7 @@ export const ProgressItemView = (props: TProgressItemViewProps) => {
                         size="small"
                         isDense
                         Icon={<RetryIcon />}
-                        onClick={() => onRetryClick(id)}
+                        onClick={() => onRetry(id)}
                     />
                 </Tooltip>
             )
