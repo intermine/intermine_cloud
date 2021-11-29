@@ -58,17 +58,19 @@ export const FormSelect = <
                 },
                 option: {
                     borderRadius: '0.25rem',
-                    padding: '0.5rem'
+                    padding: '0.6rem'
                 },
                 menu: {
                     background: themeType === 'dark' ? darkGrey[40] : white,
-                    borderRadius: '0.25rem',
-                    boxShadow:
-                        themeType === 'dark' ? elevation.low : elevation.none,
+                    borderRadius: '0.4rem',
+                    boxShadow: elevation.medium,
                     border:
                         '1px solid ' +
                         (themeType === 'dark' ? darkGrey[50] : grey[30]),
                     overflow: 'hidden',
+                    padding: '0rem'
+                },
+                menuList: {
                     padding: '0.5rem'
                 },
                 ...csx
