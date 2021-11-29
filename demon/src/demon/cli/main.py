@@ -9,6 +9,7 @@ import click
 from demon.cli.data import data
 from demon.cli.mine import mine
 from demon.cli.template import template
+from demon.cli.argo import argo
 from .. import __version__
 
 
@@ -28,3 +29,4 @@ main.add_command(sub)
 main.add_command(data)
 main.add_command(template)
 main.add_command(mine)
+main.add_command(argo)

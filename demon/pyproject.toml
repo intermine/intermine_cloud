@@ -5,6 +5,8 @@ description = "Demon for InterMine Cloud"
 authors = ["Ankur Kumar <ank@leoank.me>"]
 license = "MIT"
 
+include = ["minebuilder.yaml.template", "minedeployer.yaml.template"]
+
 [tool.poetry.dependencies]
 python = "^3.8"
 blackcap = "^0.18.0"
@@ -13,6 +15,8 @@ minio = "^7.1.1"
 tqdm = "^4.62.3"
 requests = "^2.26.0"
 xdg = "^5.1.1"
+Jinja2 = "^3.0.3"
+kubernetes = "^19.15.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.2.4"
