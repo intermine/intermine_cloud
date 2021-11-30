@@ -8,7 +8,7 @@ from blackcap.messenger import messenger_registry
 from blackcap.configs import config_registry
 
 config = config_registry.get_config()
-messenger = messenger_registry.get_messenger(config)
+messenger = messenger_registry.get_messenger(config.MESSENGER)
 
 
 class ArgoCluster(BaseCluster):

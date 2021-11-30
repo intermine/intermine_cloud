@@ -5,7 +5,14 @@ Workflows to NATS.
 import re
 from typing import Dict, Optional
 
-from kubernetes import client, config, watch
+from kubernetes import client, config as kube_config, watch
+
+from blackcap.messenger import messenger_registry
+from blackcap.configs import config_registry
+
+
+config = config_registry.get_config()
+messenger = messenger_registry.get_messenger(config.MESSENGER)
 
 
 def _parse_annotations(annotations: Dict[str, str]) -> Optional[Dict]:
@@ -29,7 +36,7 @@ def _parse_annotations(annotations: Dict[str, str]) -> Optional[Dict]:
 
 
 def main(namespace: str) -> None:
-    config.load_kube_config()
+    kube_config.load_kube_config()
     v1 = client.CoreV1Api()
     w = watch.Watch()
 
@@ -37,7 +44,8 @@ def main(namespace: str) -> None:
         if event["type"] == "ADDED" and event["object"].metadata.annotations:
             message_event = _parse_annotations(event["object"].metadata.annotations)
             if message_event:
-                print(str(message_event))
+                messenger.publish({"data": message_event}, "mineprogress")
+                # print(str(message_event))
 
         # print(
         #     "Event: %s %s %s %s"

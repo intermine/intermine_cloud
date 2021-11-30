@@ -15,3 +15,5 @@ class DemonDefaultConfig(DefaultConfig):
     MINIO_SECURE: bool = False
     DB_NAME: str = "demon"
     DB_URI: str = f"sqlite:////{xdg_data_home() / ('imcloud') / ('demon.db')}"
+    MESSENGER: str = "NATS"
+    NATS_ENDPOINT: str = "nats://0.0.0.0:4222"
