@@ -309,7 +309,7 @@ export const useDashboardUpload = (
     const onInputChange = (event: React.FormEvent<HTMLInputElement>) => {
         try {
             const files = event.currentTarget.files
-            if (files) {
+            if (files && files.length > 0) {
                 setFile(files[0])
             }
         } catch (error) {
