@@ -29,13 +29,13 @@ const useBoxStyles = createStyle((theme) => {
 
     return {
         uploadBox: (props: TUseStyleProps) => ({
-            border:
-                '5px dashed ' + (themeType === 'dark' ? neutral[20] : grey[50]),
+            border: '5px dashed',
             borderRadius: '0.5rem',
             height: '8rem',
             margin: spacing(3, 0),
             width: '100%',
             transition: '0.3s',
+            borderColor: themeType === 'dark' ? neutral[20] : grey[50],
             ...(props.dragEvent.isDragOver && {
                 transform: 'scale(1.1)',
                 background: themeType === 'dark' ? neutral[10] : grey[20]
