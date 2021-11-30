@@ -13,13 +13,15 @@ import RetryIcon from '@intermine/chromatin/icons/System/arrow-go-forward-line'
 
 import { TProgressItem } from '../../../context/types'
 import { ProgressItemStatus } from '../../../constants/progress'
+import { Button } from '@intermine/chromatin'
+import { Link } from 'react-router-dom'
 
 type TProgressItemViewProps = TProgressItem & {
     onRemoveItem: (id: string) => void
 }
 
 type TUseStyleProps = {
-    uploadPercentage: string
+    progressPercentage: string
 }
 
 const { Completed, Running, Canceled, Failed } = ProgressItemStatus
@@ -45,10 +47,10 @@ const useStyle = createStyle((theme) => {
         progressIndicator: (props: TUseStyleProps) => ({
             background: primary.main,
             height: '100%',
-            width: props.uploadPercentage,
+            width: props.progressPercentage,
             transition: '0.3s'
         }),
-        textContainer: {
+        rowContainer: {
             alignItems: 'center',
             display: 'flex',
             justifyContent: 'space-between',
@@ -87,7 +89,9 @@ export const ProgressItemView = (props: TProgressItemViewProps) => {
         onCancel = () => false,
         onRetry = () => false,
         onRemoveItem = () => false,
-        getProgressText
+        getProgressText,
+        getOnSuccessViewButtonProps,
+        getRunningStatusText = () => ''
     } = props
 
     const getPrimaryAction = (): JSX.Element => {
@@ -95,7 +99,7 @@ export const ProgressItemView = (props: TProgressItemViewProps) => {
             return (
                 <Tooltip
                     {...defaultTooltipProps}
-                    message="Cancel upload"
+                    message="Cancel"
                     key="cancel"
                     color="error"
                 >
@@ -104,7 +108,7 @@ export const ProgressItemView = (props: TProgressItemViewProps) => {
                         size="small"
                         isDense
                         Icon={<CancelIcon />}
-                        onClick={() => onCancel(id)}
+                        onClick={() => onCancel()}
                     />
                 </Tooltip>
             )
@@ -134,14 +138,14 @@ export const ProgressItemView = (props: TProgressItemViewProps) => {
                 <Tooltip
                     {...defaultTooltipProps}
                     color="secondary"
-                    message="Retry upload"
+                    message="Retry"
                 >
                     <IconButton
                         color="secondary"
                         size="small"
                         isDense
                         Icon={<RetryIcon />}
-                        onClick={() => onRetry(id)}
+                        onClick={() => onRetry()}
                     />
                 </Tooltip>
             )
@@ -167,22 +171,47 @@ export const ProgressItemView = (props: TProgressItemViewProps) => {
         if (status === Completed) {
             return {
                 children: 'Completed',
-                color: 'primary'
+                color: 'info'
             }
         }
 
         return {
-            children: 'Progress',
-            color: 'info'
+            children: getRunningStatusText(loadedSize, totalSize),
+            color: 'neutral.30',
+            variant: 'bodySm'
         }
     }
 
-    const uploadPercentage = ((100 * loadedSize) / totalSize).toFixed(1) + '%'
-    const classes = useStyle({ uploadPercentage })
+    const getViewButton = () => {
+        if (
+            status !== Completed ||
+            typeof getOnSuccessViewButtonProps !== 'function'
+        )
+            return <></>
+        const { title, to, target } = getOnSuccessViewButtonProps()
+
+        return (
+            <Button
+                variant="ghost"
+                color="primary"
+                size="small"
+                isDense
+                Component={Link}
+                to={to}
+                target={target}
+                csx={{ root: { padding: '0.25rem 0' } }}
+            >
+                {title}
+            </Button>
+        )
+    }
+
+    const progressPercentage = ((100 * loadedSize) / totalSize).toFixed(1) + '%'
+    const classes = useStyle({ progressPercentage })
 
     return (
         <Box className={classes.root}>
-            <Box className={classes.textContainer}>
+            <Box className={classes.rowContainer}>
                 <Typography isTruncateText variant="bodySm">
                     {name}
                 </Typography>
@@ -190,23 +219,28 @@ export const ProgressItemView = (props: TProgressItemViewProps) => {
                 {getSecondaryAction()}
                 {getPrimaryAction()}
             </Box>
-            <Box className={classes.textContainer}>
-                <Typography isTruncateText variant="small" color="neutral.30">
+            <Box className={classes.rowContainer}>
+                <Typography isTruncateText variant="bodySm" color="neutral.30">
                     {getProgressText(loadedSize, totalSize)}
                 </Typography>
 
-                <Typography Component="span" variant="small" color="neutral.30">
-                    {uploadPercentage}
+                <Typography
+                    Component="span"
+                    variant="bodySm"
+                    color="neutral.30"
+                >
+                    {progressPercentage}
                 </Typography>
             </Box>
-            {status !== Running && (
-                <Typography variant="caption" {...getStatusTextProps()} />
-            )}
             {status === Running && (
                 <Box className={classes.progressContainer}>
                     <Box className={classes.progressIndicator}></Box>
                 </Box>
             )}
+            <Box className={classes.rowContainer}>
+                <Typography variant="caption" {...getStatusTextProps()} />
+                {getViewButton()}
+            </Box>
         </Box>
     )
 }

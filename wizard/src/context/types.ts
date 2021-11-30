@@ -2,6 +2,8 @@ import { AlertProps } from '@intermine/chromatin/alert'
 import { ButtonCommonProps } from '@intermine/chromatin/button'
 
 import type { ThemeType } from '@intermine/chromatin/styles'
+import { HTMLAttributeAnchorTarget } from 'react'
+import { LinkProps } from 'react-router-dom'
 
 import {
     AdditionalSidebarActions,
@@ -192,6 +194,12 @@ export type TProgressItem = {
     getProgressText: (loadedSize: number, totalSize: number) => string
     onRetry: () => void
     onCancel: () => void
+    getOnSuccessViewButtonProps?: () => {
+        to: LinkProps['to']
+        title: string
+        target?: HTMLAttributeAnchorTarget
+    }
+    getRunningStatusText?: (loadedSize: number, totalSize: number) => string
 }
 
 export type TProgressItems = {
