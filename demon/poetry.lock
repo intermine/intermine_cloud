@@ -433,7 +433,7 @@ doc = ["sphinx", "sphinx-rtd-theme", "sphinxcontrib-spelling"]
 
 [[package]]
 name = "faker"
-version = "9.8.3"
+version = "9.9.0"
 description = "Faker is a Python package that generates fake data for you."
 category = "dev"
 optional = false
@@ -508,7 +508,11 @@ toml = "*"
 
 [[package]]
 name = "flake8-bugbear"
+<<<<<<< HEAD
 version = "21.11.28"
+=======
+version = "21.11.29"
+>>>>>>> 7622ae7 (update deps)
 description = "A plugin for flake8 finding likely bugs and design problems in your program. Contains warnings that don't belong in pyflakes and pycodestyle."
 category = "dev"
 optional = false
@@ -944,7 +948,7 @@ python-versions = "*"
 
 [[package]]
 name = "minio"
-version = "7.1.1"
+version = "7.1.2"
 description = "MinIO Python SDK for Amazon S3 Compatible Cloud Storage"
 category = "main"
 optional = false
@@ -1678,7 +1682,7 @@ testing = ["pytest (>=4.6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytes
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "94af2de96f3310ae0a46fba6354b1d56a5f4589bc76f61de21c0c0c245714f8b"
+content-hash = "a80fbc5ad3de7b17862d0af8f990d6afae0c067530b7f53ca0c7dfc9f2a8776c"
 
 [metadata.files]
 alembic = [
@@ -1913,8 +1917,8 @@ factory-boy = [
     {file = "factory_boy-3.2.1.tar.gz", hash = "sha256:a98d277b0c047c75eb6e4ab8508a7f81fb03d2cb21986f627913546ef7a2a55e"},
 ]
 faker = [
-    {file = "Faker-9.8.3-py3-none-any.whl", hash = "sha256:76ad74cebe727affa1c108e17fc1d2c0be8f498ff71b25f464fb8241301fe6f2"},
-    {file = "Faker-9.8.3.tar.gz", hash = "sha256:3c997b505627e63eb54e7ec268d0669bc5b6b98c1822f632d2784d91664d5f11"},
+    {file = "Faker-9.9.0-py3-none-any.whl", hash = "sha256:049185d17ff95c4311557da6b72416c18732e5977dcfd116a323b6d620db5dca"},
+    {file = "Faker-9.9.0.tar.gz", hash = "sha256:7227703a3db36ed8241108547544445f45aa45db2f3f63e885cb9b5699383f0e"},
 ]
 filelock = [
     {file = "filelock-3.4.0-py3-none-any.whl", hash = "sha256:2e139a228bcf56dd8b2274a65174d005c4a6b68540ee0bdbb92c76f43f29f7e8"},
@@ -1936,8 +1940,13 @@ flake8-black = [
     {file = "flake8_black-0.2.3-py3-none-any.whl", hash = "sha256:cc080ba5b3773b69ba102b6617a00cc4ecbad8914109690cfda4d565ea435d96"},
 ]
 flake8-bugbear = [
+<<<<<<< HEAD
     {file = "flake8-bugbear-21.11.28.tar.gz", hash = "sha256:5d7aad75b270ab93d64d479f4285909aaceae177b3fee482a80d2affe904ab01"},
     {file = "flake8_bugbear-21.11.28-py36.py37.py38-none-any.whl", hash = "sha256:35e6333c37d9e9806d9919acd10740cd4de111c180afe9921c8f4410fbb76e1c"},
+=======
+    {file = "flake8-bugbear-21.11.29.tar.gz", hash = "sha256:8b04cb2fafc6a78e1a9d873bd3988e4282f7959bb6b0d7c1ae648ec09b937a7b"},
+    {file = "flake8_bugbear-21.11.29-py36.py37.py38-none-any.whl", hash = "sha256:179e41ddae5de5e3c20d1f61736feeb234e70958fbb56ab3c28a67739c8e9a82"},
+>>>>>>> 7622ae7 (update deps)
 ]
 flake8-docstrings = [
     {file = "flake8-docstrings-1.6.0.tar.gz", hash = "sha256:9fe7c6a306064af8e62a055c2f61e9eb1da55f84bb39caef2b84ce53708ac34b"},
@@ -2220,8 +2229,8 @@ mccabe = [
     {file = "mccabe-0.6.1.tar.gz", hash = "sha256:dd8d182285a0fe56bace7f45b5e7d1a6ebcbf524e8f3bd87eb0f125271b8831f"},
 ]
 minio = [
-    {file = "minio-7.1.1-py3-none-any.whl", hash = "sha256:6e46317a47c9e0f374dec8f9e3961bd1a2cd95b717b98f04680a0e9ff1d691e1"},
-    {file = "minio-7.1.1.tar.gz", hash = "sha256:f8271a56c3b91b54c9b25e3d12e1a88ccffea70b7bdce5c906e7bb7dea45c7ba"},
+    {file = "minio-7.1.2-py3-none-any.whl", hash = "sha256:51318733496f37617bebfefe116453406a0d5afc6add8c421df07f32e0843c2b"},
+    {file = "minio-7.1.2.tar.gz", hash = "sha256:40d0cdb4dba5d5610d6599ea740cf827102db5bfa71279fc220c3cf7305bedc1"},
 ]
 mypy = [
     {file = "mypy-0.812-cp35-cp35m-macosx_10_9_x86_64.whl", hash = "sha256:a26f8ec704e5a7423c8824d425086705e381b4f1dfdef6e3a1edab7ba174ec49"},

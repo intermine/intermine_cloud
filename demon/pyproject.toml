@@ -17,6 +17,7 @@ requests = "^2.26.0"
 xdg = "^5.1.1"
 Jinja2 = "^3.0.3"
 kubernetes = "^19.15.0"
+PyYAML = "^6.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.2.4"
