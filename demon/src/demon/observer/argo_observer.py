@@ -70,9 +70,13 @@ def main(namespace: str) -> None:
     w = watch.Watch()
 
     for event in w.stream(api.list_namespaced_event, namespace, field_selector='involvedObject.kind=Workflow'):
-        message_event = _parse_object(event['object'])
-        if message_event:
-            messenger.publish({"data": message_event}, "mineprogress")
+        # Prior workflows will broadcast DELETED events when they get GC'ed, so
+        # we have to filter those out so we won't publish them as being a
+        # workflow in progress.
+        if event['type'] in ['ADDED', 'MODIFIED']:
+            message_event = _parse_object(event['object'])
+            if message_event:
+                messenger.publish({"data": message_event}, "mineprogress")
             # print(str(message_event))
 
         # print(json.dumps({'type': event['type'],
