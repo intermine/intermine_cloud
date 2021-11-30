@@ -1,0 +1,177 @@
+# This workflow is a Jinja template, so it needs variables to be
+# injected before you can submit it.
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: deploy-a-mine-
+spec:
+  entrypoint: deploy-mine
+  volumeClaimTemplates:
+  - metadata:
+      name: workdir
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 200Mi
+  - metadata:
+      name: postgres-data
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 1Gi
+  - metadata:
+      name: solr-data
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 1Gi
+  - metadata:
+      name: tomcat-data
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 1Gi
+  templates:
+  - name: deploy-mine
+    steps:
+    - - name: get-artifacts
+        template: getter
+
+    - - name: start-services
+        template: intermine-instance
+
+    - - name: prepare-deploy
+        template: prebuilder
+        arguments:
+          parameters:
+          - name: postgres-host
+            value: {% raw %}"{{workflow.name}}-postgres"{% endraw %}
+          - name: solr-host
+            value: {% raw %}"{{workflow.name}}-solr"{% endraw %}
+          - name: tomcat-host
+            value: {% raw %}"{{workflow.name}}-tomcat"{% endraw %}
+
+    - - name: prepare-tomcat
+        template: tomcat
+
+    - - name: deploy
+        template: war-builder
+
+  - name: getter
+    inputs:
+      artifacts:
+      - name: minedir
+        path: /home/intermine/{{ mine_name }}
+        http:
+          url: {{ get_minedir }}
+      - name: postgres-data
+        path: /postgres/data
+        http:
+          url: {{ get_postgres }}
+      - name: solr-data
+        path: /solr/server/solr
+        http:
+          url: {{ get_solr }}
+    container:
+      image: alpine:3.8
+      command:  [sh, -c]
+      args: ["chown -R 1001:1001 /postgres/data /solr/server && mv -v /solr/server/solr/data/* /solr/server/solr"]
+      volumeMounts:
+      - name: workdir
+        mountPath: /home/intermine
+      - name: postgres-data
+        mountPath: /postgres
+      - name: solr-data
+        mountPath: /solr
+  - name: intermine-instance
+    resource:
+      action: create
+      manifest: |
+        apiVersion: intermine.org/v1alpha1
+        kind: IntermineInstance
+        metadata:
+          name: {% raw %}"{{workflow.name}}"{% endraw %}
+        spec:
+          postgresql:
+            fullnameOverride: {% raw %}"{{workflow.name}}-postgres"{% endraw %}
+            persistence:
+              existingClaim: {% raw %}"{{workflow.name}}-postgres-data"{% endraw %}
+              mountPath: /bitnami/postgresql/data
+              subPath: data
+          solr:
+            fullnameOverride: {% raw %}"{{workflow.name}}-solr"{% endraw %}
+            persistence:
+              existingClaim: {% raw %}"{{workflow.name}}-solr-data"{% endraw %}
+          tomcat:
+            fullnameOverride: {% raw %}"{{workflow.name}}-tomcat"{% endraw %}
+            persistence:
+              existingClaim: {% raw %}"{{workflow.name}}-tomcat-data"{% endraw %}
+            livenessProbe:
+              httpGet:
+                path: /{{ mine_name }}/begin.do
+            readinessProbe:
+              httpGet:
+                path: /{{ mine_name }}/begin.do
+            initContainers:
+            - name: wait-for-pvc
+              image: bitnami/kubectl:1.20.12
+              command: ["kubectl"]
+              args: {% raw %}["wait", "--for=condition=Completed=True", "workflow/{{workflow.name}}", "--timeout=-1s"]{% endraw %}
+            ingress:
+              hostname: legacy.{{ mine_name }}
+          bluegenes:
+            backendServiceRoot: {% raw %}http://{{workflow.name}}-tomcat:8080{% endraw %}/{{ mine_name }}
+            serviceRoot: http://{{ mine_name }}/{{ mine_name }}
+            mineName: {{ pretty_mine_name }}
+            mineNamespace: {{ mine_name }}
+          ingress:
+            hostname: {{ mine_name }}
+  - name: prebuilder
+    inputs:
+      parameters:
+      - name: postgres-host
+      - name: solr-host
+      - name: tomcat-host
+    container:
+      image: intermine/prebuild:latest
+      command: ["builder_prepare"]
+      args: ["--mine-path", "/home/intermine/{{ mine_name }}", "--override", "webapp.path={{ mine_name }}", "--override", "project.title={{ pretty_mine_name }}"]
+      # TODO support property overrides in a way secrets aren't visible
+      env:
+      - name: PGHOST
+        value: {% raw %}"{{inputs.parameters.postgres-host}}"{% endraw %}
+      - name: SOLR_HOST
+        value: {% raw %}"{{inputs.parameters.solr-host}}"{% endraw %}
+      - name: TOMCAT_HOST
+        value: {% raw %}"{{inputs.parameters.tomcat-host}}"{% endraw %}
+      volumeMounts:
+      - name: workdir
+        mountPath: /home/intermine
+  - name: tomcat
+    container:
+      image: intermine/tomcat:latest
+      # Copy Tomcat configs/libs/etc. excluding webapps.
+      command: ["sh", "-c", "cp -av $CATALINA_HOME/. /tomcat && rm -rvf /tomcat/webapps"]
+      volumeMounts:
+      - name: tomcat-data
+        mountPath: /tomcat
+  - name: war-builder
+    container:
+      image: intermine/build:latest
+      workingDir: /home/intermine/{{ mine_name }}
+      command: [sh, -c]
+      # TODO support webapp.path set to nested directory
+      args: ["./gradlew war && mkdir -v /tomcat/webapps && cp -v webapp/build/libs/webapp.war /tomcat/webapps/{{ mine_name }}.war && chown -R 1001:1001 /tomcat/*"]
+      resources:
+        requests:
+          memory: 4Gi
+          cpu: 500m
+      volumeMounts:
+      - name: workdir
+        mountPath: /home/intermine
+      - name: tomcat-data
+        mountPath: /tomcat
