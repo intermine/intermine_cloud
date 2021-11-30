@@ -18,6 +18,11 @@ const getMsg = (type: 'failed' | 'success', file: File) => {
     return 'Successfully uploaded ' + file.name
 }
 
+export type TRunWhenPresignedURLGeneratedOptions = {
+    name?: string
+    description?: string
+}
+
 export const useUploadPageTemplate = () => {
     const [inlineAlertProps, setInlineAlertProps] = useState<InlineAlertProps>(
         {}
@@ -91,8 +96,10 @@ export const useUploadPageTemplate = () => {
     }
 
     const runWhenPresignedURLGenerated = (
-        upload: TUseDashboardUploadMachineState
+        upload: TUseDashboardUploadMachineState,
+        options = {} as TRunWhenPresignedURLGeneratedOptions
     ) => {
+        const { name: _name = '' } = options
         const { file } = upload.context
         const { id, cancelTokenSource } = uploadFile(upload)
 
@@ -101,9 +108,9 @@ export const useUploadPageTemplate = () => {
             onCancel: () => {
                 onCancelRequest(id, cancelTokenSource)
             },
-            getProgressText: (l, t) => `${getDataSize(l)}/${getDataSize(t)}`,
+            getProgressText: (l, t) => `${getDataSize(l)} / ${getDataSize(t)}`,
             isDependentOnBrowser: true,
-            name: file.name,
+            name: _name !== '' ? _name : file.name,
             totalSize: file.size,
             loadedSize: 0,
             onRetry: () => {

@@ -42,7 +42,10 @@ export const UploadDataset = () => {
     } = useDashboardUpload({
         uploadBaseUrl: uploadEndpoint,
         runWhenPresignedURLGenerated: (upload) => {
-            runWhenPresignedURLGenerated(upload)
+            runWhenPresignedURLGenerated(upload, {
+                name: name.value,
+                description: description.value
+            })
             resetForm()
         },
         runWhenPresignedURLGenerationFailed
