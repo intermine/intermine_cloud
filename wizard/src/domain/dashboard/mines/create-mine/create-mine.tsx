@@ -4,26 +4,23 @@ import { createStyle } from '@intermine/chromatin/styles'
 import { DASHBOARD_MINES_LANDING_PATH } from '../../../../routes'
 import { DashboardForm as DForm } from '../../common/dashboard-form'
 import { useDashboardForm } from '../../common/dashboard-form/utils'
+import { useOnProgress } from '../../utils/hooks'
 import { initialFormFieldsValue } from './form-utils'
 
 const dummyTemplateOptions = [
-    { label: 'HumanMine', value: 'template-1' },
-    { label: 'CovidMine', value: 'template-2' },
-    { label: 'FlyMine', value: 'template-3' },
-    { label: 'RatMine', value: 'template-4' }
+    { label: 'HumanMine - Template', value: 'template-1' },
+    { label: 'CovidMine - Template', value: 'template-2' },
+    { label: 'FlyMine - Template', value: 'template-3' },
+    { label: 'RatMine - Template', value: 'template-4' }
 ]
 
 const dummyDatasetsOptions = [
-    { label: 'Dataset 1', value: 'template-1' },
-    { label: 'Dataset 2', value: 'template-2' },
-    { label: 'Dataset 3', value: 'template-3' },
-    { label: 'Dataset 4', value: 'template-4' },
-    { label: 'Dataset 5', value: 'template-5' },
-    { label: 'Dataset 6', value: 'template-6' },
-    { label: 'Dataset 7', value: 'template-7' },
-    { label: 'Dataset 8', value: 'template-8' },
-    { label: 'Dataset 9', value: 'template-9' },
-    { label: 'Dataset 10', value: 'template-10' }
+    { label: 'Malaria - Genome', value: 'dataset-1' },
+    { label: 'Malaria - UniProt', value: 'dataset-2' },
+    { label: 'Malaria - Kegg', value: 'dataset-3' },
+    { label: 'Drosophila Genome', value: 'dataset-4' },
+    { label: 'Drosophila UniProt', value: 'dataset-5' },
+    { label: 'Drosophila Kegg', value: 'dataset-6' }
 ]
 
 const useStyles = createStyle((theme) => {
@@ -69,6 +66,41 @@ export const CreateMine = () => {
 
     const resetForm = () => {
         resetToInitialState()
+    }
+
+    const { onProgressStart, onProgressUpdate, onProgressSuccessful } =
+        useOnProgress()
+
+    const submitForm = () => {
+        onProgressStart({
+            id: subDomain.value,
+            getProgressText: (loadedSize, totalSize) =>
+                `${loadedSize}/${totalSize} steps`,
+            isDependentOnBrowser: false,
+            loadedSize: 1,
+            totalSize: 11,
+            name: name.value,
+            onCancel: () => console.log('Cancel'),
+            onRetry: () => console.log('Retry')
+        })
+
+        let l = 1
+        const i = setInterval(() => {
+            console.log(l)
+            onProgressUpdate({ id: subDomain.value, loadedSize: ++l })
+            if (l === 11) {
+                onProgressSuccessful({
+                    id: subDomain.value,
+                    successMsg: name.value + ' is successfully created.',
+                    to: {
+                        pathname: 'http://bluegenes.apps.intermine.org/flymine'
+                    }
+                })
+                clearInterval(i)
+            }
+        }, 100)
+
+        resetForm()
     }
 
     return (
@@ -202,7 +234,7 @@ export const CreateMine = () => {
                                 children: 'Create Mine',
                                 key: 'create',
                                 onClick: () =>
-                                    handleFormSubmit((s) => console.log(s))
+                                    handleFormSubmit(() => submitForm())
                             }
                         ]}
                     />
