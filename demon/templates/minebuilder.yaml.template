@@ -213,7 +213,16 @@ spec:
       artifacts:
       - name: mine-dir
         path: /home/intermine/{{ mine_name }}
+        s3:
+          bucket: {{ bucket_name }}
+          key: {{ minedir_bucket_key }}
       - name: postgres-dump
         path: /var/lib/postgresql/data
+        s3:
+          bucket: {{ bucket_name }}
+          key: {{ postgres_bucket_key }}
       - name: solr-dump
         path: /var/solr
+        s3:
+          bucket: {{ bucket_name }}
+          key: {{ solr_bucket_key }}

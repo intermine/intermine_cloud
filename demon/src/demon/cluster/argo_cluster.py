@@ -15,7 +15,7 @@ messenger = messenger_registry.get_messenger(config.MESSENGER)
 def _report_mineprogress(workflow_yaml: str, extra_data: Optional[Dict] = None) -> None:
     workflow = yaml.safe_load(workflow_yaml)
     try:
-        total_steps = workflow["spec"]["templates"][0]["steps"]
+        total_steps = len(workflow["spec"]["templates"][0]["steps"])
     except KeyError:
         # TODO what's the best way to report this error?
         pass

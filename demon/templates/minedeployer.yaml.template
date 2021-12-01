@@ -66,16 +66,19 @@ spec:
       artifacts:
       - name: minedir
         path: /home/intermine/{{ mine_name }}
-        http:
-          url: {{ get_minedir }}
+        s3:
+          bucket: {{ bucket_name }}
+          key: {{ minedir_bucket_key }}
       - name: postgres-data
         path: /postgres/data
-        http:
-          url: {{ get_postgres }}
+        s3:
+          bucket: {{ bucket_name }}
+          key: {{ postgres_bucket_key }}
       - name: solr-data
         path: /solr/server/solr
-        http:
-          url: {{ get_solr }}
+        s3:
+          bucket: {{ bucket_name }}
+          key: {{ solr_bucket_key }}
     container:
       image: alpine:3.8
       command:  [sh, -c]
