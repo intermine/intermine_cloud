@@ -9,6 +9,8 @@ import { TLandingPageListDatum, TLandingPageListHeaderItem } from './types'
 import { useDebouncedCallback } from '@intermine/chromatin/utils'
 import clsx from 'clsx'
 import DownArrow from '@intermine/chromatin/icons/System/arrow-down-s-line'
+import EditIcon from '@intermine/chromatin/icons/Design/pencil-fill'
+import DeleteIcon from '@intermine/chromatin/icons/System/delete-bin-fill'
 
 import { DomElementIDs } from '../../../../constants/ids'
 import { Button } from '@intermine/chromatin'
@@ -271,19 +273,19 @@ const LandingPageListContent = (props: TLandingPageListContentProps) => {
                 >
                     <Button
                         isTextUppercase={false}
-                        size="small"
                         isDense
                         variant="ghost"
                         color="error"
+                        LeftIcon={<DeleteIcon />}
                     >
                         Delete
                     </Button>
                     <Button
                         isTextUppercase={false}
-                        size="small"
                         isDense
                         variant="ghost"
                         color="info"
+                        LeftIcon={<EditIcon />}
                     >
                         Edit
                     </Button>
