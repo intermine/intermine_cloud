@@ -3,6 +3,7 @@ Workflows to NATS.
 """
 
 import re
+
 # import json
 from typing import Dict, Optional
 
@@ -13,16 +14,22 @@ from blackcap.configs import config_registry
 
 
 WORKFLOW_STATES = [
-    'WorkflowRunning',
-    'WorkflowSucceeded',
-    'WorkflowFailed',
-    'WorkflowTimedOut'
+    "WorkflowRunning",
+    "WorkflowSucceeded",
+    "WorkflowFailed",
+    "WorkflowTimedOut",
 ]
 WORKFLOW_NODE_STATES = [
-    'WorkflowNodeRunning',
-    'WorkflowNodeSucceeded',
-    'WorkflowNodeFailed',
-    'WorkflowNodeError'
+    "WorkflowNodeRunning",
+    "WorkflowNodeSucceeded",
+    "WorkflowNodeFailed",
+    "WorkflowNodeError",
+]
+ERROR_STATES = [
+    "WorkflowFailed",
+    "WorkflowTimedOut",
+    "WorkflowNodeFailed",
+    "WorkflowNodeError",
 ]
 
 config = config_registry.get_config()
@@ -37,7 +44,11 @@ def _parse_object(obj) -> Optional[Dict]:
             # Annotations are only present for events of type ADDED.
             # Some events are only broadcasted with type MODIFIED without
             # annotations, so we have to read it from the message instead.
-            node_name = obj.metadata.annotations['workflows.argoproj.io/node-name'] if obj.metadata.annotations else obj.message.split(' ')[-1]
+            node_name = (
+                obj.metadata.annotations["workflows.argoproj.io/node-name"]
+                if obj.metadata.annotations
+                else obj.message.split(" ")[-1]
+            )
 
             # This match also ensures we ignore events for
             # build-a-mine-9l4bh[7]
@@ -47,19 +58,35 @@ def _parse_object(obj) -> Optional[Dict]:
             if not match:
                 return None
 
-            return {
-                "status": obj.reason,
-                "workflow_name": obj.involved_object.name,
-                "current_step_number": int(match.group(2)),
-                "current_step_name": match.group(3),
+            msg = {
+                "message_type": "job_update",
+                "data": {
+                    "status": obj.reason,
+                    "workflow_name": obj.involved_object.name,
+                    "current_step_number": int(match.group(2)),
+                    "current_step_name": match.group(3),
+                },
             }
+            if obj.reason in ERROR_STATES:
+                msg["message_type"] = "job_error"
+                msg["data"]["error_message"] = obj.message
+
+            return msg
         elif obj.reason in WORKFLOW_STATES:
             # Event is for workflow state change.
 
-            return {
-                "status": obj.reason,
-                "workflow_name": obj.involved_object.name,
+            msg = {
+                "message_type": "job_update",
+                "data": {
+                    "status": obj.reason,
+                    "workflow_name": obj.involved_object.name,
+                },
             }
+            if obj.reason in ERROR_STATES:
+                msg["message_type"] = "job_error"
+                msg["data"]["error_message"] = obj.message
+
+            return msg
     except KeyError:
         return None
 
@@ -69,15 +96,20 @@ def main(namespace: str) -> None:
     api = client.CoreV1Api()
     w = watch.Watch()
 
-    for event in w.stream(api.list_namespaced_event, namespace, field_selector='involvedObject.kind=Workflow'):
+    for event in w.stream(
+        api.list_namespaced_event,
+        namespace,
+        field_selector="involvedObject.kind=Workflow",
+    ):
         # Prior workflows will broadcast DELETED events when they get GC'ed, so
         # we have to filter those out so we won't publish them as being a
         # workflow in progress.
-        if event['type'] in ['ADDED', 'MODIFIED']:
-            message_event = _parse_object(event['object'])
-            if message_event:
-                messenger.publish({"data": message_event}, "mineprogress")
-            # print(str(message_event))
+        if event["type"] in ["ADDED", "MODIFIED"]:
+            msg = _parse_object(event["object"])
+            if msg:
+                messenger.publish(msg, "mineprogress")
+                # print(str(event))
+            # print(str(msg))
 
         # print(json.dumps({'type': event['type'],
         #     'involved_object': {'name': event['object'].involved_object.name},
