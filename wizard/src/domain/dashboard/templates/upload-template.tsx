@@ -66,7 +66,11 @@ export const UploadTemplate = () => {
                 <DForm.Wrapper>
                     <DForm.InlineAlert {...inlineAlertProps} />
                     <DForm.Heading>Upload New Template</DForm.Heading>
-                    <DForm.Label main="Name" sub="Name of your template.">
+                    <DForm.Label
+                        isDisabled={isGeneratingPresignedURL}
+                        main="Name"
+                        sub="Name of your template."
+                    >
                         <DForm.Input
                             value={name.value}
                             onChange={(event) =>
@@ -79,6 +83,7 @@ export const UploadTemplate = () => {
                         />
                     </DForm.Label>
                     <DForm.Label
+                        isDisabled={isGeneratingPresignedURL}
                         main="Describe your Template"
                         sub="This will help other users to get an idea about
                         this template. You can write something like: A template 
@@ -99,6 +104,7 @@ export const UploadTemplate = () => {
                     </DForm.Label>
 
                     <DForm.Label
+                        isDisabled={isGeneratingPresignedURL}
                         main="Select a file"
                         sub="You can select .fasta, .tsv, .cst, .etc"
                         hasAsterisk

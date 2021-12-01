@@ -254,7 +254,7 @@ const LandingPageListItemHeaderItem = (props: {
 type TLandingPageListContentProps = {
     className: string
     isOpen: boolean
-    content: string
+    content: React.ReactChildren | React.ReactChildren[] | string
 }
 
 const LandingPageListContent = (props: TLandingPageListContentProps) => {
@@ -263,16 +263,28 @@ const LandingPageListContent = (props: TLandingPageListContentProps) => {
     return (
         <Collapsible in={isOpen}>
             <Box className={className}>
-                <Typography variant="body" color="neutral.40">
+                <Typography Component="div" variant="body" color="neutral.40">
                     {content}
                 </Typography>
                 <Box
                     csx={{ root: { alignSelf: 'flex-end', marginTop: 'auto' } }}
                 >
-                    <Button isDense variant="ghost" color="error">
+                    <Button
+                        isTextUppercase={false}
+                        size="small"
+                        isDense
+                        variant="ghost"
+                        color="error"
+                    >
                         Delete
                     </Button>
-                    <Button isDense variant="ghost" color="info">
+                    <Button
+                        isTextUppercase={false}
+                        size="small"
+                        isDense
+                        variant="ghost"
+                        color="info"
+                    >
                         Edit
                     </Button>
                 </Box>

@@ -66,7 +66,11 @@ export const UploadDataset = () => {
                 <DForm.Wrapper>
                     <DForm.InlineAlert {...inlineAlertProps} />
                     <DForm.Heading>Upload New Dataset</DForm.Heading>
-                    <DForm.Label main="Name" sub="Name of your dataset.">
+                    <DForm.Label
+                        isDisabled={isGeneratingPresignedURL}
+                        main="Name"
+                        sub="Name of your dataset."
+                    >
                         <DForm.Input
                             value={name.value}
                             onChange={(event) =>
@@ -83,6 +87,7 @@ export const UploadDataset = () => {
                         sub="This will help other users to get an idea about
                         this dataset. You can write something like: A dataset 
                         having information about..."
+                        isDisabled={isGeneratingPresignedURL}
                     >
                         <DForm.Input
                             rows={5}
@@ -104,6 +109,7 @@ export const UploadDataset = () => {
                         hasAsterisk
                         isError={uploadMachineState.value === 'fileMissing'}
                         errorMsg="Please select a file."
+                        isDisabled={isGeneratingPresignedURL}
                     >
                         <DForm.UploadBox
                             onInputChange={onInputChange}
