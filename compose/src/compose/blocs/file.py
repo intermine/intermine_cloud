@@ -66,7 +66,7 @@ def create_file(file_list: List[File], user_creds: User) -> List[File]:
                 FileDB(
                     id=file.file_id,
                     protagonist_id=user_creds.user_id,
-                    **file.dict(exclude={"file_id", "presigned_url"}),  # noqa: E501
+                    **file.dict(exclude={"file_id", "presigned_url"}),
                 )
                 for file in file_list
             ]
@@ -77,7 +77,7 @@ def create_file(file_list: List[File], user_creds: User) -> List[File]:
                     presigned_url=create_presigned_post_url(obj, user_creds, "PUT"),
                     **obj.to_dict(),
                 )
-                for obj in file_db_create_list  # noqa: E501
+                for obj in file_db_create_list
             ]
         except Exception as e:
             session.rollback()
@@ -111,9 +111,7 @@ def get_file(query_params: FileGetQueryParams, user_creds: User = None) -> List[
 
     with DBSession() as session:
         try:
-            file_list: List[FileDB] = (
-                session.execute(stmt).scalars().all()
-            )  # noqa: E501
+            file_list: List[FileDB] = session.execute(stmt).scalars().all()
             return [
                 File(
                     file_id=obj.id,
@@ -146,24 +144,18 @@ def update_file(file_update: FileUpdate, user_creds: User = None) -> File:
     stmt = select(FileDB).where(FileDB.id == file_update.file_id)
     with DBSession() as session:
         try:
-            file_list: List[FileDB] = (
-                session.execute(stmt).scalars().all()
-            )  # noqa: E501
+            file_list: List[FileDB] = session.execute(stmt).scalars().all()
             if len(file_list) == 1:
                 file_update_dict = file_update.dict(exclude_defaults=True)
                 file_update_dict.pop("file_id")
-                updated_file = file_list[0].update(
-                    session, **file_update_dict
-                )  # noqa: E501
+                updated_file = file_list[0].update(session, **file_update_dict)
                 return File(file_id=updated_file.id, **updated_file.to_dict())
             if len(file_list) == 0:
                 # TODO: Raise not found
                 pass
         except Exception as e:
             session.rollback()
-            logger.error(
-                f"Unable to update file: {file_update.dict()} due to {e}"
-            )  # noqa: E501
+            logger.error(f"Unable to update file: {file_update.dict()} due to {e}")
             raise e
 
 
@@ -183,9 +175,7 @@ def delete_file(file_delete: FileDelete, user_creds: User = None) -> File:
     stmt = select(FileDB).where(FileDB.id == file_delete.file_id)
     with DBSession() as session:
         try:
-            file_list: List[FileDB] = (
-                session.execute(stmt).scalars().all()
-            )  # noqa: E501
+            file_list: List[FileDB] = session.execute(stmt).scalars().all()
             if len(file_list) == 1:
                 deleted_file = file_list[0].delete(session)
                 return File(file_id=deleted_file.id, **deleted_file.to_dict())
@@ -194,7 +184,5 @@ def delete_file(file_delete: FileDelete, user_creds: User = None) -> File:
                 pass
         except Exception as e:
             session.rollback()
-            logger.error(
-                f"Unable to delete file: {file_delete.dict()} due to {e}"
-            )  # noqa: E501
+            logger.error(f"Unable to delete file: {file_delete.dict()} due to {e}")
             raise e

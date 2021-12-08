@@ -28,6 +28,7 @@ class Template(BaseModel):
     description: Optional[str]
     template_vars: List[TemplateVar]
     latest_file_id: Optional[UUID4]
+    presigned_url: Optional[str]
 
 
 class RenderedTemplate(BaseModel):
@@ -40,3 +41,4 @@ class RenderedTemplate(BaseModel):
     template_context: Optional[TemplateContext]
     parent_mine_id: Optional[UUID4]
     file_id: Optional[UUID4]
+    presigned_url: Optional[str]

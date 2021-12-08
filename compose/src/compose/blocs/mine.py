@@ -37,14 +37,13 @@ def create_mine(mine_list: List[Mine], user_creds: Optional[User] = None) -> Lis
             mine_db_create_list: List[MineDB] = [
                 MineDB(
                     protagonist_id=user_creds.user_id,
-                    **mine.dict(exclude={"mine_id", "protagonist_id"}),  # noqa: E501
+                    **mine.dict(exclude={"mine_id", "protagonist_id"}),
                 )
                 for mine in mine_list
             ]
             MineDB.bulk_create(mine_db_create_list, session)
             return [
-                Mine(mine_id=obj.id, **obj.to_dict())
-                for obj in mine_db_create_list  # noqa: E501
+                Mine(mine_id=obj.id, **obj.to_dict()) for obj in mine_db_create_list
             ]
         except Exception as e:
             session.rollback()
@@ -78,9 +77,7 @@ def get_mine(
 
     with DBSession() as session:
         try:
-            mine_list: List[MineDB] = (
-                session.execute(stmt).scalars().all()
-            )  # noqa: E501
+            mine_list: List[MineDB] = session.execute(stmt).scalars().all()
             return [Mine(mine_id=obj.id, **obj.to_dict()) for obj in mine_list]
         except Exception as e:
             session.rollback()
@@ -104,24 +101,18 @@ def update_mine(mine_update: MineUpdate, user_creds: Optional[User] = None) -> M
     stmt = select(MineDB).where(MineDB.id == mine_update.mine_id)
     with DBSession() as session:
         try:
-            mine_list: List[MineDB] = (
-                session.execute(stmt).scalars().all()
-            )  # noqa: E501
+            mine_list: List[MineDB] = session.execute(stmt).scalars().all()
             if len(mine_list) == 1:
                 mine_update_dict = mine_update.dict(exclude_defaults=True)
                 mine_update_dict.pop("mine_id")
-                updated_mine = mine_list[0].update(
-                    session, **mine_update_dict
-                )  # noqa: E501
+                updated_mine = mine_list[0].update(session, **mine_update_dict)
                 return Mine(data_id=updated_mine.id, **updated_mine.to_dict())
             if len(mine_list) == 0:
                 # TODO: Raise not found
                 pass
         except Exception as e:
             session.rollback()
-            logger.error(
-                f"Unable to update mine: {mine_update.dict()} due to {e}"
-            )  # noqa: E501
+            logger.error(f"Unable to update mine: {mine_update.dict()} due to {e}")
             raise e
 
 
@@ -141,9 +132,7 @@ def delete_mine(mine_delete: MineDelete, user_creds: Optional[User] = None) -> M
     stmt = select(MineDB).where(MineDB.id == mine_delete.mine_id)
     with DBSession() as session:
         try:
-            mine_list: List[MineDB] = (
-                session.execute(stmt).scalars().all()
-            )  # noqa: E501
+            mine_list: List[MineDB] = session.execute(stmt).scalars().all()
             if len(mine_list) == 1:
                 deleted_mine = mine_list[0].delete(session)
                 return Mine(mine_id=deleted_mine.id, **deleted_mine.to_dict())
@@ -152,9 +141,7 @@ def delete_mine(mine_delete: MineDelete, user_creds: Optional[User] = None) -> M
                 pass
         except Exception as e:
             session.rollback()
-            logger.error(
-                f"Unable to delete mine: {mine_delete.dict()} due to {e}"
-            )  # noqa: E501
+            logger.error(f"Unable to delete mine: {mine_delete.dict()} due to {e}")
             raise e
 
 

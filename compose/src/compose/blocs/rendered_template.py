@@ -38,15 +38,15 @@ def create_rendered_template(
                 RenderedTemplateDB(
                     protagonist_id=user_creds.user_id,
                     **rendered_template.dict(
-                        exclude={"rendered_template_id"}
-                    ),  # noqa: E501
+                        exclude={"rendered_template_id", "presigned_url"}
+                    ),
                 )
                 for rendered_template in rendered_template_list
             ]
             RenderedTemplateDB.bulk_create(rendered_template_db_create_list, session)
             return [
                 RenderedTemplate(rendered_template_id=obj.id, **obj.to_dict())
-                for obj in rendered_template_db_create_list  # noqa: E501
+                for obj in rendered_template_db_create_list
             ]
         except Exception as e:
             session.rollback()
@@ -89,7 +89,7 @@ def get_rendered_template(
         try:
             rendered_template_list: List[RenderedTemplateDB] = (
                 session.execute(stmt).scalars().all()
-            )  # noqa: E501
+            )
             return [
                 RenderedTemplate(renderedtemplate_id=obj.id, **obj.to_dict())
                 for obj in rendered_template_list
@@ -122,7 +122,7 @@ def update_rendered_template(
         try:
             rendered_template_list: List[RenderedTemplateDB] = (
                 session.execute(stmt).scalars().all()
-            )  # noqa: E501
+            )
             if len(rendered_template_list) == 1:
                 rendered_template_update_dict = rendered_template_update.dict(
                     exclude_defaults=True
@@ -130,7 +130,7 @@ def update_rendered_template(
                 rendered_template_update_dict.pop("rendered_template_id")
                 updated_rendered_template = rendered_template_list[0].update(
                     session, **rendered_template_update_dict
-                )  # noqa: E501
+                )
                 return RenderedTemplate(
                     rendered_template_id=updated_rendered_template.id,
                     **updated_rendered_template.to_dict(),
@@ -142,7 +142,7 @@ def update_rendered_template(
             session.rollback()
             logger.error(
                 f"Unable to update rendered template: {rendered_template_update.dict()} due to {e}"
-            )  # noqa: E501
+            )
             raise e
 
 
@@ -168,7 +168,7 @@ def delete_rendered_template(
         try:
             rendered_template_list: List[RenderedTemplateDB] = (
                 session.execute(stmt).scalars().all()
-            )  # noqa: E501
+            )
             if len(rendered_template_list) == 1:
                 deleted_rendered_template = rendered_template_list[0].delete(session)
                 return RenderedTemplate(
@@ -182,5 +182,5 @@ def delete_rendered_template(
             session.rollback()
             logger.error(
                 f"Unable to delete rendered template: {rendered_template_delete.dict()} due to {e}"
-            )  # noqa: E501
+            )
             raise e

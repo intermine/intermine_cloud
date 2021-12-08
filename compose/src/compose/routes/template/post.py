@@ -1,4 +1,4 @@
-"""Data POST route."""
+"""Template POST route."""
 
 from http import HTTPStatus
 import json
@@ -10,19 +10,19 @@ from flask import make_response, request, Response
 from pydantic import parse_obj_as, ValidationError
 from sqlalchemy.exc import SQLAlchemyError
 
-from compose.blocs.data import create_data, update_data
+from compose.blocs.template import create_template, update_template
 from compose.blocs.file import create_file
-from compose.routes.data import data_bp
-from compose.schemas.api.data.post import DataPOSTResponse
-from compose.schemas.data import Data
+from compose.routes.template import template_bp
+from compose.schemas.api.template.post import TemplatePOSTResponse
+from compose.schemas.template import Template
 from compose.schemas.file import File
 from compose.utils.auth import check_authentication
 
 
-@data_bp.post("/")
+@template_bp.post("/")
 @check_authentication
 def post(user: User) -> Response:  # noqa: C901
-    """Create data.
+    """Create template.
 
     Args:
         user (User): extracted user from request
@@ -32,28 +32,28 @@ def post(user: User) -> Response:  # noqa: C901
     """
     # Parse json from request
     try:
-        data_create = parse_obj_as(List[Data], json.loads(request.data))
+        template_create = parse_obj_as(List[Template], json.loads(request.data))
     except ValidationError as e:
-        response_body = DataPOSTResponse(
+        response_body = TemplatePOSTResponse(
             msg="json validation failed", errors=e.errors()
         )
         return make_response(response_body.json(), HTTPStatus.BAD_REQUEST)
     except Exception:
-        response_body = DataPOSTResponse(
+        response_body = TemplatePOSTResponse(
             msg="unknown error", errors=["unknown internal error"]
         )
         return make_response(response_body.json(), HTTPStatus.INTERNAL_SERVER_ERROR)
 
-    # Create data
+    # Create template
     try:
-        created_data = create_data(data_create, user)
+        created_template = create_template(template_create, user)
     except SQLAlchemyError:
-        response_body = DataPOSTResponse(
+        response_body = TemplatePOSTResponse(
             msg="internal databse error", errors=["internal database error"]
         )
         return make_response(response_body.json(), HTTPStatus.INTERNAL_SERVER_ERROR)
     except Exception:
-        response_body = DataPOSTResponse(
+        response_body = TemplatePOSTResponse(
             msg="unknown error", errors=["unknown internal error"]
         )
         return make_response(response_body.json(), HTTPStatus.INTERNAL_SERVER_ERROR)
@@ -61,7 +61,7 @@ def post(user: User) -> Response:  # noqa: C901
     # Create associated file
     try:
         file_create = []
-        for data in created_data:
+        for template in created_template:
             file_create.append(
                 File(
                     name=data.name,

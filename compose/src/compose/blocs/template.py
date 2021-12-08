@@ -34,14 +34,14 @@ def create_template(
             template_db_create_list: List[TemplateDB] = [
                 TemplateDB(
                     protagonist_id=user_creds.user_id,
-                    **template.dict(exclude={"template_id"}),  # noqa: E501
+                    **template.dict(exclude={"template_id", "presigned_url"}),
                 )
                 for template in template_list
             ]
             TemplateDB.bulk_create(template_db_create_list, session)
             return [
                 Template(template_id=obj.id, **obj.to_dict())
-                for obj in template_db_create_list  # noqa: E501
+                for obj in template_db_create_list
             ]
         except Exception as e:
             session.rollback()
@@ -77,9 +77,7 @@ def get_template(
 
     with DBSession() as session:
         try:
-            template_list: List[TemplateDB] = (
-                session.execute(stmt).scalars().all()
-            )  # noqa: E501
+            template_list: List[TemplateDB] = session.execute(stmt).scalars().all()
             return [
                 Template(template_id=obj.id, **obj.to_dict()) for obj in template_list
             ]
@@ -109,15 +107,13 @@ def update_template(
     stmt = select(TemplateDB).where(TemplateDB.id == template_update.template_id)
     with DBSession() as session:
         try:
-            template_list: List[TemplateDB] = (
-                session.execute(stmt).scalars().all()
-            )  # noqa: E501
+            template_list: List[TemplateDB] = session.execute(stmt).scalars().all()
             if len(template_list) == 1:
                 template_update_dict = template_update.dict(exclude_defaults=True)
                 template_update_dict.pop("template_id")
                 updated_template = template_list[0].update(
                     session, **template_update_dict
-                )  # noqa: E501
+                )
                 return Template(
                     template_id=updated_template.id, **updated_template.to_dict()
                 )
@@ -128,7 +124,7 @@ def update_template(
             session.rollback()
             logger.error(
                 f"Unable to update template: {template_update.dict()} due to {e}"
-            )  # noqa: E501
+            )
             raise e
 
 
@@ -150,9 +146,7 @@ def delete_template(
     stmt = select(TemplateDB).where(TemplateDB.id == template_delete.template_id)
     with DBSession() as session:
         try:
-            template_list: List[TemplateDB] = (
-                session.execute(stmt).scalars().all()
-            )  # noqa: E501
+            template_list: List[TemplateDB] = session.execute(stmt).scalars().all()
             if len(template_list) == 1:
                 deleted_template = template_list[0].delete(session)
                 return Template(
@@ -165,5 +159,5 @@ def delete_template(
             session.rollback()
             logger.error(
                 f"Unable to delete template: {template_delete.dict()} due to {e}"
-            )  # noqa: E501
+            )
             raise e
