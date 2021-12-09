@@ -2,6 +2,7 @@
 
 from typing import List, Optional
 
+from blackcap.schemas.api.common import ResponseSchema
 from blackcap.schemas.user import User
 from pydantic import BaseModel
 from pydantic.types import UUID4
@@ -13,7 +14,7 @@ class RenderedTemplateDelete(BaseModel):
     rendered_template_id: UUID4
 
 
-class RenderedTemplateDELETEResponse(BaseModel):
+class RenderedTemplateDELETEResponse(ResponseSchema):
     """RenderedTemplate DELETE response schema."""
 
     items: List[RenderedTemplateDelete] = []

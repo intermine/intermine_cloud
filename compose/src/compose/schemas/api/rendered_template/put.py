@@ -1,9 +1,12 @@
 """RenderedTemplate API PUT schema."""
 from typing import List, Optional
 
+from blackcap.schemas.api.common import ResponseSchema
 from blackcap.schemas.user import User
 from pydantic import BaseModel
 from pydantic.types import UUID4
+
+from compose.schemas.template import RenderedTemplate
 
 
 class RenderedTemplateUpdate(BaseModel):
@@ -20,3 +23,9 @@ class RenderedTemplatePUTRequest(BaseModel):
 
     rendered_templates: List[RenderedTemplateUpdate]
     user: Optional[User]
+
+
+class RenderedTemplatePUTResponse(ResponseSchema):
+    """RenderedTemplate PUT response schema."""
+
+    items: List[RenderedTemplate] = []
