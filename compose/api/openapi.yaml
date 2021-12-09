@@ -54,19 +54,19 @@ servers:
         default: "443"
         description: "port"
 paths:
-  /auth:
+  /auth/:
     $ref: paths/auth.yaml
-  /user:
+  /user/:
     $ref: paths/user.yaml
-  /job:
+  /job/:
     $ref: paths/job.yaml
-  /data:
+  /data/:
     $ref: paths/data.yaml
-  /template:
+  /template/:
     $ref: paths/template.yaml
-  /mine:
+  /mine/:
     $ref: paths/mine.yaml
-  /file:
+  /file/:
     $ref: paths/file.yaml
 components:
   securitySchemes:
