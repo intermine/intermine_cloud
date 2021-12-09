@@ -5,7 +5,6 @@ import json
 from typing import List
 
 from blackcap.schemas.user import User
-from compose.schemas.api.data.put import DataUpdate
 from flask import make_response, request, Response
 from pydantic import parse_obj_as, ValidationError
 from sqlalchemy.exc import SQLAlchemyError
@@ -14,6 +13,7 @@ from compose.blocs.data import create_data, update_data
 from compose.blocs.file import create_file
 from compose.routes.data import data_bp
 from compose.schemas.api.data.post import DataPOSTResponse
+from compose.schemas.api.data.put import DataUpdate
 from compose.schemas.data import Data
 from compose.schemas.file import File
 from compose.utils.auth import check_authentication
