@@ -1,4 +1,4 @@
-"""Template GET route."""
+"""File GET route."""
 
 from http import HTTPStatus
 
@@ -7,16 +7,16 @@ from flask import make_response, request, Response
 from pydantic import ValidationError
 from sqlalchemy.exc import SQLAlchemyError
 
-from compose.blocs.template import get_template
-from compose.routes.template import template_bp
-from compose.schemas.api.template.get import TemplateGetQueryParams, TemplateGetResponse
+from compose.blocs.file import get_file
+from compose.routes.file import file_bp
+from compose.schemas.api.file.get import FileGetQueryParams, FileGetResponse
 from compose.utils.auth import check_authentication
 
 
-@template_bp.get("/")
+@file_bp.get("/")
 @check_authentication
 def get(user: User) -> Response:
-    """Get template.
+    """Get file.
 
     Args:
         user (User): Extracted user from request
@@ -26,34 +26,30 @@ def get(user: User) -> Response:
     """
     # Parse query params from request
     try:
-        query_params = TemplateGetQueryParams.parse_obj(request.args)
+        query_params = FileGetQueryParams.parse_obj(request.args)
     except ValidationError as e:
-        response_body = TemplateGetResponse(
-            msg="query validation error", errors=e.errors()
-        )
+        response_body = FileGetResponse(msg="query validation error", errors=e.errors())
         return make_response(response_body.json(), HTTPStatus.BAD_REQUEST)
     except Exception:
-        response_body = TemplateGetResponse(
+        response_body = FileGetResponse(
             msg="unknown error", errors=["unknown internal error"]
         )
         return make_response(response_body.json(), HTTPStatus.INTERNAL_SERVER_ERROR)
 
-    # Get template from the DB
+    # Get file from the DB
     try:
-        template_list = get_template(query_params, user)
+        file_list = get_file(query_params, user)
     except SQLAlchemyError:
-        response_body = TemplateGetResponse(
+        response_body = FileGetResponse(
             msg="internal databse error", errors=["internal database error"]
         )
         return make_response(response_body.json(), HTTPStatus.INTERNAL_SERVER_ERROR)
     except Exception:
-        response_body = TemplateGetResponse(
+        response_body = FileGetResponse(
             msg="unknown error", errors=["unknown internal error"]
         )
         return make_response(response_body.json(), HTTPStatus.INTERNAL_SERVER_ERROR)
 
-    # return fetched templates in response
-    response_body = TemplateGetResponse(
-        msg=" successfully retrieved", items=template_list
-    )
+    # return fetched file in response
+    response_body = FileGetResponse(msg=" successfully retrieved", items=file_list)
     return make_response(response_body.json(), HTTPStatus.OK)

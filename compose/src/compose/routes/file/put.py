@@ -1,59 +1,58 @@
-"""Template GET route."""
+"""User PUT route."""
 
 from http import HTTPStatus
+import json
+from typing import List
 
 from blackcap.schemas.user import User
 from flask import make_response, request, Response
-from pydantic import ValidationError
+from pydantic import parse_obj_as, ValidationError
 from sqlalchemy.exc import SQLAlchemyError
 
-from compose.blocs.template import get_template
-from compose.routes.template import template_bp
-from compose.schemas.api.template.get import TemplateGetQueryParams, TemplateGetResponse
+from compose.blocs.file import update_file
+from compose.routes.file import file_bp
+from compose.schemas.api.file.put import FilePUTResponse, FileUpdate
 from compose.utils.auth import check_authentication
 
 
-@template_bp.get("/")
+@file_bp.put("/")
 @check_authentication
-def get(user: User) -> Response:
-    """Get template.
+def put(user: User) -> Response:
+    """Update user.
 
     Args:
-        user (User): Extracted user from request
+        user (User): extracted user from request
 
     Returns:
         Response: Flask response
     """
-    # Parse query params from request
+    # Parse json from request
     try:
-        query_params = TemplateGetQueryParams.parse_obj(request.args)
+        file_update = parse_obj_as(List[FileUpdate], (json.loads(request.data)))
     except ValidationError as e:
-        response_body = TemplateGetResponse(
-            msg="query validation error", errors=e.errors()
-        )
+        response_body = FilePUTResponse(msg="json validation failed", errors=e.errors())
         return make_response(response_body.json(), HTTPStatus.BAD_REQUEST)
     except Exception:
-        response_body = TemplateGetResponse(
+        response_body = FilePUTResponse(
             msg="unknown error", errors=["unknown internal error"]
         )
         return make_response(response_body.json(), HTTPStatus.INTERNAL_SERVER_ERROR)
 
-    # Get template from the DB
+    # Update file
+    # TODO: Make the api accepts array
     try:
-        template_list = get_template(query_params, user)
+        file = update_file(file_update[0])
     except SQLAlchemyError:
-        response_body = TemplateGetResponse(
+        response_body = FilePUTResponse(
             msg="internal databse error", errors=["internal database error"]
         )
         return make_response(response_body.json(), HTTPStatus.INTERNAL_SERVER_ERROR)
     except Exception:
-        response_body = TemplateGetResponse(
+        response_body = FilePUTResponse(
             msg="unknown error", errors=["unknown internal error"]
         )
         return make_response(response_body.json(), HTTPStatus.INTERNAL_SERVER_ERROR)
 
-    # return fetched templates in response
-    response_body = TemplateGetResponse(
-        msg=" successfully retrieved", items=template_list
-    )
+    # return fetched file in response
+    response_body = FilePUTResponse(msg="user successfully updated", items=[file])
     return make_response(response_body.json(), HTTPStatus.OK)

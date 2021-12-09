@@ -9,6 +9,7 @@ from logzero import logger
 
 from compose.routes.auth import auth_bp
 from compose.routes.data import data_bp
+from compose.routes.file import file_bp
 from compose.routes.status import status_bp
 from compose.routes.template import template_bp
 from compose.routes.user import user_bp
@@ -37,4 +38,5 @@ def register_blueprints(app: Flask) -> None:
     app.register_blueprint(schedule_bp)
     app.register_blueprint(data_bp)
     app.register_blueprint(template_bp)
+    app.register_blueprint(file_bp)
     logger.info("Registered blueprints")
