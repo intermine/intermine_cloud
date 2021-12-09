@@ -80,7 +80,7 @@ def post(user: User) -> Response:  # noqa: C901
     for i, template in enumerate(created_template):
         # link template and file object
         template_update = TemplateUpdate(
-            template_id=template.template_id, file_id=created_files[i].file_id
+            template_id=template.template_id, latest_file_id=created_files[i].file_id
         )
         update_template(template_update, user)
         # Update local template object for response
