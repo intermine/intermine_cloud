@@ -86,3 +86,31 @@ Note that to run another minedeployer workflow, you'll have to delete the existi
 kubectl get intermineinstances
 kubectl delete intermineinstances deploy-a-mine-UNIQUE_ID_HERE
 ```
+
+## Argo Events
+
+```
+kubectl create namespace argo-events
+kubectl apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/manifests/install.yaml
+kubectl apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/manifests/install-validating-webhook.yaml
+kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/eventbus/native.yaml
+
+kubectl apply -n argo-events -f nats.yaml
+kubectl apply -n argo-events -f event-source.yaml
+kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/rbac/sensor-rbac.yaml
+kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/rbac/workflow-rbac.yaml
+kubectl apply -n argo-events -f sensor.yaml
+```
+
+`kubectl -n argo-events port-forward svc/nats 4222:4222`
+
+```
+nats context add local --description "Localhost" --select
+nats pub minejob '{"message": "hello there"}'
+```
+
+Make sure to check Argo workflows using namespace `argo-events`.
+
+```
+argo -n argo-events list
+```

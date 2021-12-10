@@ -1,0 +1,80 @@
+apiVersion: argoproj.io/v1alpha1
+kind: EventSource
+metadata:
+  name: nats
+spec:
+  nats:
+    example:
+      # url of the nats service
+      url: nats://nats.argo-events.svc:4222
+      # jsonBody specifies that all event body payload coming from this
+      # source will be JSON
+      jsonBody: true
+      # subject name
+      subject: minejob
+      # optional backoff time for connection retries.
+      # if not provided, default connection backoff time will be used.
+      connectionBackoff:
+        # duration in nanoseconds, or strings like "4s", "1m". following value is 10 seconds
+        duration: 10s
+        # how many backoffs
+        steps: 5
+        # factor to increase on each step.
+        # setting factor > 1 makes backoff exponential.
+        factor: 2
+        jitter: 0.2
+
+#    example-tls:
+#      url: nats://nats.argo-events.svc:4222
+#      jsonBody: true
+#      subject: "foo"
+#      tls:
+#        caCertSecret:
+#          name: my-secret
+#          key: ca-cert-key
+#        clientCertSecret:
+#          name: my-secret
+#          key: client-cert-key
+#        clientKeySecret:
+#          name: my-secret
+#          key: client-key-key
+
+#    example-auth-basic:
+#      url: nats://nats.argo-events.svc:4222
+#      jsonBody: true
+#      subject: "foo"
+#      auth:
+#        basic:
+#          username:
+#            name: my-secret
+#            key: name
+#          password:
+#            name: my-secret
+#            key: password
+
+#    example-auth-nkey:
+#      url: nats://nats.argo-events.svc:4222
+#      jsonBody: true
+#      subject: "foo"
+#      auth:
+#        nkey:
+#          name: my-secret
+#          key: my-key
+
+#    example-auth-token:
+#      url: nats://nats.argo-events.svc:4222
+#      jsonBody: true
+#      subject: "foo"
+#      auth:
+#        token:
+#          name: my-secret
+#          key: my-token
+
+#    example-auth-credential:
+#      url: nats://nats.argo-events.svc:4222
+#      jsonBody: true
+#      subject: "foo"
+#      auth:
+#        credential:
+#          name: my-secret
+#          key: my-credential
