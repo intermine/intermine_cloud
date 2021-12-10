@@ -31,7 +31,9 @@ def _report_mineprogress(workflow_yaml: str, extra_data: Optional[Dict] = None) 
 
 
 class ArgoCluster(BaseCluster):
-    def prepare_job(self: "BaseCluster", job: Job) -> None:
+    CONFIG_KEY_VAL = "ARGO"
+
+    def prepare_job(self: "BaseCluster", schedule: Schedule) -> None:
         pass
 
     def submit_job(self: "BaseCluster", schedule: Schedule) -> str:

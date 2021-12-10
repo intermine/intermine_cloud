@@ -17,3 +17,4 @@ class DemonDefaultConfig(DefaultConfig):
     DB_URI: str = f"sqlite:////{xdg_data_home() / ('imcloud') / ('demon.db')}"
     MESSENGER: str = "NATS"
     NATS_ENDPOINT: str = "nats://0.0.0.0:4222"
+    CLUSTER: str = "ARGO"

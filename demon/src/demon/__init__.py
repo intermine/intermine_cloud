@@ -2,7 +2,7 @@
 
 from importlib.metadata import PackageNotFoundError, version  # type: ignore
 
-from demon import configs  # noqa: F401
+from demon import configs, cluster  # noqa: F401
 
 try:
     __version__ = version(__name__)
