@@ -6,6 +6,15 @@ from pydantic import BaseModel
 from pydantic.types import UUID4
 
 
+class MineJobs(BaseModel):
+    """Mine jobs."""
+
+    build_id: UUID4
+    deploy_id: UUID4
+    undeploy_id: UUID4
+    build_and_deploy_id: UUID4
+
+
 class Mine(BaseModel):
     """Mine schema."""
 
@@ -14,6 +23,7 @@ class Mine(BaseModel):
     description: Optional[str]
     preference: Dict = {}
     state: Dict = {}
+    mine_jobs: Optional[MineJobs]
     protagonist_id: Optional[UUID4]
     template_id: Optional[UUID4]
     rendered_template_file_id: Optional[UUID4]

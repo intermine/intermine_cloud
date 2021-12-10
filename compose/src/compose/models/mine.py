@@ -16,3 +16,4 @@ class MineDB(DBModel, SurrogatePKUUID, TimestampMixin):
     protagonist_id = reference_col("protagonist")
     rendered_template_file_id = reference_col("file")
     data_file_ids = Column(JSON)
+    mine_jobs = Column(JSON)
