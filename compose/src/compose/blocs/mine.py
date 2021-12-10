@@ -37,7 +37,7 @@ def create_mine(mine_list: List[Mine], user_creds: Optional[User] = None) -> Lis
             mine_db_create_list: List[MineDB] = [
                 MineDB(
                     protagonist_id=user_creds.user_id,
-                    **mine.dict(exclude={"mine_id", "protagonist_id"}),
+                    **mine.dict(exclude={"mine_id", "protagonist_id", "template_id"}),
                 )
                 for mine in mine_list
             ]

@@ -220,7 +220,7 @@ def create(name, desc, pref, template_id, data_ids) -> None:  # noqa: C901, ANN0
         rendered_template_update = RenderedTemplateUpdate(
             rendered_template_id=created_rendered_template.rendered_template_id,
             file_id=created_file.file_id,
-            parent_mine_id=mine.mine_id,
+            parent_mine_id=created_mine.mine_id,
         )
         try:
             updated_rendered_template = update_rendered_template(

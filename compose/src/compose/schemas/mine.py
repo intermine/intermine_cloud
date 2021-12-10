@@ -15,5 +15,6 @@ class Mine(BaseModel):
     preference: Dict = {}
     state: Dict = {}
     protagonist_id: Optional[UUID4]
+    template_id: Optional[UUID4]
     rendered_template_file_id: Optional[UUID4]
     data_file_ids: Optional[List[str]]
