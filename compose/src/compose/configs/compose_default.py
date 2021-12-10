@@ -13,5 +13,6 @@ class ComposeDefaultConfig(DefaultConfig):
     MINIO_ACCESS_KEY: str = "minioaccess"
     MINIO_SECRET_KEY: str = "minioaccess"
     MINIO_SECURE: bool = False
+    CLUSTER: str = "ARGO"
     DB_NAME: str = "compose"
     DB_URI: str = f"sqlite:////{xdg_data_home() / ('imcloud') / ('compose.db')}"
