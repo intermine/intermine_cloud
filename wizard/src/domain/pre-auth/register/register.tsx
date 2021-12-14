@@ -28,7 +28,6 @@ type TInputFields = {
     name: TInputField
     organisation: TInputField
     email: TInputField
-    username: TInputField
     password: TInputField
     confirmPassword: TInputField
 }
@@ -44,13 +43,12 @@ export const Register = () => {
 
     const [authMachineState, dispatch] = useMachine(authMachine)
     const [
-        { name, organisation, email, username, password, confirmPassword },
+        { name, organisation, email, password, confirmPassword },
         setFields
     ] = useState<TInputFields>({
         name: clone(defaultFieldValue),
         organisation: clone(defaultFieldValue),
         email: clone(defaultFieldValue),
-        username: clone(defaultFieldValue),
         password: clone(defaultFieldValue),
         confirmPassword: clone(defaultFieldValue)
     })
@@ -95,14 +93,6 @@ export const Register = () => {
             errorFields.push(['email', 'Please enter a valid email address.'])
             if (canScroll) {
                 scrollIntoView('email')
-                canScroll = false
-            }
-        }
-
-        if (username.value.length === 0) {
-            errorFields.push(['username', 'Username is required'])
-            if (canScroll) {
-                scrollIntoView('username')
                 canScroll = false
             }
         }
@@ -234,20 +224,6 @@ export const Register = () => {
                         value: email.value,
                         onChange: (event) =>
                             updateValue(setFields, 'email', event)
-                    }}
-                    hasAsterisk
-                />
-                <FormGroup
-                    id="username"
-                    isDisabled={isMakingRequest}
-                    label="Username"
-                    isError={username.isError}
-                    errorMessage={username.errorMessage}
-                    inputProps={{
-                        placeholder: 'Username',
-                        value: username.value,
-                        onChange: (event) =>
-                            updateValue(setFields, 'username', event)
                     }}
                     hasAsterisk
                 />

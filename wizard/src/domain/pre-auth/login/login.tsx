@@ -27,7 +27,7 @@ import { TInputField, updateError, updateValue } from '../utils'
 import { scrollIntoView } from '../../../utils/misc'
 
 type TInputFields = {
-    username: TInputField
+    email: TInputField
     password: TInputField
 }
 
@@ -43,9 +43,9 @@ export const Login = () => {
 
     const { updateAuthState } = authReducer
 
-    const [{ password, username }, setFields] = useState<TInputFields>({
+    const [{ password, email }, setFields] = useState<TInputFields>({
         password: clone(defaultFieldValue),
-        username: clone(defaultFieldValue)
+        email: clone(defaultFieldValue)
     })
 
     const [authMachineState, dispatch] = useMachine(authMachine)
@@ -56,8 +56,8 @@ export const Login = () => {
 
         const errorFields: [keyof TInputFields, string][] = []
 
-        if (username.value.length === 0) {
-            errorFields.push(['username', 'Username is required'])
+        if (email.value.length === 0) {
+            errorFields.push(['email', 'EmaIL is required'])
         }
 
         if (password.value.length === 0) {
@@ -73,7 +73,7 @@ export const Login = () => {
             return
         }
 
-        dispatch('LOGIN')
+        dispatch('LOGIN', { email: email.value, password: password.value })
     }
 
     useEffect(() => {
@@ -109,15 +109,15 @@ export const Login = () => {
                 />
                 <FormGroup
                     isDisabled={isMakingLoginRequest}
-                    label="Username"
-                    isError={username.isError}
+                    label="Email"
+                    isError={email.isError}
                     inputProps={{
-                        placeholder: 'Username',
-                        value: username.value,
+                        placeholder: 'Email',
+                        value: email.value,
                         onChange: (event) =>
-                            updateValue(setFields, 'username', event)
+                            updateValue(setFields, 'email', event)
                     }}
-                    errorMessage={username.errorMessage}
+                    errorMessage={email.errorMessage}
                 />
 
                 <FormGroup

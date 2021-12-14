@@ -1,9 +1,12 @@
 import { createMachine, assign } from 'xstate'
 import { clone } from '@intermine/chromatin/utils'
-
+import { AuthApi } from '@intermine/compose-rest-client'
 import { AuthStates } from '../../../constants/auth'
+import { composeConfiguration } from '../../../config'
 
 import { TUserDetails } from '../../../context/types'
+
+const authApi = new AuthApi(composeConfiguration)
 
 export type TAuthMachineContext = {
     errorMessage?: string
@@ -24,7 +27,7 @@ export type TAuthMachineState =
     | { value: 'reset'; context: TAuthMachineContext }
 
 export type TAuthMachineEvents =
-    | { type: 'LOGIN' }
+    | { type: 'LOGIN'; email: string; password: string }
     | { type: 'REGISTER' }
     | { type: 'RESET_PASSWORD' }
     | { type: 'END' }
@@ -120,8 +123,12 @@ export const authMachine = createMachine<
             ),
         },
         services: {
-            login: () => {
-                return new Promise((resolve, reject) => setTimeout(resolve, 0))
+            login: (_, event) => {
+                if (event.type === 'LOGIN') {
+                    const { email, password } = event
+                    return authApi.authPost({ email, password })
+                }
+                return new Promise(() => false)
             },
         },
     }
