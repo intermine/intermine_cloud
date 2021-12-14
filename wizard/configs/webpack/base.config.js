@@ -1,7 +1,11 @@
 const webpack = require('webpack')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const path = require('path')
-const { entryPath, rootDir } = require('./paths')
+const dotenv = require('dotenv')
+
+const { entryPath, rootDir, envPath } = require('./paths')
+
+dotenv.config({ path: envPath })
 
 module.exports = {
     entry: entryPath,
@@ -47,5 +51,8 @@ module.exports = {
                 'intermine-logo.webp'
             ),
         }),
+        new webpack.DefinePlugin({
+            'process.env': JSON.stringify(process.env)
+        })
     ],
 }
