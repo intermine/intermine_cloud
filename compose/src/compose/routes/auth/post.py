@@ -31,15 +31,13 @@ def post() -> Response:
     except ValidationError as e:
         response_body = AuthPOSTResponse(
             msg="json validation failed", errors=e.errors()
-        )  # noqa: E501
+        )
         return make_response(response_body.json(), HTTPStatus.BAD_REQUEST)
     except Exception as e:
         response_body = AuthPOSTResponse(
             msg="unknown error", errors=[f"unknown internal error: {e}"]
         )
-        return make_response(
-            response_body.json(), HTTPStatus.INTERNAL_SERVER_ERROR
-        )  # noqa: E501
+        return make_response(response_body.json(), HTTPStatus.INTERNAL_SERVER_ERROR)
 
     # try to login user
     try:
@@ -48,21 +46,25 @@ def post() -> Response:
         response_body = AuthPOSTResponse(
             msg="internal databse error", errors=["internal database error"]
         )
-        return make_response(
-            response_body.json(), HTTPStatus.INTERNAL_SERVER_ERROR
-        )  # noqa: E501
+        return make_response(response_body.json(), HTTPStatus.INTERNAL_SERVER_ERROR)
     except Exception:
         response_body = AuthPOSTResponse(
             msg="unknown error", errors=["unknown internal error"]
         )
-        return make_response(
-            response_body.json(), HTTPStatus.INTERNAL_SERVER_ERROR
-        )  # noqa: E501
+        return make_response(response_body.json(), HTTPStatus.INTERNAL_SERVER_ERROR)
+
+    if user is None:
+        # return invalid creds in response
+        response_body = AuthPOSTResponse(
+            msg="Invalid credentials", items=[], errors=["Invalid credentials"]
+        )
+        response = make_response(response_body.json(), HTTPStatus.OK)
+        return response
 
     # return logged in user and cookie in response
     response_body = AuthPOSTResponse(
         msg="User successfully logged in", items=[user.dict()]
-    )  # noqa: E501
+    )
     response = make_response(response_body.json(), HTTPStatus.OK)
     response.set_cookie("imcloud", f"Bearer {token}")
     return response
