@@ -5,6 +5,7 @@ from blackcap.routes.schedule import schedule_bp
 from blackcap.tasks import init_celery
 from blackcap.workers import celery_app
 from flask import Flask
+from flask_cors import CORS
 from logzero import logger
 
 from compose.routes.auth import auth_bp
@@ -22,6 +23,7 @@ def register_extensions(app: Flask) -> None:
         app (Flask): Flask app
     """
     init_celery(app, celery_app)
+    CORS(app)
     logger.info("Registered extensions")
 
 
