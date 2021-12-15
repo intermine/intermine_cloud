@@ -85,7 +85,7 @@ export const App = () => {
              * If not authorize and user tries to navigate to
              * auth page.
              */
-            history.push(LOGIN_PATH)
+            history.push(`${LOGIN_PATH}?next=${pathname}`)
             return
         }
         if (auth.authState === Authorize && !isAuthRoute(pathname)) {

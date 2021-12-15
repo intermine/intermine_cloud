@@ -305,7 +305,10 @@ export const Register = () => {
                 secondaryAction={{
                     children: 'Login',
                     Component: Link,
-                    to: LOGIN_PATH,
+                    to: {
+                        pathname: LOGIN_PATH,
+                        search: history.location.search
+                    },
                     LeftIcon: <GoBackIcon />,
                     isDisabled: isMakingRequest
                 }}

@@ -1,6 +1,6 @@
 import { Card } from '@intermine/chromatin/card'
 import { createStyle } from '@intermine/chromatin/styles'
-import { useEffect, useRef } from 'react'
+import React, { useEffect, useRef } from 'react'
 export type TFormProps = {
     children: React.ReactChild | React.ReactChild[]
     id: string
@@ -49,6 +49,7 @@ export const Form = (props: TFormProps) => {
             formRef.current.scrollIntoView()
         }
     }, [])
+
     return (
         <form ref={formRef} id={id} className={classes.form}>
             <Card hoverVariant="none" className={classes.card}>

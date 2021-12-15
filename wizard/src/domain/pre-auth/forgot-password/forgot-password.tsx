@@ -6,7 +6,7 @@ import {
 } from '@intermine/chromatin/inline-alert'
 import { clone } from '@intermine/chromatin/utils'
 
-import { Link } from 'react-router-dom'
+import { Link, useHistory } from 'react-router-dom'
 import GoBackIcon from '@intermine/chromatin/icons/System/arrow-left-line'
 
 import { DomElementIDs } from '../../../constants/ids'
@@ -36,6 +36,7 @@ const defaultFieldValue: TInputField = {
 }
 
 export const ForgotPassword = () => {
+    const history = useHistory()
     const [{ email }, setFields] = useState<TInputFields>({
         email: clone(defaultFieldValue)
     })
@@ -137,7 +138,10 @@ export const ForgotPassword = () => {
                 secondaryAction={{
                     children: 'Login',
                     Component: Link,
-                    to: LOGIN_PATH,
+                    to: {
+                        pathname: LOGIN_PATH,
+                        search: history.location.search
+                    },
                     LeftIcon: <GoBackIcon />,
                     isDisabled: isMakingRequest
                 }}

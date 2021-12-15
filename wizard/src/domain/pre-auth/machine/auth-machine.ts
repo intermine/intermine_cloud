@@ -1,17 +1,13 @@
 import { createMachine, assign } from 'xstate'
 import { clone } from '@intermine/chromatin/utils'
-import { AuthApi, UserApi } from '@intermine/compose-rest-client'
 import { AuthStates } from '../../../constants/auth'
-import { composeConfiguration } from '../../../config'
+import { authApi, userApi } from '../../../services/api'
 
 import { TUserDetails } from '../../../context/types'
 import {
     getResponseMessageUsingResponseStatus,
     getResponseStatus,
 } from '../../../utils/get'
-
-const authApi = new AuthApi(composeConfiguration)
-const userApi = new UserApi(composeConfiguration)
 
 export type TLoginPayload = {
     email: string

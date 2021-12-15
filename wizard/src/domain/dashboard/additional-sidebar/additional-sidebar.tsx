@@ -15,7 +15,7 @@ import { AdditionalSidebarTabs } from '../../../constants/additional-sidebar'
 import { Progress } from './progress'
 import { EditProfile } from './edit-profile'
 import { Preferences } from './preferences'
-import { Logout } from '../common/logout'
+import { LogoutIconButton } from '../common/logout-icon-button'
 
 type TUseStyleProps = {
     isOpen: boolean
@@ -118,15 +118,14 @@ export const AdditionalSidebar = () => {
         })
     }
 
-    const handleLogoutClick = () => {
-        if (isLogoutAllowed) {
-            updateAdditionalSidebarState({
-                isOpen: false,
-                activeTab: None
-            })
-            return
-        }
+    const onLogout = () => {
+        updateAdditionalSidebarState({
+            isOpen: false,
+            activeTab: None
+        })
+    }
 
+    const handleLogoutClick = () => {
         const { onLogoutClickCallbacks, isEditingForm, isUploading } = logout
 
         const { editingFormCallback, uploadingFormCallback } =
@@ -134,11 +133,25 @@ export const AdditionalSidebar = () => {
 
         if (isEditingForm && editingFormCallback) {
             editingFormCallback()
+            /**
+             * Prevent logout default action
+             */
+            return true
         }
 
         if (isUploading && uploadingFormCallback) {
             uploadingFormCallback()
+
+            /**
+             * Prevent logout default action
+             */
+            return true
         }
+
+        /**
+         * Not prevent default action.
+         */
+        return false
     }
 
     return (
@@ -166,10 +179,11 @@ export const AdditionalSidebar = () => {
                         </Box>
                     </Tooltip>
                 ))}
-                <Logout
+                <LogoutIconButton
                     isLogoutAllowed={isLogoutAllowed}
                     className={classes.button}
-                    handleLogoutClick={handleLogoutClick}
+                    onLogoutClick={handleLogoutClick}
+                    onLogout={onLogout}
                 />
             </Box>
             <Box className={classes.actionSection}>

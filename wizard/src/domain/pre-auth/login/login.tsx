@@ -141,7 +141,10 @@ export const Login = () => {
                     <Button
                         isDisabled={isMakingLoginRequest}
                         Component={Link}
-                        to={FORGOT_PASSWORD_PATH}
+                        to={{
+                            pathname: FORGOT_PASSWORD_PATH,
+                            search: history.location.search
+                        }}
                         type="button"
                         variant="ghost"
                         isDense
@@ -168,7 +171,10 @@ export const Login = () => {
                 secondaryAction={{
                     children: 'Create account',
                     Component: Link,
-                    to: REGISTER_PATH,
+                    to: {
+                        pathname: REGISTER_PATH,
+                        search: history.location.search
+                    },
                     isDisabled: isMakingLoginRequest
                 }}
             />

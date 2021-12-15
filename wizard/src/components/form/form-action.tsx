@@ -1,11 +1,19 @@
 import { Box } from '@intermine/chromatin/box'
 import { Button, ButtonCommonProps } from '@intermine/chromatin/button'
 
+import type { LinkProps } from 'react-router-dom'
+
 export type TFormActionProps = {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    primaryAction?: ButtonCommonProps & { to?: string; Component?: any }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    secondaryAction?: ButtonCommonProps & { to?: string; Component?: any }
+    primaryAction?: ButtonCommonProps & {
+        to?: LinkProps['to']
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        Component?: any
+    }
+    secondaryAction?: ButtonCommonProps & {
+        to?: LinkProps['to']
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        Component?: any
+    }
 }
 
 export const FormAction = (props: TFormActionProps) => {

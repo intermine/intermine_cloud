@@ -11,6 +11,7 @@ import { TProgressItem } from '../../../context/types'
 import { AdditionalSidebarTabs } from '../../../constants/additional-sidebar'
 import { ProgressItemStatus } from '../../../constants/progress'
 import { LOGIN_PATH } from '../../../routes'
+import { authApi } from '../../../services/api'
 
 type TUseDashboardWarningModalProps = {
     msg?: string
@@ -76,8 +77,14 @@ export const useLogout = () => {
     const { updateAdditionalSidebarLogoutState } = useAdditionalSidebarReducer()
     const { showWarningModal } = useDashboardWarningModal()
 
-    const logout = () => {
-        updateAuthState(AuthStates.NotAuthorize)
+    const logout = async () => {
+        try {
+            await authApi.authDelete()
+            updateAuthState(AuthStates.NotAuthorize)
+            return true
+        } catch {
+            return false
+        }
     }
 
     const restrictAdditionalSidebarLogoutWithModal = (
