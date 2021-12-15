@@ -35,7 +35,7 @@ def post() -> Response:
         return make_response(response_body.json(), HTTPStatus.BAD_REQUEST)
     except Exception as e:
         response_body = AuthPOSTResponse(
-            msg="unknown error", errors=[f"unknown internal error: {e}"]
+            msg="There is some problem with our server.", errors=[f"unknown internal error: {e}"]
         )
         return make_response(response_body.json(), HTTPStatus.INTERNAL_SERVER_ERROR)
 
@@ -44,19 +44,19 @@ def post() -> Response:
         user, token = auther.login_user(AuthUserCreds(**user_creds.dict()))
     except SQLAlchemyError:
         response_body = AuthPOSTResponse(
-            msg="internal databse error", errors=["internal database error"]
+            msg="Something bad happened. Please come back after some time.", errors=["internal database error"]
         )
         return make_response(response_body.json(), HTTPStatus.INTERNAL_SERVER_ERROR)
     except Exception:
         response_body = AuthPOSTResponse(
-            msg="unknown error", errors=["unknown internal error"]
+            msg="Something bad happened. Please come back after some time.", errors=["unknown internal error"]
         )
         return make_response(response_body.json(), HTTPStatus.INTERNAL_SERVER_ERROR)
 
     if user is None:
         # return invalid creds in response
         response_body = AuthPOSTResponse(
-            msg="Invalid credentials", items=[], errors=["Invalid credentials"]
+            msg="Wrong credentials.", items=[], errors=["Wrong credentials"]
         )
         response = make_response(response_body.json(), HTTPStatus.UNAUTHORIZED)
         return response
