@@ -1,5 +1,7 @@
 """Compose default config."""
 
+from typing import List
+
 from blackcap.configs.default import DefaultConfig
 from xdg import xdg_data_home
 
@@ -16,3 +18,5 @@ class ComposeDefaultConfig(DefaultConfig):
     CLUSTER: str = "ARGO"
     DB_NAME: str = "compose"
     DB_URI: str = f"sqlite:////{xdg_data_home() / ('imcloud') / ('compose.db')}"
+    CORS_SUPPORTS_CREDENTIALS: bool = True
+    CORS_ORIGINS: List[str] = ['http://localhost:8080']
