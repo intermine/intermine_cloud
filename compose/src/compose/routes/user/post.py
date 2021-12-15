@@ -42,7 +42,7 @@ def post() -> Response:
         return make_response(response_body.json(), HTTPStatus.BAD_REQUEST)
     except Exception:
         response_body = UserPOSTResponse(
-            msg="unknown error", errors=["unknown internal error"]
+            msg="There is some problem with our server.", errors=["unknown internal error"]
         )
         return make_response(response_body.json(), HTTPStatus.INTERNAL_SERVER_ERROR)
 
@@ -51,12 +51,12 @@ def post() -> Response:
         user = create_user(user_create)
     except SQLAlchemyError:
         response_body = UserPOSTResponse(
-            msg="internal databse error", errors=["internal database error"]
+            msg="Something bad happened. Please come back after some time.", errors=["internal database error"]
         )
         return make_response(response_body.json(), HTTPStatus.INTERNAL_SERVER_ERROR)
     except Exception:
         response_body = UserPOSTResponse(
-            msg="unknown error", errors=["unknown internal error"]
+            msg="There is some problem with our server.", errors=["unknown internal error"]
         )
         return make_response(response_body.json(), HTTPStatus.INTERNAL_SERVER_ERROR)
 
@@ -67,10 +67,10 @@ def post() -> Response:
             minio_client.make_bucket(f"protagonist-{u.user_id}")
     except Exception:
         response_body = UserPOSTResponse(
-            msg="unknown error", errors=["unknown internal error"]
+            msg="There is some problem with our server.", errors=["unknown internal error"]
         )
         return make_response(response_body.json(), HTTPStatus.INTERNAL_SERVER_ERROR)
 
     # return fetched data in response
-    response_body = UserPOSTResponse(msg="user successfully created", items=user)
+    response_body = UserPOSTResponse(msg="User successfully created", items=user)
     return make_response(response_body.json(), HTTPStatus.OK)
