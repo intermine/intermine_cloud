@@ -1,15 +1,20 @@
 description: User create schema
 type: object
 properties:
-  name:
+  password:
     type: string
-  email:
-    type: string
-  organisation:
-    type: string
-  active:
-    type: boolean
-required:
-  - "name"
-  - "email"
-  - "organisation"
+  user:
+    type: object
+    properties:
+      name:
+        type: string
+      email:
+        type: string
+      organisation:
+        type: string
+      active:
+        type: boolean
+    required:
+      - "name"
+      - "email"
+      - "organisation"
