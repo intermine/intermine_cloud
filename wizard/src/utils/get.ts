@@ -1,3 +1,7 @@
+import { ResponseStatus } from '../constants/response'
+
+const { UserOffline, ServerUnavailable, UnknownError } = ResponseStatus
+
 export const getDataSize = (size: number): string => {
     if (size < 1024) {
         /**
@@ -28,4 +32,52 @@ export const getDataSize = (size: number): string => {
     }
 
     return `${(size / 1_099_511_627_776).toFixed(2)} TB`
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const getResponseStatus = (response: any): ResponseStatus | number => {
+    if (typeof response !== 'object') {
+        if (!window.navigator.onLine) {
+            // User is offline
+            return UserOffline
+        }
+
+        // Server is offline/unavailable
+        return ServerUnavailable
+    }
+
+    if (typeof response.status === 'number') {
+        return response.status as number
+    }
+
+    return UnknownError
+}
+
+export const getResponseMessageUsingResponseStatus = (
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    response: any,
+    status: ResponseStatus
+): string => {
+    if (status === UserOffline) {
+        return 'Please check your internet connection.'
+    }
+
+    if (status === ServerUnavailable) {
+        return `We are currently offline. Please try after some time.`
+    }
+
+    if (status === UnknownError) {
+        return `
+        Something bad happened. We are trying to fix it.
+        Please come back after some time.
+        `
+    }
+
+    try {
+        if (response.data.msg) {
+            return response.data.msg
+        }
+    } catch {}
+
+    return 'Unknown error occurred'
 }

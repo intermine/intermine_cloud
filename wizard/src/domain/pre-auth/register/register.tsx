@@ -18,7 +18,7 @@ import {
     FormAction
 } from '../../../components/form'
 import { Logo } from '../../../components/logo'
-import { authMachine } from '../machine/auth-machine'
+import { authMachine, TRegisterPayload } from '../machine/auth-machine'
 
 import { scrollIntoView } from '../../../utils/misc'
 import { TInputField, updateError, updateValue } from '../utils'
@@ -136,7 +136,14 @@ export const Register = () => {
             return
         }
 
-        dispatch('REGISTER')
+        const payload: TRegisterPayload = {
+            email: email.value,
+            name: name.value,
+            organisation: organisation.value,
+            password: password.value
+        }
+
+        dispatch('REGISTER', payload)
     }
 
     useEffect(() => {

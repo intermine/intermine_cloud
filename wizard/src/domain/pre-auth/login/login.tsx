@@ -21,7 +21,7 @@ import {
     FormAction
 } from '../../../components/form'
 import { Logo } from '../../../components/logo'
-import { authMachine } from '../machine/auth-machine'
+import { authMachine, TLoginPayload } from '../machine/auth-machine'
 
 import { TInputField, updateError, updateValue } from '../utils'
 import { scrollIntoView } from '../../../utils/misc'
@@ -57,7 +57,7 @@ export const Login = () => {
         const errorFields: [keyof TInputFields, string][] = []
 
         if (email.value.length === 0) {
-            errorFields.push(['email', 'EmaIL is required'])
+            errorFields.push(['email', 'Email is required'])
         }
 
         if (password.value.length === 0) {
@@ -73,7 +73,12 @@ export const Login = () => {
             return
         }
 
-        dispatch('LOGIN', { email: email.value, password: password.value })
+        const payload: TLoginPayload = {
+            email: email.value,
+            password: password.value
+        }
+
+        dispatch('LOGIN', payload)
     }
 
     useEffect(() => {
