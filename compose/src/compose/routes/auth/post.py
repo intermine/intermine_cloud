@@ -58,7 +58,7 @@ def post() -> Response:
         response_body = AuthPOSTResponse(
             msg="Invalid credentials", items=[], errors=["Invalid credentials"]
         )
-        response = make_response(response_body.json(), HTTPStatus.OK)
+        response = make_response(response_body.json(), HTTPStatus.UNAUTHORIZED)
         return response
 
     # return logged in user and cookie in response
