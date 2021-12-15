@@ -10,7 +10,9 @@ properties:
   errors:
     type: array
     items:
-      type: any
+      oneOf:
+        - type: string
+        - type: object 
 required:
   - "msg"
   - "items"
