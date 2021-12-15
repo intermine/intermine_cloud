@@ -1,12 +1,33 @@
 import { createMachine, assign } from 'xstate'
 import { clone } from '@intermine/chromatin/utils'
-import { AuthApi } from '@intermine/compose-rest-client'
+import { AuthApi, UserApi } from '@intermine/compose-rest-client'
 import { AuthStates } from '../../../constants/auth'
 import { composeConfiguration } from '../../../config'
 
 import { TUserDetails } from '../../../context/types'
+import {
+    getResponseMessageUsingResponseStatus,
+    getResponseStatus,
+} from '../../../utils/get'
 
 const authApi = new AuthApi(composeConfiguration)
+const userApi = new UserApi(composeConfiguration)
+
+export type TLoginPayload = {
+    email: string
+    password: string
+}
+
+export type TRegisterPayload = {
+    email: string
+    password: string
+    name: string
+    organisation: string
+}
+
+export type TResetPasswordPayload = {
+    email: string
+}
 
 export type TAuthMachineContext = {
     errorMessage?: string
@@ -14,6 +35,9 @@ export type TAuthMachineContext = {
     authState?: AuthStates
     isRequestFailed?: boolean
 }
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type TResponse = any
 
 export type TAuthMachineState =
     | {
@@ -27,12 +51,14 @@ export type TAuthMachineState =
     | { value: 'reset'; context: TAuthMachineContext }
 
 export type TAuthMachineEvents =
-    | { type: 'LOGIN'; email: string; password: string }
-    | { type: 'REGISTER' }
-    | { type: 'RESET_PASSWORD' }
+    | ({ type: 'LOGIN' } & TLoginPayload)
+    | ({ type: 'REGISTER' } & TRegisterPayload)
+    | ({ type: 'RESET_PASSWORD' } & TResetPasswordPayload)
     | { type: 'END' }
     | { type: 'START' }
     | { type: 'RESET' }
+    | { type: 'error.platform.login'; data: { response: TResponse } }
+    | { type: 'error.platform.register'; data: { response: TResponse } }
 
 const authMachineInitialContext: TAuthMachineContext = {
     errorMessage: '',
@@ -75,7 +101,7 @@ export const authMachine = createMachine<
             },
             register: {
                 invoke: {
-                    src: 'login',
+                    src: 'register',
                     onDone: {
                         target: 'end',
                     },
@@ -108,9 +134,19 @@ export const authMachine = createMachine<
         actions: {
             requestFailed: assign<TAuthMachineContext, TAuthMachineEvents>({
                 isRequestFailed: true,
-                errorMessage: (ctx, event) => {
-                    console.log(event)
-                    return 'Failed to load response'
+                errorMessage: (_, event) => {
+                    console.log('error', event)
+                    if (
+                        event.type === 'error.platform.login' ||
+                        event.type === 'error.platform.register'
+                    ) {
+                        const status = getResponseStatus(event.data.response)
+
+                        return getResponseMessageUsingResponseStatus(
+                            event.data.response,
+                            status
+                        )
+                    }
                 },
             }),
             resetAuthState: assign<TAuthMachineContext, TAuthMachineEvents>({
@@ -128,7 +164,21 @@ export const authMachine = createMachine<
                     const { email, password } = event
                     return authApi.authPost({ email, password })
                 }
-                return new Promise(() => false)
+
+                throw new Error(
+                    'event.type should be LOGIN. Got: '.concat(event.type)
+                )
+            },
+            register: (_, event) => {
+                if (event.type === 'REGISTER') {
+                    const { email, name, password, organisation } = event
+                    return userApi.userPost([
+                        { user: { email, name, organisation }, password },
+                    ])
+                }
+                throw new Error(
+                    'event.type should be REGISTER. Got: '.concat(event.type)
+                )
             },
         },
     }
