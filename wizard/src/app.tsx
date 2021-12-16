@@ -91,7 +91,7 @@ export const App = () => {
              * If not authorize and user tries to navigate to
              * auth page.
              */
-            history.push(`${LOGIN_PATH}?next=${pathname}`)
+            history.push(`${LOGIN_PATH}?${OtherIDs.URLReferer}=${pathname}`)
 
             /**
              * Showing an alert to user stating why we redirected user to

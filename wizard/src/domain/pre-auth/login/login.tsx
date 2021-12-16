@@ -82,22 +82,23 @@ export const Login = () => {
         dispatch('LOGIN', payload)
     }
 
-    const getNextUrl = (): string => {
-        const defaultURL = DASHBOARD_OVERVIEW_PATH
+    const onLoginSuccessful = () => {
+        // Remove unauthorize alert.
+        removeAlert(OtherIDs.UnauthorizeAlert)
 
-        if (history.location.search) {
-            const query = new URLSearchParams(history.location.search)
-            return query.get('next') || defaultURL
-        }
+        // Updating AuthState
+        updateAuthState(AuthStates.Authorize)
 
-        return defaultURL
+        // Redirecting
+        const query = new URLSearchParams(history.location.search)
+        const redirectURL =
+            query.get(OtherIDs.URLReferer) || DASHBOARD_OVERVIEW_PATH
+        history.push(redirectURL)
     }
 
     useEffect(() => {
         if (authMachineState.value === 'end') {
-            updateAuthState(AuthStates.Authorize)
-            history.push(getNextUrl())
-            removeAlert(OtherIDs.UnauthorizeAlert)
+            onLoginSuccessful()
         }
 
         if (authMachineState.context.isRequestFailed) {

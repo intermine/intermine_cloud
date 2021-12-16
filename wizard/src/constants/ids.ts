@@ -12,4 +12,5 @@ export enum DomElementIDs {
 
 export enum OtherIDs {
     UnauthorizeAlert = 'UnauthorizeAlert',
+    URLReferer = 'next',
 }
