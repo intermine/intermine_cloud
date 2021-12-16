@@ -130,7 +130,6 @@ export const authMachine = createMachine<
             requestFailed: assign<TAuthMachineContext, TAuthMachineEvents>({
                 isRequestFailed: true,
                 errorMessage: (_, event) => {
-                    console.log('error', event)
                     if (
                         event.type === 'error.platform.login' ||
                         event.type === 'error.platform.register'
