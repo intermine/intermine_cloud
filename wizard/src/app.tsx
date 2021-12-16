@@ -140,6 +140,28 @@ export const App = () => {
         onLocationChange()
     }, [pathname])
 
+    useEffect(() => {
+        window.addEventListener('offline', () => {
+            addAlert({
+                isOpen: true,
+                id: 'offline-alert',
+                title: 'Connectivity Issue',
+                message: 'It seems like you are offline.',
+                type: 'warning'
+            })
+        })
+
+        window.addEventListener('online', () => {
+            addAlert({
+                isOpen: true,
+                id: 'online-alert',
+                title: 'Online',
+                message: 'You are now online.',
+                type: 'info'
+            })
+        })
+    }, [])
+
     return (
         <ThemeProvider theme={themeType === 'dark' ? darkTheme : lightTheme}>
             <Box
