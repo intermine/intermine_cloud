@@ -8,6 +8,7 @@ import {
     getResponseMessageUsingResponseStatus,
     getResponseStatus,
 } from '../../../utils/get'
+import { AxiosResponse } from 'axios'
 
 export type TLoginPayload = {
     email: string
@@ -32,8 +33,7 @@ export type TAuthMachineContext = {
     isRequestFailed?: boolean
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type TResponse = any
+type TResponse = AxiosResponse
 
 export type TAuthMachineState =
     | {
@@ -58,7 +58,6 @@ export type TAuthMachineEvents =
 
 const authMachineInitialContext: TAuthMachineContext = {
     errorMessage: '',
-    userDetails: {},
     authState: AuthStates.NotAuthorize,
     isRequestFailed: false,
 }
