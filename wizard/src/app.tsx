@@ -6,7 +6,11 @@ import { createStyle } from '@intermine/chromatin/styles'
 import 'regenerator-runtime'
 
 import { AuthStates } from './constants/auth'
-import { useAuthReducer, usePreferencesReducer } from './context'
+import {
+    useAuthReducer,
+    useGlobalAlertReducer,
+    usePreferencesReducer
+} from './context'
 import { RouteLoadingSpinner } from './components/route-loading-spinner'
 import { darkTheme, lightTheme } from './constants/theme'
 import { PageNotFound } from './components/page-not-found'
@@ -73,6 +77,7 @@ export const App = () => {
 
     const authReducer = useAuthReducer()
     const preferenceReducer = usePreferencesReducer()
+    const { addAlert } = useGlobalAlertReducer()
 
     const { state: auth } = authReducer
     const {
@@ -86,6 +91,20 @@ export const App = () => {
              * auth page.
              */
             history.push(`${LOGIN_PATH}?next=${pathname}`)
+
+            /**
+             * Showing an alert to user stating why we redirected user to
+             * login page.
+             */
+            addAlert({
+                id: 'redirect-alert',
+                isOpen: true,
+                message: `You are not logged in. 
+                Please login to continue.`,
+                title: 'Unauthorise',
+                type: 'warning'
+            })
+
             return
         }
         if (auth.authState === Authorize && !isAuthRoute(pathname)) {

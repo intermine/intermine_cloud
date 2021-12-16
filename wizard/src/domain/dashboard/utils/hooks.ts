@@ -122,19 +122,24 @@ export const useDashboardLogout = () => {
         let message = ''
         switch (response.status) {
             case ResponseStatus.ServerUnavailable: {
-                message = 'Failed to logout. Please try again.'
+                message = `Failed to logout. Please
+                try again.`
                 break
             }
             case ResponseStatus.UserOffline: {
-                message = 'It seems that you are offline.'
+                message = `It seems that you are offline.
+                Please check your internet connection.`
                 break
             }
             case 401: {
-                message = 'It seems that you are already logout.'
+                message = `It seems that you are already logout.
+                Please refresh your page.
+                `
                 break
             }
             default:
-                message = 'Unknown error occurred.'
+                message = `Oh no! Something bad happened and
+                we don't know why. Please try to refresh this page.`
         }
 
         addAlert({
@@ -142,6 +147,7 @@ export const useDashboardLogout = () => {
             isOpen: true,
             type: 'error',
             message,
+            title: 'Error',
         })
     }
 

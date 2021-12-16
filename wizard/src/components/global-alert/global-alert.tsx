@@ -51,9 +51,6 @@ export const GlobalAlert = () => {
             isOpen={alertsKey.length > 0}
             origin="top-right"
             csx={{ root: { ...getOrigin(), transition: '0.2s' } }}
-            alertChildProps={{
-                csx: { root: { wordBreak: 'break-all' } }
-            }}
         >
             {alertsKey.map((alertKey) => {
                 const { id, onClose, ...alert } = alerts[alertKey]
