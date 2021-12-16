@@ -12,5 +12,4 @@ export enum AuthActions {
 
 export const DEFAULT_AUTH: TAuthReducer = {
     authState: AuthStates.NotAuthorize,
-    userDetails: {},
 }
