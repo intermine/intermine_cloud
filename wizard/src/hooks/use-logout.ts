@@ -15,18 +15,27 @@ export const useLogout = () => {
             updateAuthState(AuthStates.NotAuthorize)
             return {
                 ...response,
+                config: {},
                 status: getResponseStatus(response),
             }
 
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (error: unknown) {
+            const status = getResponseStatus((error as AxiosError).response)
+
+            if (status === 401) {
+                // Unauthorize means user is already logout.
+                // So it is nice to update app state as well.
+                updateAuthState(AuthStates.NotAuthorize)
+            }
+
             return {
                 data: {},
                 config: {},
                 headers: {},
                 statusText: '',
                 ...((error as AxiosError) && (error as AxiosError).response),
-                status: getResponseStatus((error as AxiosError).response),
+                status,
             }
         }
     }
