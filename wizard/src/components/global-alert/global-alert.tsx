@@ -1,3 +1,4 @@
+import { useLocation } from 'react-router'
 import { AlertGroup } from '@intermine/chromatin/alert-group'
 import { Alert } from '@intermine/chromatin/alert'
 
@@ -5,10 +6,12 @@ import {
     useAdditionalSidebarReducer,
     useGlobalAlertReducer
 } from '../../context'
+import { isAuthRoute } from '../../routes'
 
 export const GlobalAlert = () => {
     const globalAlertReducer = useGlobalAlertReducer()
     const additionalSidebarReducer = useAdditionalSidebarReducer()
+    const { pathname } = useLocation()
 
     const {
         state: { alerts },
@@ -20,16 +23,24 @@ export const GlobalAlert = () => {
     } = additionalSidebarReducer
 
     const getOrigin = (): { top: string; right: string } => {
+        const top = '1.5rem'
+        let right = '5.5rem'
+
         if (isAdditionalSidebarOpen) {
-            return {
-                top: '1.5rem',
-                right: '22.5rem'
-            }
+            right = '22.5rem'
+        }
+
+        if (!isAuthRoute(pathname)) {
+            /**
+             * If path is not auth path. Then we don't have any additional
+             * sidebar. So alert should be less far from right.
+             */
+            right = '1.5rem'
         }
 
         return {
-            top: '1.5rem',
-            right: '5.5rem'
+            top,
+            right
         }
     }
 
