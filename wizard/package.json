@@ -72,6 +72,7 @@
         "react-transition-group": "^4.4.2",
         "regenerator-runtime": "^0.13.9",
         "shortid": "^2.2.16",
+        "webpack-retry-chunk-load-plugin": "^3.0.0",
         "xstate": "^4.25.0"
     }
 }
