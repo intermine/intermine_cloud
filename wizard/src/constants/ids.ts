@@ -9,3 +9,7 @@ export enum DomElementIDs {
     RegisterForm = 'register-form',
     ForgotPasswordForm = 'forgot-password-form',
 }
+
+export enum OtherIDs {
+    UnauthorizeAlert = 'UnauthorizeAlert',
+}

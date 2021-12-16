@@ -6,6 +6,7 @@ import { createStyle } from '@intermine/chromatin/styles'
 import 'regenerator-runtime'
 
 import { AuthStates } from './constants/auth'
+import { OtherIDs } from './constants/ids'
 import {
     useAuthReducer,
     useGlobalAlertReducer,
@@ -97,7 +98,7 @@ export const App = () => {
              * login page.
              */
             addAlert({
-                id: 'redirect-alert',
+                id: OtherIDs.UnauthorizeAlert,
                 isOpen: true,
                 message: `You are not logged in. 
                 Please login to continue.`,
