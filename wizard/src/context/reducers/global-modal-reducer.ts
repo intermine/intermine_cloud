@@ -25,12 +25,13 @@ const globalModalReducer = (
 
     switch (type) {
         case UpdateGlobalModalProps:
-            state = { ...(data as TGlobalModalReducer) }
-            return state
+            return { ...state, ...(data as TGlobalModalReducer) }
 
         case CloseGlobalModal:
-            state = { isOpen: false }
-            return state
+            /**
+             * This will also reset global modal
+             */
+            return { isOpen: false }
 
         /* istanbul ignore next */
         default:

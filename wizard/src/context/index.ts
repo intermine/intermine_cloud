@@ -6,4 +6,5 @@ export {
     usePreferencesReducer,
     useSidebarReducer,
     useProgressReducer,
+    useSharedReducer,
 } from './store'

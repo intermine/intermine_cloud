@@ -16,7 +16,7 @@ import { DashboardFormContext } from './dashboard-form-context'
 import {
     RestrictLogoutRestrictions,
     useDashboardWarningModal,
-    useLogout
+    useDashboardLogout
 } from '../../utils/hooks'
 import { useSidebarReducer } from '../../../../context'
 import { handleOnBeforeUnload } from '../../utils/misc'
@@ -37,13 +37,13 @@ export const DashboardForm = (props: TDashboardFormProps) => {
     const {
         removeAdditionalSidebarLogoutWithModalRestriction,
         restrictAdditionalSidebarLogoutWithModal
-    } = useLogout()
+    } = useDashboardLogout()
 
     useEffect(() => {
         if (isDirty) {
             updateSidebarState({
                 isPageSwitchingAllowed: false,
-                onSidebarItemClick: (to) => showWarningModal({ to })
+                onSidebarItemClick: (to) => showWarningModal({ redirectTo: to })
             })
             window.addEventListener('beforeunload', _handleOnBeforeUnload)
             restrictAdditionalSidebarLogoutWithModal({
@@ -83,7 +83,7 @@ export const FormPageHeading = (props: TFormPageHeading) => {
 
     const handleOnClickBack = () => {
         if (isDirty) {
-            showWarningModal({ to: landingPageUrl })
+            showWarningModal({ redirectTo: landingPageUrl })
         } else {
             history.push(landingPageUrl)
         }

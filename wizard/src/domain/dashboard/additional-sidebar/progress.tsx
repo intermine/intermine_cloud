@@ -9,7 +9,7 @@ import {
 import { ActionSection } from './action-section'
 import { ProgressItemView } from './progress-item-view'
 import { handleOnBeforeUnload } from '../utils/misc'
-import { RestrictLogoutRestrictions, useLogout } from '../utils/hooks'
+import { RestrictLogoutRestrictions, useDashboardLogout } from '../utils/hooks'
 
 const _handleOnBeforeUnload = (event: Event) => {
     handleOnBeforeUnload(event)
@@ -31,7 +31,7 @@ export const Progress = () => {
     const {
         removeAdditionalSidebarLogoutWithModalRestriction,
         restrictAdditionalSidebarLogoutWithModal
-    } = useLogout()
+    } = useDashboardLogout()
 
     const cancelBrowserDependentRequests = () => {
         const _active = { ...activeItems }

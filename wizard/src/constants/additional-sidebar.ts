@@ -1,6 +1,5 @@
 export enum AdditionalSidebarActions {
     UpdateState = 'UpdateState',
-    UpdateLogoutState = 'UpdateLogoutState',
 }
 
 export enum AdditionalSidebarTabs {

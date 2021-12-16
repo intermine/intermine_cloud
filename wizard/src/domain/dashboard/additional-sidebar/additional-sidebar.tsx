@@ -97,7 +97,7 @@ export const AdditionalSidebar = () => {
     const additionalSidebarReducer = useAdditionalSidebarReducer()
     const {
         updateAdditionalSidebarState,
-        state: { isOpen, activeTab, logout }
+        state: { isOpen, activeTab }
     } = additionalSidebarReducer
 
     const progressReducer = useProgressReducer()
@@ -108,8 +108,6 @@ export const AdditionalSidebar = () => {
     const classes = useStyles({
         isOpen
     })
-
-    const isLogoutAllowed = !logout.isUploading && !logout.isEditingForm
 
     const onClickActionIcon = (activeTab: AdditionalSidebarTabs) => {
         updateAdditionalSidebarState({
@@ -123,35 +121,6 @@ export const AdditionalSidebar = () => {
             isOpen: false,
             activeTab: None
         })
-    }
-
-    const handleLogoutClick = () => {
-        const { onLogoutClickCallbacks, isEditingForm, isUploading } = logout
-
-        const { editingFormCallback, uploadingFormCallback } =
-            onLogoutClickCallbacks
-
-        if (isEditingForm && editingFormCallback) {
-            editingFormCallback()
-            /**
-             * Prevent logout default action
-             */
-            return true
-        }
-
-        if (isUploading && uploadingFormCallback) {
-            uploadingFormCallback()
-
-            /**
-             * Prevent logout default action
-             */
-            return true
-        }
-
-        /**
-         * Not prevent default action.
-         */
-        return false
     }
 
     return (
@@ -180,9 +149,7 @@ export const AdditionalSidebar = () => {
                     </Tooltip>
                 ))}
                 <LogoutIconButton
-                    isLogoutAllowed={isLogoutAllowed}
                     className={classes.button}
-                    onLogoutClick={handleLogoutClick}
                     onLogout={onLogout}
                 />
             </Box>

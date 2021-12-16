@@ -65,7 +65,9 @@ export const GlobalModal = () => {
             children,
             primaryAction = {},
             secondaryAction = {},
-            type = 'warning'
+            type = 'warning',
+            isLoadingPrimaryAction = false,
+            isLoadingSecondaryAction = false
         },
         closeGlobalModal
     } = globalModalReducer
@@ -113,11 +115,15 @@ export const GlobalModal = () => {
                 <Button
                     isTextUppercase={false}
                     color="neutral"
+                    isLoading={isLoadingSecondaryAction}
+                    isDisabled={isLoadingPrimaryAction}
                     {...secondaryAction}
                 />
                 <Button
                     isTextUppercase={false}
                     color={type}
+                    isDisabled={isLoadingSecondaryAction}
+                    isLoading={isLoadingPrimaryAction}
                     {...primaryAction}
                 />
             </Box>

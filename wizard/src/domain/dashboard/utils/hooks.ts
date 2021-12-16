@@ -1,24 +1,30 @@
 import { useHistory } from 'react-router'
+import shortid from 'shortid'
+
+import { ButtonCommonProps } from '@intermine/chromatin/button'
+
 import {
     useGlobalModalReducer,
-    useAuthReducer,
     useProgressReducer,
     useGlobalAlertReducer,
     useAdditionalSidebarReducer,
+    useSharedReducer,
 } from '../../../context'
-import { AuthStates } from '../../../constants/auth'
 import { TProgressItem } from '../../../context/types'
 import { AdditionalSidebarTabs } from '../../../constants/additional-sidebar'
 import { ProgressItemStatus } from '../../../constants/progress'
 import { LOGIN_PATH } from '../../../routes'
-import { authApi } from '../../../services/api'
+import { useLogout } from '../../../hooks/use-logout'
 
 type TUseDashboardWarningModalProps = {
     msg?: string
-    primaryActionTitle?: string
-    primaryActionCallback?: () => void
-    secondaryActionTitle?: string
-    to?: string
+    primaryAction?: ButtonCommonProps
+    secondaryAction?: ButtonCommonProps
+    /**
+     * If set then redirect to this url otherwise
+     * no redirection will take place
+     */
+    redirectTo?: string
 }
 
 export const useDashboardWarningModal = () => {
@@ -28,35 +34,43 @@ export const useDashboardWarningModal = () => {
     const showWarningModal = (props: TUseDashboardWarningModalProps) => {
         const {
             msg = 'All your work will be lost.',
-            primaryActionTitle = 'Proceed',
-            secondaryActionTitle = 'Cancel',
-            to = '/',
-            primaryActionCallback,
+            primaryAction = {
+                children: 'Proceed',
+            },
+            secondaryAction = {
+                children: 'Cancel',
+            },
+            redirectTo,
         } = props
+
         updateGlobalModalProps({
             isOpen: true,
             heading: 'Are you sure?',
             type: 'warning',
             children: msg,
             primaryAction: {
-                onClick: () => {
-                    closeGlobalModal()
-                    history.push(to)
-                    if (typeof primaryActionCallback === 'function') {
-                        primaryActionCallback()
+                ...primaryAction,
+                onClick: (event) => {
+                    if (redirectTo) {
+                        closeGlobalModal()
+                        history.push(redirectTo)
+                    }
+                    if (primaryAction.onClick) {
+                        primaryAction.onClick(event)
                     }
                 },
-                children: primaryActionTitle,
             },
             secondaryAction: {
                 onClick: closeGlobalModal,
-                children: secondaryActionTitle,
+                ...secondaryAction,
             },
         })
     }
 
     return {
         showWarningModal,
+        closeWarningModal: closeGlobalModal,
+        updateWarningModal: updateGlobalModalProps,
     }
 }
 
@@ -65,26 +79,66 @@ export enum RestrictLogoutRestrictions {
     Uploading = 'Uploading',
 }
 
-export type TRestrictAdditionalSidebarLogoutWithModalProps =
-    TUseDashboardWarningModalProps & {
-        type: RestrictLogoutRestrictions
-    }
+export type TRestrictAdditionalSidebarLogoutWithModalProps = {
+    primaryActionCallback?: () => void
+    type: RestrictLogoutRestrictions
+}
 
-export const useLogout = () => {
+export const useDashboardLogout = () => {
     const { FormIsDirty, Uploading } = RestrictLogoutRestrictions
 
-    const { updateAuthState } = useAuthReducer()
-    const { updateAdditionalSidebarLogoutState } = useAdditionalSidebarReducer()
-    const { showWarningModal } = useDashboardWarningModal()
+    const { updateSharedReducer } = useSharedReducer()
+    const { addAlert } = useGlobalAlertReducer()
 
-    const logout = async () => {
-        try {
-            await authApi.authDelete()
-            updateAuthState(AuthStates.NotAuthorize)
-            return true
-        } catch {
-            return false
+    const { showWarningModal, closeWarningModal, updateWarningModal } =
+        useDashboardWarningModal()
+
+    const { logout } = useLogout()
+    const history = useHistory()
+
+    type TDashboardLogoutOptions = {
+        onSuccess?: () => void
+        onError?: () => void
+    }
+    const dashboardLogout = async (options = {} as TDashboardLogoutOptions) => {
+        const { onError, onSuccess } = options
+
+        const isLogoutSuccessfully = await logout()
+
+        if (isLogoutSuccessfully) {
+            history.push(LOGIN_PATH)
+            if (typeof onSuccess === 'function') {
+                onSuccess()
+            }
+        } else if (typeof onError === 'function') {
+            onError()
         }
+    }
+
+    const showAlertOnFailedLogoutAttempt = () => {
+        addAlert({
+            id: shortid.generate(),
+            isOpen: true,
+            type: 'error',
+            message: window.navigator.onLine
+                ? 'Failed to logout. Please refresh your page.'
+                : 'You seem to be offline.',
+        })
+    }
+
+    const primaryAction = async (cb?: () => void) => {
+        updateWarningModal({ isLoadingPrimaryAction: true, isOpen: true })
+
+        await dashboardLogout({
+            onSuccess: () => {
+                history.push(LOGIN_PATH)
+                if (cb) cb()
+                closeWarningModal()
+            },
+            onError: showAlertOnFailedLogoutAttempt,
+        })
+
+        updateWarningModal({ isLoadingPrimaryAction: false, isOpen: true })
     }
 
     const restrictAdditionalSidebarLogoutWithModal = (
@@ -93,20 +147,16 @@ export const useLogout = () => {
         const { type, primaryActionCallback, ...rest } = props
 
         if (type === FormIsDirty) {
-            updateAdditionalSidebarLogoutState({
-                isEditingForm: true,
-                onLogoutClickCallbacks: {
-                    editingFormCallback: () => {
-                        showWarningModal({
-                            to: LOGIN_PATH,
-                            primaryActionTitle: 'Logout',
-                            primaryActionCallback: () => {
-                                logout()
-                                primaryActionCallback && primaryActionCallback()
-                            },
-                            ...rest,
-                        })
-                    },
+            updateSharedReducer({
+                isEditingAnyForm: true,
+                cbIfEditingFormAndUserRequestLogout: () => {
+                    showWarningModal({
+                        primaryAction: {
+                            children: 'Logout',
+                            onClick: () => primaryAction(primaryActionCallback),
+                        },
+                        ...rest,
+                    })
                 },
             })
 
@@ -114,22 +164,18 @@ export const useLogout = () => {
         }
 
         if (type === Uploading) {
-            updateAdditionalSidebarLogoutState({
-                isUploading: true,
-                onLogoutClickCallbacks: {
-                    uploadingFormCallback: () => {
-                        showWarningModal({
-                            to: LOGIN_PATH,
-                            primaryActionTitle: 'Logout',
-                            primaryActionCallback: () => {
-                                logout()
-                                primaryActionCallback && primaryActionCallback()
-                            },
-                            msg: `If you logout, then all the uploads
+            updateSharedReducer({
+                isUploadingAnyFile: true,
+                cbIfUploadingFileAndUserRequestLogout: () => {
+                    showWarningModal({
+                        primaryAction: {
+                            children: 'Logout',
+                            onClick: () => primaryAction(primaryActionCallback),
+                        },
+                        msg: `If you logout, then all the uploads
                             in progress will be lost.`,
-                            ...rest,
-                        })
-                    },
+                        ...rest,
+                    })
                 },
             })
             return
@@ -141,30 +187,27 @@ export const useLogout = () => {
     }) => {
         const { type } = props
         if (type === FormIsDirty) {
-            updateAdditionalSidebarLogoutState({
-                isEditingForm: false,
-                onLogoutClickCallbacks: {
-                    editingFormCallback: () => false,
-                },
+            updateSharedReducer({
+                isEditingAnyForm: false,
+                cbIfEditingFormAndUserRequestLogout: () => false,
             })
 
             return
         }
 
         if (type === Uploading) {
-            updateAdditionalSidebarLogoutState({
-                isUploading: false,
-                onLogoutClickCallbacks: {
-                    uploadingFormCallback: () => false,
-                },
+            updateSharedReducer({
+                isUploadingAnyFile: false,
+                cbIfUploadingFileAndUserRequestLogout: () => false,
             })
         }
     }
 
     return {
-        logout,
+        dashboardLogout,
         restrictAdditionalSidebarLogoutWithModal,
         removeAdditionalSidebarLogoutWithModalRestriction,
+        showAlertOnFailedLogoutAttempt,
     }
 }
 

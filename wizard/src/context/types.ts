@@ -15,14 +15,17 @@ import { GlobalAlertsActions } from '../constants/global-alert'
 import { GlobalModalActions } from '../constants/global-modal'
 import { PreferencesActions } from '../constants/preferences'
 import { ProgressActions, ProgressItemStatus } from '../constants/progress'
+import { SharedReducerActions } from '../constants/shared-reducer'
 import { SidebarActions } from '../constants/sidebar'
 
 /**
  * Auth
  */
-
-// TODO: fix type after userDetails structure is finalize.
-export type TUserDetails = any
+export type TUserDetails = {
+    name: string
+    organisation: string
+    email: string
+}
 
 export type TAuthReducer = {
     authState: AuthStates
@@ -98,6 +101,8 @@ export type TGlobalModalReducer = {
     isOpen: boolean
     primaryAction?: ButtonCommonProps
     secondaryAction?: ButtonCommonProps
+    isLoadingPrimaryAction?: boolean
+    isLoadingSecondaryAction?: boolean
 }
 
 export type TGlobalModalReducerAction = {
@@ -118,32 +123,20 @@ export type TUseGlobalModalReducer = {
 /**
  * Additional Sidebar
  */
-export type TAdditionalSidebarLogout = {
-    isEditingForm: boolean
-    isUploading: boolean
-    onLogoutClickCallbacks: {
-        editingFormCallback?: () => void
-        uploadingFormCallback?: () => void
-    }
-}
 export type TAdditionalSidebarReducer = {
     isOpen: boolean
     activeTab: AdditionalSidebarTabs
-    logout: TAdditionalSidebarLogout
 }
 
 export type TAdditionalSidebarReducerAction = {
     type: AdditionalSidebarActions
-    data: Partial<TAdditionalSidebarReducer | TAdditionalSidebarLogout>
+    data: Partial<TAdditionalSidebarReducer>
 }
 
 export type TUseAdditionalSidebarReducer = {
     state: TAdditionalSidebarReducer
     updateAdditionalSidebarState: (
         data: Partial<TAdditionalSidebarReducer>
-    ) => void
-    updateAdditionalSidebarLogoutState: (
-        data: Partial<TAdditionalSidebarLogout>
     ) => void
 }
 /**
@@ -240,6 +233,39 @@ export type TUseProgressReducer = {
  */
 
 /**
+ * Shared
+ */
+
+export type TSharedReducer = {
+    isUploadingAnyFile: boolean
+    isEditingAnyForm: boolean
+    /**
+     * Callback function to show user warning, if any
+     * file is uploading and user request to logout.
+     */
+    cbIfUploadingFileAndUserRequestLogout?: () => void
+    /**
+     * Callback function to show user warning, if any
+     * form is edited by user and user request to logout.
+     */
+    cbIfEditingFormAndUserRequestLogout?: () => void
+}
+
+export type TSharedReducerAction = {
+    type: SharedReducerActions
+    data: Partial<TSharedReducer>
+}
+
+export type TUseSharedReducer = {
+    state: TSharedReducer
+    updateSharedReducer: (data: Partial<TSharedReducer>) => void
+}
+
+/**
+ * Shared Ends
+ */
+
+/**
  * App Context
  */
 export type TAppContext = {
@@ -250,4 +276,5 @@ export type TAppContext = {
     additionalSidebarReducer: TUseAdditionalSidebarReducer
     globalAlertReducer: TUseGlobalAlertReducer
     progressReducer: TUseProgressReducer
+    sharedReducer: TUseSharedReducer
 }
