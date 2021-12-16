@@ -28,7 +28,7 @@ const authReducer = (state: TAuthReducer, action: TAuthReducerAction) => {
             return state
 
         case UpdateUserDetails:
-            state = { ...state, userDetails: data }
+            state = { ...state, userDetails: data as TUserDetails }
             return state
 
         /* istanbul ignore next */

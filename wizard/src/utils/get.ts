@@ -1,5 +1,3 @@
-import { AxiosResponse } from 'axios'
-
 import { ResponseStatus } from '../constants/response'
 
 const { UserOffline, ServerUnavailable, UnknownError, Ok } = ResponseStatus
@@ -37,7 +35,8 @@ export const getDataSize = (size: number): string => {
 }
 
 export const getResponseStatus = (
-    response: AxiosResponse | undefined
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    response: any
 ): ResponseStatus | number => {
     if (typeof response !== 'object') {
         if (!window.navigator.onLine) {

@@ -29,7 +29,7 @@ export type TUserDetails = {
 
 export type TAuthReducer = {
     authState: AuthStates
-    userDetails?: TUserDetails
+    userDetails: TUserDetails
 }
 
 export type TAuthReducerAction = {
