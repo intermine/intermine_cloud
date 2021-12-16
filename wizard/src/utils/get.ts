@@ -1,6 +1,8 @@
+import { AxiosResponse } from 'axios'
+
 import { ResponseStatus } from '../constants/response'
 
-const { UserOffline, ServerUnavailable, UnknownError } = ResponseStatus
+const { UserOffline, ServerUnavailable, UnknownError, Ok } = ResponseStatus
 
 export const getDataSize = (size: number): string => {
     if (size < 1024) {
@@ -34,8 +36,9 @@ export const getDataSize = (size: number): string => {
     return `${(size / 1_099_511_627_776).toFixed(2)} TB`
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const getResponseStatus = (response: any): ResponseStatus | number => {
+export const getResponseStatus = (
+    response: AxiosResponse | undefined
+): ResponseStatus | number => {
     if (typeof response !== 'object') {
         if (!window.navigator.onLine) {
             // User is offline
@@ -47,6 +50,9 @@ export const getResponseStatus = (response: any): ResponseStatus | number => {
     }
 
     if (typeof response.status === 'number') {
+        if (response.status < 400) {
+            return Ok
+        }
         return response.status as number
     }
 
