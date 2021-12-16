@@ -5,9 +5,9 @@ import { InlineAlert } from '@intermine/chromatin/inline-alert'
 import { Button } from '@intermine/chromatin/button'
 import { clone } from '@intermine/chromatin/utils'
 
-import { useAuthReducer } from '../../../context'
+import { useAuthReducer, useGlobalAlertReducer } from '../../../context'
 import { AuthStates } from '../../../constants/auth'
-import { DomElementIDs } from '../../../constants/ids'
+import { DomElementIDs, OtherIDs } from '../../../constants/ids'
 import {
     FORGOT_PASSWORD_PATH,
     REGISTER_PATH,
@@ -40,6 +40,7 @@ const defaultFieldValue: TInputField = {
 export const Login = () => {
     const authReducer = useAuthReducer()
     const history = useHistory()
+    const { removeAlert } = useGlobalAlertReducer()
 
     const { updateAuthState } = authReducer
 
@@ -81,11 +82,24 @@ export const Login = () => {
         dispatch('LOGIN', payload)
     }
 
+    const getNextUrl = (): string => {
+        const defaultURL = DASHBOARD_OVERVIEW_PATH
+
+        if (history.location.search) {
+            const query = new URLSearchParams(history.location.search)
+            return query.get('next') || defaultURL
+        }
+
+        return defaultURL
+    }
+
     useEffect(() => {
         if (authMachineState.value === 'end') {
             updateAuthState(AuthStates.Authorize)
-            history.push(DASHBOARD_OVERVIEW_PATH)
+            history.push(getNextUrl())
+            removeAlert(OtherIDs.UnauthorizeAlert)
         }
+
         if (authMachineState.context.isRequestFailed) {
             /**
              * Failed request.
