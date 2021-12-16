@@ -2,6 +2,7 @@ import { useHistory } from 'react-router'
 import shortid from 'shortid'
 
 import { ButtonCommonProps } from '@intermine/chromatin/button'
+import { AxiosResponse } from 'axios'
 
 import {
     useGlobalModalReducer,
@@ -15,6 +16,8 @@ import { AdditionalSidebarTabs } from '../../../constants/additional-sidebar'
 import { ProgressItemStatus } from '../../../constants/progress'
 import { LOGIN_PATH } from '../../../routes'
 import { useLogout } from '../../../hooks/use-logout'
+
+import { ResponseStatus } from '../../../constants/response'
 
 type TUseDashboardWarningModalProps = {
     msg?: string
@@ -98,47 +101,48 @@ export const useDashboardLogout = () => {
 
     type TDashboardLogoutOptions = {
         onSuccess?: () => void
-        onError?: () => void
+        onError?: (response: AxiosResponse) => void
     }
     const dashboardLogout = async (options = {} as TDashboardLogoutOptions) => {
         const { onError, onSuccess } = options
 
-        const isLogoutSuccessfully = await logout()
+        const response = await logout()
 
-        if (isLogoutSuccessfully) {
+        if (response.status === ResponseStatus.Ok) {
             history.push(LOGIN_PATH)
             if (typeof onSuccess === 'function') {
                 onSuccess()
             }
         } else if (typeof onError === 'function') {
-            onError()
+            onError(response)
         }
     }
 
-    const showAlertOnFailedLogoutAttempt = () => {
+    const showAlertOnFailedLogoutAttempt = (response: AxiosResponse) => {
+        let message = ''
+        switch (response.status) {
+            case ResponseStatus.ServerUnavailable: {
+                message = 'Failed to logout. Please try again.'
+                break
+            }
+            case ResponseStatus.UserOffline: {
+                message = 'It seems that you are offline.'
+                break
+            }
+            case 401: {
+                message = 'It seems that you are already logout.'
+                break
+            }
+            default:
+                message = 'Unknown error occurred.'
+        }
+
         addAlert({
             id: shortid.generate(),
             isOpen: true,
             type: 'error',
-            message: window.navigator.onLine
-                ? 'Failed to logout. Please refresh your page.'
-                : 'You seem to be offline.',
+            message,
         })
-    }
-
-    const primaryAction = async (cb?: () => void) => {
-        updateWarningModal({ isLoadingPrimaryAction: true, isOpen: true })
-
-        await dashboardLogout({
-            onSuccess: () => {
-                history.push(LOGIN_PATH)
-                if (cb) cb()
-                closeWarningModal()
-            },
-            onError: showAlertOnFailedLogoutAttempt,
-        })
-
-        updateWarningModal({ isLoadingPrimaryAction: false, isOpen: true })
     }
 
     const restrictAdditionalSidebarLogoutWithModal = (
@@ -146,15 +150,33 @@ export const useDashboardLogout = () => {
     ) => {
         const { type, primaryActionCallback, ...rest } = props
 
+        const onClickPrimaryAction = async () => {
+            updateWarningModal({ isLoadingPrimaryAction: true, isOpen: true })
+
+            await dashboardLogout({
+                onSuccess: () => {
+                    history.push(LOGIN_PATH)
+                    if (primaryActionCallback) primaryActionCallback()
+                    closeWarningModal()
+                },
+                onError: (response) => {
+                    closeWarningModal()
+                    showAlertOnFailedLogoutAttempt(response)
+                },
+            })
+        }
+
+        const primaryAction: ButtonCommonProps = {
+            onClick: onClickPrimaryAction,
+            children: 'Logout',
+        }
+
         if (type === FormIsDirty) {
             updateSharedReducer({
                 isEditingAnyForm: true,
                 cbIfEditingFormAndUserRequestLogout: () => {
                     showWarningModal({
-                        primaryAction: {
-                            children: 'Logout',
-                            onClick: () => primaryAction(primaryActionCallback),
-                        },
+                        primaryAction,
                         ...rest,
                     })
                 },
@@ -168,10 +190,7 @@ export const useDashboardLogout = () => {
                 isUploadingAnyFile: true,
                 cbIfUploadingFileAndUserRequestLogout: () => {
                     showWarningModal({
-                        primaryAction: {
-                            children: 'Logout',
-                            onClick: () => primaryAction(primaryActionCallback),
-                        },
+                        primaryAction,
                         msg: `If you logout, then all the uploads
                             in progress will be lost.`,
                         ...rest,
