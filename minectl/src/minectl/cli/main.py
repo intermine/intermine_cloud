@@ -380,6 +380,7 @@ def dev(ctx, kube, docker, host) -> None:
             [
                 "minio",
                 "server",
+                f"--address={host}:9000",
                 "--console-address=:9001",
                 f"{(tools_path / 'minio' / 'data')}",
             ],
