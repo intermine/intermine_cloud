@@ -41,7 +41,7 @@ def create_presigned_post_url(file: FileDB, user_creds: User, method: str) -> st
     """
     return minio_client.get_presigned_url(
         method,
-        f"imcloud-{user_creds.user_id}",
+        f"protagonist-{user_creds.user_id}",
         f"{str(file.id)}.{file.ext}",
         expires=timedelta(days=7),
     )
