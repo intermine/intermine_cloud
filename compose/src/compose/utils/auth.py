@@ -69,7 +69,7 @@ def check_authentication(flask_route: Callable) -> Callable:
                 raise Exception("User not found")
         except Exception:
             response_body = ResponseSchema(
-                msg="unauthorized",
+                msg="Authentication failed. Please login again.",
                 errors=[
                     {
                         "loc": "creds",
