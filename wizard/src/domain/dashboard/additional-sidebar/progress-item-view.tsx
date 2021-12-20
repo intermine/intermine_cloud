@@ -8,7 +8,7 @@ import { Box } from '@intermine/chromatin/box'
 import { createStyle } from '@intermine/chromatin/styles'
 
 import RemoveIcon from '@intermine/chromatin/icons/System/close-line'
-import CancelIcon from '@intermine/chromatin/icons/System/delete-bin-6-line'
+import CancelIcon from '@intermine/chromatin/icons/System/forbid-line'
 import RetryIcon from '@intermine/chromatin/icons/System/arrow-go-forward-line'
 
 import { TProgressItem } from '../../../context/types'
@@ -118,7 +118,7 @@ export const ProgressItemView = (props: TProgressItemViewProps) => {
             <Tooltip
                 {...defaultTooltipProps}
                 color="info"
-                message="Remove"
+                message="Remove from progress list."
                 key="remove"
             >
                 <IconButton
