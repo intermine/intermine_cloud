@@ -34,7 +34,7 @@ def put(user: User) -> Response:
         return make_response(response_body.json(), HTTPStatus.BAD_REQUEST)
     except Exception:
         response_body = FilePUTResponse(
-            msg="unknown error", errors=["unknown internal error"]
+            msg="Something bad happened. Please try again after some time.", errors=["unknown internal error"]
         )
         return make_response(response_body.json(), HTTPStatus.INTERNAL_SERVER_ERROR)
 
@@ -44,15 +44,15 @@ def put(user: User) -> Response:
         file = update_file(file_update[0])
     except SQLAlchemyError:
         response_body = FilePUTResponse(
-            msg="internal databse error", errors=["internal database error"]
+            msg="Something bad happened. Please try again after some time", errors=["internal database error"]
         )
         return make_response(response_body.json(), HTTPStatus.INTERNAL_SERVER_ERROR)
     except Exception:
         response_body = FilePUTResponse(
-            msg="unknown error", errors=["unknown internal error"]
+            msg="Something bad happened. Please try again after some time.", errors=["unknown internal error"]
         )
         return make_response(response_body.json(), HTTPStatus.INTERNAL_SERVER_ERROR)
 
     # return fetched file in response
-    response_body = FilePUTResponse(msg="user successfully updated", items=[file])
+    response_body = FilePUTResponse(msg="File updated successfully", items=[file])
     return make_response(response_body.json(), HTTPStatus.OK)
