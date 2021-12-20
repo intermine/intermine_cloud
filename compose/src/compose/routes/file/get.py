@@ -41,15 +41,15 @@ def get(user: User) -> Response:
         file_list = get_file(query_params, user)
     except SQLAlchemyError:
         response_body = FileGetResponse(
-            msg="internal databse error", errors=["internal database error"]
+            msg="Something bad happened. Please try again after some time", errors=["internal database error"]
         )
         return make_response(response_body.json(), HTTPStatus.INTERNAL_SERVER_ERROR)
     except Exception:
         response_body = FileGetResponse(
-            msg="unknown error", errors=["unknown internal error"]
+            msg="Something bad happened. Please try again after some time", errors=["unknown internal error"]
         )
         return make_response(response_body.json(), HTTPStatus.INTERNAL_SERVER_ERROR)
 
     # return fetched file in response
-    response_body = FileGetResponse(msg=" successfully retrieved", items=file_list)
+    response_body = FileGetResponse(msg="Files retrieved successfully", items=file_list)
     return make_response(response_body.json(), HTTPStatus.OK)
