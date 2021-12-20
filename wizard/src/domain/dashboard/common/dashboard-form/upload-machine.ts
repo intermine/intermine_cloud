@@ -7,10 +7,22 @@ import {
     getResponseStatus,
 } from '../../../../utils/get'
 
+type Model200Response = {
+    msg?: string
+    items: Array<{
+        presigned_url: string
+        name: string
+        file_id: string
+        description: string
+        ext: string
+    }>
+}
+
 export type TUploadMachineContext = {
     file: File
     putUrl: string
     errorMessage?: string
+    response?: AxiosResponse<Model200Response>
 }
 
 export type TUploadMachineState =
@@ -143,11 +155,11 @@ export const uploadMachine = createMachine<
                 putUrl: (_, event) => {
                     return event.data.data.items[0].presigned_url
                 },
+                response: (_, event) => event.data,
             }),
 
             OnServerError: assign<TUploadMachineContext, any>({
                 errorMessage: (_, event) => {
-                    console.log('Event', event)
                     if (event.type === 'error.platform.generatePresignedURL') {
                         const status = getResponseStatus(event.data.response)
 

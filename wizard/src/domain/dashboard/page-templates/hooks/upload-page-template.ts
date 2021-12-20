@@ -9,16 +9,16 @@ import {
 } from '../../common/dashboard-form/utils'
 import { useOnProgress } from '../../utils/hooks'
 import { getDataSize } from '../../../../utils/get'
-import { dataApi, templateApi } from '../../../../services/api'
+import { dataApi, fileApi, templateApi } from '../../../../services/api'
 // eslint-disable-next-line max-len
 import { TUploadMachineContext } from '../../common/dashboard-form/upload-machine'
 
-const getMsg = (type: 'failed' | 'success', file: File) => {
+const getMsg = (type: 'failed' | 'success', fileName: string) => {
     if (type === 'failed') {
-        return 'Failed to upload ' + file.name
+        return 'Failed to upload ' + fileName
     }
 
-    return 'Successfully uploaded ' + file.name
+    return 'Successfully uploaded ' + fileName
 }
 
 export type TRunWhenPresignedURLGeneratedOptions = {
@@ -107,10 +107,14 @@ export const useUploadPageTemplate = () => {
         upload: TUseDashboardUploadMachineState,
         _id?: string
     ) => {
-        const { file, putUrl } = upload.context
+        const { file, putUrl, response } = upload.context
 
-        const failedMsg = getMsg('failed', file)
-        const successMsg = getMsg('success', file)
+        // It is sure that we have some response.
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        const data = response!.data.items[0]
+
+        const failedMsg = getMsg('failed', data.name)
+        const successMsg = getMsg('success', data.name)
 
         const { id, cancelTokenSource } = uploadService({
             id: _id,
@@ -118,11 +122,20 @@ export const useUploadPageTemplate = () => {
             url: putUrl,
             onProgress: onProgressUpdate,
             onFailed: (evt) => onProgressFailed({ ...evt, failedMsg }),
-            onSuccessful: (evt) =>
-                onProgressSuccessful({
-                    ...evt,
-                    successMsg,
-                }),
+            onSuccessful: async (evt) => {
+                try {
+                    await fileApi.filePut([
+                        { file_id: data.file_id, uploaded: true },
+                    ])
+
+                    onProgressSuccessful({
+                        ...evt,
+                        successMsg,
+                    })
+                } catch {
+                    onProgressFailed({ ...evt, failedMsg })
+                }
+            },
         })
 
         return {
