@@ -18,8 +18,6 @@ export const useLogout = () => {
                 config: {},
                 status: getResponseStatus(response),
             }
-
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (error: unknown) {
             const status = getResponseStatus((error as AxiosError).response)
 

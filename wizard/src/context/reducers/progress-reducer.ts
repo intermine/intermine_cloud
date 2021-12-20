@@ -46,8 +46,6 @@ const progressReducer = (
                 [(data as TProgressItem).id]: data as TProgressItem,
             }
 
-            console.log(state)
-
             return { ...state }
 
         case UpdateProgressItem:

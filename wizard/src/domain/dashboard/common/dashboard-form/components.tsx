@@ -193,6 +193,7 @@ export const FormInlineAlert = (props: TFormInlineAlertProps) => {
             scrollToTop(DomElementIDs.WorkspacePageContainer)
         }
     }, [isOpen])
+
     return (
         <InlineAlert
             isOpen={isOpen}
