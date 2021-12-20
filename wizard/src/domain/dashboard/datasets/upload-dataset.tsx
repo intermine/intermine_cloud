@@ -8,10 +8,9 @@ import {
 } from '../common/dashboard-form/utils'
 import { useUploadPageTemplate } from '../page-templates/hooks'
 
-const uploadEndpoint = 'http://localhost:3000/presignedUrl/dataset?name='
-
 export const UploadDataset = () => {
     const {
+        serviceToGeneratePresignedURL,
         runWhenPresignedURLGenerationFailed,
         runWhenPresignedURLGenerated,
         inlineAlertProps
@@ -40,7 +39,13 @@ export const UploadDataset = () => {
         uploadMachineState,
         reset: resetUpload
     } = useDashboardUpload({
-        uploadBaseUrl: uploadEndpoint,
+        serviceToGeneratePresignedURL: (ctx) => {
+            return serviceToGeneratePresignedURL(ctx, {
+                toUpload: 'dataset',
+                name: name.value,
+                description: description.value
+            })
+        },
         runWhenPresignedURLGenerated: (upload) => {
             runWhenPresignedURLGenerated(upload, {
                 name: name.value,

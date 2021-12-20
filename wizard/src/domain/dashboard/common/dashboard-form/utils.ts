@@ -8,6 +8,7 @@ import type { State } from 'xstate'
 
 import { throttle } from '../../../../utils/throttle'
 import {
+    TServiceToGeneratePresignedURL,
     TUploadMachineContext,
     TUploadMachineEvents,
     TUploadMachineState,
@@ -268,11 +269,11 @@ export type TUseDashboardUploadMachineState = State<
 >
 
 export type TUseDashboardUploadProps = {
-    uploadBaseUrl: string
     runWhenPresignedURLGenerated: (ctx: TUseDashboardUploadMachineState) => void
     runWhenPresignedURLGenerationFailed: (
         ctx: TUseDashboardUploadMachineState
     ) => void
+    serviceToGeneratePresignedURL: TServiceToGeneratePresignedURL
 }
 
 export type TUseDashboardUploadReturn = {
@@ -289,15 +290,13 @@ export const useDashboardUpload = (
     props: TUseDashboardUploadProps
 ): TUseDashboardUploadReturn => {
     const {
-        uploadBaseUrl,
         runWhenPresignedURLGenerated,
         runWhenPresignedURLGenerationFailed,
+        serviceToGeneratePresignedURL,
     } = props
     const [isDirty, setIsDirty] = useState(false)
 
-    const [uploadMachineState, dispatch] = useMachine(uploadMachine, {
-        context: { baseURL: uploadBaseUrl },
-    })
+    const [uploadMachineState, dispatch] = useMachine(uploadMachine)
 
     const { value } = uploadMachineState
 
@@ -329,8 +328,12 @@ export const useDashboardUpload = (
     }
 
     const generatePresignedURL = () => {
+        // @ts-expect-error xstate not able to narrow down possible transition
+        // state.
         if (uploadMachineState.can('GENERATE_PRESIGNED_URL')) {
-            dispatch('GENERATE_PRESIGNED_URL')
+            dispatch('GENERATE_PRESIGNED_URL', {
+                serviceToGeneratePresignedURL,
+            })
             return true
         }
 

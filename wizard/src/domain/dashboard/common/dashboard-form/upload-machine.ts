@@ -1,10 +1,16 @@
 import { createMachine, assign } from 'xstate'
 
+import { AxiosResponse } from 'axios'
+
+import {
+    getResponseMessageUsingResponseStatus,
+    getResponseStatus,
+} from '../../../../utils/get'
+
 export type TUploadMachineContext = {
     file: File
-    errorMessage?: string
     putUrl: string
-    baseURL: string
+    errorMessage?: string
 }
 
 export type TUploadMachineState =
@@ -37,14 +43,24 @@ export type TUploadMachineState =
           context: TUploadMachineContext
       }
 
+type TResponse = AxiosResponse
+
+export type TServiceToGeneratePresignedURL = (
+    ctx: TUploadMachineContext
+) => Promise<unknown>
+
 export type TUploadMachineEvents =
     | { type: 'START' }
     | { type: 'FILE_MISSING' }
     | { type: 'FILE_SELECTED'; file: File }
-    | { type: 'GENERATE_PRESIGNED_URL' }
+    | {
+          type: 'GENERATE_PRESIGNED_URL'
+          serviceToGeneratePresignedURL: TServiceToGeneratePresignedURL
+      }
     | { type: 'SERVER_ERROR' }
     | { type: 'SUCCESSFUL' }
     | { type: 'RESET' }
+    | { type: 'generatePresignedURL'; data: { response: TResponse } }
 
 export const uploadMachine = createMachine<
     TUploadMachineContext,
@@ -55,7 +71,6 @@ export const uploadMachine = createMachine<
         id: 'upload-data-machine',
         initial: 'start',
         context: {
-            baseURL: '',
             putUrl: '',
             file: new File([], ''),
         },
@@ -126,20 +141,38 @@ export const uploadMachine = createMachine<
 
             onPresignedURLGenerated: assign<TUploadMachineContext, any>({
                 putUrl: (_, event) => {
-                    return event.data
+                    return event.data.data.items[0].presigned_url
                 },
             }),
 
             OnServerError: assign<TUploadMachineContext, any>({
-                errorMessage:
-                    'Unexpected error occur. Please try after some time',
+                errorMessage: (_, event) => {
+                    console.log('Event', event)
+                    if (event.type === 'error.platform.generatePresignedURL') {
+                        const status = getResponseStatus(event.data.response)
+
+                        return getResponseMessageUsingResponseStatus(
+                            event.data.response,
+                            status
+                        )
+                    }
+                },
             }),
         },
         services: {
-            generatePresignedURL: (ctx) =>
-                fetch(ctx.baseURL + ctx.file?.name)
-                    .then((response) => response.text())
-                    .then((url) => url),
+            generatePresignedURL: (ctx, event) => {
+                if (event.type === 'GENERATE_PRESIGNED_URL') {
+                    return event.serviceToGeneratePresignedURL(ctx)
+                }
+
+                throw new Error(
+                    '[GeneratePresignedURL]: event type'.concat(
+                        ' is not as expected. ',
+                        'Got: ',
+                        event.type
+                    )
+                )
+            },
         },
     }
 )

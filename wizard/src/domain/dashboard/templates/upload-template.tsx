@@ -8,12 +8,11 @@ import {
 } from '../common/dashboard-form/utils'
 import { useUploadPageTemplate } from '../page-templates/hooks'
 
-const uploadEndpoint = 'http://localhost:3000/presignedUrl/template?name='
-
 export const UploadTemplate = () => {
     const {
         runWhenPresignedURLGenerationFailed,
         runWhenPresignedURLGenerated,
+        serviceToGeneratePresignedURL,
         inlineAlertProps
     } = useUploadPageTemplate()
 
@@ -40,7 +39,13 @@ export const UploadTemplate = () => {
         uploadMachineState,
         reset: resetUpload
     } = useDashboardUpload({
-        uploadBaseUrl: uploadEndpoint,
+        serviceToGeneratePresignedURL: (ctx) => {
+            return serviceToGeneratePresignedURL(ctx, {
+                toUpload: 'template',
+                name: name.value,
+                description: description.value
+            })
+        },
         runWhenPresignedURLGenerated: (upload) => {
             runWhenPresignedURLGenerated(upload, {
                 name: name.value,

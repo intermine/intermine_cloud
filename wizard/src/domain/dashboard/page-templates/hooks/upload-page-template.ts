@@ -9,6 +9,9 @@ import {
 } from '../../common/dashboard-form/utils'
 import { useOnProgress } from '../../utils/hooks'
 import { getDataSize } from '../../../../utils/get'
+import { dataApi, templateApi } from '../../../../services/api'
+// eslint-disable-next-line max-len
+import { TUploadMachineContext } from '../../common/dashboard-form/upload-machine'
 
 const getMsg = (type: 'failed' | 'success', file: File) => {
     if (type === 'failed') {
@@ -21,6 +24,61 @@ const getMsg = (type: 'failed' | 'success', file: File) => {
 export type TRunWhenPresignedURLGeneratedOptions = {
     name?: string
     description?: string
+}
+
+export type TServiceToGeneratePreSignedURLOption = {
+    name?: string
+    description?: string
+    toUpload: 'dataset' | 'template'
+}
+
+const getTaskName = (fileName: string, optionName?: string): string => {
+    if (optionName) return optionName
+    return fileName
+}
+
+const getFileExt = (file: File): string => {
+    return file.name.slice(file.name.lastIndexOf('.') + 1, file.name.length)
+}
+
+const serviceToGeneratePresignedURL = (
+    uploadCtx: TUploadMachineContext,
+    options: TServiceToGeneratePreSignedURLOption
+): Promise<unknown> => {
+    const { file } = uploadCtx
+    const { toUpload, name: nameOption, description } = options
+
+    const name = getTaskName(file.name, nameOption)
+
+    switch (toUpload) {
+        case 'dataset':
+            return dataApi.dataPost([
+                {
+                    name,
+                    ext: getFileExt(file),
+                    file_type: file.type,
+                },
+            ])
+
+        case 'template':
+            return templateApi.templatePost([
+                {
+                    name,
+                    template_vars: [],
+                    description,
+                },
+            ])
+
+        default:
+            throw new Error(
+                ''.concat(
+                    '[ServiceToGeneratePresignedURL]: toUpload',
+                    ' is not of known type. Got ',
+                    toUpload,
+                    '. It should be "dataset" or "template"'
+                )
+            )
+    }
 }
 
 export const useUploadPageTemplate = () => {
@@ -99,7 +157,7 @@ export const useUploadPageTemplate = () => {
         upload: TUseDashboardUploadMachineState,
         options = {} as TRunWhenPresignedURLGeneratedOptions
     ) => {
-        const { name: _name = '' } = options
+        const { name } = options
         const { file } = upload.context
         const { id, cancelTokenSource } = uploadFile(upload)
 
@@ -110,7 +168,7 @@ export const useUploadPageTemplate = () => {
             },
             getProgressText: (l, t) => `${getDataSize(l)} / ${getDataSize(t)}`,
             isDependentOnBrowser: true,
-            name: _name !== '' ? _name : file.name,
+            name: getTaskName(file.name, name),
             totalSize: file.size,
             loadedSize: 0,
             onRetry: () => {
@@ -124,9 +182,12 @@ export const useUploadPageTemplate = () => {
         })
     }
 
-    const runWhenPresignedURLGenerationFailed = () => {
+    const runWhenPresignedURLGenerationFailed = (
+        upload: TUseDashboardUploadMachineState
+    ) => {
+        const { errorMessage = 'Unknown error occurred' } = upload.context
         _setInlineAlert({
-            message: 'Unexpected Error occurred. Please try after sometime.',
+            message: errorMessage,
             type: 'error',
         })
     }
@@ -135,5 +196,6 @@ export const useUploadPageTemplate = () => {
         inlineAlertProps,
         runWhenPresignedURLGenerated,
         runWhenPresignedURLGenerationFailed,
+        serviceToGeneratePresignedURL,
     }
 }
