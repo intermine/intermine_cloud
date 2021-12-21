@@ -20,13 +20,13 @@ export type TLandingPageListDatum = {
 export type TLandingPageListProps = {
     data: Array<TLandingPageListDatum>
     emptyListMsg: TElement
-    isLoadingData: boolean
+    isLoading: boolean
 }
 
 export type TLandingPageReducer = {
     lists: TLandingPageListProps['data']
     emptyListMsg: TElement
-    isLoadingData: boolean
+    isLoading: boolean
     listsObj: {
         [X in string]: TLandingPageListDatum & {
             upItemId: string

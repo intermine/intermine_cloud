@@ -219,6 +219,14 @@ export const CreateMine = () => {
                                 .intermine.org
                             </Box>
                         </Box>
+                        <Box>
+                            {initialFormFieldsValue?.subDomain?.options
+                                ?.validator &&
+                                initialFormFieldsValue?.subDomain?.options?.validator(
+                                    subDomain.value
+                                ).isError === false &&
+                                'Checking whether this subdomain is available or not'}
+                        </Box>
                     </DForm.Label>
 
                     <DForm.Actions

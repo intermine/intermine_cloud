@@ -1,12 +1,14 @@
+import { useEffect, useMemo, useReducer, useRef } from 'react'
+
 import { LandingPageListContext } from './landing-page-context'
-import { useMemo, useReducer } from 'react'
+import { LandingPageListContainer } from './components'
+
 import {
     LandingPageListActions,
     TLandingPageListProps,
     TLandingPageListReducerAction,
     TLandingPageReducer
 } from './types'
-import { LandingPageListContainer } from './components'
 
 const { UpdateState } = LandingPageListActions
 const landingPageListReducer = (
@@ -15,8 +17,7 @@ const landingPageListReducer = (
 ) => {
     switch (action.type) {
         case UpdateState:
-            state = { ...state, ...action.data }
-            return state
+            return { ...state, ...action.data }
 
         /* istanbul ignore next */
         default:
@@ -51,32 +52,42 @@ const getLandingPageListReducerFromProps = (
         lists: data,
         listsObj,
         // Here we are only using dummy data for emptyListMsg
-        // and isLoadingData to fix typing issue.
-        // emptyListMsg and isLoadingData are spread over the Context provider
+        // and isLoading to fix typing issue.
+        // emptyListMsg and isLoading are spread over the Context provider
         // later in the code.
-        isLoadingData: false,
+        isLoading: false,
         emptyListMsg: ''
     }
 }
 
 export const LandingPageList = (props: TLandingPageListProps) => {
-    const { data, isLoadingData, emptyListMsg } = props
+    const { data, isLoading, emptyListMsg } = props
 
     const initialReducer = useMemo(
         () => getLandingPageListReducerFromProps(props),
-        [data]
+        []
     )
+
+    const isMounted = useRef(false)
+
     const [state, dispatch] = useReducer(landingPageListReducer, initialReducer)
 
     const updateState = (data: Partial<TLandingPageReducer>) => {
         dispatch({ type: UpdateState, data })
     }
 
+    useEffect(() => {
+        if (isMounted) {
+            updateState(getLandingPageListReducerFromProps(props))
+        }
+        isMounted.current = true
+    }, [data])
+
     return (
         <LandingPageListContext.Provider
             value={{
                 ...state,
-                isLoadingData,
+                isLoading,
                 emptyListMsg,
                 updateState
             }}

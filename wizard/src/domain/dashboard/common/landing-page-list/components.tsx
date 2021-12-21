@@ -90,7 +90,7 @@ const useStyles = createStyle((theme) => {
 })
 
 export const LandingPageListContainer = () => {
-    const { lists, emptyListMsg, isLoadingData } = useContext(
+    const { lists, emptyListMsg, isLoading } = useContext(
         LandingPageListContext
     )
 
@@ -124,7 +124,7 @@ export const LandingPageListContainer = () => {
     }, [])
 
     const getComponentToRender = () => {
-        if (isLoadingData) {
+        if (isLoading) {
             return <RouteLoadingSpinner hasBackground={false} />
         }
 

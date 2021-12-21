@@ -1,14 +1,20 @@
-import { useState, useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useHistory } from 'react-router-dom'
 import { Box } from '@intermine/chromatin/box'
 import { WorkspaceHeading } from '../common/workspace-heading'
 import UploadIcon from '@intermine/chromatin/icons/System/upload-line'
 
+import { AxiosResponse } from 'axios'
+
 import { DASHBOARD_UPLOAD_DATASET_PATH } from '../../../routes'
 
 import { DashboardErrorBoundary } from '../common/error-boundary'
 import { LandingPageList } from '../common/landing-page-list'
-import { d } from './test-data'
+import { dataApi } from '../../../services/api'
+import { useDashboardQuery } from '../common/use-dashboard-query'
+
+import { TDatasetResponseData } from './types'
+import { TLandingPageListProps } from '../common/landing-page-list/types'
 
 const emptyListMsg = (
     <Box>
@@ -20,14 +26,52 @@ const emptyListMsg = (
 
 export const Landing = () => {
     const history = useHistory()
-    const [isLoadingData, setIsLoadingData] = useState(true)
+    const [data, setData] = useState<TLandingPageListProps['data']>([])
 
     const handleUploadClick = () => {
         history.push(DASHBOARD_UPLOAD_DATASET_PATH)
     }
 
+    const onQuerySuccessful = (
+        response: AxiosResponse<TDatasetResponseData>
+    ) => {
+        const lists: TLandingPageListProps['data'] = []
+
+        for (let i = 0; i < response.data.items.length; i += 1) {
+            const currentItem = response.data.items[i]
+            lists.push({
+                id: currentItem.data_id,
+                bodyItem: { content: currentItem.description },
+                headerItems: [
+                    {
+                        id: currentItem.data_id + 'header-name',
+                        body: currentItem.name,
+                        heading: 'Name'
+                    },
+                    {
+                        id: currentItem.data_id + 'header-file-type',
+                        body: currentItem.file_type,
+                        heading: 'File Type'
+                    },
+                    {
+                        id: currentItem.data_id + 'header-ext',
+                        body: currentItem.ext,
+                        heading: 'Extension'
+                    }
+                ]
+            })
+        }
+
+        setData(lists)
+    }
+
+    const { isLoading, query } = useDashboardQuery({
+        queryFn: () => dataApi.dataGet('get_all_data'),
+        onSuccessful: onQuerySuccessful
+    })
+
     useEffect(() => {
-        setTimeout(() => setIsLoadingData(false), 100)
+        query()
     }, [])
 
     return (
@@ -43,9 +87,9 @@ export const Landing = () => {
 
             <DashboardErrorBoundary errorMessage="Unable to load table.">
                 <LandingPageList
-                    isLoadingData={isLoadingData}
+                    isLoading={isLoading}
                     emptyListMsg={emptyListMsg}
-                    data={d}
+                    data={data}
                 />
             </DashboardErrorBoundary>
         </Box>
