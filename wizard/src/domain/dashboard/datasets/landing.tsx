@@ -10,6 +10,14 @@ import { DashboardErrorBoundary } from '../common/error-boundary'
 import { LandingPageList } from '../common/landing-page-list'
 import { d } from './test-data'
 
+const emptyListMsg = (
+    <Box>
+        You haven't uploaded any dataset yet!
+        <br />
+        Use the 'Upload New Dataset' button to upload.
+    </Box>
+)
+
 export const Landing = () => {
     const history = useHistory()
     const [isLoadingData, setIsLoadingData] = useState(true)
@@ -19,7 +27,7 @@ export const Landing = () => {
     }
 
     useEffect(() => {
-        setTimeout(() => setIsLoadingData(false), 5000)
+        setTimeout(() => setIsLoadingData(false), 100)
     }, [])
 
     return (
@@ -34,7 +42,11 @@ export const Landing = () => {
             />
 
             <DashboardErrorBoundary errorMessage="Unable to load table.">
-                <LandingPageList data={d} />
+                <LandingPageList
+                    isLoadingData={isLoadingData}
+                    emptyListMsg={emptyListMsg}
+                    data={d}
+                />
             </DashboardErrorBoundary>
         </Box>
     )

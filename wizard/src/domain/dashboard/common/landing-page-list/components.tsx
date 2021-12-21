@@ -1,19 +1,22 @@
 import { useContext, useEffect } from 'react'
+import clsx from 'clsx'
+import { Button } from '@intermine/chromatin'
 import { Box, BoxBaseProps } from '@intermine/chromatin/box'
 import { Typography } from '@intermine/chromatin/typography'
 import { IconButton } from '@intermine/chromatin/icon-button'
 import { Collapsible } from '@intermine/chromatin/collapsible'
 import { createStyle } from '@intermine/chromatin/styles'
-import { LandingPageListContext } from './landing-page-context'
-import { TLandingPageListDatum, TLandingPageListHeaderItem } from './types'
 import { useDebouncedCallback } from '@intermine/chromatin/utils'
-import clsx from 'clsx'
 import DownArrow from '@intermine/chromatin/icons/System/arrow-down-s-line'
 import EditIcon from '@intermine/chromatin/icons/Design/pencil-fill'
 import DeleteIcon from '@intermine/chromatin/icons/System/delete-bin-fill'
 
+import { LandingPageListContext } from './landing-page-context'
 import { DomElementIDs } from '../../../../constants/ids'
-import { Button } from '@intermine/chromatin'
+// eslint-disable-next-line max-len
+import { RouteLoadingSpinner } from '../../../../components/route-loading-spinner'
+
+import { TLandingPageListDatum, TLandingPageListHeaderItem } from './types'
 
 const {
     WorkspacePageContainer,
@@ -76,12 +79,20 @@ const useStyles = createStyle((theme) => {
             flex: '0 0 25%',
             overflow: 'hidden',
             paddingRight: spacing(3)
+        },
+        emptyListMessage: {
+            color: neutral[30],
+            height: '100%',
+            padding: spacing(5),
+            textAlign: 'center'
         }
     }
 })
 
 export const LandingPageListContainer = () => {
-    const { lists } = useContext(LandingPageListContext)
+    const { lists, emptyListMsg, isLoadingData } = useContext(
+        LandingPageListContext
+    )
 
     const resizeTableContainer = () => {
         const pageContainer: HTMLDivElement | null = document.querySelector(
@@ -112,26 +123,47 @@ export const LandingPageListContainer = () => {
         }
     }, [])
 
+    const getComponentToRender = () => {
+        if (isLoadingData) {
+            return <RouteLoadingSpinner hasBackground={false} />
+        }
+
+        if (lists.length === 0) {
+            return emptyListMsg
+        }
+
+        return lists.map((item, idx) => (
+            <LandingPageListItem
+                isFirst={idx === 0}
+                isLast={idx + 1 === lists.length}
+                id={item.id}
+                key={item.id}
+                data={item}
+            />
+        ))
+    }
+
+    const isNotRenderList = () => {
+        return lists.length === 0
+    }
+
     return (
         <Box
             id={WorkspacePageListContainer}
             csx={{
-                root: ({ spacing }) => ({
+                root: ({ spacing, palette: { neutral } }) => ({
                     marginTop: spacing(15),
                     padding: spacing(1, 0),
-                    overflow: 'auto'
+                    overflow: 'auto',
+                    ...(isNotRenderList() && {
+                        color: neutral[30],
+                        textAlign: 'center'
+                    })
                 })
             }}
+            isContentCenter={isNotRenderList()}
         >
-            {lists.map((item, idx) => (
-                <LandingPageListItem
-                    isFirst={idx === 0}
-                    isLast={idx + 1 === lists.length}
-                    id={item.id}
-                    key={item.id}
-                    data={item}
-                />
-            ))}
+            {getComponentToRender()}
         </Box>
     )
 }
@@ -182,11 +214,11 @@ const LandingPageListItem = (props: TLandingPageListItemProps) => {
                     [classes.rotate]: activeItemId === id
                 })}
             >
-                {data.headerItems.map((header) => (
+                {data.headerItems.map((item) => (
                     <LandingPageListItemHeaderItem
                         className={classes.listItemHeaderItem}
-                        key={header.id}
-                        data={header}
+                        key={item.id}
+                        data={item}
                     />
                 ))}
             </LandingPageListItemHeader>
@@ -256,7 +288,7 @@ const LandingPageListItemHeaderItem = (props: {
 type TLandingPageListContentProps = {
     className: string
     isOpen: boolean
-    content: React.ReactChildren | React.ReactChildren[] | string
+    content: React.ReactChild | React.ReactChild[]
 }
 
 const LandingPageListContent = (props: TLandingPageListContentProps) => {

@@ -69,7 +69,7 @@ const serviceToGeneratePresignedURL = (
                 {
                     name,
                     ext: getFileExt(file),
-                    file_type: file.type,
+                    file_type: file.type !== '' ? file.type : getFileExt(file),
                 },
             ])
 

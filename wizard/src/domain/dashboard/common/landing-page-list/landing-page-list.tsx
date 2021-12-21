@@ -49,14 +49,22 @@ const getLandingPageListReducerFromProps = (
         downItemId: '',
         upItemId: '',
         lists: data,
-        listsObj
+        listsObj,
+        // Here we are only using dummy data for emptyListMsg
+        // and isLoadingData to fix typing issue.
+        // emptyListMsg and isLoadingData are spread over the Context provider
+        // later in the code.
+        isLoadingData: false,
+        emptyListMsg: ''
     }
 }
 
 export const LandingPageList = (props: TLandingPageListProps) => {
+    const { data, isLoadingData, emptyListMsg } = props
+
     const initialReducer = useMemo(
         () => getLandingPageListReducerFromProps(props),
-        [props.data]
+        [data]
     )
     const [state, dispatch] = useReducer(landingPageListReducer, initialReducer)
 
@@ -65,7 +73,14 @@ export const LandingPageList = (props: TLandingPageListProps) => {
     }
 
     return (
-        <LandingPageListContext.Provider value={{ ...state, updateState }}>
+        <LandingPageListContext.Provider
+            value={{
+                ...state,
+                isLoadingData,
+                emptyListMsg,
+                updateState
+            }}
+        >
             <LandingPageListContainer />
         </LandingPageListContext.Provider>
     )

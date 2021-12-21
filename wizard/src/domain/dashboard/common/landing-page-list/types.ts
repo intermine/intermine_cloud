@@ -1,13 +1,14 @@
 type TLandingPageListID = string
+type TElement = React.ReactChild | React.ReactChild[]
 
 export type TLandingPageListHeaderItem = {
     id: TLandingPageListID
-    heading: string
-    body: string
+    heading: TElement
+    body: TElement
 }
 
 export type TLandingPageListBodyItem = {
-    content: string
+    content: TElement
 }
 
 export type TLandingPageListDatum = {
@@ -18,10 +19,14 @@ export type TLandingPageListDatum = {
 
 export type TLandingPageListProps = {
     data: Array<TLandingPageListDatum>
+    emptyListMsg: TElement
+    isLoadingData: boolean
 }
 
 export type TLandingPageReducer = {
     lists: TLandingPageListProps['data']
+    emptyListMsg: TElement
+    isLoadingData: boolean
     listsObj: {
         [X in string]: TLandingPageListDatum & {
             upItemId: string
