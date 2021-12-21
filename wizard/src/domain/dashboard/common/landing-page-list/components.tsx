@@ -152,6 +152,7 @@ export const LandingPageListContainer = () => {
             id={WorkspacePageListContainer}
             csx={{
                 root: ({ spacing, palette: { neutral } }) => ({
+                    borderRadius: '0.5rem',
                     marginTop: spacing(15),
                     padding: spacing(1, 0),
                     overflow: 'auto',
@@ -180,9 +181,7 @@ const LandingPageListItem = (props: TLandingPageListItemProps) => {
     const { activeItemId, upItemId, downItemId, listsObj, updateState } =
         useContext(LandingPageListContext)
 
-    const classes = useStyles({
-        isListItemOpen: activeItemId === id
-    })
+    const classes = useStyles()
 
     const handleIconButtonClick = () => {
         if (activeItemId === id) {
@@ -294,12 +293,25 @@ type TLandingPageListContentProps = {
 const LandingPageListContent = (props: TLandingPageListContentProps) => {
     const { className, isOpen, content } = props
 
+    const getContent = () => {
+        if (!content) {
+            return (
+                <Typography Component="div" variant="bodySm" color="neutral.30">
+                    No description available.
+                </Typography>
+            )
+        }
+
+        return (
+            <Typography Component="div" variant="body" color="neutral.40">
+                {content}
+            </Typography>
+        )
+    }
     return (
         <Collapsible in={isOpen}>
             <Box className={className}>
-                <Typography Component="div" variant="body" color="neutral.40">
-                    {content}
-                </Typography>
+                {getContent()}
                 <Box
                     csx={{ root: { alignSelf: 'flex-end', marginTop: 'auto' } }}
                 >
