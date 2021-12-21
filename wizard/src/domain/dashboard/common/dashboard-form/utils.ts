@@ -245,6 +245,7 @@ export const useDashboardForm = <T extends TUseDashboardFormFields>(
 
     const resetToInitialState = () => {
         setState(getInitialValue())
+        setErrorFields({})
         setIsDirty(false)
     }
 
