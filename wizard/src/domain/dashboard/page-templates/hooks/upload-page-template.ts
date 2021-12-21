@@ -13,12 +13,25 @@ import { dataApi, fileApi, templateApi } from '../../../../services/api'
 // eslint-disable-next-line max-len
 import { TUploadMachineContext } from '../../common/dashboard-form/upload-machine'
 
-const getMsg = (type: 'failed' | 'success', fileName: string) => {
-    if (type === 'failed') {
-        return 'Failed to upload ' + fileName
-    }
+enum GetMessageType {
+    Successful,
+    FailedToUpload,
+    FailedToUploadToFile,
+}
 
-    return 'Successfully uploaded ' + fileName
+const getMsg = (type: GetMessageType, fileName: string) => {
+    switch (type) {
+        case GetMessageType.FailedToUpload:
+            return 'Failed to upload ' + fileName
+
+        case GetMessageType.FailedToUploadToFile:
+            return `File ${fileName} uploaded, but we failed
+            to register it as uploaded. This is considered as failed.
+            Please upload the file again.`
+
+        default:
+            return 'Successfully uploaded ' + fileName
+    }
 }
 
 export type TRunWhenPresignedURLGeneratedOptions = {
@@ -113,8 +126,12 @@ export const useUploadPageTemplate = () => {
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         const data = response!.data.items[0]
 
-        const failedMsg = getMsg('failed', data.name)
-        const successMsg = getMsg('success', data.name)
+        const failedMsg = getMsg(GetMessageType.FailedToUpload, data.name)
+        const failedToUploadToFileMsg = getMsg(
+            GetMessageType.FailedToUploadToFile,
+            data.name
+        )
+        const successMsg = getMsg(GetMessageType.Successful, data.name)
 
         const { id, cancelTokenSource } = uploadService({
             id: _id,
@@ -133,7 +150,10 @@ export const useUploadPageTemplate = () => {
                         successMsg,
                     })
                 } catch {
-                    onProgressFailed({ ...evt, failedMsg })
+                    onProgressFailed({
+                        ...evt,
+                        failedMsg: failedToUploadToFileMsg,
+                    })
                 }
             },
         })
