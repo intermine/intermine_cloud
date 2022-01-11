@@ -5,5 +5,7 @@ export enum PreferencesActions {
 }
 
 export const DEFAULT_PREFERENCES: TPreferencesReducer = {
-    themeType: 'dark',
+    themeType: window.matchMedia('(prefers-color-scheme: light)').matches
+        ? 'light'
+        : 'dark',
 }
