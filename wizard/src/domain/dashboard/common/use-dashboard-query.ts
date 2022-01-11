@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import shortid from 'shortid'
 
-import { AxiosError, AxiosResponse } from 'axios'
+import axios, { AxiosResponse } from 'axios'
 
 import { useGlobalAlertReducer } from '../../../context'
 import {
@@ -10,7 +10,7 @@ import {
 } from '../../../utils/get'
 
 export type TUseDashboardQuery = {
-    queryFn: () => Promise<unknown>
+    queryFn: (...params: any[]) => Promise<unknown>
     onError?: (response: unknown) => void
     onSuccessful?: (response: AxiosResponse<any, any>) => void
     /**
@@ -31,24 +31,28 @@ export const useDashboardQuery = (props: TUseDashboardQuery) => {
         hasToShowAlertOnError = true,
     } = props
 
-    const query = async () => {
+    const query = async (...params: any[]) => {
         setIsLoading(true)
         try {
-            const responseFromServer = await queryFn()
+            console.log('params', params)
+            const responseFromServer = await queryFn(...params)
             setResponse(responseFromServer)
 
             if (typeof onSuccessful === 'function') {
                 onSuccessful(responseFromServer as any)
             }
         } catch (error) {
-            const errorResponse = (error as AxiosError).response
+            if (!axios.isAxiosError(error)) {
+                console.log(error)
+                throw new Error('Non-axios error at useDashboardQuery.')
+            }
 
             if (hasToShowAlertOnError) {
-                const status = getResponseStatus(errorResponse)
+                const status = getResponseStatus(error.response)
                 addAlert({
                     id: shortid.generate(),
                     message: getResponseMessageUsingResponseStatus(
-                        errorResponse,
+                        error.response,
                         status
                     ),
                     isOpen: true,
@@ -58,7 +62,7 @@ export const useDashboardQuery = (props: TUseDashboardQuery) => {
             }
 
             if (typeof onError === 'function') {
-                onError(errorResponse)
+                onError(error.response)
             }
         }
         setIsLoading(false)
