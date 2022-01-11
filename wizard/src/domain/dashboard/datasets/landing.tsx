@@ -3,20 +3,24 @@ import { useHistory } from 'react-router-dom'
 import { Box } from '@intermine/chromatin/box'
 import { WorkspaceHeading } from '../common/workspace-heading'
 import UploadIcon from '@intermine/chromatin/icons/System/upload-line'
+import DownloadIcon from '@intermine/chromatin/icons/System/download-line'
 
 import { AxiosResponse } from 'axios'
 
 import { DASHBOARD_UPLOAD_DATASET_PATH } from '../../../routes'
 
 import { DashboardErrorBoundary } from '../common/error-boundary'
-import { LandingPageList } from '../common/landing-page-list'
-import { dataApi } from '../../../services/api'
+import { dataApi, fileApi } from '../../../services/api'
 import { useDashboardQuery } from '../common/use-dashboard-query'
 
 import { TDatasetResponseData } from './types'
-import { TLandingPageListProps } from '../common/landing-page-list/types'
+import {
+    AccordionList,
+    AccordionListContainer,
+    TAccordionListDatum
+} from '../common/accordion-list/accordion-list'
 
-const emptyListMsg = (
+const MsgIfListEmpty = (
     <Box>
         You haven't uploaded any dataset yet!
         <br />
@@ -24,9 +28,30 @@ const emptyListMsg = (
     </Box>
 )
 
+type TActionsLoading = {
+    [x in string]: {
+        download: boolean
+    }
+}
+
 export const Landing = () => {
     const history = useHistory()
-    const [data, setData] = useState<TLandingPageListProps['data']>([])
+    const [data, setData] = useState<TAccordionListDatum[]>([])
+    const [actionsLoading, _setActionsLoading] = useState<TActionsLoading>({})
+
+    const setActionsLoading = (
+        id: string,
+        key: keyof TActionsLoading[''],
+        value: boolean
+    ) => {
+        _setActionsLoading((prev) => ({
+            ...prev,
+            [id]: {
+                ...prev[id],
+                [key]: value
+            }
+        }))
+    }
 
     const handleUploadClick = () => {
         history.push(DASHBOARD_UPLOAD_DATASET_PATH)
@@ -35,12 +60,13 @@ export const Landing = () => {
     const onQuerySuccessful = (
         response: AxiosResponse<TDatasetResponseData>
     ) => {
-        const lists: TLandingPageListProps['data'] = []
+        const lists: TAccordionListDatum[] = []
 
         for (let i = 0; i < response.data.items.length; i += 1) {
             const currentItem = response.data.items[i]
             lists.push({
                 id: currentItem.data_id,
+                file_id: currentItem.file_id,
                 bodyItem: { content: currentItem.description },
                 headerItems: [
                     {
@@ -70,6 +96,19 @@ export const Landing = () => {
         onSuccessful: onQuerySuccessful
     })
 
+    const { query: downloadQuery } = useDashboardQuery({
+        queryFn: (id) => fileApi.fileGet('get_file_by_id', id),
+        onSuccessful: (res) => {
+            // Add download file logic
+            // Add a logic to remove id from loading
+        }
+    })
+
+    const handleDownloadClick = (id: string) => {
+        // Add a logic to add id to loading.
+        downloadQuery(id)
+    }
+
     useEffect(() => {
         query()
     }, [])
@@ -86,11 +125,54 @@ export const Landing = () => {
             />
 
             <DashboardErrorBoundary errorMessage="Unable to load table.">
-                <LandingPageList
+                <AccordionListContainer
+                    isEmpty={data.length === 0}
                     isLoading={isLoading}
-                    emptyListMsg={emptyListMsg}
-                    data={data}
-                />
+                    msgIfListIsEmpty={MsgIfListEmpty}
+                >
+                    {data.map((item, idx) => {
+                        return (
+                            <AccordionList
+                                key={item.id}
+                                isFirstItem={idx === 0}
+                                isLastItem={idx + 1 === data.length}
+                            >
+                                <AccordionList.Header>
+                                    {item.headerItems.map((header) => {
+                                        return (
+                                            <AccordionList.HeaderChild
+                                                key={header.id}
+                                                data={header}
+                                            />
+                                        )
+                                    })}
+                                </AccordionList.Header>
+                                <AccordionList.Body
+                                    content={item.bodyItem.content}
+                                >
+                                    <AccordionList.ActionButton
+                                        color="primary"
+                                        isLoading={
+                                            actionsLoading[item.file_id]
+                                                ?.download
+                                        }
+                                        onClick={() => {
+                                            handleDownloadClick(item.file_id)
+                                            setActionsLoading(
+                                                item.file_id,
+                                                'download',
+                                                true
+                                            )
+                                        }}
+                                        Icon={<DownloadIcon />}
+                                    >
+                                        Download
+                                    </AccordionList.ActionButton>
+                                </AccordionList.Body>
+                            </AccordionList>
+                        )
+                    })}
+                </AccordionListContainer>
             </DashboardErrorBoundary>
         </Box>
     )
