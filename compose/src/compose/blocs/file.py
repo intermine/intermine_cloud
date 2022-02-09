@@ -2,6 +2,7 @@
 
 from datetime import timedelta
 from typing import List
+from uuid import uuid4
 
 from blackcap.db import DBSession
 from blackcap.schemas.user import User
@@ -13,6 +14,7 @@ from compose.configs import config_registry
 from compose.models.file import FileDB
 from compose.schemas.api.file.delete import FileDelete
 from compose.schemas.api.file.get import FileGetQueryParams, FileQueryType
+from compose.schemas.api.file.post import FileCreate
 from compose.schemas.api.file.put import FileUpdate
 from compose.schemas.file import File
 
@@ -28,11 +30,11 @@ minio_client = Minio(
 )
 
 
-def create_presigned_post_url(file: FileDB, user_creds: User, method: str) -> str:
+def create_presigned_post_url(file: File, user_creds: User, method: str) -> str:
     """Create presigned post url for the file.
 
     Args:
-        file (FileDB): File object from db
+        file (File): File object
         user_creds (User): User credentials.
         method (str): HTTP Method
 
@@ -42,16 +44,16 @@ def create_presigned_post_url(file: FileDB, user_creds: User, method: str) -> st
     return minio_client.get_presigned_url(
         method,
         f"protagonist-{user_creds.user_id}",
-        f"{str(file.id)}.{file.ext}",
+        f"{str(file.file_id)}.{file.ext}",
         expires=timedelta(days=7),
     )
 
 
-def create_file(file_list: List[File], user_creds: User) -> List[File]:
+def create_file(file_create_list: List[FileCreate], user_creds: User) -> List[File]:
     """Create file objects.
 
     Args:
-        file_list (List[File]): List of file objects to create.
+        file_create_list (List[FileCreate]): List of file objects to create.
         user_creds (User): User credentials.
 
     Raises:
@@ -64,17 +66,16 @@ def create_file(file_list: List[File], user_creds: User) -> List[File]:
         try:
             file_db_create_list: List[FileDB] = [
                 FileDB(
-                    id=file.file_id,
+                    id=uuid4(),
                     protagonist_id=user_creds.user_id,
-                    **file.dict(exclude={"file_id", "presigned_url"}),
+                    **file.dict(),
                 )
-                for file in file_list
+                for file in file_create_list
             ]
             FileDB.bulk_create(file_db_create_list, session)
             return [
                 File(
                     file_id=obj.id,
-                    presigned_url=create_presigned_post_url(obj, user_creds, "PUT"),
                     **obj.to_dict(),
                 )
                 for obj in file_db_create_list
@@ -85,7 +86,7 @@ def create_file(file_list: List[File], user_creds: User) -> List[File]:
             raise e
 
 
-def get_file(query_params: FileGetQueryParams, user_creds: User = None) -> List[File]:
+def get_file(query_params: FileGetQueryParams, user_creds: User) -> List[File]:
     """Query DB for Files.
 
     Args:
@@ -103,11 +104,15 @@ def get_file(query_params: FileGetQueryParams, user_creds: User = None) -> List[
     stmt = ""
 
     if query_params.query_type == FileQueryType.GET_ALL_FILES:
-        stmt = select(FileDB)
+        stmt = select(FileDB).where(FileDB.protagonist_id == user_creds.user_id)
     if query_params.query_type == FileQueryType.GET_FILE_BY_ID:
-        stmt = select(FileDB).where(FileDB.id == query_params.file_id)
+        stmt = (
+            select(FileDB)
+            .where(FileDB.protagonist_id == user_creds.user_id)
+            .where(FileDB.id == query_params.file_id)
+        )
     if query_params.query_type == FileQueryType.GET_FILES_BY_PROTAGONIST_ID:
-        stmt = select(FileDB).where(FileDB.id == query_params.protagonist_id)
+        stmt = select(FileDB).where(FileDB.id == user_creds.user_id)
 
     with DBSession() as session:
         try:
@@ -159,11 +164,11 @@ def update_file(file_update: FileUpdate, user_creds: User = None) -> File:
             raise e
 
 
-def delete_file(file_delete: FileDelete, user_creds: User = None) -> File:
+def delete_file(file_delete: List[FileDelete], user_creds: User) -> File:
     """Delete file in the DB from FileDelete request.
 
     Args:
-        file_delete (FileDelete): FileDelete request
+        file_delete (List[FileDelete]): List of FileDelete request
         user_creds (User): User credentials.
 
     Raises:
@@ -172,17 +177,22 @@ def delete_file(file_delete: FileDelete, user_creds: User = None) -> File:
     Returns:
         File: Instance of Deleted File
     """
-    stmt = select(FileDB).where(FileDB.id == file_delete.file_id)
+    stmt = (
+        select(FileDB)
+        .where(FileDB.protagonist_id == user_creds.user_id)
+        .where(FileDB.id.in_([file.file_id for file in file_delete]))
+    )
     with DBSession() as session:
         try:
-            file_list: List[FileDB] = session.execute(stmt).scalars().all()
-            if len(file_list) == 1:
-                deleted_file = file_list[0].delete(session)
-                return File(file_id=deleted_file.id, **deleted_file.to_dict())
-            if len(file_list) == 0:
-                # TODO: Raise not found
-                pass
+            file_db_delete_list: List[FileDB] = session.execute(stmt).scalars().all()
+            deleted_file_list = []
+            for file in file_db_delete_list:
+                deleted_file = file.delete(session)
+                deleted_file_list.append(
+                    File(file_id=deleted_file.id, **deleted_file.to_dict())
+                )
+            return deleted_file_list
         except Exception as e:
             session.rollback()
-            logger.error(f"Unable to delete file: {file_delete.dict()} due to {e}")
+            logger.error(f"Unable to delete file: {file.dict()} due to {e}")
             raise e
