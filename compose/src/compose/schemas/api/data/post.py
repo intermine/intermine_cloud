@@ -15,8 +15,16 @@ class DataPOSTResponse(ResponseSchema):
     items: List[Data] = []
 
 
+class DataCreate(BaseModel):
+    """Data create schema."""
+
+    name: str
+    ext: str
+    file_type: str
+
+
 class DataPOSTRequest(BaseModel):
     """Data POST request schema."""
 
-    data: List[Data]
+    data: List[DataCreate]
     user: Optional[User]

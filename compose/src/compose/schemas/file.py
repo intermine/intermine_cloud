@@ -9,7 +9,7 @@ from pydantic.types import UUID4
 class File(BaseModel):
     """File schema."""
 
-    file_id: Optional[UUID4]
+    file_id: UUID4
     name: str
     ext: Optional[str]
     file_type: str
