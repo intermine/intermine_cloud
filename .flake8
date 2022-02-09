@@ -6,4 +6,9 @@ max-complexity = 10
 application-import-names = compose,minectl,demon,intermine_cloud_docs,tests
 import-order-style = google
 docstring-convention = google
-per-file-ignores = tests/*:S101
+per-file-ignores = 
+    tests/*:S101,,D101,D102,D103
+    compose/tests/*:S101,,D101,D102,D103
+    minectl/tests/*:S101,,D101,D102,D103
+    demon/tests/*:S101,,D101,D102,D103
+    intermine_cloud_docs/tests/*:S101,,D101,D102,D103
