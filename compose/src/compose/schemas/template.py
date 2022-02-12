@@ -23,11 +23,11 @@ class TemplateVar(BaseModel):
 class Template(BaseModel):
     """Template schema."""
 
-    template_id: Optional[UUID4]
+    template_id: UUID4
     name: str
-    description: Optional[str]
+    description: str = ""
     template_vars: List[TemplateVar]
-    latest_file_id: Optional[UUID4]
+    latest_file_id: UUID4
     presigned_url: Optional[str]
 
 
