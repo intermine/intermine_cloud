@@ -6,7 +6,6 @@ from blackcap.db import DBSession
 from blackcap.flow import Flow, FlowExecError, FuncProp, get_outer_function, Prop, Step
 from blackcap.flow.step import dummy_backward
 from blackcap.schemas.user import User
-from compose.schemas.api.file.post import FileCreate
 from logzero import logger
 from pydantic import ValidationError
 from pydantic.error_wrappers import ErrorWrapper
@@ -17,6 +16,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from compose.blocs.file import create_file, create_presigned_post_url, delete_file
 from compose.models.data import DataDB
 from compose.schemas.api.data.delete import DataDelete
+from compose.schemas.api.file.post import FileCreate
 from compose.schemas.api.data.get import DataGetQueryParams, DataQueryType
 from compose.schemas.api.data.post import DataCreate
 from compose.schemas.api.data.put import DataUpdate
@@ -133,13 +133,17 @@ def update_data(data_update_list: List[DataUpdate], user_creds: User) -> List[Da
     with DBSession() as session:
         try:
             data_db_update_list: List[DataDB] = session.execute(stmt).scalars().all()
-            update_data_list = []
+            updated_data_list = []
             for data in data_db_update_list:
-                updated_data = data.update(session)
-                update_data_list.append(
-                    Data(data_id=updated_data.id, **updated_data.to_dict())
-                )
-            return update_data_list
+                for data_update in data_update_list:
+                    if data_update.data_id == data.id:
+                        data_update_dict = data_update.dict(exclude_defaults=True)
+                        data_update_dict.pop("data_id")
+                        updated_data = data.update(session, **data_update_dict)
+                        updated_data_list.append(
+                            Data(data_id=updated_data.id, **updated_data.to_dict())
+                        )
+            return updated_data_list
         except Exception as e:
             session.rollback()
             logger.error(f"Unable to update data: {data.to_dict()} due to {e}")
@@ -192,7 +196,7 @@ def forward_create_db_entry(inputs: List[Prop]) -> List[Prop]:
                 0: data_create_request_list
                     Prop(data=data_create_request_list, description="List of create data objects")
                 2: user
-                    Prop(data=data_create_request_list, description="List of create data objects")
+                    Prop(data=user, description="User")
 
     Raises:
         FlowExecError: Flow execution failed
@@ -251,7 +255,7 @@ def backward_create_db_entry(inputs: List[Prop]) -> List[Prop]:
                 0: data_create_request_list
                     Prop(data=data_create_request_list, description="List of create data objects")
                 1: user
-                    Prop(data=data_create_request_list, description="List of create data objects")
+                    Prop(data=user, description="User")
                 2: created_data_list
                     Prop(data=created_data_list, description="List of created data objects")
                 3: user
@@ -530,6 +534,8 @@ def forward_update_data(inputs: List[Prop]) -> List[Prop]:
 
     try:
         updated_data_list = update_data(data_update_list, user)
+        for i, data in enumerate(updated_data_list):
+            data.presigned_url = created_file_list[i].presigned_url
     except SQLAlchemyError as e:
         raise FlowExecError(
             human_description="Updating DB object failed",
