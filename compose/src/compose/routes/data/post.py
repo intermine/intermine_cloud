@@ -26,11 +26,11 @@ def post(user: User) -> Response:  # noqa: C901
     Returns:
         Response: Flask response
     """
-    # Parse json from request
+    # Parse json from requests
     try:
         data_create_request_list = parse_obj_as(
             DataPOSTRequest, json.loads(request.data)
-        )["data"]
+        ).data_list
     except ValidationError as e:
         response_body = DataPOSTResponse(
             msg="json validation failed", errors=e.errors()
@@ -65,7 +65,7 @@ def post(user: User) -> Response:  # noqa: C901
         # return fetched data in response
         response_body = DataPOSTResponse(
             msg="data successfully created",
-            items=executed_flow.forward_outputs[-1][0]["data"],
+            items=executed_flow.forward_outputs[-1][0].data,
         )
         return make_response(response_body.json(), HTTPStatus.OK)
     else:
