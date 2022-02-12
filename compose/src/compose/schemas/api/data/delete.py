@@ -23,5 +23,5 @@ class DataDELETEResponse(ResponseSchema):
 class DataDELETERequest(BaseModel):
     """Data DELETE request schema."""
 
-    data: List[DataDelete]
+    data_list: List[DataDelete]
     user: Optional[User]

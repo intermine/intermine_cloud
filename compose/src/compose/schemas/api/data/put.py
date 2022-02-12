@@ -20,7 +20,7 @@ class DataUpdate(BaseModel):
 class DataPUTRequest(BaseModel):
     """Data PUT request schema."""
 
-    data: List[DataUpdate]
+    data_list: List[DataUpdate]
     user: Optional[User]
 
 

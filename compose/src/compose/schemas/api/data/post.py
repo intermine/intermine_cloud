@@ -26,5 +26,5 @@ class DataCreate(BaseModel):
 class DataPOSTRequest(BaseModel):
     """Data POST request schema."""
 
-    data: List[DataCreate]
+    data_list: List[DataCreate]
     user: Optional[User]
