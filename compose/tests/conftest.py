@@ -1,21 +1,21 @@
 """Pytest config."""
 
-from blackcap.blocs.user import create_user, delete_user
+from typing import Dict
+
+from blackcap.blocs.user import create_user
 from blackcap.db import db_engine
 from blackcap.models.meta.mixins import DBModel
-from blackcap.schemas.api.user.delete import UserDelete
 from blackcap.schemas.api.user.post import UserCreate
 from blackcap.schemas.user import User
 from blackcap.server import create_app
 from flask import Flask
 from minio.api import Minio
 from minio.deleteobjects import DeleteObject
-
 import pytest
 
 from compose.configs import config_registry
 from compose.routes import register_blueprints, register_extensions
-
+from compose.schemas.api.auth.post import AuthPOSTRequest
 
 config = config_registry.get_config()
 
@@ -31,7 +31,7 @@ minio_client = Minio(
 def app() -> Flask:
     app = create_app(config, register_extensions, register_blueprints)
     app.testing = True
-    return app
+    return app.test_client()
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -59,4 +59,13 @@ def user() -> User:
         f"protagonist-{created_user.user_id}", delete_object_list
     )
     minio_client.remove_bucket(f"protagonist-{created_user.user_id}")
-    # delete_user(UserDelete(user_id=created_user.user_id))
+
+
+@pytest.fixture(scope="session")
+def cookies(user: User, app: Flask) -> Dict:
+    user_login = AuthPOSTRequest(email=user.email, password="password")  # noqa: S106
+    app.post("/v1/auth/", json=user_login.dict())
+    cookie_list = [cookie for cookie in app.cookie_jar]
+    # remove cookies from test client
+    app.cookie_jar.clear()
+    return cookie_list
