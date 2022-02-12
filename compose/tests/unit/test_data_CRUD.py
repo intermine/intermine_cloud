@@ -4,7 +4,6 @@ from blackcap.schemas.user import User
 
 from compose.blocs.data import create_data
 from compose.schemas.api.data.post import DataCreate
-
 from compose.schemas.data import Data
 
 
