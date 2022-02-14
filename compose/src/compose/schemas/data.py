@@ -14,4 +14,3 @@ class Data(BaseModel):
     ext: str
     file_type: str
     file_id: Optional[UUID4]
-    presigned_url: Optional[str]
