@@ -14,5 +14,6 @@ class File(BaseModel):
     ext: Optional[str]
     file_type: str
     parent_id: UUID4
-    presigned_url: Optional[str]
+    presigned_get: Optional[str]
+    presigned_put: Optional[str]
     uploaded: bool = False
