@@ -8,13 +8,12 @@ from subprocess import run, Popen
 from typing import Dict
 
 import click
-
 from blackcap.configs import config_registry
-
 from yaml import dump as ydump
 
 
 from .. import __version__
+from minectl.cli.imcloud import imcloud
 
 config = config_registry.get_config()
 
@@ -424,3 +423,4 @@ main.add_command(gitea)
 main.add_command(flux)
 main.add_command(dev)
 main.add_command(argo)
+main.add_command(imcloud)
