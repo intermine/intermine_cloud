@@ -1,19 +1,13 @@
 """Template API GET schema."""
 
 from enum import Enum, unique
-from typing import List, Optional
+from typing import Any, Dict, List, Optional, Union
 
 from blackcap.schemas.api.common import ResponseSchema
 from pydantic import BaseModel
 from pydantic.types import UUID4
 
 from compose.schemas.template import Template
-
-
-class TemplateGetResponse(ResponseSchema):
-    """Template GET response schema."""
-
-    items: List[Template] = []
 
 
 @unique
@@ -30,5 +24,11 @@ class TemplateGetQueryParams(BaseModel):
 
     query_type: TemplateQueryType
     template_id: Optional[UUID4]
-    latest_file_id: Optional[UUID4]
+    file_id: Optional[UUID4]
     protagonist_id: Optional[UUID4]
+
+
+class TemplateGetResponse(ResponseSchema):
+    """Template GET response schema."""
+
+    items: Dict[str, List[Union[Template, Any]]] = {}

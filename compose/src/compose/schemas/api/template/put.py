@@ -1,8 +1,7 @@
 """Template API PUT schema."""
-from typing import List, Optional
+from typing import Any, Dict, List, Optional, Union
 
 from blackcap.schemas.api.common import ResponseSchema
-from blackcap.schemas.user import User
 from pydantic import BaseModel
 from pydantic.types import UUID4
 
@@ -16,17 +15,16 @@ class TemplateUpdate(BaseModel):
     name: Optional[str]
     template_vars: Optional[List[TemplateVar]]
     status: Optional[str]
-    latest_file_id: Optional[UUID4]
+    file_id: Optional[UUID4]
 
 
 class TemplatePUTRequest(BaseModel):
     """Template PUT request schema."""
 
-    templates: List[TemplateUpdate]
-    user: Optional[User]
+    template_list: List[TemplateUpdate]
 
 
 class TemplatePOSTResponse(ResponseSchema):
     """Template POST response schema."""
 
-    items: List[Template] = []
+    items: Dict[str, List[Union[Template, Any]]] = {}
