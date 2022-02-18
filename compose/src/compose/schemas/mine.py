@@ -18,13 +18,13 @@ class MineJobs(BaseModel):
 class Mine(BaseModel):
     """Mine schema."""
 
-    mine_id: Optional[UUID4]
+    mine_id: UUID4
     name: str
-    description: Optional[str]
+    description: str = ""
     preference: Dict = {}
     state: Dict = {}
     mine_jobs: Optional[MineJobs]
-    protagonist_id: Optional[UUID4]
-    template_id: Optional[UUID4]
-    rendered_template_file_id: Optional[UUID4]
-    data_file_ids: Optional[List[str]]
+    protagonist_id: UUID4
+    template_id: UUID4
+    rendered_template_file_id: UUID4
+    data_file_ids: List[UUID4]
