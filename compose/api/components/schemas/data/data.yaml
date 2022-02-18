@@ -1,4 +1,4 @@
-description: File schema
+description: Data schema
 type: object
 properties:
   data_id:

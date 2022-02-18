@@ -1,8 +1,12 @@
 description: Template delete schema
 type: object
 properties:
-  template_id:
-    type: string
+  template_list:
+    type: object
+    properties:
+      template_id:
+        type: string
+    required:
+      - "template_id"
 required:
-  - "template_id"
-
+  - "template_list"

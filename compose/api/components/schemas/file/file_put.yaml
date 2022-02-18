@@ -16,4 +16,5 @@ properties:
         - "file_id"
         - "name"
         - "uploaded"
-
+required:
+  - "file_list"

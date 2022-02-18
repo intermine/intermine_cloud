@@ -1,12 +1,21 @@
 description: Template update schema
 type: object
 properties:
-  template_id:
-    type: string
-  name:
-    type: string
-  description:
-    type: string
+  template_list:
+    type: object
+    properties:
+      template_id:
+        type: string
+      name:
+        type: string
+      description:
+        type: string
+      template_vars:
+        type: arrays
+        items:
+          type: string
+    required:
+      - "template_id"
 required:
-  - "template_id"
+  - "template_list"
 
