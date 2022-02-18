@@ -13,10 +13,13 @@ from sqlalchemy import select
 from sqlalchemy.exc import SQLAlchemyError
 
 
-from compose.blocs.file import create_file, create_presigned_post_url, delete_file
+from compose.blocs.file import (
+    create_file_db_entry,
+    create_file_presigned_urls,
+    revert_file_db_entry,
+)
 from compose.models.data import DataDB
 from compose.schemas.api.data.delete import DataDelete
-from compose.schemas.api.file.post import FileCreate
 from compose.schemas.api.data.get import DataGetQueryParams, DataQueryType
 from compose.schemas.api.data.post import DataCreate
 from compose.schemas.api.data.put import DataUpdate
@@ -187,7 +190,7 @@ def delete_data(data_delete_list: List[DataDelete], user_creds: User) -> Data:
 ###
 
 
-def forward_create_db_entry(inputs: List[Prop]) -> List[Prop]:
+def create_data_db_entry(inputs: List[Prop]) -> List[Prop]:
     """Forward function for create db entry step.
 
     Args:
@@ -246,8 +249,8 @@ def forward_create_db_entry(inputs: List[Prop]) -> List[Prop]:
     ]
 
 
-def backward_create_db_entry(inputs: List[Prop]) -> List[Prop]:
-    """Backward function for create db entry step.
+def revert_data_db_entry(inputs: List[Prop]) -> List[Prop]:
+    """Revert function for create db entry step.
 
     Args:
         inputs (List[Prop]):
@@ -309,191 +312,7 @@ def backward_create_db_entry(inputs: List[Prop]) -> List[Prop]:
     ]
 
 
-def forward_create_file(inputs: List[Prop]) -> List[Prop]:
-    """Forward function for creating file step.
-
-    Args:
-        inputs (List[Prop]):
-            Expects
-                0: created_data_list
-                    Prop(data=created_data_list, description="List of created data objects")
-                1: user
-                    Prop(data=user, description="User")
-
-
-    Raises:
-        FlowExecError: Flow execution failed
-
-    Returns:
-        List[Prop]:
-            Created file objects
-
-            Prop(data=created_file_list, description="List of created File Objects")
-
-            Prop(data=user, description="User")
-    """
-    try:
-        created_data_list: List[Data] = inputs[0].data
-        user: User = inputs[1].data
-    except Exception as e:
-        raise FlowExecError(
-            human_description="Parsing inputs failed",
-            error=e,
-            error_type=type(e),
-            is_user_facing=True,
-            error_in_function=get_outer_function(),
-        ) from e
-
-    try:
-        file_create_list = []
-        for data in created_data_list:
-            file_create_list.append(
-                FileCreate(
-                    name=data.name,
-                    ext=data.ext,
-                    file_type=data.file_type,
-                    parent_id=data.data_id,
-                )
-            )
-        created_file_list = create_file(file_create_list, user)
-    except SQLAlchemyError as e:
-        raise FlowExecError(
-            human_description="Creating DB object failed",
-            error=e,
-            error_type=type(e),
-            is_user_facing=False,
-            error_in_function=get_outer_function(),
-        ) from e
-    except Exception as e:
-        raise FlowExecError(
-            human_description="Something bad happened",
-            error=e,
-            error_type=type(e),
-            is_user_facing=False,
-            error_in_function=get_outer_function(),
-        ) from e
-
-    return [
-        Prop(data=created_file_list, description="List of created File Objects"),
-        Prop(data=user, description="User"),
-    ]
-
-
-def backward_create_file(inputs: List[Prop]) -> List[Prop]:
-    """Backward function for creating file step.
-
-    Args:
-        inputs (List[Prop]):
-            Expects
-                0: created_data_list
-                    Prop(data=created_data_list, description="List of created data objects")
-                1: user
-                    Prop(data=user, description="User")
-                2: created_file_list
-                    Prop(data=created_file_list, description="List of created file objects")
-                3: user
-                    Prop(data=user, description="User")
-
-    Raises:
-        FlowExecError: Flow execution failed
-
-    Returns:
-        List[Prop]:
-            Deleted file objects
-
-            Prop(data=deleted_file_list, description="List of deleted File Objects")
-
-            Prop(data=user, description="User")
-    """
-    try:
-        created_file_list: List[File] = inputs[2].data
-        user: User = inputs[3].data
-    except Exception as e:
-        raise FlowExecError(
-            human_description="Parsing inputs failed",
-            error=e,
-            error_type=type(e),
-            is_user_facing=True,
-            error_in_function=get_outer_function(),
-        ) from e
-
-    try:
-        deleted_file_list = delete_file(created_file_list, user)
-    except SQLAlchemyError as e:
-        raise FlowExecError(
-            human_description="Deleting DB object failed",
-            error=e,
-            error_type=type(e),
-            is_user_facing=False,
-            error_in_function=get_outer_function(),
-        ) from e
-    except Exception as e:
-        raise FlowExecError(
-            human_description="Something bad happened",
-            error=e,
-            error_type=type(e),
-            is_user_facing=False,
-            error_in_function=get_outer_function(),
-        ) from e
-
-    return [
-        Prop(data=deleted_file_list, description="List of deleted Data Objects"),
-        Prop(data=user, description="User"),
-    ]
-
-
-def forward_create_file_presigned_url(inputs: List[Prop]) -> List[Prop]:
-    """Forward function for creating presigned url using created file object.
-
-    Args:
-        inputs (List[Prop]):
-            Expects
-                0: created_file_list
-                    Prop(data=created_file_list, description="List of created file objects")
-                1: user
-                    Prop(data=user, description="User")
-
-    Raises:
-        FlowExecError: Flow execution failed
-
-    Returns:
-        List[Prop]:
-            Updated data objects
-
-            Prop(data=updated_file_list, description="List of updated File Objects")
-
-            Prop(data=user, description="User")
-    """
-    try:
-        created_file_list: List[File] = inputs[0].data
-        user: User = inputs[1].data
-    except Exception as e:
-        raise FlowExecError(
-            human_description="Parsing inputs failed",
-            error=e,
-            error_type=type(e),
-            is_user_facing=True,
-            error_in_function=get_outer_function(),
-        ) from e
-    try:
-        for file in created_file_list:
-            file.presigned_url = create_presigned_post_url(file, user, "PUT")
-    except Exception as e:
-        raise FlowExecError(
-            human_description="Creating presigned urls failed",
-            error=e,
-            error_type=type(e),
-            is_user_facing=True,
-            error_in_function=get_outer_function(),
-        ) from e
-
-    return [
-        Prop(data=created_file_list, description="List of updated File Objects"),
-        Prop(data=user, description="User"),
-    ]
-
-
-def forward_update_data(inputs: List[Prop]) -> List[Prop]:
+def update_data_db_entry(inputs: List[Prop]) -> List[Prop]:
     """Forward function for updating file_id in created data object.
 
     Args:
@@ -534,8 +353,6 @@ def forward_update_data(inputs: List[Prop]) -> List[Prop]:
 
     try:
         updated_data_list = update_data(data_update_list, user)
-        for i, data in enumerate(updated_data_list):
-            data.presigned_url = created_file_list[i].presigned_url
     except SQLAlchemyError as e:
         raise FlowExecError(
             human_description="Updating DB object failed",
@@ -559,7 +376,7 @@ def forward_update_data(inputs: List[Prop]) -> List[Prop]:
     ]
 
 
-def backward_update_data(inputs: List[Prop]) -> List[Prop]:
+def rewind_data_db_entry(inputs: List[Prop]) -> List[Prop]:
     """Backward function for updating data step.
 
     Args:
@@ -609,7 +426,7 @@ def backward_update_data(inputs: List[Prop]) -> List[Prop]:
 def generate_create_data_flow(
     data_create_request_list: List[DataCreate], user: User
 ) -> Flow:
-    """Generate flow for creating the data reource.
+    """Generate flow for creating the data resource.
 
     Args:
         data_create_request_list (List[DataCreate]): List of data objects to create.
@@ -618,12 +435,10 @@ def generate_create_data_flow(
     Returns:
         Flow: Create data flow
     """
-    create_db_entry_step = Step(forward_create_db_entry, backward_create_db_entry)
-    create_file_step = Step(forward_create_file, backward_create_file)
-    create_file_presigned_url_step = Step(
-        forward_create_file_presigned_url, dummy_backward
-    )
-    update_db_entry_step = Step(forward_update_data, backward_update_data)
+    create_db_entry_step = Step(create_data_db_entry, revert_data_db_entry)
+    create_file_step = Step(create_file_db_entry, revert_file_db_entry)
+    create_file_presigned_url_step = Step(create_file_presigned_urls, dummy_backward)
+    update_db_entry_step = Step(update_data_db_entry, rewind_data_db_entry)
 
     flow = Flow()
 
@@ -632,7 +447,7 @@ def generate_create_data_flow(
         [
             Prop(
                 data=data_create_request_list,
-                description="List of deleted Data Objects",
+                description="List of DataCreate Objects",
             ),
             Prop(data=user, description="User"),
         ],

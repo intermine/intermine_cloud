@@ -1,14 +1,19 @@
 """File BLoCs."""
 
+from ctypes import Union
 from datetime import timedelta
 from typing import List
-from uuid import uuid4
 
 from blackcap.db import DBSession
+from blackcap.flow import FlowExecError, get_outer_function, Prop
 from blackcap.schemas.user import User
+from compose.schemas.data import Data
+from compose.schemas.template import Template
 from logzero import logger
 from minio.api import Minio
 from sqlalchemy import select
+from sqlalchemy.exc import SQLAlchemyError
+
 
 from compose.configs import config_registry
 from compose.models.file import FileDB
@@ -30,7 +35,7 @@ minio_client = Minio(
 )
 
 
-def create_presigned_post_url(file: File, user_creds: User, method: str) -> str:
+def create_presigned_url(file: File, user_creds: User, method: str) -> str:
     """Create presigned post url for the file.
 
     Args:
@@ -66,7 +71,6 @@ def create_file(file_create_list: List[FileCreate], user_creds: User) -> List[Fi
         try:
             file_db_create_list: List[FileDB] = [
                 FileDB(
-                    id=uuid4(),
                     protagonist_id=user_creds.user_id,
                     **file.dict(),
                 )
@@ -120,7 +124,7 @@ def get_file(query_params: FileGetQueryParams, user_creds: User) -> List[File]:
             return [
                 File(
                     file_id=obj.id,
-                    presigned_url=create_presigned_post_url(obj, user_creds, "GET"),
+                    presigned_get=create_presigned_url(obj, user_creds, "GET"),
                     **obj.to_dict(),
                 )
                 for obj in file_list
@@ -133,11 +137,11 @@ def get_file(query_params: FileGetQueryParams, user_creds: User) -> List[File]:
     return file_list
 
 
-def update_file(file_update: FileUpdate, user_creds: User = None) -> File:
+def update_file(file_update_list: List[FileUpdate], user_creds: User) -> File:
     """Update File in the DB from FileUpdate request.
 
     Args:
-        file_update (FileUpdate): FileUpdate request
+        file_update_list (List[FileUpdate]): ListFileUpdate request
         user_creds (User): User credentials.
 
     Raises:
@@ -146,21 +150,28 @@ def update_file(file_update: FileUpdate, user_creds: User = None) -> File:
     Returns:
         File: Instance of Updated File
     """
-    stmt = select(FileDB).where(FileDB.id == file_update.file_id)
+    stmt = (
+        select(FileDB)
+        .where(FileDB.protagonist_id == user_creds.user_id)
+        .where(FileDB.id.in_([file_update.file_id for file_update in file_update_list]))
+    )
     with DBSession() as session:
         try:
-            file_list: List[FileDB] = session.execute(stmt).scalars().all()
-            if len(file_list) == 1:
-                file_update_dict = file_update.dict(exclude_defaults=True)
-                file_update_dict.pop("file_id")
-                updated_file = file_list[0].update(session, **file_update_dict)
-                return File(file_id=updated_file.id, **updated_file.to_dict())
-            if len(file_list) == 0:
-                # TODO: Raise not found
-                pass
+            file_db_update_list: List[FileDB] = session.execute(stmt).scalars().all()
+            updated_file_list = []
+            for file in file_db_update_list:
+                for file_update in file_update_list:
+                    if file_update.file_id == file.id:
+                        file_update_dict = file_update.dict(exclude_defaults=True)
+                        file_update_dict.pop("file_id")
+                        updated_file = file.update(session, **file_update_dict)
+                        updated_file_list.append(
+                            File(file_id=updated_file.id, **updated_file.to_dict())
+                        )
+            return updated_file_list
         except Exception as e:
             session.rollback()
-            logger.error(f"Unable to update file: {file_update.dict()} due to {e}")
+            logger.error(f"Unable to update file: {file.to_dict()} due to {e}")
             raise e
 
 
@@ -187,12 +198,199 @@ def delete_file(file_delete: List[FileDelete], user_creds: User) -> File:
             file_db_delete_list: List[FileDB] = session.execute(stmt).scalars().all()
             deleted_file_list = []
             for file in file_db_delete_list:
-                deleted_file = file.delete(session)
-                deleted_file_list.append(
-                    File(file_id=deleted_file.id, **deleted_file.to_dict())
-                )
+                file.delete(session)
+                deleted_file_list.append(File(file_id=file.id, **file.to_dict()))
             return deleted_file_list
         except Exception as e:
             session.rollback()
-            logger.error(f"Unable to delete file: {file.dict()} due to {e}")
+            logger.error(f"Unable to delete file: {file.to_dict()} due to {e}")
             raise e
+
+
+###
+# Flow BLoCs
+###
+
+
+def create_file_db_entry(inputs: List[Prop]) -> List[Prop]:
+    """Forward function for creating file step.
+
+    Args:
+        inputs (List[Prop]):
+            Expects
+                0: created_parent_list
+                    Prop(data=created_parent_list, description="List of created data objects")
+                1: user
+                    Prop(data=user, description="User")
+
+
+    Raises:
+        FlowExecError: Flow execution failed
+
+    Returns:
+        List[Prop]:
+            Created file objects
+
+            Prop(data=created_file_list, description="List of created File Objects")
+
+            Prop(data=user, description="User")
+    """
+    try:
+        created_parent_list: List[Union[Data, Template]] = inputs[0].data
+        user: User = inputs[1].data
+    except Exception as e:
+        raise FlowExecError(
+            human_description="Parsing inputs failed",
+            error=e,
+            error_type=type(e),
+            is_user_facing=True,
+            error_in_function=get_outer_function(),
+        ) from e
+
+    try:
+        file_create_list = []
+        for parent in created_parent_list:
+            file_create_list.append(
+                FileCreate(
+                    name=parent.name,
+                    ext=parent.ext,
+                    file_type=parent.file_type,
+                    parent_id=parent.get_id(),
+                )
+            )
+        created_file_list = create_file(file_create_list, user)
+    except SQLAlchemyError as e:
+        raise FlowExecError(
+            human_description="Creating DB object failed",
+            error=e,
+            error_type=type(e),
+            is_user_facing=False,
+            error_in_function=get_outer_function(),
+        ) from e
+    except Exception as e:
+        raise FlowExecError(
+            human_description="Something bad happened",
+            error=e,
+            error_type=type(e),
+            is_user_facing=False,
+            error_in_function=get_outer_function(),
+        ) from e
+
+    return [
+        Prop(data=created_file_list, description="List of created File Objects"),
+        Prop(data=user, description="User"),
+    ]
+
+
+def revert_file_db_entry(inputs: List[Prop]) -> List[Prop]:
+    """Backward function for creating file step.
+
+    Args:
+        inputs (List[Prop]):
+            Expects
+                0: created_parent_list
+                    Prop(data=created_parent_list, description="List of created data objects")
+                1: user
+                    Prop(data=user, description="User")
+                2: created_file_list
+                    Prop(data=created_file_list, description="List of created file objects")
+                3: user
+                    Prop(data=user, description="User")
+
+    Raises:
+        FlowExecError: Flow execution failed
+
+    Returns:
+        List[Prop]:
+            Deleted file objects
+
+            Prop(data=deleted_file_list, description="List of deleted File Objects")
+
+            Prop(data=user, description="User")
+    """
+    try:
+        created_file_list: List[File] = inputs[2].data
+        user: User = inputs[3].data
+    except Exception as e:
+        raise FlowExecError(
+            human_description="Parsing inputs failed",
+            error=e,
+            error_type=type(e),
+            is_user_facing=True,
+            error_in_function=get_outer_function(),
+        ) from e
+
+    try:
+        deleted_file_list = delete_file(created_file_list, user)
+    except SQLAlchemyError as e:
+        raise FlowExecError(
+            human_description="Deleting DB object failed",
+            error=e,
+            error_type=type(e),
+            is_user_facing=False,
+            error_in_function=get_outer_function(),
+        ) from e
+    except Exception as e:
+        raise FlowExecError(
+            human_description="Something bad happened",
+            error=e,
+            error_type=type(e),
+            is_user_facing=False,
+            error_in_function=get_outer_function(),
+        ) from e
+
+    return [
+        Prop(data=deleted_file_list, description="List of deleted Data Objects"),
+        Prop(data=user, description="User"),
+    ]
+
+
+def create_file_presigned_urls(inputs: List[Prop]) -> List[Prop]:
+    """Forward function for creating presigned url using created file object.
+
+    Args:
+        inputs (List[Prop]):
+            Expects
+                0: created_file_list
+                    Prop(data=created_file_list, description="List of created file objects")
+                1: user
+                    Prop(data=user, description="User")
+
+    Raises:
+        FlowExecError: Flow execution failed
+
+    Returns:
+        List[Prop]:
+            Updated data objects
+
+            Prop(data=updated_file_list, description="List of updated File Objects")
+
+            Prop(data=user, description="User")
+    """
+    try:
+        created_file_list: List[File] = inputs[0].data
+        user: User = inputs[1].data
+    except Exception as e:
+        raise FlowExecError(
+            human_description="Parsing inputs failed",
+            error=e,
+            error_type=type(e),
+            is_user_facing=True,
+            error_in_function=get_outer_function(),
+        ) from e
+    try:
+        for file in created_file_list:
+            file.presigned_put = create_presigned_url(file, user, "PUT")
+    except Exception as e:
+        raise FlowExecError(
+            human_description="Creating presigned urls failed",
+            error=e,
+            error_type=type(e),
+            is_user_facing=True,
+            error_in_function=get_outer_function(),
+        ) from e
+
+    return [
+        Prop(data=created_file_list, description="List of updated File Objects"),
+        Prop(data=user, description="User"),
+    ]
