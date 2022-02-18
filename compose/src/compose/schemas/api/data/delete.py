@@ -1,11 +1,12 @@
 """Data API DELETE schema."""
 
-from typing import List, Optional
+from typing import Any, Dict, List, Union
 
 from blackcap.schemas.api.common import ResponseSchema
-from blackcap.schemas.user import User
 from pydantic import BaseModel
 from pydantic.types import UUID4
+
+from compose.schemas.data import Data
 
 
 class DataDelete(BaseModel):
@@ -14,14 +15,13 @@ class DataDelete(BaseModel):
     data_id: UUID4
 
 
-class DataDELETEResponse(ResponseSchema):
-    """Data DELETE response schema."""
-
-    items: List[DataDelete] = []
-
-
 class DataDELETERequest(BaseModel):
     """Data DELETE request schema."""
 
     data_list: List[DataDelete]
-    user: Optional[User]
+
+
+class DataDELETEResponse(ResponseSchema):
+    """Data DELETE response schema."""
+
+    items: Dict[str, List[Union[Data, Any]]] = {}

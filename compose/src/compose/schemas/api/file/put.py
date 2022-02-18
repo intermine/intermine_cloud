@@ -1,8 +1,7 @@
 """File API PUT schema."""
-from typing import List, Optional
+from typing import Any, Dict, List, Optional, Union
 
 from blackcap.schemas.api.common import ResponseSchema
-from blackcap.schemas.user import User
 from pydantic import BaseModel
 from pydantic.types import UUID4
 
@@ -20,11 +19,10 @@ class FileUpdate(BaseModel):
 class FilePUTRequest(BaseModel):
     """File PUT request schema."""
 
-    file: List[FileUpdate]
-    user: Optional[User]
+    file_list: List[FileUpdate]
 
 
 class FilePUTResponse(ResponseSchema):
     """File PUT response schema."""
 
-    items: List[File] = []
+    items: Dict[str, List[Union[File, Any]]] = {}

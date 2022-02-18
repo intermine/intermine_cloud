@@ -1,18 +1,11 @@
 """Data API POST schema."""
 
-from typing import List, Optional
+from typing import Any, Dict, List, Union
 
 from blackcap.schemas.api.common import ResponseSchema
-from blackcap.schemas.user import User
 from pydantic import BaseModel
 
 from compose.schemas.data import Data
-
-
-class DataPOSTResponse(ResponseSchema):
-    """Data POST response schema."""
-
-    items: List[Data] = []
 
 
 class DataCreate(BaseModel):
@@ -27,4 +20,9 @@ class DataPOSTRequest(BaseModel):
     """Data POST request schema."""
 
     data_list: List[DataCreate]
-    user: Optional[User]
+
+
+class DataPOSTResponse(ResponseSchema):
+    """Data POST response schema."""
+
+    items: Dict[str, List[Union[Data, Any]]] = {}

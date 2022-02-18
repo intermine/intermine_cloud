@@ -1,19 +1,13 @@
 """File API GET schema."""
 
 from enum import Enum, unique
-from typing import List, Optional
+from typing import Any, Dict, List, Optional, Union
 
 from blackcap.schemas.api.common import ResponseSchema
 from pydantic import BaseModel
 from pydantic.types import UUID4
 
 from compose.schemas.file import File
-
-
-class FileGetResponse(ResponseSchema):
-    """File GET response schema."""
-
-    items: List[File] = []
 
 
 @unique
@@ -31,3 +25,9 @@ class FileGetQueryParams(BaseModel):
     query_type: FileQueryType
     file_id: Optional[UUID4]
     protagonist_id: Optional[UUID4]
+
+
+class FileGetResponse(ResponseSchema):
+    """File GET response schema."""
+
+    items: Dict[str, List[Union[File, Any]]] = {}

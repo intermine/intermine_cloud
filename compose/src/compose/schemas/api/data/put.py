@@ -1,8 +1,7 @@
 """Data API PUT schema."""
-from typing import List, Optional
+from typing import Any, Dict, List, Optional, Union
 
 from blackcap.schemas.api.common import ResponseSchema
-from blackcap.schemas.user import User
 from pydantic import BaseModel
 from pydantic.types import UUID4
 
@@ -21,10 +20,9 @@ class DataPUTRequest(BaseModel):
     """Data PUT request schema."""
 
     data_list: List[DataUpdate]
-    user: Optional[User]
 
 
 class DataPUTResponse(ResponseSchema):
     """Data PUT response schema."""
 
-    items: List[Data] = []
+    items: Dict[str, List[Union[Data, Any]]] = {}
