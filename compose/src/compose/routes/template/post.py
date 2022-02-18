@@ -2,20 +2,16 @@
 
 from http import HTTPStatus
 import json
-from typing import List
 
+from blackcap.flow import Executor, FlowExecError, FlowStatus
 from blackcap.schemas.user import User
 from flask import make_response, request, Response
 from pydantic import parse_obj_as, ValidationError
-from sqlalchemy.exc import SQLAlchemyError
 
-from compose.blocs.file import create_file
-from compose.blocs.template import create_template, update_template
+
+from compose.blocs.template import generate_create_template_flow
 from compose.routes.template import template_bp
-from compose.schemas.api.template.post import TemplatePOSTResponse
-from compose.schemas.api.template.put import TemplateUpdate
-from compose.schemas.file import File
-from compose.schemas.template import Template
+from compose.schemas.api.template.post import TemplatePOSTResponse, TemplatePOSTRequest
 from compose.utils.auth import check_authentication
 
 
@@ -32,7 +28,9 @@ def post(user: User) -> Response:  # noqa: C901
     """
     # Parse json from request
     try:
-        template_create = parse_obj_as(List[Template], json.loads(request.data))
+        template_create_request_list = parse_obj_as(
+            TemplatePOSTRequest, json.loads(request.data)
+        ).template_list
     except ValidationError as e:
         response_body = TemplatePOSTResponse(
             msg="json validation failed", errors=e.errors()
@@ -44,10 +42,12 @@ def post(user: User) -> Response:  # noqa: C901
         )
         return make_response(response_body.json(), HTTPStatus.INTERNAL_SERVER_ERROR)
 
-    # Create template
+    # Generate create template flow
     try:
-        created_template = create_template(template_create, user)
-    except SQLAlchemyError:
+        create_data_flow = generate_create_template_flow(
+            template_create_request_list, user
+        )
+    except FlowExecError:
         response_body = TemplatePOSTResponse(
             msg="internal databse error", errors=["internal database error"]
         )
@@ -58,38 +58,22 @@ def post(user: User) -> Response:  # noqa: C901
         )
         return make_response(response_body.json(), HTTPStatus.INTERNAL_SERVER_ERROR)
 
-    # Create associated file
-    try:
-        file_create = []
-        for template in created_template:
-            file_create.append(
-                File(
-                    name=template.name,
-                    ext="tar",
-                    file_type="template",
-                    parent_id=template.template_id,
-                )
-            )
-        created_files = create_file(file_create, user)
-    except Exception:
+    # Excute the flow
+    executor = Executor(create_data_flow, {})
+    executed_flow = executor.run()
+
+    # Check flow status and return
+    if executed_flow.status == FlowStatus.PASSED:
+        # return fetched template in response
         response_body = TemplatePOSTResponse(
-            msg="unknown error", errors=["unknown internal error"]
+            msg="templates successfully created",
+            items=executed_flow.forward_outputs[-1][0].data,
         )
-        return make_response(response_body.json(), HTTPStatus.INTERNAL_SERVER_ERROR)
-
-    for i, template in enumerate(created_template):
-        # link template and file object
-        template_update = TemplateUpdate(
-            template_id=template.template_id, latest_file_id=created_files[i].file_id
+        return make_response(response_body.json(), HTTPStatus.OK)
+    else:
+        # handle errors
+        # return processed errors in response
+        response_body = TemplatePOSTResponse(
+            msg="failed to create templates", errors=[]
         )
-        update_template(template_update, user)
-        # Update local template object for response
-        template.latest_file_id = created_files[i].file_id
-        # add presigned_url to template objects
-        template.presigned_url = created_files[i].presigned_url
-
-    # return fetched template in response
-    response_body = TemplatePOSTResponse(
-        msg="data successfully created", items=created_template
-    )
-    return make_response(response_body.json(), HTTPStatus.OK)
+        return make_response(response_body.json(), HTTPStatus.OK)
