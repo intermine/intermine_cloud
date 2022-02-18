@@ -1,0 +1,14 @@
+description : "200 File Response"
+allOf:
+  - $ref: "../../schemas/200_response.yaml"
+  - type: object
+    properties:
+      items:
+        type: object
+        properties:
+          file_list:
+            type: array
+            items:
+              $ref: "file.yaml"
+        required:
+          - "file_list"

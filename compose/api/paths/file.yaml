@@ -28,12 +28,14 @@ get:
       content:
         application/json:
           schema:
-            $ref: "../components/schemas/200_response.yaml"
+            type: object
+            $ref: "../components/schemas/file/200_file_response.yaml"
     "401":
       description: "Bad request"
       content:
         application/json:
           schema:
+            type: object
             $ref: "../components/schemas/401_response.yaml"
 put:
   tags:
@@ -46,19 +48,20 @@ put:
     content:
       application/json:
         schema:
-          type: array
-          items:
-            $ref: "../components/schemas/file/file_put.yaml"
+          type: object
+          $ref: "../components/schemas/file/file_put.yaml"
   responses:
     "200":
-      description: "Successfully updated file"
+      description: "Successfully retreived status"
       content:
         application/json:
           schema:
-            $ref: "../components/schemas/200_response.yaml"
+            type: object
+            $ref: "../components/schemas/file/200_file_response.yaml"
     "401":
       description: "Bad request"
       content:
         application/json:
           schema:
+            type: object
             $ref: "../components/schemas/401_response.yaml"

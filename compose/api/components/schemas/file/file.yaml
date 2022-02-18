@@ -1,0 +1,26 @@
+description: File schema
+type: object
+properties:
+  file_id:
+    type: string
+  name:
+    type: string
+  ext:
+    type: string
+  file_type:
+    type: string
+  parent_id:
+    type: string
+  presigned_get:
+    type: string
+  presigned_put:
+    type: string
+  uploaded:
+    type: boolean
+required:
+  - "file_id"
+  - "name"
+  - "ext"
+  - "file_type"
+  - "parent_id"
+  - "uploaded"

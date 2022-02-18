@@ -1,12 +1,19 @@
-description: File update schema
+description: File update request schema
 type: object
 properties:
-  file_id:
-    type: string
-  name:
-    type: string
-  uploaded:
-    type: boolean
-required:
-  - "file_id"
+  file_list:
+    type: array
+    items:
+      type: object
+      properties:
+        file_id:
+          type: string
+        name:
+          type: string
+        uploaded:
+          type: boolean
+      required:
+        - "file_id"
+        - "name"
+        - "uploaded"
 
