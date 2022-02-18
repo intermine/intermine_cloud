@@ -1,15 +1,18 @@
-description: Data create schema
+description: Data post request schema
 type: object
 properties:
-  name:
-    type: string
-  description:
-    type: string
-  ext:
-    type: string
-  file_type:
-    type: string
-required:
-  - "name"
-  - "ext"
-  - "file_type"
+  data_list:
+    type: array
+    items:
+      type: object
+      properties:
+        name:
+          type: string
+        ext:
+          type: string
+        file_type:
+          type: string
+      required:
+        - "name"
+        - "ext"
+        - "file_type"

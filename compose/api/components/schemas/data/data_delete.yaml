@@ -1,8 +1,12 @@
 description: Data delete schema
 type: object
 properties:
-  data_id:
-    type: string
-required:
-  - "data_id"
-
+  data_list:
+    type: array
+    items:
+      type: object
+      properties:
+        data_id:
+          type: string
+      required:
+        - "data_id"
