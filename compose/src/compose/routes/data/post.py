@@ -33,12 +33,12 @@ def post(user: User) -> Response:  # noqa: C901
         ).data_list
     except ValidationError as e:
         response_body = DataPOSTResponse(
-            msg="json validation failed", errors=e.errors()
+            msg="json validation failed", errors={"main": e.errors()}
         )
         return make_response(response_body.json(), HTTPStatus.BAD_REQUEST)
     except Exception:
         response_body = DataPOSTResponse(
-            msg="unknown error", errors=["unknown internal error"]
+            msg="unknown error", errors={"main": ["unknown internal error"]}
         )
         return make_response(response_body.json(), HTTPStatus.INTERNAL_SERVER_ERROR)
 
@@ -47,12 +47,12 @@ def post(user: User) -> Response:  # noqa: C901
         create_data_flow = generate_create_data_flow(data_create_request_list, user)
     except FlowExecError:
         response_body = DataPOSTResponse(
-            msg="internal databse error", errors=["internal database error"]
+            msg="internal databse error", errors={"main": ["unknown internal error"]}
         )
         return make_response(response_body.json(), HTTPStatus.INTERNAL_SERVER_ERROR)
     except Exception:
         response_body = DataPOSTResponse(
-            msg="unknown error", errors=["unknown internal error"]
+            msg="unknown error", errors={"main": ["unknown internal error"]}
         )
         return make_response(response_body.json(), HTTPStatus.INTERNAL_SERVER_ERROR)
 
@@ -65,11 +65,13 @@ def post(user: User) -> Response:  # noqa: C901
         # return fetched data in response
         response_body = DataPOSTResponse(
             msg="data successfully created",
-            items=executed_flow.forward_outputs[-1][0].data,
+            items={"data_list": executed_flow.forward_outputs[-1][0].data},
         )
         return make_response(response_body.json(), HTTPStatus.OK)
     else:
         # handle errors
         # return processed errors in response
-        response_body = DataPOSTResponse(msg="failed to create data", errors=[])
+        response_body = DataPOSTResponse(
+            msg="failed to create data", errors={"main": []}
+        )
         return make_response(response_body.json(), HTTPStatus.OK)

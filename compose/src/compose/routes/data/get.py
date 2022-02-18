@@ -28,11 +28,13 @@ def get(user: User) -> Response:
     try:
         query_params = DataGetQueryParams.parse_obj(request.args)
     except ValidationError as e:
-        response_body = DataGetResponse(msg="query validation error", errors=e.errors())
+        response_body = DataGetResponse(
+            msg="query validation error", errors={"main": e.errors()}
+        )
         return make_response(response_body.json(), HTTPStatus.BAD_REQUEST)
     except Exception:
         response_body = DataGetResponse(
-            msg="unknown error", errors=["unknown internal error"]
+            msg="unknown error", errors={"main": ["unknown internal error"]}
         )
         return make_response(response_body.json(), HTTPStatus.INTERNAL_SERVER_ERROR)
 
@@ -41,18 +43,22 @@ def get(user: User) -> Response:
         data_list = get_data(query_params, user)
     except SQLAlchemyError:
         response_body = DataGetResponse(
-            msg="internal databse error", errors=["internal database error"]
+            msg="internal databse error", errors={"main": ["unknown internal error"]}
         )
         return make_response(response_body.json(), HTTPStatus.INTERNAL_SERVER_ERROR)
     except ValidationError as e:
-        response_body = DataGetResponse(msg="query validation error", errors=e.errors())
+        response_body = DataGetResponse(
+            msg="query validation error", errors={"main": e.errors()}
+        )
         return make_response(response_body.json(), HTTPStatus.BAD_REQUEST)
     except Exception:
         response_body = DataGetResponse(
-            msg="unknown error", errors=["unknown internal error"]
+            msg="unknown error", errors={"main": ["unknown internal error"]}
         )
         return make_response(response_body.json(), HTTPStatus.INTERNAL_SERVER_ERROR)
 
     # return fetched data in response
-    response_body = DataGetResponse(msg="data successfully retrieved", items=data_list)
+    response_body = DataGetResponse(
+        msg="data successfully retrieved", items={"data_list": data_list}
+    )
     return make_response(response_body.json(), HTTPStatus.OK)
