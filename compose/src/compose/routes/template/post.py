@@ -11,7 +11,7 @@ from pydantic import parse_obj_as, ValidationError
 
 from compose.blocs.template import generate_create_template_flow
 from compose.routes.template import template_bp
-from compose.schemas.api.template.post import TemplatePOSTResponse, TemplatePOSTRequest
+from compose.schemas.api.template.post import TemplatePOSTRequest, TemplatePOSTResponse
 from compose.utils.auth import check_authentication
 
 
@@ -33,12 +33,12 @@ def post(user: User) -> Response:  # noqa: C901
         ).template_list
     except ValidationError as e:
         response_body = TemplatePOSTResponse(
-            msg="json validation failed", errors=e.errors()
+            msg="json validation failed", errors={"main": e.errors()}
         )
         return make_response(response_body.json(), HTTPStatus.BAD_REQUEST)
     except Exception:
         response_body = TemplatePOSTResponse(
-            msg="unknown error", errors=["unknown internal error"]
+            msg="unknown error", errors={"main": ["unknown internal error"]}
         )
         return make_response(response_body.json(), HTTPStatus.INTERNAL_SERVER_ERROR)
 
@@ -49,12 +49,12 @@ def post(user: User) -> Response:  # noqa: C901
         )
     except FlowExecError:
         response_body = TemplatePOSTResponse(
-            msg="internal databse error", errors=["internal database error"]
+            msg="internal databse error", errors={"main": ["unknown internal error"]}
         )
         return make_response(response_body.json(), HTTPStatus.INTERNAL_SERVER_ERROR)
     except Exception:
         response_body = TemplatePOSTResponse(
-            msg="unknown error", errors=["unknown internal error"]
+            msg="unknown error", errors={"main": ["unknown internal error"]}
         )
         return make_response(response_body.json(), HTTPStatus.INTERNAL_SERVER_ERROR)
 
@@ -67,13 +67,13 @@ def post(user: User) -> Response:  # noqa: C901
         # return fetched template in response
         response_body = TemplatePOSTResponse(
             msg="templates successfully created",
-            items=executed_flow.forward_outputs[-1][0].data,
+            items={"template_list": executed_flow.forward_outputs[-1][0].data},
         )
         return make_response(response_body.json(), HTTPStatus.OK)
     else:
         # handle errors
         # return processed errors in response
         response_body = TemplatePOSTResponse(
-            msg="failed to create templates", errors=[]
+            msg="failed to create templates", errors={"main": []}
         )
         return make_response(response_body.json(), HTTPStatus.OK)
