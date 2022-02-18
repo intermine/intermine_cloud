@@ -65,12 +65,12 @@ def post(user: User) -> Response:  # noqa: C901
         mine_create = parse_obj_as(List[Mine], json.loads(request.data))
     except ValidationError as e:
         response_body = MinePOSTResponse(
-            msg="json validation failed", errors=e.errors()
+            msg="json validation failed", errors={"main": e.errors()}
         )
         return make_response(response_body.json(), HTTPStatus.BAD_REQUEST)
     except Exception:
         response_body = MinePOSTResponse(
-            msg="unknown error", errors=["unknown internal error"]
+            msg="unknown error", errors={"main": ["unknown internal error"]}
         )
         return make_response(response_body.json(), HTTPStatus.INTERNAL_SERVER_ERROR)
 
@@ -94,7 +94,7 @@ def post(user: User) -> Response:  # noqa: C901
             )
 
             response_body = MinePOSTResponse(
-                msg="template not found", errors=e.errors()
+                msg="template not found", errors={"main": e.errors()}
             )
             return make_response(response_body.json(), HTTPStatus.BAD_REQUEST)
 
@@ -114,7 +114,7 @@ def post(user: User) -> Response:  # noqa: C901
             )
 
             response_body = MinePOSTResponse(
-                msg="template file not found", errors=e.errors()
+                msg="template file not found", errors={"main": e.errors()}
             )
             return make_response(response_body.json(), HTTPStatus.BAD_REQUEST)
 
@@ -136,7 +136,7 @@ def post(user: User) -> Response:  # noqa: C901
                 )
 
                 response_body = MinePOSTResponse(
-                    msg="data not found", errors=e.errors()
+                    msg="data not found", errors={"main": e.errors()}
                 )
                 return make_response(response_body.json(), HTTPStatus.BAD_REQUEST)
 
@@ -158,7 +158,7 @@ def post(user: User) -> Response:  # noqa: C901
                 )
 
                 response_body = MinePOSTResponse(
-                    msg="template file not found", errors=e.errors()
+                    msg="template file not found", errors={"main": e.errors()}
                 )
                 return make_response(response_body.json(), HTTPStatus.BAD_REQUEST)
 
@@ -177,7 +177,7 @@ def post(user: User) -> Response:  # noqa: C901
                 )[0]
             except Exception:
                 response_body = MinePOSTResponse(
-                    msg="unknown error", errors=["unknown internal error"]
+                    msg="unknown error", errors={"main": ["unknown internal error"]}
                 )
                 return make_response(
                     response_body.json(), HTTPStatus.INTERNAL_SERVER_ERROR
@@ -215,7 +215,7 @@ def post(user: User) -> Response:  # noqa: C901
                 created_file = create_file([file], user)[0]
             except Exception:
                 response_body = MinePOSTResponse(
-                    msg="unknown error", errors=["unknown internal error"]
+                    msg="unknown error", errors={"main": ["unknown internal error"]}
                 )
                 return make_response(
                     response_body.json(), HTTPStatus.INTERNAL_SERVER_ERROR
@@ -233,7 +233,7 @@ def post(user: User) -> Response:  # noqa: C901
                 created_mine = create_mine([c_mine], user)[0]
             except Exception:
                 response_body = MinePOSTResponse(
-                    msg="unknown error", errors=["unknown internal error"]
+                    msg="unknown error", errors={"main": ["unknown internal error"]}
                 )
                 return make_response(
                     response_body.json(), HTTPStatus.INTERNAL_SERVER_ERROR
@@ -249,7 +249,7 @@ def post(user: User) -> Response:  # noqa: C901
                 update_rendered_template(rendered_template_update)
             except Exception:
                 response_body = MinePOSTResponse(
-                    msg="unknown error", errors=["unknown internal error"]
+                    msg="unknown error", errors={"main": ["unknown internal error"]}
                 )
                 return make_response(
                     response_body.json(), HTTPStatus.INTERNAL_SERVER_ERROR
@@ -264,7 +264,7 @@ def post(user: User) -> Response:  # noqa: C901
                     )
             except Exception:
                 response_body = MinePOSTResponse(
-                    msg="unknown error", errors=["unknown internal error"]
+                    msg="unknown error", errors={"main": ["unknown internal error"]}
                 )
                 return make_response(
                     response_body.json(), HTTPStatus.INTERNAL_SERVER_ERROR
@@ -276,7 +276,7 @@ def post(user: User) -> Response:  # noqa: C901
                 update_file(file_update)
             except Exception:
                 response_body = MinePOSTResponse(
-                    msg="unknown error", errors=["unknown internal error"]
+                    msg="unknown error", errors={"main": ["unknown internal error"]}
                 )
                 return make_response(
                     response_body.json(), HTTPStatus.INTERNAL_SERVER_ERROR
@@ -285,6 +285,6 @@ def post(user: User) -> Response:  # noqa: C901
 
     # return created mines in response
     response_body = MinePOSTResponse(
-        msg="data successfully created", items=created_mines
+        msg="data successfully created", items={"mine_list": created_mines}
     )
     return make_response(response_body.json(), HTTPStatus.OK)

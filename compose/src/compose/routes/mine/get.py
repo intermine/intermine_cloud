@@ -28,20 +28,22 @@ def get(user: User) -> Response:
     try:
         query_params = MineGetQueryParams.parse_obj(request.args)
     except ValidationError as e:
-        response_body = MineGetResponse(msg="query validation error", errors=e.errors())
+        response_body = MineGetResponse(
+            msg="query validation error", errors={"main": e.errors()}
+        )
         return make_response(response_body.json(), HTTPStatus.BAD_REQUEST)
     except Exception:
         response_body = MineGetResponse(
-            msg="unknown error", errors=["unknown internal error"]
+            msg="unknown error", errors={"main": ["unknown internal error"]}
         )
         return make_response(response_body.json(), HTTPStatus.INTERNAL_SERVER_ERROR)
 
-    # Get mine from the DB
+    # Get mines from the DB
     try:
-        mine = get_mine(query_params, user)
+        mine_list = get_mine(query_params, user)
     except SQLAlchemyError:
         response_body = MineGetResponse(
-            msg="internal databse error", errors=["internal database error"]
+            msg="internal databse error", errors={"main": ["unknown internal error"]}
         )
         return make_response(response_body.json(), HTTPStatus.INTERNAL_SERVER_ERROR)
     except ValidationError as e:
@@ -49,10 +51,10 @@ def get(user: User) -> Response:
         return make_response(response_body.json(), HTTPStatus.BAD_REQUEST)
     except Exception:
         response_body = MineGetResponse(
-            msg="unknown error", errors=["unknown internal error"]
+            msg="unknown error", errors={"main": ["unknown internal error"]}
         )
         return make_response(response_body.json(), HTTPStatus.INTERNAL_SERVER_ERROR)
 
-    # return fetched mine in response
-    response_body = MineGetResponse(msg="data successfully retrieved", items=mine)
+    # return fetched mines in response
+    response_body = MineGetResponse(msg="data successfully retrieved", items=mine_list)
     return make_response(response_body.json(), HTTPStatus.OK)
