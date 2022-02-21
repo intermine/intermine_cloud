@@ -2,19 +2,21 @@ description: Template create schema
 type: object
 properties:
   template_list:
-    type: object
-    properties:
-      name:
-        type: string
-      description:
-        type: string
-      template_vars:
-        type: array
-        items:
+    type: array
+    items:
+      type: object
+      properties:
+        name:
           type: string
-    required:
-      - "name"
-      - "description"
-      - "template_vars"
+        description:
+          type: string
+        template_vars:
+          type: array
+          items:
+            type: string
+      required:
+        - "name"
+        - "description"
+        - "template_vars"
 required:
   - "template_list"
