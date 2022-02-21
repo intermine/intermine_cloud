@@ -28,7 +28,7 @@ get:
       content:
         application/json:
           schema:
-            $ref: "../components/schemas/200_response.yaml"
+            $ref: "../components/schemas/user/200_user_response.yaml"
     "401":
       description: "Bad request"
       content:
@@ -53,7 +53,7 @@ post:
       content:
         application/json:
           schema:
-            $ref: "../components/schemas/200_response.yaml"
+            $ref: "../components/schemas/user/200_user_response.yaml"
     "401":
       description: "Bad request"
       content:
@@ -80,7 +80,7 @@ put:
       content:
         application/json:
           schema:
-            $ref: "../components/schemas/200_response.yaml"
+            $ref: "../components/schemas/user/200_user_response.yaml"
     "401":
       description: "Bad request"
       content:
@@ -107,7 +107,7 @@ delete:
       content:
         application/json:
           schema:
-            $ref: "../components/schemas/200_response.yaml"
+            $ref: "../components/schemas/user/200_user_response.yaml"
     "401":
       description: "Bad request"
       content:
