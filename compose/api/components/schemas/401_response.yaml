@@ -12,6 +12,7 @@ properties:
         type: array
         items:
           type: object
+      
 required:
   - "msg"
   - "items"
