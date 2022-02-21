@@ -34,6 +34,11 @@ export type TAuthMachineContext = {
 }
 
 type TResponse = AxiosResponse
+type TErrorEvent = {
+    data: {
+        response: TResponse
+    }
+}
 
 export type TAuthMachineState =
     | {
@@ -53,8 +58,7 @@ export type TAuthMachineEvents =
     | { type: 'END' }
     | { type: 'START' }
     | { type: 'RESET' }
-    | { type: 'error.platform.login'; data: { response: TResponse } }
-    | { type: 'error.platform.register'; data: { response: TResponse } }
+    | { type: 'error.platform'; data: { response: TResponse } }
 
 const authMachineInitialContext: TAuthMachineContext = {
     errorMessage: '',
@@ -130,14 +134,13 @@ export const authMachine = createMachine<
             requestFailed: assign<TAuthMachineContext, TAuthMachineEvents>({
                 isRequestFailed: true,
                 errorMessage: (_, event) => {
-                    if (
-                        event.type === 'error.platform.login' ||
-                        event.type === 'error.platform.register'
-                    ) {
-                        const status = getResponseStatus(event.data.response)
+                    if (event.type.startsWith('error.platform')) {
+                        const response = (event as TErrorEvent).data.response
+
+                        const status = getResponseStatus(response)
 
                         return getResponseMessageUsingResponseStatus(
-                            event.data.response,
+                            response,
                             status
                         )
                     }
