@@ -1,0 +1,19 @@
+description : "200 Template POST Response"
+allOf:
+  - $ref: "200_template_response.yaml"
+  - type: object
+    properties:
+      items:
+        type: object
+        properties:
+          file_list:
+            type: array
+            items:
+              allOf:
+                - $ref: "../file/file.yaml"
+                - type: object
+                  required:
+                    - "presigned_get"
+                    - "presigned_put"
+        required:
+          - "file_list"

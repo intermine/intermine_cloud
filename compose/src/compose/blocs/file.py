@@ -7,10 +7,9 @@ from typing import List
 from blackcap.db import DBSession
 from blackcap.flow import FlowExecError, get_outer_function, Prop
 from blackcap.schemas.user import User
-from compose.schemas.data import Data
-from compose.schemas.template import Template
 from logzero import logger
-from minio.api import Minio
+from minio import Minio
+from minio.deleteobjects import DeleteObject
 from sqlalchemy import select
 from sqlalchemy.exc import SQLAlchemyError
 
@@ -21,7 +20,9 @@ from compose.schemas.api.file.delete import FileDelete
 from compose.schemas.api.file.get import FileGetQueryParams, FileQueryType
 from compose.schemas.api.file.post import FileCreate
 from compose.schemas.api.file.put import FileUpdate
+from compose.schemas.data import Data
 from compose.schemas.file import File
+from compose.schemas.template import Template
 
 
 config = config_registry.get_config()
@@ -125,6 +126,7 @@ def get_file(query_params: FileGetQueryParams, user_creds: User) -> List[File]:
                 File(
                     file_id=obj.id,
                     presigned_get=create_presigned_url(obj, user_creds, "GET"),
+                    presigned_put=create_presigned_url(obj, user_creds, "PUT"),
                     **obj.to_dict(),
                 )
                 for obj in file_list
@@ -134,10 +136,8 @@ def get_file(query_params: FileGetQueryParams, user_creds: User) -> List[File]:
             logger.error(f"Unable to fetch files due to {e}")
             raise e
 
-    return file_list
 
-
-def update_file(file_update_list: List[FileUpdate], user_creds: User) -> File:
+def update_file(file_update_list: List[FileUpdate], user_creds: User) -> List[File]:
     """Update File in the DB from FileUpdate request.
 
     Args:
@@ -148,7 +148,7 @@ def update_file(file_update_list: List[FileUpdate], user_creds: User) -> File:
         Exception: error
 
     Returns:
-        File: Instance of Updated File
+        List[File]: List of Instance of Updated File
     """
     stmt = (
         select(FileDB)
@@ -175,7 +175,7 @@ def update_file(file_update_list: List[FileUpdate], user_creds: User) -> File:
             raise e
 
 
-def delete_file(file_delete: List[FileDelete], user_creds: User) -> File:
+def delete_file(file_delete: List[FileDelete], user_creds: User) -> List[File]:
     """Delete file in the DB from FileDelete request.
 
     Args:
@@ -186,7 +186,7 @@ def delete_file(file_delete: List[FileDelete], user_creds: User) -> File:
         Exception: error
 
     Returns:
-        File: Instance of Deleted File
+        List[File]: List of Instance of Deleted File
     """
     stmt = (
         select(FileDB)
@@ -381,6 +381,7 @@ def create_file_presigned_urls(inputs: List[Prop]) -> List[Prop]:
     try:
         for file in created_file_list:
             file.presigned_put = create_presigned_url(file, user, "PUT")
+            file.presigned_get = create_presigned_url(file, user, "GET")
     except Exception as e:
         raise FlowExecError(
             human_description="Creating presigned urls failed",
@@ -392,5 +393,60 @@ def create_file_presigned_urls(inputs: List[Prop]) -> List[Prop]:
 
     return [
         Prop(data=created_file_list, description="List of updated File Objects"),
+        Prop(data=user, description="User"),
+    ]
+
+
+def delete_file_s3_entry(inputs: List[Prop]) -> List[Prop]:
+    """Forward function for deleting file in s3 step.
+
+    Args:
+        inputs (List[Prop]):
+            Expects
+                0: file_delete_list
+                    Prop(data=file_delete_list, description="List of files to delete")
+                1: user
+                    Prop(data=user, description="User")
+
+
+    Raises:
+        FlowExecError: Flow execution failed
+
+    Returns:
+        List[Prop]:
+            deleted file objects
+
+            Prop(data=deleted_file_list, description="List of deleted File Objects")
+
+            Prop(data=user, description="User")
+    """
+    try:
+        file_list: List[File] = inputs[0].data
+        user: User = inputs[1].data
+    except Exception as e:
+        raise FlowExecError(
+            human_description="Parsing inputs failed",
+            error=e,
+            error_type=type(e),
+            is_user_facing=True,
+            error_in_function=get_outer_function(),
+        ) from e
+
+    try:
+        file_delete_list = []
+        for file in file_list:
+            file_delete_list.append(DeleteObject(f"{str(file.file_id)}.{file.ext}"))
+        minio_client.remove_objects(f"protagonist-{user.user_id}", file_delete_list)
+    except Exception as e:
+        raise FlowExecError(
+            human_description="Something bad happened",
+            error=e,
+            error_type=type(e),
+            is_user_facing=False,
+            error_in_function=get_outer_function(),
+        ) from e
+
+    return [
+        Prop(data=file_list, description="List of deleted File Objects"),
         Prop(data=user, description="User"),
     ]

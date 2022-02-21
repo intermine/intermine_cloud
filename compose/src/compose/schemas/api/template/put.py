@@ -13,8 +13,8 @@ class TemplateUpdate(BaseModel):
 
     template_id: UUID4
     name: Optional[str]
+    description: Optional[str]
     template_vars: Optional[List[TemplateVar]]
-    status: Optional[str]
     file_id: Optional[UUID4]
 
 

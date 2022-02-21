@@ -1,0 +1,14 @@
+description : "200 Template Response"
+allOf:
+  - $ref: "../../schemas/200_response.yaml"
+  - type: object
+    properties:
+      items:
+        type: object
+        properties:
+          template_list:
+            type: array
+            items:
+              $ref: "template.yaml"
+        required:
+          - "template_list"

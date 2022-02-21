@@ -10,3 +10,5 @@ properties:
           type: string
       required:
         - "data_id"
+required:
+  - "data_list"

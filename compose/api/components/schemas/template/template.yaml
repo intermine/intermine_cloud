@@ -1,0 +1,19 @@
+description: Template schema
+type: object
+properties:
+  template_id:
+    type: string
+  name:
+    type: string
+  description:
+    type: string
+  template_vars:
+    type: array
+  file_id:
+    type: string
+required:
+  - "template_id"
+  - "name"
+  - "description"
+  - "template_vars"
+  - "file_id"

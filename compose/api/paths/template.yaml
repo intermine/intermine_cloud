@@ -28,12 +28,14 @@ get:
       content:
         application/json:
           schema:
-            $ref: "../components/schemas/200_response.yaml"
+            type: object
+            $ref: "../components/schemas/template/200_template_response.yaml"
     "401":
       description: "Bad request"
       content:
         application/json:
           schema:
+            type: object
             $ref: "../components/schemas/401_response.yaml"
 post:
   tags:
@@ -51,16 +53,18 @@ post:
             $ref: "../components/schemas/template/template_post.yaml"
   responses:
     "200":
-      description: "Successfully created template"
+      description: "Successfully retreived status"
       content:
         application/json:
           schema:
-            $ref: "../components/schemas/200_response.yaml"
+            type: object
+            $ref: "../components/schemas/template/200_template_post_response.yaml"
     "401":
       description: "Bad request"
       content:
         application/json:
           schema:
+            type: object
             $ref: "../components/schemas/401_response.yaml"
 put:
   tags:
@@ -78,16 +82,18 @@ put:
             $ref: "../components/schemas/template/template_put.yaml"
   responses:
     "200":
-      description: "Successfully updated template"
+      description: "Successfully retreived status"
       content:
         application/json:
           schema:
-            $ref: "../components/schemas/200_response.yaml"
+            type: object
+            $ref: "../components/schemas/template/200_template_response.yaml"
     "401":
       description: "Bad request"
       content:
         application/json:
           schema:
+            type: object
             $ref: "../components/schemas/401_response.yaml"
 delete:
   tags:
@@ -105,14 +111,16 @@ delete:
             $ref: "../components/schemas/template/template_delete.yaml"
   responses:
     "200":
-      description: "Successfully deleted template"
+      description: "Successfully retreived status"
       content:
         application/json:
           schema:
-            $ref: "../components/schemas/200_response.yaml"
+            type: object
+            $ref: "../components/schemas/template/200_template_response.yaml"
     "401":
       description: "Bad request"
       content:
         application/json:
           schema:
+            type: object
             $ref: "../components/schemas/401_response.yaml"

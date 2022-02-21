@@ -16,3 +16,5 @@ properties:
         - "name"
         - "ext"
         - "file_type"
+required:
+  - "data_list"

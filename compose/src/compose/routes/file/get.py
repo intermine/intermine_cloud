@@ -28,11 +28,13 @@ def get(user: User) -> Response:
     try:
         query_params = FileGetQueryParams.parse_obj(request.args)
     except ValidationError as e:
-        response_body = FileGetResponse(msg="query validation error", errors=e.errors())
+        response_body = FileGetResponse(
+            msg="query validation error", errors={"main": e.errors()}
+        )
         return make_response(response_body.json(), HTTPStatus.BAD_REQUEST)
     except Exception:
         response_body = FileGetResponse(
-            msg="unknown error", errors=["unknown internal error"]
+            msg="unknown error", errors={"main": ["unknown internal error"]}
         )
         return make_response(response_body.json(), HTTPStatus.INTERNAL_SERVER_ERROR)
 
@@ -41,15 +43,19 @@ def get(user: User) -> Response:
         file_list = get_file(query_params, user)
     except SQLAlchemyError:
         response_body = FileGetResponse(
-            msg="Something bad happened. Please try again after some time", errors=["internal database error"]
+            msg="Something bad happened. Please try again after some time",
+            errors={"main": ["unknown internal error"]},
         )
         return make_response(response_body.json(), HTTPStatus.INTERNAL_SERVER_ERROR)
     except Exception:
         response_body = FileGetResponse(
-            msg="Something bad happened. Please try again after some time", errors=["unknown internal error"]
+            msg="Something bad happened. Please try again after some time",
+            errors={"main": ["unknown internal error"]},
         )
         return make_response(response_body.json(), HTTPStatus.INTERNAL_SERVER_ERROR)
 
     # return fetched file in response
-    response_body = FileGetResponse(msg="Files retrieved successfully", items=file_list)
+    response_body = FileGetResponse(
+        msg="Files retrieved successfully", items={"main": file_list}
+    )
     return make_response(response_body.json(), HTTPStatus.OK)

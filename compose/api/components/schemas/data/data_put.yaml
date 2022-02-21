@@ -16,4 +16,6 @@ properties:
         - "data_id"
         - "name"
         - "file_id"
+required:
+  - "data_list"
 

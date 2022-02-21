@@ -29,12 +29,12 @@ def get(user: User) -> Response:
         query_params = TemplateGetQueryParams.parse_obj(request.args)
     except ValidationError as e:
         response_body = TemplateGetResponse(
-            msg="query validation error", errors=e.errors()
+            msg="query validation error", errors={"main": e.errors()}
         )
         return make_response(response_body.json(), HTTPStatus.BAD_REQUEST)
     except Exception:
         response_body = TemplateGetResponse(
-            msg="unknown error", errors=["unknown internal error"]
+            msg="unknown error", errors={"main": ["unknown internal error"]}
         )
         return make_response(response_body.json(), HTTPStatus.INTERNAL_SERVER_ERROR)
 
@@ -43,17 +43,17 @@ def get(user: User) -> Response:
         template_list = get_template(query_params, user)
     except SQLAlchemyError:
         response_body = TemplateGetResponse(
-            msg="internal databse error", errors=["internal database error"]
+            msg="internal databse error", errors={"main": ["unknown internal error"]}
         )
         return make_response(response_body.json(), HTTPStatus.INTERNAL_SERVER_ERROR)
     except Exception:
         response_body = TemplateGetResponse(
-            msg="unknown error", errors=["unknown internal error"]
+            msg="unknown error", errors={"main": ["unknown internal error"]}
         )
         return make_response(response_body.json(), HTTPStatus.INTERNAL_SERVER_ERROR)
 
     # return fetched templates in response
     response_body = TemplateGetResponse(
-        msg=" successfully retrieved", items=template_list
+        msg=" successfully retrieved", items={"template_list": template_list}
     )
     return make_response(response_body.json(), HTTPStatus.OK)
