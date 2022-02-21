@@ -1,4 +1,4 @@
-import { createMachine, assign } from 'xstate'
+import { createMachine, assign, ServiceMap } from 'xstate'
 
 import { AxiosResponse } from 'axios'
 
@@ -77,7 +77,9 @@ export type TUploadMachineEvents =
 export const uploadMachine = createMachine<
     TUploadMachineContext,
     TUploadMachineEvents,
-    TUploadMachineState
+    TUploadMachineState,
+    ServiceMap,
+    any
 >(
     {
         id: 'upload-data-machine',
@@ -160,7 +162,7 @@ export const uploadMachine = createMachine<
 
             OnServerError: assign<TUploadMachineContext, any>({
                 errorMessage: (_, event) => {
-                    if (event.type === 'error.platform.generatePresignedURL') {
+                    if (event.type.startsWith('error.platform')) {
                         const status = getResponseStatus(event.data.response)
 
                         return getResponseMessageUsingResponseStatus(
@@ -168,6 +170,7 @@ export const uploadMachine = createMachine<
                             status
                         )
                     }
+                    return getResponseMessageUsingResponseStatus({}, 500)
                 },
             }),
         },

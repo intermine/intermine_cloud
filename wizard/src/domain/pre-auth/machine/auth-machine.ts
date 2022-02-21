@@ -1,4 +1,4 @@
-import { createMachine, assign } from 'xstate'
+import { createMachine, assign, ServiceMap, TypegenDisabled } from 'xstate'
 import { clone } from '@intermine/chromatin/utils'
 import { AuthStates } from '../../../constants/auth'
 import { authApi, userApi } from '../../../services/api'
@@ -34,7 +34,7 @@ export type TAuthMachineContext = {
 }
 
 type TResponse = AxiosResponse
-type TErrorEvent = {
+type TErrorEvent = TAuthMachineEvents & {
     data: {
         response: TResponse
     }
@@ -60,6 +60,11 @@ export type TAuthMachineEvents =
     | { type: 'RESET' }
     | { type: 'error.platform'; data: { response: TResponse } }
 
+const isPlatformError = (event: TAuthMachineEvents): event is TErrorEvent => {
+    if (event.type.startsWith('error.platform')) return true
+    return false
+}
+
 const authMachineInitialContext: TAuthMachineContext = {
     errorMessage: '',
     authState: AuthStates.NotAuthorize,
@@ -69,7 +74,9 @@ const authMachineInitialContext: TAuthMachineContext = {
 export const authMachine = createMachine<
     TAuthMachineContext,
     TAuthMachineEvents,
-    TAuthMachineState
+    TAuthMachineState,
+    ServiceMap,
+    any
 >(
     {
         id: 'pre-auth-machine',
@@ -134,8 +141,8 @@ export const authMachine = createMachine<
             requestFailed: assign<TAuthMachineContext, TAuthMachineEvents>({
                 isRequestFailed: true,
                 errorMessage: (_, event) => {
-                    if (event.type.startsWith('error.platform')) {
-                        const response = (event as TErrorEvent).data.response
+                    if (isPlatformError(event)) {
+                        const response = event.data.response
 
                         const status = getResponseStatus(response)
 
