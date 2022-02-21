@@ -29,12 +29,12 @@ def get(user: User) -> Response:
         query_params = UserGetQueryParams.parse_obj(request.args)
     except ValidationError as e:
         response_body = UserGetResponse(
-            msg="query validation error", errors=e.errors()
+            msg="query validation error", errors={"main": e.errors()}
         )  # noqa: E501
         return make_response(response_body.json(), HTTPStatus.BAD_REQUEST)
     except Exception:
         response_body = UserGetResponse(
-            msg="unknown error", errors=["unknown internal error"]
+            msg="unknown error", errors={"main": ["unknown internal error"]}
         )
         return make_response(
             response_body.json(), HTTPStatus.INTERNAL_SERVER_ERROR
@@ -45,14 +45,14 @@ def get(user: User) -> Response:
         user_list = get_users(query_params)
     except SQLAlchemyError:
         response_body = UserGetResponse(
-            msg="internal databse error", errors=["internal database error"]
+            msg="internal databse error", errors={"main": ["unknown internal error"]}
         )
         return make_response(
             response_body.json(), HTTPStatus.INTERNAL_SERVER_ERROR
         )  # noqa: E501
     except Exception:
         response_body = UserGetResponse(
-            msg="unknown error", errors=["unknown internal error"]
+            msg="unknown error", errors={"main": ["unknown internal error"]}
         )
         return make_response(
             response_body.json(), HTTPStatus.INTERNAL_SERVER_ERROR
@@ -60,6 +60,6 @@ def get(user: User) -> Response:
 
     # return fetched users in response
     response_body = UserGetResponse(
-        msg=" successfully retrieved", items=user_list
+        msg=" successfully retrieved", items={"user_list": user_list}
     )  # noqa: E501
     return make_response(response_body.json(), HTTPStatus.OK)

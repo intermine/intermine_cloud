@@ -37,40 +37,46 @@ def post() -> Response:
         user_create = parse_obj_as(List[UserCreate], (json.loads(request.data)))
     except ValidationError as e:
         response_body = UserPOSTResponse(
-            msg="json validation failed", errors=e.errors()
+            msg="json validation failed", errors={"main": e.errors()}
         )
         return make_response(response_body.json(), HTTPStatus.BAD_REQUEST)
     except Exception:
         response_body = UserPOSTResponse(
-            msg="There is some problem with our server.", errors=["unknown internal error"]
+            msg="There is some problem with our server.",
+            errors={"main": ["unknown internal error"]},
         )
         return make_response(response_body.json(), HTTPStatus.INTERNAL_SERVER_ERROR)
 
     # Create user
     try:
-        user = create_user(user_create)
+        user_list = create_user(user_create)
     except SQLAlchemyError:
         response_body = UserPOSTResponse(
-            msg="Something bad happened. Please come back after some time.", errors=["internal database error"]
+            msg="Something bad happened. Please come back after some time.",
+            errors={"main": ["unknown internal error"]},
         )
         return make_response(response_body.json(), HTTPStatus.INTERNAL_SERVER_ERROR)
     except Exception:
         response_body = UserPOSTResponse(
-            msg="There is some problem with our server.", errors=["unknown internal error"]
+            msg="There is some problem with our server.",
+            errors={"main": ["unknown internal error"]},
         )
         return make_response(response_body.json(), HTTPStatus.INTERNAL_SERVER_ERROR)
 
     # Create user bucket
     # TODO: Make this part of the flow or better add it as a post script
     try:
-        for u in user:
-            minio_client.make_bucket(f"protagonist-{u.user_id}")
+        for user in user_list:
+            minio_client.make_bucket(f"protagonist-{user.user_id}")
     except Exception:
         response_body = UserPOSTResponse(
-            msg="There is some problem with our server.", errors=["unknown internal error"]
+            msg="There is some problem with our server.",
+            errors={"main": ["unknown internal error"]},
         )
         return make_response(response_body.json(), HTTPStatus.INTERNAL_SERVER_ERROR)
 
     # return fetched data in response
-    response_body = UserPOSTResponse(msg="User successfully created", items=user)
+    response_body = UserPOSTResponse(
+        msg="User successfully created", items={"user_list": user_list}
+    )
     return make_response(response_body.json(), HTTPStatus.OK)

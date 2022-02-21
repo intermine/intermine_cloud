@@ -1,0 +1,19 @@
+description: User schema
+type: object
+properties:
+  user_id:
+    type: string
+  name:
+    type: string
+  email:
+    type: string
+  organisation:
+    type: string
+  active:
+    type: boolean
+required:
+  - "user_id"
+  - "name"
+  - "email"
+  - "organisation"
+  - "active"

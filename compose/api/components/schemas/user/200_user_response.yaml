@@ -1,0 +1,14 @@
+description : "200 Data Response"
+allOf:
+  - $ref: "../../schemas/200_response.yaml"
+  - type: object
+    properties:
+      items:
+        type: object
+        properties:
+          user_list:
+            type: array
+            items:
+              $ref: "user.yaml"
+        required:
+          - "data_list"

@@ -25,12 +25,12 @@ def delete() -> Response:
         user_delete = parse_obj_as(List[UserDelete], (json.loads(request.data)))
     except ValidationError as e:
         response_body = UserDELETEResponse(
-            msg="json validation failed", errors=e.errors()
+            msg="json validation failed", errors={"main": e.errors()}
         )
         return make_response(response_body.json(), HTTPStatus.BAD_REQUEST)
     except Exception:
         response_body = UserDELETEResponse(
-            msg="unknown error", errors=["unknown internal error"]
+            msg="unknown error", errors={"main": ["unknown internal error"]}
         )
         return make_response(response_body.json(), HTTPStatus.INTERNAL_SERVER_ERROR)
 
@@ -40,15 +40,17 @@ def delete() -> Response:
         user = delete_user(user_delete[0])
     except SQLAlchemyError:
         response_body = UserDELETEResponse(
-            msg="internal databse error", errors=["internal database error"]
+            msg="internal databse error", errors={"main": ["unknown internal error"]}
         )
         return make_response(response_body.json(), HTTPStatus.INTERNAL_SERVER_ERROR)
     except Exception:
         response_body = UserDELETEResponse(
-            msg="unknown error", errors=["unknown internal error"]
+            msg="unknown error", errors={"main": ["unknown internal error"]}
         )
         return make_response(response_body.json(), HTTPStatus.INTERNAL_SERVER_ERROR)
 
     # return fetched data in response
-    response_body = UserDELETEResponse(msg="user successfully updated", items=user)
+    response_body = UserDELETEResponse(
+        msg="user successfully updated", items={"user_list": [user]}
+    )
     return make_response(response_body.json(), HTTPStatus.OK)
