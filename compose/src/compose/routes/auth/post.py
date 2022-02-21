@@ -30,12 +30,13 @@ def post() -> Response:
         user_creds = AuthPOSTRequest.parse_obj(json.loads(request.data))
     except ValidationError as e:
         response_body = AuthPOSTResponse(
-            msg="json validation failed", errors=e.errors()
+            msg="json validation failed", errors={"main": e.errors()}
         )
         return make_response(response_body.json(), HTTPStatus.BAD_REQUEST)
     except Exception as e:
         response_body = AuthPOSTResponse(
-            msg="There is some problem with our server.", errors=[f"unknown internal error: {e}"]
+            msg="There is some problem with our server.",
+            errors={"main": [f"unknown internal error: {e}"]},
         )
         return make_response(response_body.json(), HTTPStatus.INTERNAL_SERVER_ERROR)
 
@@ -44,26 +45,28 @@ def post() -> Response:
         user, token = auther.login_user(AuthUserCreds(**user_creds.dict()))
     except SQLAlchemyError:
         response_body = AuthPOSTResponse(
-            msg="Something bad happened. Please come back after some time.", errors=["internal database error"]
+            msg="Something bad happened. Please come back after some time.",
+            errors={"main": ["internal database error"]},
         )
         return make_response(response_body.json(), HTTPStatus.INTERNAL_SERVER_ERROR)
     except Exception:
         response_body = AuthPOSTResponse(
-            msg="Something bad happened. Please come back after some time.", errors=["unknown internal error"]
+            msg="Something bad happened. Please come back after some time.",
+            errors={"main": ["unknown internal error"]},
         )
         return make_response(response_body.json(), HTTPStatus.INTERNAL_SERVER_ERROR)
 
     if user is None:
         # return invalid creds in response
         response_body = AuthPOSTResponse(
-            msg="Wrong credentials.", items=[], errors=["Wrong credentials"]
+            msg="Wrong credentials.", items=[], errors={"main": ["Wrong credentials"]}
         )
         response = make_response(response_body.json(), HTTPStatus.UNAUTHORIZED)
         return response
 
     # return logged in user and cookie in response
     response_body = AuthPOSTResponse(
-        msg="User successfully logged in", items=[user.dict()]
+        msg="User successfully logged in", items={"user_list": [user.dict()]}
     )
     response = make_response(response_body.json(), HTTPStatus.OK)
     response.set_cookie("imcloud", f"Bearer {token}")

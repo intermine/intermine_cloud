@@ -70,13 +70,15 @@ def check_authentication(flask_route: Callable) -> Callable:
         except Exception:
             response_body = ResponseSchema(
                 msg="Authentication failed. Please login again.",
-                errors=[
-                    {
-                        "loc": "creds",
-                        "msg": "unauthorized",
-                        "type": "authentication",
-                    }
-                ],
+                errors={
+                    "main": [
+                        {
+                            "loc": "creds",
+                            "msg": "unauthorized",
+                            "type": "authentication",
+                        }
+                    ]
+                },
             )
             return make_response(response_body.json(), HTTPStatus.UNAUTHORIZED)
 

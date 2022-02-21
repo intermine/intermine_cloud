@@ -29,8 +29,8 @@ def delete(user: User) -> Response:
     """
     # return logged in user and cookie in response
     response_body = ResponseSchema(
-        msg="User successfully logged out", items=[user.dict()]
-    )  # noqa: E501
+        msg="User successfully logged out", items={"user_list": [user.dict()]}
+    )
     response = make_response(response_body.json(), HTTPStatus.OK)
     response.delete_cookie("imcloud")
     return response
