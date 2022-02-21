@@ -67,7 +67,10 @@ def post(user: User) -> Response:  # noqa: C901
         # return fetched template in response
         response_body = TemplatePOSTResponse(
             msg="templates successfully created",
-            items={"template_list": executed_flow.forward_outputs[-1][0].data},
+            items={
+                "template_list": executed_flow.forward_outputs[-1][0].data,
+                "file_list": executed_flow.forward_outputs[-2][0].data,
+            },
         )
         return make_response(response_body.json(), HTTPStatus.OK)
     else:

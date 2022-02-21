@@ -11,4 +11,4 @@ allOf:
             items:
               $ref: "template.yaml"
         required:
-          - "data_list"
+          - "template_list"

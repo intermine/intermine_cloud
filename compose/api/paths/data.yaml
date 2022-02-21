@@ -57,7 +57,7 @@ post:
         application/json:
           schema:
             type: object
-            $ref: "../components/schemas/data/200_data_response.yaml"
+            $ref: "../components/schemas/data/200_data_post_response.yaml"
     "401":
       description: "Bad request"
       content:
