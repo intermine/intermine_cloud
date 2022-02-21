@@ -141,6 +141,8 @@ export const authMachine = createMachine<
                             status
                         )
                     }
+
+                    return getResponseMessageUsingResponseStatus({}, 500)
                 },
             }),
             resetAuthState: assign<TAuthMachineContext, TAuthMachineEvents>({
