@@ -23,6 +23,6 @@ def get(user: User) -> Response:
     """
     # return fetched data in response
     response_body = ResponseSchema(
-        msg="You are authenticated", items=[user]
+        msg="You are authenticated", items={"user_list": [user]}
     )  # noqa: E501
     return make_response(response_body.json(), HTTPStatus.OK)
