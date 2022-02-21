@@ -65,13 +65,16 @@ const serviceToGeneratePresignedURL = (
 
     switch (toUpload) {
         case 'dataset':
-            return dataApi.dataPost([
-                {
-                    name,
-                    ext: getFileExt(file),
-                    file_type: file.type !== '' ? file.type : getFileExt(file),
-                },
-            ])
+            return dataApi.dataPost({
+                data_list: [
+                    {
+                        name,
+                        ext: getFileExt(file),
+                        file_type:
+                            file.type !== '' ? file.type : getFileExt(file),
+                    },
+                ],
+            })
 
         case 'template':
             return templateApi.templatePost([
