@@ -9,7 +9,7 @@ import { AxiosResponse } from 'axios'
 import { DASHBOARD_UPLOAD_TEMPLATE_PATH } from '../../../routes'
 
 import { DashboardErrorBoundary } from '../common/error-boundary'
-import { templateApi } from '../../../services/api'
+import { fileApi, templateApi } from '../../../services/api'
 import { useDashboardQuery } from '../common/use-dashboard-query'
 
 import {
@@ -19,6 +19,7 @@ import {
 // eslint-disable-next-line max-len
 import { LandingPageAccordionList } from '../common/accordion-list/landing-page-accordion-list'
 import { TTemplateResponseData } from './types'
+import { Model200FileResponse } from '@intermine/compose-rest-client'
 
 const MsgIfListEmpty = (
     <Box>
@@ -39,9 +40,7 @@ export const Landing = () => {
         history.push(DASHBOARD_UPLOAD_TEMPLATE_PATH)
     }
 
-    const onQuerySuccessful = (
-        response: AxiosResponse<TTemplateResponseData>
-    ) => {
+    const onQuerySuccessful = (response: unknown) => {
         const lists: TAccordionListDatum[] = []
 
         for (let i = 0; i < response.data.items.template_list.length; i += 1) {
@@ -75,7 +74,7 @@ export const Landing = () => {
     }
 
     const { isLoading, query } = useDashboardQuery({
-        queryFn: () => templateApi.templateGet('get_all_templates'),
+        queryFn: () => fileApi.fileGet('get_all_files'),
         onSuccessful: onQuerySuccessful,
         onError: () => setIsFailedToFetchData(true)
     })

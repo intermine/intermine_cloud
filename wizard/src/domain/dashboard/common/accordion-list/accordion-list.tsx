@@ -180,6 +180,7 @@ export const AccordionListContainer = (props: TAccordionListContainerProps) => {
                 root: ({ spacing, palette: { neutral } }) => ({
                     borderRadius: '0.5rem',
                     marginTop: spacing(15),
+                    paddingTop: spacing(1),
                     overflow: 'auto',
                     ...(isEmpty && {
                         color: neutral[30],
