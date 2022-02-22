@@ -19,7 +19,7 @@ class FileUpdate(BaseModel):
 class FilePUTRequest(BaseModel):
     """File PUT request schema."""
 
-    file_list: Dict[str, List[Union[File, Any]]] = {}
+    file_list: List[FileUpdate]
 
 
 class FilePUTResponse(ResponseSchema):
