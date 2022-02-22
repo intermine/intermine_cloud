@@ -9,17 +9,17 @@ import {
     getResponseStatus,
 } from '../../../utils/get'
 
-export type TUseDashboardQuery = {
-    queryFn: (...params: any[]) => Promise<unknown>
+export type TUseDashboardQuery<T = unknown> = {
+    queryFn: (...params: any[]) => Promise<T>
     onError?: (response: unknown) => void
-    onSuccessful?: (response: AxiosResponse<any, any>) => void
+    onSuccessful?: (response: T) => void
     /**
      * @default true
      */
     hasToShowAlertOnError?: boolean
 }
 
-export const useDashboardQuery = (props: TUseDashboardQuery) => {
+export const useDashboardQuery = <T>(props: TUseDashboardQuery<T>) => {
     const [isLoading, setIsLoading] = useState(false)
     const [response, setResponse] = useState<unknown>()
     const { addAlert } = useGlobalAlertReducer()
@@ -34,7 +34,6 @@ export const useDashboardQuery = (props: TUseDashboardQuery) => {
     const query = async (...params: any[]) => {
         setIsLoading(true)
         try {
-            console.log('params', params)
             const responseFromServer = await queryFn(...params)
             setResponse(responseFromServer)
 
@@ -42,17 +41,22 @@ export const useDashboardQuery = (props: TUseDashboardQuery) => {
                 onSuccessful(responseFromServer as any)
             }
         } catch (error) {
-            if (!axios.isAxiosError(error)) {
-                console.log(error)
-                throw new Error('Non-axios error at useDashboardQuery.')
+            if (process.env.NODE_ENV === 'development') {
+                console.error('useDashboardQuery:', error)
+            }
+
+            const _error = {
+                message: 'Unknown error',
+                response: {},
+                ...(typeof error === 'object' ? error : undefined),
             }
 
             if (hasToShowAlertOnError) {
-                const status = getResponseStatus(error.response)
+                const status = getResponseStatus(_error.response)
                 addAlert({
                     id: shortid.generate(),
                     message: getResponseMessageUsingResponseStatus(
-                        error.response,
+                        _error.response,
                         status
                     ),
                     isOpen: true,
@@ -62,7 +66,7 @@ export const useDashboardQuery = (props: TUseDashboardQuery) => {
             }
 
             if (typeof onError === 'function') {
-                onError(error.response)
+                onError(_error.response)
             }
         }
         setIsLoading(false)
