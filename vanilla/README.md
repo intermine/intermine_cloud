@@ -20,10 +20,10 @@ You can now use [rclone](https://docs.csc.fi/data/Allas/using_allas/rclone/) to 
 
 For programmatic access, some additional steps are required:
 
-. Open https://pouta.csc.fi/dashboard/project/api_access/
-. Click *Download OpenStack RC File* near the right edge of the page
-. Click *OpenStack RC File (Identity API v3)*
-. Run `source ~/Downloads/project_XXXXXXX-openrc.sh`
+1. Open https://pouta.csc.fi/dashboard/project/api_access/
+1. Click *Download OpenStack RC File* near the right edge of the page
+1. Click *OpenStack RC File (Identity API v3)*
+1. Run `source ~/Downloads/project_XXXXXXX-openrc.sh`
 
 You now have all the environment variables (`env | grep OS`) needed to use Keystone authentication with the [Python swift client](https://docs.openstack.org/python-swiftclient/newton/client-api.html).
 
