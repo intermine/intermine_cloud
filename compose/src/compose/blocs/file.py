@@ -125,8 +125,12 @@ def get_file(query_params: FileGetQueryParams, user_creds: User) -> List[File]:
             return [
                 File(
                     file_id=obj.id,
-                    presigned_get=create_presigned_url(obj, user_creds, "GET"),
-                    presigned_put=create_presigned_url(obj, user_creds, "PUT"),
+                    presigned_get=create_presigned_url(
+                        File(file_id=obj.id, **obj.to_dict()), user_creds, "GET"
+                    ),
+                    presigned_put=create_presigned_url(
+                        File(file_id=obj.id, **obj.to_dict()), user_creds, "PUT"
+                    ),
                     **obj.to_dict(),
                 )
                 for obj in file_list

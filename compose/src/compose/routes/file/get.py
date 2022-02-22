@@ -56,6 +56,6 @@ def get(user: User) -> Response:
 
     # return fetched file in response
     response_body = FileGetResponse(
-        msg="Files retrieved successfully", items={"main": file_list}
+        msg="Files retrieved successfully", items={"file_list": file_list}
     )
     return make_response(response_body.json(), HTTPStatus.OK)
