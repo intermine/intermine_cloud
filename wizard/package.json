@@ -55,7 +55,7 @@
     },
     "dependencies": {
         "@intermine/chromatin": "0.0.19",
-        "@intermine/compose-rest-client": "^1.2.7",
+        "@intermine/compose-rest-client": "^1.2.8",
         "@types/axios": "^0.14.0",
         "@types/react": "^17.0.31",
         "@types/react-dom": "^17.0.10",
