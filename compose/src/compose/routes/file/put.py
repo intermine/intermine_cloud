@@ -43,7 +43,7 @@ def put(user: User) -> Response:
     # Update file
     # TODO: Make the api accepts array
     try:
-        updated_file_list = update_file(file_update.file_list)
+        updated_file_list = update_file(file_update.file_list, user)
     except SQLAlchemyError:
         response_body = FilePUTResponse(
             msg="Something bad happened. Please try again after some time",
