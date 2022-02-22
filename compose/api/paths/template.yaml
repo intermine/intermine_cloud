@@ -48,9 +48,8 @@ post:
     content:
       application/json:
         schema:
-          type: array
-          items:
-            $ref: "../components/schemas/template/template_post.yaml"
+          type: object
+          $ref: "../components/schemas/template/template_post.yaml"
   responses:
     "200":
       description: "Successfully retreived status"
@@ -77,9 +76,8 @@ put:
     content:
       application/json:
         schema:
-          type: array
-          items:
-            $ref: "../components/schemas/template/template_put.yaml"
+          type: object
+          $ref: "../components/schemas/template/template_put.yaml"
   responses:
     "200":
       description: "Successfully retreived status"
@@ -106,9 +104,8 @@ delete:
     content:
       application/json:
         schema:
-          type: array
-          items:
-            $ref: "../components/schemas/template/template_delete.yaml"
+          type: object
+          $ref: "../components/schemas/template/template_delete.yaml"
   responses:
     "200":
       description: "Successfully retreived status"
