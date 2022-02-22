@@ -15,7 +15,7 @@ import { useDashboardQuery } from '../common/use-dashboard-query'
 import { TDatasetResponseData } from './types'
 import {
     AccordionListContainer,
-    TAccordionListDatum,
+    TAccordionListDatum
 } from '../common/accordion-list/accordion-list'
 
 // eslint-disable-next-line max-len
@@ -45,29 +45,30 @@ export const Landing = () => {
     ) => {
         const lists: TAccordionListDatum[] = []
 
-        for (let i = 0; i < response.data.items.length; i += 1) {
-            const currentItem = response.data.items[i]
+        for (let i = 0; i < response.data.items.data_list.length; i += 1) {
+            const currentItem = response.data.items.data_list[i]
+
             lists.push({
                 id: currentItem.data_id,
                 file_id: currentItem.file_id,
-                bodyItem: { content: currentItem.description },
+                bodyItem: { content: '' },
                 headerItems: [
                     {
                         id: currentItem.data_id + 'header-name',
                         body: currentItem.name,
-                        heading: 'Name',
+                        heading: 'Name'
                     },
                     {
                         id: currentItem.data_id + 'header-file-type',
                         body: currentItem.file_type,
-                        heading: 'File Type',
+                        heading: 'File Type'
                     },
                     {
                         id: currentItem.data_id + 'header-ext',
                         body: currentItem.ext,
-                        heading: 'Extension',
-                    },
-                ],
+                        heading: 'Extension'
+                    }
+                ]
             })
         }
 
@@ -77,7 +78,7 @@ export const Landing = () => {
     const { isLoading, query } = useDashboardQuery({
         queryFn: () => dataApi.dataGet('get_all_data'),
         onSuccessful: onQuerySuccessful,
-        onError: () => setIsFailedToFetchData(true),
+        onError: () => setIsFailedToFetchData(true)
     })
 
     useEffect(() => {
@@ -91,7 +92,7 @@ export const Landing = () => {
                 primaryAction={{
                     children: 'Upload New Dataset',
                     RightIcon: <UploadIcon />,
-                    onClick: handleUploadClick,
+                    onClick: handleUploadClick
                 }}
             />
 

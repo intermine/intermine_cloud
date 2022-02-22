@@ -14,9 +14,11 @@ import { useDashboardQuery } from '../common/use-dashboard-query'
 
 import {
     AccordionListContainer,
-    TAccordionListDatum,
+    TAccordionListDatum
 } from '../common/accordion-list/accordion-list'
+// eslint-disable-next-line max-len
 import { LandingPageAccordionList } from '../common/accordion-list/landing-page-accordion-list'
+import { TTemplateResponseData } from './types'
 
 const MsgIfListEmpty = (
     <Box>
@@ -37,32 +39,35 @@ export const Landing = () => {
         history.push(DASHBOARD_UPLOAD_TEMPLATE_PATH)
     }
 
-    const onQuerySuccessful = (response: AxiosResponse<any>) => {
+    const onQuerySuccessful = (
+        response: AxiosResponse<TTemplateResponseData>
+    ) => {
         const lists: TAccordionListDatum[] = []
 
-        for (let i = 0; i < response.data.items.length; i += 1) {
-            const currentItem = response.data.items[i]
+        for (let i = 0; i < response.data.items.template_list.length; i += 1) {
+            const currentItem = response.data.items.template_list[i]
+
             lists.push({
-                id: currentItem.data_id,
+                id: currentItem.template_id,
                 file_id: currentItem.file_id,
                 bodyItem: { content: currentItem.description },
                 headerItems: [
                     {
-                        id: currentItem.data_id + 'header-name',
+                        id: currentItem.template_id + 'header-name',
                         body: currentItem.name,
-                        heading: 'Name',
-                    },
-                    {
-                        id: currentItem.data_id + 'header-file-type',
-                        body: currentItem.file_type,
-                        heading: 'File Type',
-                    },
-                    {
-                        id: currentItem.data_id + 'header-ext',
-                        body: currentItem.ext,
-                        heading: 'Extension',
-                    },
-                ],
+                        heading: 'Name'
+                    }
+                    // {
+                    //     id: currentItem.template_id + 'header-file-type',
+                    //     body: currentItem.,
+                    //     heading: 'File Type'
+                    // },
+                    // {
+                    //     id: currentItem.template_id + 'header-ext',
+                    //     body: currentItem.,
+                    //     heading: 'Extension'
+                    // }
+                ]
             })
         }
 
@@ -72,7 +77,7 @@ export const Landing = () => {
     const { isLoading, query } = useDashboardQuery({
         queryFn: () => templateApi.templateGet('get_all_templates'),
         onSuccessful: onQuerySuccessful,
-        onError: () => setIsFailedToFetchData(true),
+        onError: () => setIsFailedToFetchData(true)
     })
 
     useEffect(() => {
@@ -86,7 +91,7 @@ export const Landing = () => {
                 primaryAction={{
                     children: 'Upload New Template',
                     RightIcon: <UploadIcon />,
-                    onClick: handleUploadClick,
+                    onClick: handleUploadClick
                 }}
             />
 
