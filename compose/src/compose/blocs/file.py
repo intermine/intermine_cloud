@@ -170,7 +170,26 @@ def update_file(file_update_list: List[FileUpdate], user_creds: User) -> List[Fi
                         file_update_dict.pop("file_id")
                         updated_file = file.update(session, **file_update_dict)
                         updated_file_list.append(
-                            File(file_id=updated_file.id, **updated_file.to_dict())
+                            File(
+                                file_id=updated_file.id,
+                                presigned_get=create_presigned_url(
+                                    File(
+                                        file_id=updated_file.id,
+                                        **updated_file.to_dict(),
+                                    ),
+                                    user_creds,
+                                    "GET",
+                                ),
+                                presigned_put=create_presigned_url(
+                                    File(
+                                        file_id=updated_file.id,
+                                        **updated_file.to_dict(),
+                                    ),
+                                    user_creds,
+                                    "GET",
+                                ),
+                                **updated_file.to_dict(),
+                            )
                         )
             return updated_file_list
         except Exception as e:
