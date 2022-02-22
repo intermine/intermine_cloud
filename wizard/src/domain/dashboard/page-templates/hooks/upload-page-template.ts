@@ -19,6 +19,11 @@ enum GetMessageType {
     FailedToUploadToFile,
 }
 
+export enum UploadType {
+    Dataset,
+    Template,
+}
+
 const getMsg = (type: GetMessageType, fileName: string) => {
     switch (type) {
         case GetMessageType.FailedToUpload:
@@ -34,17 +39,6 @@ const getMsg = (type: GetMessageType, fileName: string) => {
     }
 }
 
-export type TRunWhenPresignedURLGeneratedOptions = {
-    name?: string
-    description?: string
-}
-
-export type TServiceToGeneratePreSignedURLOption = {
-    name?: string
-    description?: string
-    toUpload: 'dataset' | 'template'
-}
-
 const getTaskName = (fileName: string, optionName?: string): string => {
     if (optionName) return optionName
     return fileName
@@ -54,17 +48,30 @@ const getFileExt = (file: File): string => {
     return file.name.slice(file.name.lastIndexOf('.') + 1, file.name.length)
 }
 
+export type TRunWhenPresignedURLGeneratedOptions = {
+    toUpload: UploadType
+    name?: string
+    description?: string
+    getProgressText?: (loaded: number, total: number) => string
+}
+
+export type TServiceToGeneratePreSignedURLOption = {
+    name?: string
+    description?: string
+    toUpload: UploadType
+}
+
 const serviceToGeneratePresignedURL = (
     uploadCtx: TUploadMachineContext,
     options: TServiceToGeneratePreSignedURLOption
 ): Promise<unknown> => {
     const { file } = uploadCtx
-    const { toUpload, name: nameOption, description } = options
+    const { toUpload, name: nameOption, description = '' } = options
 
     const name = getTaskName(file.name, nameOption)
 
     switch (toUpload) {
-        case 'dataset':
+        case UploadType.Dataset:
             return dataApi.dataPost({
                 data_list: [
                     {
@@ -76,14 +83,16 @@ const serviceToGeneratePresignedURL = (
                 ],
             })
 
-        case 'template':
-            return templateApi.templatePost([
-                {
-                    name,
-                    template_vars: [],
-                    description,
-                },
-            ])
+        case UploadType.Template:
+            return templateApi.templatePost({
+                template_list: [
+                    {
+                        name,
+                        template_vars: [],
+                        description,
+                    },
+                ],
+            })
 
         default:
             throw new Error(
@@ -91,7 +100,7 @@ const serviceToGeneratePresignedURL = (
                     '[ServiceToGeneratePresignedURL]: toUpload',
                     ' is not of known type. Got ',
                     toUpload,
-                    '. It should be "dataset" or "template"'
+                    '. It should be UploadType.Dataset or UploadType.Template'
                 )
             )
     }
@@ -121,32 +130,69 @@ export const useUploadPageTemplate = () => {
 
     const uploadFile = (
         upload: TUseDashboardUploadMachineState,
-        _id?: string
+        options: {
+            _id?: string
+            toUpload: UploadType
+        }
     ) => {
-        const { file, putUrl, response } = upload.context
+        const { file, response } = upload.context
+        const { _id, toUpload } = options
 
         // It is sure that we have some response.
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        const data = response!.data.items[0]
+        const items = response!.data.items
+        const data_list =
+            toUpload === UploadType.Dataset
+                ? items.data_list
+                : items.template_list
 
-        const failedMsg = getMsg(GetMessageType.FailedToUpload, data.name)
+        const file_list = items.file_list
+
+        if (!Array.isArray(data_list) || !Array.isArray(file_list)) {
+            if (process.env.NODE_ENV === 'development') {
+                console.error(
+                    'Data or File is not defined, Given: Data',
+                    data_list,
+                    'File:',
+                    file_list,
+                    'To Upload:',
+                    toUpload === UploadType.Dataset ? 'Dataset' : 'Template',
+                    'Response',
+                    response
+                )
+            }
+
+            throw new Error('Data or File is not defined')
+        }
+
+        const failedMsg = getMsg(
+            GetMessageType.FailedToUpload,
+            data_list[0].name
+        )
         const failedToUploadToFileMsg = getMsg(
             GetMessageType.FailedToUploadToFile,
-            data.name
+            data_list[0].name
         )
-        const successMsg = getMsg(GetMessageType.Successful, data.name)
+        const successMsg = getMsg(GetMessageType.Successful, data_list[0].name)
 
         const { id, cancelTokenSource } = uploadService({
             id: _id,
             file,
-            url: putUrl,
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            url: file_list[0].presigned_put!,
             onProgress: onProgressUpdate,
             onFailed: (evt) => onProgressFailed({ ...evt, failedMsg }),
             onSuccessful: async (evt) => {
                 try {
-                    await fileApi.filePut([
-                        { file_id: data.file_id, uploaded: true },
-                    ])
+                    await fileApi.filePut({
+                        file_list: [
+                            {
+                                file_id: file_list[0].file_id,
+                                name: file_list[0].name,
+                                uploaded: true,
+                            },
+                        ],
+                    })
 
                     onProgressSuccessful({
                         ...evt,
@@ -177,9 +223,10 @@ export const useUploadPageTemplate = () => {
 
     const onRetryRequest = (
         id: string,
+        toUpload: UploadType,
         upload: TUseDashboardUploadMachineState
     ) => {
-        const { cancelTokenSource } = uploadFile(upload, id)
+        const { cancelTokenSource } = uploadFile(upload, { _id: id, toUpload })
         onProgressRetry({
             id,
             isDependentOnBrowser: true,
@@ -193,22 +240,26 @@ export const useUploadPageTemplate = () => {
         upload: TUseDashboardUploadMachineState,
         options = {} as TRunWhenPresignedURLGeneratedOptions
     ) => {
-        const { name } = options
+        const {
+            name,
+            toUpload,
+            getProgressText = (l, t) => `${getDataSize(l)} / ${getDataSize(t)}`,
+        } = options
         const { file } = upload.context
-        const { id, cancelTokenSource } = uploadFile(upload)
+        const { id, cancelTokenSource } = uploadFile(upload, { toUpload })
 
         onProgressStart({
             id,
             onCancel: () => {
                 onCancelRequest(id, cancelTokenSource)
             },
-            getProgressText: (l, t) => `${getDataSize(l)} / ${getDataSize(t)}`,
+            getProgressText,
             isDependentOnBrowser: true,
             name: getTaskName(file.name, name),
             totalSize: file.size,
             loadedSize: 0,
             onRetry: () => {
-                onRetryRequest(id, upload)
+                onRetryRequest(id, toUpload, upload)
             },
         })
 
