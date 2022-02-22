@@ -29,6 +29,26 @@ You now have all the environment variables (`env | grep OS`) needed to use Keyst
 
 You can also create *S3-like* `ACCESS_KEY` and `SECRET_KEY` credentials using `openstack ec2 credentials create` and then to list them again in the future, `openstack ec2 credentials list -f yaml`.
 
+To use rclone with these credentials and not your CSC account, edit `~/.config/rclone/rclone.conf` to add
+
+```rc
+[s3allas]
+type = s3
+provider = Other
+env_auth = false
+access_key_id = <ACCESSKEY>
+secret_access_key = <SECRETKEY>
+endpoint = object.pouta.csc.fi
+location_constraint = regionOne
+```
+
+replacing the following
+
+- `<ACCESSKEY>`
+- `<SECRETKEY>`
+
+For an example of performing this within CSC, see: https://github.com/lvarin/rclone-template
+
 #### Resources
 - https://docs.csc.fi/cloud/pouta/install-client/
 - https://docs.csc.fi/cloud/rahti/tutorials/backup-postgres-allas/
