@@ -1,11 +1,65 @@
+import { Model200UserResponseAllOfItems } from '@intermine/compose-rest-client'
 import { ResponseStatus } from '../constants/response'
 import { TUserDetails } from '../context/types'
 import { authApi } from './api'
 
-export const getCurrentUserDetails = async () => {
+const defaultUser = {
+    name: '',
+    email: '',
+    organisation: '',
+    id: '#',
+    isActive: false,
+}
+
+export type TGetUserFromUserListOption = {
+    userList?: Model200UserResponseAllOfItems['user_list']
+    /**
+     * @default 0
+     */
+    userIndex?: number
+}
+
+export const getUserFromUserList = (
+    options: TGetUserFromUserListOption
+): Omit<TUserDetails, 'status'> => {
+    const { userIndex = 0, userList } = options
+
+    if (!Array.isArray(userList)) {
+        if (process.env.NODE_ENV) {
+            console.error('userList is not an array. Given userList:', userList)
+        }
+
+        return defaultUser
+    }
+
+    const user = userList[userIndex]
+
+    if (user) {
+        return {
+            name: user.name,
+            email: user.email,
+            organisation: user.organisation,
+            isActive: user.active,
+            id: user.user_id,
+        }
+    }
+
+    if (process.env.NODE_ENV) {
+        console.error('User not found at index', userIndex)
+    }
+
+    return defaultUser
+}
+
+export const getCurrentUserDetails = async (): Promise<
+    TUserDetails & { status: ResponseStatus }
+> => {
     try {
         const response = await authApi.authCheck()
-        const userDetails = response.data.items[0] as unknown as TUserDetails
+
+        const userDetails = getUserFromUserList({
+            userList: response.data.items.user_list,
+        })
 
         return {
             status: ResponseStatus.Ok,
@@ -14,9 +68,7 @@ export const getCurrentUserDetails = async () => {
     } catch {
         return {
             status: ResponseStatus.Failed,
-            name: '',
-            email: '',
-            organisation: '',
+            ...defaultUser,
         }
     }
 }

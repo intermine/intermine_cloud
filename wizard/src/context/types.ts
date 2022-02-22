@@ -25,6 +25,8 @@ export type TUserDetails = {
     name: string
     organisation: string
     email: string
+    id: string
+    isActive: boolean
 }
 
 export type TAuthReducer = {

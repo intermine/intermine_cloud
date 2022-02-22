@@ -16,11 +16,7 @@ export const Overview = () => {
         const response = await getCurrentUserDetails()
 
         if (response.status === ResponseStatus.Ok) {
-            updateUserDetails({
-                name: response.name,
-                email: response.email,
-                organisation: response.organisation
-            })
+            updateUserDetails(response)
         }
         // If we want to show error if we fail to load user details
         // then we can add code for that here.
