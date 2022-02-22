@@ -6,23 +6,21 @@ import {
     getResponseMessageUsingResponseStatus,
     getResponseStatus,
 } from '../../../../utils/get'
+import { Data, ModelFile, Template } from '@intermine/compose-rest-client'
 
-type Model200Response = {
+type TServerResponse = {
     msg?: string
-    items: Array<{
-        presigned_url: string
-        name: string
-        file_id: string
-        description: string
-        ext: string
-    }>
+    items: {
+        data_list?: Array<Data>
+        template_list?: Array<Template>
+        file_list?: Array<ModelFile>
+    }
 }
 
 export type TUploadMachineContext = {
     file: File
-    putUrl: string
     errorMessage?: string
-    response?: AxiosResponse<Model200Response>
+    response?: AxiosResponse<TServerResponse>
 }
 
 export type TUploadMachineState =
@@ -82,10 +80,9 @@ export const uploadMachine = createMachine<
     any
 >(
     {
-        id: 'upload-data-machine',
+        id: 'upload-machine',
         initial: 'start',
         context: {
-            putUrl: '',
             file: new File([], ''),
         },
         states: {
@@ -149,14 +146,10 @@ export const uploadMachine = createMachine<
             }),
             reset: assign<TUploadMachineContext, TUploadMachineEvents>({
                 file: undefined,
-                putUrl: undefined,
                 errorMessage: undefined,
             }),
 
             onPresignedURLGenerated: assign<TUploadMachineContext, any>({
-                putUrl: (_, event) => {
-                    return event.data.data.items[0].presigned_url
-                },
                 response: (_, event) => event.data,
             }),
 

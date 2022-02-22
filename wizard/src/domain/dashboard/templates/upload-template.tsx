@@ -7,6 +7,7 @@ import {
     useDashboardUpload
 } from '../common/dashboard-form/utils'
 import { useUploadPageTemplate } from '../page-templates/hooks'
+import { UploadType } from '../page-templates/hooks/upload-page-template'
 
 export const UploadTemplate = () => {
     const {
@@ -41,7 +42,7 @@ export const UploadTemplate = () => {
     } = useDashboardUpload({
         serviceToGeneratePresignedURL: (ctx) => {
             return serviceToGeneratePresignedURL(ctx, {
-                toUpload: 'template',
+                toUpload: UploadType.Template,
                 name: name.value,
                 description: description.value
             })
@@ -49,7 +50,8 @@ export const UploadTemplate = () => {
         runWhenPresignedURLGenerated: (upload) => {
             runWhenPresignedURLGenerated(upload, {
                 name: name.value,
-                description: description.value
+                description: description.value,
+                toUpload: UploadType.Template
             })
             resetForm()
         },
