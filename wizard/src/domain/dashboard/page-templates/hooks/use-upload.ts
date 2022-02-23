@@ -1,17 +1,23 @@
 import { useState } from 'react'
 import { InlineAlertProps } from '@intermine/chromatin/inline-alert'
 
+import type { Data, ModelFile, Template } from '@intermine/compose-rest-client'
 import type { CancelTokenSource } from 'axios'
 
-import {
-    TUseDashboardUploadMachineState,
-    uploadService,
-} from '../../common/dashboard-form/utils'
+import { uploadService } from '../../common/dashboard-form/utils'
 import { useOnProgress } from '../../utils/hooks'
 import { getDataSize } from '../../../../utils/get'
 import { dataApi, fileApi, templateApi } from '../../../../services/api'
+
 // eslint-disable-next-line max-len
 import { TUploadMachineContext } from '../../common/dashboard-form/upload-machine'
+
+export type TRunWhenPresignedURLGeneratedOptions = {
+    toUpload: UploadType
+    name?: string
+    description?: string
+    getProgressText?: (loaded: number, total: number) => string
+}
 
 enum GetMessageType {
     Successful,
@@ -22,6 +28,24 @@ enum GetMessageType {
 export enum UploadType {
     Dataset,
     Template,
+}
+
+export type TServiceToGeneratePreSignedURLOption = {
+    name?: string
+    description?: string
+    toUpload: UploadType
+}
+
+export type TUseUploadProps = {
+    toUpload: UploadType
+}
+
+export type TUploadProps = {
+    file: File
+    fileList: ModelFile[]
+    dataList?: Data[]
+    templateList?: Template[]
+    errorMessage?: string
 }
 
 const getMsg = (type: GetMessageType, fileName: string) => {
@@ -48,21 +72,8 @@ const getFileExt = (file: File): string => {
     return file.name.slice(file.name.lastIndexOf('.') + 1, file.name.length)
 }
 
-export type TRunWhenPresignedURLGeneratedOptions = {
-    toUpload: UploadType
-    name?: string
-    description?: string
-    getProgressText?: (loaded: number, total: number) => string
-}
-
-export type TServiceToGeneratePreSignedURLOption = {
-    name?: string
-    description?: string
-    toUpload: UploadType
-}
-
 const serviceToGeneratePresignedURL = (
-    uploadCtx: TUploadMachineContext,
+    uploadCtx: TUploadProps,
     options: TServiceToGeneratePreSignedURLOption
 ): Promise<unknown> => {
     const { file } = uploadCtx
@@ -106,7 +117,7 @@ const serviceToGeneratePresignedURL = (
     }
 }
 
-export const useUploadPageTemplate = () => {
+export const useUpload = () => {
     const [inlineAlertProps, setInlineAlertProps] = useState<InlineAlertProps>(
         {}
     )
@@ -129,57 +140,46 @@ export const useUploadPageTemplate = () => {
     } = useOnProgress()
 
     const uploadFile = (
-        upload: TUseDashboardUploadMachineState,
+        upload: TUploadProps,
         options: {
             _id?: string
             toUpload: UploadType
         }
     ) => {
-        const { file, response } = upload.context
+        const { file, dataList, templateList, fileList } = upload
         const { _id, toUpload } = options
 
-        // It is sure that we have some response.
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        const items = response!.data.items
-        const data_list =
-            toUpload === UploadType.Dataset
-                ? items.data_list
-                : items.template_list
+        const list = toUpload === UploadType.Dataset ? dataList : templateList
 
-        const file_list = items.file_list
-
-        if (!Array.isArray(data_list) || !Array.isArray(file_list)) {
+        if (!Array.isArray(list) || !Array.isArray(fileList)) {
             if (process.env.NODE_ENV === 'development') {
                 console.error(
                     'Data or File is not defined, Given: Data',
-                    data_list,
+                    list,
                     'File:',
-                    file_list,
+                    fileList,
                     'To Upload:',
                     toUpload === UploadType.Dataset ? 'Dataset' : 'Template',
-                    'Response',
-                    response
+                    'Upload Context',
+                    upload
                 )
             }
 
             throw new Error('Data or File is not defined')
         }
 
-        const failedMsg = getMsg(
-            GetMessageType.FailedToUpload,
-            data_list[0].name
-        )
+        const failedMsg = getMsg(GetMessageType.FailedToUpload, list[0].name)
         const failedToUploadToFileMsg = getMsg(
             GetMessageType.FailedToUploadToFile,
-            data_list[0].name
+            list[0].name
         )
-        const successMsg = getMsg(GetMessageType.Successful, data_list[0].name)
+        const successMsg = getMsg(GetMessageType.Successful, list[0].name)
 
         const { id, cancelTokenSource } = uploadService({
             id: _id,
             file,
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            url: file_list[0].presigned_put!,
+            url: fileList[0].presigned_put!,
             onProgress: onProgressUpdate,
             onFailed: (evt) => onProgressFailed({ ...evt, failedMsg }),
             onSuccessful: async (evt) => {
@@ -187,8 +187,8 @@ export const useUploadPageTemplate = () => {
                     await fileApi.filePut({
                         file_list: [
                             {
-                                file_id: file_list[0].file_id,
-                                name: file_list[0].name,
+                                file_id: fileList[0].file_id,
+                                name: fileList[0].name,
                                 uploaded: true,
                             },
                         ],
@@ -224,7 +224,7 @@ export const useUploadPageTemplate = () => {
     const onRetryRequest = (
         id: string,
         toUpload: UploadType,
-        upload: TUseDashboardUploadMachineState
+        upload: TUploadProps
     ) => {
         const { cancelTokenSource } = uploadFile(upload, { _id: id, toUpload })
         onProgressRetry({
@@ -237,7 +237,7 @@ export const useUploadPageTemplate = () => {
     }
 
     const runWhenPresignedURLGenerated = (
-        upload: TUseDashboardUploadMachineState,
+        upload: TUploadProps,
         options = {} as TRunWhenPresignedURLGeneratedOptions
     ) => {
         const {
@@ -245,7 +245,7 @@ export const useUploadPageTemplate = () => {
             toUpload,
             getProgressText = (l, t) => `${getDataSize(l)} / ${getDataSize(t)}`,
         } = options
-        const { file } = upload.context
+        const { file } = upload
         const { id, cancelTokenSource } = uploadFile(upload, { toUpload })
 
         onProgressStart({
@@ -269,10 +269,8 @@ export const useUploadPageTemplate = () => {
         })
     }
 
-    const runWhenPresignedURLGenerationFailed = (
-        upload: TUseDashboardUploadMachineState
-    ) => {
-        const { errorMessage = 'Unknown error occurred' } = upload.context
+    const runWhenPresignedURLGenerationFailed = (upload: TUploadProps) => {
+        const { errorMessage = 'Unknown error occurred' } = upload
         _setInlineAlert({
             message: errorMessage,
             type: 'error',
@@ -284,5 +282,53 @@ export const useUploadPageTemplate = () => {
         runWhenPresignedURLGenerated,
         runWhenPresignedURLGenerationFailed,
         serviceToGeneratePresignedURL,
+    }
+}
+
+export const formatUploadMachineContextForUseUploadProps = (
+    ctx: TUploadMachineContext
+): TUploadProps => {
+    const { file, response, errorMessage } = ctx
+
+    if (!response) {
+        if (process.env.NODE_ENV === 'development') {
+            console.error(
+                'FormUploadMachineContextForUseUploadProps',
+                'response is not defined',
+                'Got',
+                response
+            )
+        }
+        return {
+            file,
+            errorMessage,
+            fileList: [],
+        }
+    }
+
+    const { file_list, data_list, template_list } = response.data.items
+
+    if (!Array.isArray(file_list)) {
+        if (process.env.NODE_ENV === 'development') {
+            console.error(
+                'FormUploadMachineContextForUseUploadProps',
+                'file_list is not an array',
+                'Got',
+                file_list
+            )
+        }
+        return {
+            file,
+            errorMessage,
+            fileList: [],
+        }
+    }
+
+    return {
+        file,
+        fileList: file_list,
+        dataList: data_list,
+        templateList: template_list,
+        errorMessage,
     }
 }

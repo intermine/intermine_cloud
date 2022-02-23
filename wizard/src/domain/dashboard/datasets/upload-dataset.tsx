@@ -6,8 +6,11 @@ import {
     useDashboardForm,
     useDashboardUpload
 } from '../common/dashboard-form/utils'
-import { useUploadPageTemplate } from '../page-templates/hooks'
-import { UploadType } from '../page-templates/hooks/upload-page-template'
+import { useUpload } from '../page-templates/hooks'
+import {
+    formatUploadMachineContextForUseUploadProps,
+    UploadType
+} from '../page-templates/hooks/use-upload'
 
 export const UploadDataset = () => {
     const {
@@ -15,7 +18,7 @@ export const UploadDataset = () => {
         runWhenPresignedURLGenerationFailed,
         runWhenPresignedURLGenerated,
         inlineAlertProps
-    } = useUploadPageTemplate()
+    } = useUpload()
 
     const {
         state: { name, description },
@@ -41,21 +44,26 @@ export const UploadDataset = () => {
         reset: resetUpload
     } = useDashboardUpload({
         serviceToGeneratePresignedURL: (ctx) => {
-            return serviceToGeneratePresignedURL(ctx, {
+            const _ctx = formatUploadMachineContextForUseUploadProps(ctx)
+            return serviceToGeneratePresignedURL(_ctx, {
                 toUpload: UploadType.Dataset,
                 name: name.value,
                 description: description.value
             })
         },
-        runWhenPresignedURLGenerated: (upload) => {
-            runWhenPresignedURLGenerated(upload, {
+        runWhenPresignedURLGenerated: (ctx) => {
+            const _ctx = formatUploadMachineContextForUseUploadProps(ctx)
+            runWhenPresignedURLGenerated(_ctx, {
                 name: name.value,
                 description: description.value,
                 toUpload: UploadType.Dataset
             })
             resetForm()
         },
-        runWhenPresignedURLGenerationFailed
+        runWhenPresignedURLGenerationFailed: (ctx) => {
+            const _ctx = formatUploadMachineContextForUseUploadProps(ctx)
+            runWhenPresignedURLGenerationFailed(_ctx)
+        }
     })
 
     const resetForm = () => {

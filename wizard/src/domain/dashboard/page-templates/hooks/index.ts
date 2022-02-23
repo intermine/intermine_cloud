@@ -1,1 +1,1 @@
-export { useUploadPageTemplate } from './upload-page-template'
+export { useUpload } from './use-upload'

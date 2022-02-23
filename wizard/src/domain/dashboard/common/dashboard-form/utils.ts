@@ -270,10 +270,8 @@ export type TUseDashboardUploadMachineState = State<
 >
 
 export type TUseDashboardUploadProps = {
-    runWhenPresignedURLGenerated: (ctx: TUseDashboardUploadMachineState) => void
-    runWhenPresignedURLGenerationFailed: (
-        ctx: TUseDashboardUploadMachineState
-    ) => void
+    runWhenPresignedURLGenerated: (ctx: TUploadMachineContext) => void
+    runWhenPresignedURLGenerationFailed: (ctx: TUploadMachineContext) => void
     serviceToGeneratePresignedURL: TServiceToGeneratePresignedURL
 }
 
@@ -299,7 +297,7 @@ export const useDashboardUpload = (
 
     const [uploadMachineState, dispatch] = useMachine(uploadMachine)
 
-    const { value } = uploadMachineState
+    const { value, context } = uploadMachineState
 
     const setFile = (file: File) => {
         setIsDirty(true)
@@ -355,9 +353,9 @@ export const useDashboardUpload = (
 
     useEffect(() => {
         if (value === 'serverError') {
-            runWhenPresignedURLGenerationFailed(uploadMachineState)
+            runWhenPresignedURLGenerationFailed(context)
         } else if (value === 'successful') {
-            runWhenPresignedURLGenerated(uploadMachineState)
+            runWhenPresignedURLGenerated(context)
             dispatch('RESET')
         }
     }, [value])
