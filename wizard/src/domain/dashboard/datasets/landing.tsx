@@ -4,21 +4,23 @@ import { Box } from '@intermine/chromatin/box'
 import { WorkspaceHeading } from '../common/workspace-heading'
 import UploadIcon from '@intermine/chromatin/icons/System/upload-line'
 
+import { Data, ModelFile } from '@intermine/compose-rest-client'
+
 import { DASHBOARD_UPLOAD_DATASET_PATH } from '../../../routes'
-
 import { DashboardErrorBoundary } from '../common/error-boundary'
-import { dataApi, fileApi } from '../../../services/api'
+import { dataApi } from '../../../services/api'
 import { useDashboardQuery } from '../common/use-dashboard-query'
-
 import {
     AccordionListContainer,
     TAccordionListDatum
 } from '../common/accordion-list/accordion-list'
-
 // eslint-disable-next-line max-len
 import { LandingPageAccordionList } from '../common/accordion-list/landing-page-accordion-list'
-import { Data, ModelFile } from '@intermine/compose-rest-client'
 import { StatusTag } from '../common/status-tag'
+import {
+    extractAllFileIdsObjFromList,
+    fetchAllFileUsingFileIds
+} from '../utils/misc'
 
 type TDataset = Data & {
     file: ModelFile
@@ -35,29 +37,11 @@ const MsgIfListEmpty = (
 const MsgIfFailedToLoadList = <Box>Failed to load datasets.</Box>
 
 const fetchDataAndFiles = async () => {
-    const dataResponse = await dataApi.dataGet('get_all_data')
-    const { data_list: dataList } = dataResponse.data.items
+    const res = await dataApi.dataGet('get_all_data')
+    const { data_list: dataList } = res.data.items
 
-    const fileIds: Record<'file_id', string>[] = []
-
-    for (const data of dataList) {
-        fileIds.push({
-            file_id: data.file_id
-        })
-    }
-
-    const fileResponse = await fileApi.filePut({
-        // @ts-expect-error This will be fixed when we use fileApi.fileGet
-        file_list: fileIds
-    })
-
-    const { file_list: fileList } = fileResponse.data.items
-
-    const fileListObj: Record<string, ModelFile> = {}
-
-    for (const file of fileList) {
-        fileListObj[file.file_id] = file
-    }
+    const fileIds = extractAllFileIdsObjFromList(dataList)
+    const fileListObj = await fetchAllFileUsingFileIds(fileIds)
 
     const dataset: TDataset[] = []
 

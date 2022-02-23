@@ -4,22 +4,27 @@ import { Box } from '@intermine/chromatin/box'
 import { WorkspaceHeading } from '../common/workspace-heading'
 import UploadIcon from '@intermine/chromatin/icons/System/upload-line'
 
-import { AxiosResponse } from 'axios'
+import { Template, ModelFile } from '@intermine/compose-rest-client'
 
 import { DASHBOARD_UPLOAD_TEMPLATE_PATH } from '../../../routes'
-
 import { DashboardErrorBoundary } from '../common/error-boundary'
-import { fileApi, templateApi } from '../../../services/api'
+import { templateApi } from '../../../services/api'
 import { useDashboardQuery } from '../common/use-dashboard-query'
-
 import {
     AccordionListContainer,
     TAccordionListDatum
 } from '../common/accordion-list/accordion-list'
 // eslint-disable-next-line max-len
 import { LandingPageAccordionList } from '../common/accordion-list/landing-page-accordion-list'
-import { TTemplateResponseData } from './types'
-import { Model200FileResponse } from '@intermine/compose-rest-client'
+import { StatusTag } from '../common/status-tag'
+import {
+    extractAllFileIdsObjFromList,
+    fetchAllFileUsingFileIds
+} from '../utils/misc'
+
+type TTemplate = Template & {
+    file: ModelFile
+}
 
 const MsgIfListEmpty = (
     <Box>
@@ -31,6 +36,25 @@ const MsgIfListEmpty = (
 
 const MsgIfFailedToLoadList = <Box>Failed to load templates.</Box>
 
+const fetchTemplateAndFiles = async () => {
+    const res = await templateApi.templateGet('get_all_templates')
+    const { template_list: templateList } = res.data.items
+
+    const fileIds = extractAllFileIdsObjFromList(templateList)
+    const fileListObj = await fetchAllFileUsingFileIds(fileIds)
+
+    const templates: TTemplate[] = []
+
+    for (const template of templateList) {
+        templates.push({
+            ...template,
+            file: fileListObj[template.file_id] ?? {}
+        })
+    }
+
+    return templates
+}
+
 export const Landing = () => {
     const history = useHistory()
     const [data, setData] = useState<TAccordionListDatum[]>([])
@@ -40,32 +64,38 @@ export const Landing = () => {
         history.push(DASHBOARD_UPLOAD_TEMPLATE_PATH)
     }
 
-    const onQuerySuccessful = (response: unknown) => {
+    const onQuerySuccessful = (templates: TTemplate[]) => {
         const lists: TAccordionListDatum[] = []
 
-        for (let i = 0; i < response.data.items.template_list.length; i += 1) {
-            const currentItem = response.data.items.template_list[i]
-
+        for (const template of templates) {
             lists.push({
-                id: currentItem.template_id,
-                file_id: currentItem.file_id,
-                bodyItem: { content: currentItem.description },
+                id: template.template_id,
+                file_id: template.file_id,
+                bodyItem: { content: template.description },
                 headerItems: [
                     {
-                        id: currentItem.template_id + 'header-name',
-                        body: currentItem.name,
+                        id: template.template_id + 'header-name',
+                        body: template.name,
                         heading: 'Name'
+                    },
+                    {
+                        id: template.template_id + 'file-upload-status',
+                        body: (
+                            <StatusTag
+                                status={
+                                    template.file.uploaded
+                                        ? 'success'
+                                        : 'warning'
+                                }
+                                statusText={
+                                    template.file.uploaded
+                                        ? 'Uploaded'
+                                        : 'Pending'
+                                }
+                            />
+                        ),
+                        heading: 'File Upload Status'
                     }
-                    // {
-                    //     id: currentItem.template_id + 'header-file-type',
-                    //     body: currentItem.,
-                    //     heading: 'File Type'
-                    // },
-                    // {
-                    //     id: currentItem.template_id + 'header-ext',
-                    //     body: currentItem.,
-                    //     heading: 'Extension'
-                    // }
                 ]
             })
         }
@@ -74,7 +104,7 @@ export const Landing = () => {
     }
 
     const { isLoading, query } = useDashboardQuery({
-        queryFn: () => fileApi.fileGet('get_all_files'),
+        queryFn: fetchTemplateAndFiles,
         onSuccessful: onQuerySuccessful,
         onError: () => setIsFailedToFetchData(true)
     })

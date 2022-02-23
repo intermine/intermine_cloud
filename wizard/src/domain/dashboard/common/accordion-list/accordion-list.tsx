@@ -87,7 +87,9 @@ const useStyles = createStyle((theme) => {
             display: 'flex',
             flexDirection: 'column',
             marginTop: spacing(3),
-            minHeight: '10rem',
+            maxHeight: '12rem',
+            minHeight: '5rem',
+            overflow: 'auto',
             padding: spacing(3, 2)
         },
         headerChild: {
@@ -170,7 +172,7 @@ export const AccordionListContainer = (props: TAccordionListContainerProps) => {
             return msgIfListIsEmpty
         }
 
-        return children
+        return <Box>{children}</Box>
     }
 
     return (

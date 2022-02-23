@@ -74,16 +74,21 @@ const useStyles = createStyle((theme) => {
         workspaceContainer: (props: TUseStyleProps) => ({
             backgroundColor: themeType === 'dark' ? darkGrey[30] : light.hex,
             borderRadius: '1rem',
+            display: 'flex',
+            justifyContent: 'center',
             margin: '1rem 0',
             marginRight: props.isAdditionalSidebarOpen ? '22rem' : '5rem',
+            overflow: 'auto',
             padding: '3rem 2rem',
             flex: 1,
             transition: transitionDuration
         }),
 
         pageContainer: {
+            flex: 1,
             position: 'relative',
             height: '100%',
+            maxWidth: '87rem',
             overflow: 'auto'
         },
 
