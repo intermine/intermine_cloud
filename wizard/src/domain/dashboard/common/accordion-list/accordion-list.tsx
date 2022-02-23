@@ -47,7 +47,7 @@ const useStyles = createStyle((theme) => {
     } = theme
     return {
         accordionList: {
-            padding: spacing(2, 5),
+            padding: spacing(2, 4),
             transition: '0.3s',
             ...(themeType === 'dark' && {
                 background: neutral[10],
@@ -73,7 +73,9 @@ const useStyles = createStyle((theme) => {
             borderBottomLeftRadius: '0.5rem'
         },
         header: {
-            display: 'flex'
+            display: 'flex',
+            paddingRight: spacing(7),
+            position: 'relative'
         },
         accordionToggler: {
             transition: '0.3s'
@@ -172,7 +174,7 @@ export const AccordionListContainer = (props: TAccordionListContainerProps) => {
             return msgIfListIsEmpty
         }
 
-        return <Box>{children}</Box>
+        return <Box csx={{ root: { minWidth: '50rem' } }}>{children}</Box>
     }
 
     return (
@@ -269,10 +271,17 @@ const Header = (props: THeaderProps) => {
 
     return (
         <Box className={header}>
-            <Box display="flex" csx={{ root: { flex: '1' } }}>
+            <Box display="flex" csx={{ root: { flex: '1', width: '100%' } }}>
                 {children}
             </Box>
-            <Box>
+            <Box
+                csx={{
+                    root: {
+                        position: 'absolute',
+                        right: '0'
+                    }
+                }}
+            >
                 <IconButton
                     className={clsx(accordionToggler, {
                         [rotate]: isAccordionOpen
