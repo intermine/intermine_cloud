@@ -157,15 +157,24 @@ def update_template(
             template_db_update_list: List[TemplateDB] = (
                 session.execute(stmt).scalars().all()
             )
-            update_template_list = []
+            updated_template_list = []
             for template in template_db_update_list:
-                updated_template = template.update(session)
-                update_template_list.append(
-                    Template(
-                        template_id=updated_template.id, **updated_template.to_dict()
-                    )
-                )
-            return update_template_list
+                for template_update in template_update_list:
+                    if template_update.template_id == template.id:
+                        template_update_dict = template_update.dict(
+                            exclude_defaults=True
+                        )
+                        template_update_dict.pop("template_id")
+                        updated_template = template.update(
+                            session, **template_update_dict
+                        )
+                        updated_template_list.append(
+                            Template(
+                                template_id=updated_template.id,
+                                **updated_template.to_dict(),
+                            )
+                        )
+            return updated_template_list
         except Exception as e:
             session.rollback()
             logger.error(f"Unable to update template: {template.to_dict()} due to {e}")
