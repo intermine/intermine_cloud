@@ -1,5 +1,6 @@
 import { AlertProps } from '@intermine/chromatin/alert'
 import { ButtonCommonProps } from '@intermine/chromatin/button'
+import { ChromatinIcon } from '@intermine/chromatin/icons/types'
 
 import type { ThemeType } from '@intermine/chromatin/styles'
 import { HTMLAttributeAnchorTarget } from 'react'
@@ -99,6 +100,7 @@ export type TUseSidebarReducer = {
 export type TGlobalModalReducer = {
     heading?: string
     type?: 'error' | 'warning' | 'success' | 'info'
+    HeaderIcon?: (props: ChromatinIcon) => JSX.Element
     children?: React.ReactChild | React.ReactChild[]
     isOpen: boolean
     primaryAction?: ButtonCommonProps
