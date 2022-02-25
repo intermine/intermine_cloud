@@ -1,22 +1,25 @@
 """Mine API POST schema."""
 
-from typing import List, Optional
+from typing import Any, Dict, List, Union
+
 
 from blackcap.schemas.api.common import ResponseSchema
-from blackcap.schemas.user import User
 from pydantic import BaseModel
 
 from compose.schemas.mine import Mine
 
 
-class MinePOSTResponse(ResponseSchema):
-    """Mine POST response schema."""
-
-    items: List[Mine] = []
+class MineCreate(BaseModel):
+    """MineCreate schema."""
 
 
 class MinePOSTRequest(BaseModel):
     """Mine POST request schema."""
 
-    mines: List[Mine]
-    user: Optional[User]
+    mine_list: List[MineCreate]
+
+
+class MinePOSTResponse(ResponseSchema):
+    """Mine POST response schema."""
+
+    items: Dict[str, List[Union[Mine, Any]]] = {}
