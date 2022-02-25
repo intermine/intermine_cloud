@@ -95,8 +95,9 @@ const useStyles = createStyle((theme) => {
             padding: spacing(3, 2)
         },
         headerChild: {
-            display: 'inline-block',
-            flex: '0 0 25%',
+            display: 'inline-flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
             overflow: 'hidden',
             paddingRight: spacing(3)
         },
@@ -297,13 +298,23 @@ const Header = (props: THeaderProps) => {
 
 const HeaderChild = (props: {
     data: TAccordionListHeaderItem
+    totalItems: number
     key: string
 }) => {
-    const { heading, body } = props.data
+    const { data, totalItems } = props
+    const { heading, body } = data
+
     const { classes } = useContext(AccordionListContext)
 
     return (
-        <Box className={classes.headerChild}>
+        <Box
+            className={classes.headerChild}
+            csx={{
+                root: {
+                    flex: `0 0 ${100 / totalItems}%`
+                }
+            }}
+        >
             <Typography color="neutral.50" variant="caption">
                 {heading}
             </Typography>

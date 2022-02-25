@@ -24,6 +24,7 @@ export const LandingPageAccordionList = (
                         <AccordionList.HeaderChild
                             key={header.id}
                             data={header}
+                            totalItems={item.headerItems.length}
                         />
                     )
                 })}

@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react'
 import { useHistory } from 'react-router-dom'
 import { Box } from '@intermine/chromatin/box'
-import { WorkspaceHeading } from '../common/workspace-heading'
+import { Button } from '@intermine/chromatin/button'
 import UploadIcon from '@intermine/chromatin/icons/System/upload-line'
 
 import { Data, ModelFile } from '@intermine/compose-rest-client'
 
+import { WorkspaceHeading } from '../common/workspace-heading'
 import { DASHBOARD_UPLOAD_DATASET_PATH } from '../../../routes'
 import { DashboardErrorBoundary } from '../common/error-boundary'
 import { dataApi } from '../../../services/api'
@@ -61,6 +62,29 @@ export const Landing = () => {
         history.push(DASHBOARD_UPLOAD_DATASET_PATH)
     }
 
+    const getAction = (file: ModelFile) => {
+        if (file.uploaded) {
+            return (
+                <Button
+                    Component="a"
+                    variant="ghost"
+                    color="primary"
+                    size="small"
+                    isDense
+                    href={file.presigned_get}
+                    target="_blank"
+                >
+                    Download Dataset
+                </Button>
+            )
+        }
+        return (
+            <Button variant="ghost" color="secondary" isDense size="small">
+                Retry Upload
+            </Button>
+        )
+    }
+
     const onQuerySuccessful = (dataset: TDataset[]) => {
         const lists: TAccordionListDatum[] = []
         for (const data of dataset) {
@@ -97,6 +121,15 @@ export const Landing = () => {
                             />
                         ),
                         heading: 'File Upload Status'
+                    },
+                    {
+                        id: data.data_id + 'action',
+                        body: (
+                            <Box csx={{ root: { padding: '0.25rem' } }}>
+                                {getAction(data.file)}
+                            </Box>
+                        ),
+                        heading: ''
                     }
                 ]
             })
