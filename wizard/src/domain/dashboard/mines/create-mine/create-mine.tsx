@@ -1,27 +1,46 @@
+import { useEffect, useState } from 'react'
 import { Box } from '@intermine/chromatin'
 import { createStyle } from '@intermine/chromatin/styles'
 
 import { DASHBOARD_MINES_LANDING_PATH } from '../../../../routes'
+import { dataApi, templateApi } from '../../../../services/api'
 import { DashboardForm as DForm } from '../../common/dashboard-form'
 import { useDashboardForm } from '../../common/dashboard-form/utils'
+import { useDashboardQuery } from '../../common/use-dashboard-query'
 import { useOnProgress } from '../../utils/hooks'
 import { initialFormFieldsValue } from './form-utils'
 
-const dummyTemplateOptions = [
-    { label: 'HumanMine - Template', value: 'template-1' },
-    { label: 'CovidMine - Template', value: 'template-2' },
-    { label: 'FlyMine - Template', value: 'template-3' },
-    { label: 'RatMine - Template', value: 'template-4' }
-]
+type TSelectOption = {
+    label: string
+    value: string
+}
 
-const dummyDatasetsOptions = [
-    { label: 'Malaria - Genome', value: 'dataset-1' },
-    { label: 'Malaria - UniProt', value: 'dataset-2' },
-    { label: 'Malaria - Kegg', value: 'dataset-3' },
-    { label: 'Drosophila Genome', value: 'dataset-4' },
-    { label: 'Drosophila UniProt', value: 'dataset-5' },
-    { label: 'Drosophila Kegg', value: 'dataset-6' }
-]
+const fetchTemplatesAndDatasets = async () => {
+    const datasetResponse = await dataApi.dataGet('get_all_data')
+    const templateResponse = await templateApi.templateGet('get_all_templates')
+
+    const datasets: TSelectOption[] = []
+    const templates: TSelectOption[] = []
+
+    for (const data of datasetResponse.data.items.data_list) {
+        datasets.push({
+            label: data.name,
+            value: data.data_id
+        })
+    }
+
+    for (const template of templateResponse.data.items.template_list) {
+        templates.push({
+            label: template.name,
+            value: template.template_id
+        })
+    }
+
+    return {
+        datasets,
+        templates
+    }
+}
 
 const useStyles = createStyle((theme) => {
     const {
@@ -47,6 +66,9 @@ const useStyles = createStyle((theme) => {
 
 export const CreateMine = () => {
     const classes = useStyles()
+    const [templateOptions, setTemplatesOptions] = useState<TSelectOption[]>([])
+    const [datasetOptions, setDatasetOptions] = useState<TSelectOption[]>([])
+
     const {
         state,
         errorFields,
@@ -103,6 +125,24 @@ export const CreateMine = () => {
         resetForm()
     }
 
+    const onFetchSuccessful = (response: {
+        datasets: TSelectOption[]
+        templates: TSelectOption[]
+    }) => {
+        const { datasets, templates } = response
+        setDatasetOptions(datasets)
+        setTemplatesOptions(templates)
+    }
+
+    const { query, isLoading } = useDashboardQuery({
+        queryFn: fetchTemplatesAndDatasets,
+        onSuccessful: onFetchSuccessful
+    })
+
+    useEffect(() => {
+        query()
+    }, [])
+
     return (
         <DForm isDirty={isDirty}>
             <DForm.PageHeading
@@ -123,8 +163,9 @@ export const CreateMine = () => {
                     >
                         <DForm.Select
                             value={template.value}
-                            options={dummyTemplateOptions}
+                            options={templateOptions}
                             placeholder="Select template"
+                            isLoading={isLoading}
                             onChange={(val) =>
                                 updateDashboardFormState('template', val)
                             }
@@ -141,8 +182,9 @@ export const CreateMine = () => {
                         <DForm.Select
                             closeMenuOnSelect={false}
                             value={datasets.value}
-                            options={dummyDatasetsOptions}
+                            options={datasetOptions}
                             isMulti
+                            isLoading={isLoading}
                             onChange={(val) =>
                                 updateDashboardFormState('datasets', val)
                             }
