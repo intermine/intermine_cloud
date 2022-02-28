@@ -109,12 +109,25 @@ export const AdditionalSidebar = () => {
         isOpen
     })
 
-    const onClickActionIcon = (activeTab: AdditionalSidebarTabs) => {
+    const onClickActionIcon = (tab: AdditionalSidebarTabs) => {
+        if(isOpen && activeTab ===tab) {
+            /**
+             * If additional sidebar is open and user clicked
+             * on the same tab, then we are closing the tab
+             */
+            updateAdditionalSidebarState({
+                isOpen: false,
+                activeTab: None
+            })
+            return
+        }
+
         updateAdditionalSidebarState({
             isOpen: true,
-            activeTab
+            activeTab: tab
         })
     }
+
 
     const onLogout = () => {
         updateAdditionalSidebarState({
