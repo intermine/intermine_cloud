@@ -1,6 +1,7 @@
 """Pytest config."""
 
 from typing import Dict
+from uuid import uuid4
 
 from blackcap.blocs.user import create_user
 from blackcap.db import db_engine
@@ -13,9 +14,12 @@ from minio.api import Minio
 from minio.deleteobjects import DeleteObject
 import pytest
 
+from compose.blocs.file import create_file
 from compose.configs import config_registry
 from compose.routes import register_blueprints, register_extensions
 from compose.schemas.api.auth.post import AuthPOSTRequest
+from compose.schemas.api.file.post import FileCreate
+from compose.schemas.file import File
 
 config = config_registry.get_config()
 
@@ -59,6 +63,15 @@ def user() -> User:
         f"protagonist-{created_user.user_id}", delete_object_list
     )
     minio_client.remove_bucket(f"protagonist-{created_user.user_id}")
+
+
+@pytest.fixture(scope="session")
+def file(user: User) -> File:
+    file_create = FileCreate(
+        name="testFile", ext="gff", file_type="sequencing", parent_id=uuid4()
+    )
+    created_file = create_file([file_create], user)[0]
+    return created_file
 
 
 @pytest.fixture(scope="session")
