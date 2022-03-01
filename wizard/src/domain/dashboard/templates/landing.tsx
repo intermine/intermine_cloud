@@ -12,6 +12,7 @@ import { templateApi } from '../../../services/api'
 import { useDashboardQuery } from '../hooks'
 import {
     AccordionListContainer,
+    AccordionList,
     TAccordionListDatum
 } from '../common/accordion-list/accordion-list'
 // eslint-disable-next-line max-len
@@ -21,6 +22,8 @@ import {
     extractAllFileIdsObjFromList,
     fetchAllFileUsingFileIds
 } from '../utils/misc'
+import { UploadModal } from '../common/upload-modal'
+import { Entities } from '../common/constants'
 
 type TTemplate = Template & {
     file: ModelFile
@@ -35,6 +38,15 @@ const MsgIfListEmpty = (
 )
 
 const MsgIfFailedToLoadList = <Box>Failed to load templates.</Box>
+
+const defaultUploadModalState = {
+    isOpen: false,
+    uploadProps: {
+        entity: Entities.Template,
+        entityList: [] as Template[],
+        fileList: [] as ModelFile[]
+    }
+}
 
 const fetchTemplateAndFiles = async () => {
     const res = await templateApi.templateGet('get_all_templates')
@@ -58,9 +70,50 @@ const fetchTemplateAndFiles = async () => {
 export const Landing = () => {
     const history = useHistory()
     const [data, setData] = useState<TAccordionListDatum[]>([])
+    const [uploadModalState, setUploadModalState] = useState(
+        defaultUploadModalState
+    )
 
     const handleUploadClick = () => {
         history.push(DASHBOARD_UPLOAD_TEMPLATE_PATH)
+    }
+
+    const onUploadModalClose = () => {
+        setUploadModalState(defaultUploadModalState)
+    }
+
+    const getAction = (template: TTemplate) => {
+        const { file } = template
+
+        if (file.uploaded) {
+            return (
+                <AccordionList.ActionButton
+                    Component="a"
+                    color="primary"
+                    href={file.presigned_get}
+                    target="_blank"
+                >
+                    Download Template
+                </AccordionList.ActionButton>
+            )
+        }
+        return (
+            <AccordionList.ActionButton
+                color="secondary"
+                onClick={() =>
+                    setUploadModalState({
+                        isOpen: true,
+                        uploadProps: {
+                            ...defaultUploadModalState.uploadProps,
+                            fileList: [file],
+                            entityList: [template]
+                        }
+                    })
+                }
+            >
+                Retry Upload
+            </AccordionList.ActionButton>
+        )
     }
 
     const onQuerySuccessful = (templates: TTemplate[]) => {
@@ -94,6 +147,15 @@ export const Landing = () => {
                             />
                         ),
                         heading: 'File Upload Status'
+                    },
+                    {
+                        id: template.template_id + 'action',
+                        body: (
+                            <Box csx={{ root: { padding: '0.25rem' } }}>
+                                {getAction(template)}
+                            </Box>
+                        ),
+                        heading: ''
                     }
                 ]
             })
@@ -121,6 +183,11 @@ export const Landing = () => {
                     RightIcon: <UploadIcon />,
                     onClick: handleUploadClick
                 }}
+            />
+            <UploadModal
+                {...uploadModalState}
+                onClose={onUploadModalClose}
+                heading="Upload Template"
             />
 
             <DashboardErrorBoundary errorMessage="Unable to load table.">

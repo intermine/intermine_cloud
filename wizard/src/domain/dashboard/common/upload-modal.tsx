@@ -5,19 +5,16 @@ import { Modal } from '../../../components/modal'
 import { DashboardForm as DForm } from '../common/dashboard-form'
 import { InlineAlertProps } from '@intermine/chromatin/inline-alert'
 import { useUpload, TUploadProps } from '../hooks'
-import { Entities } from './constants'
 
 export type TUploadModalProps = {
     isOpen: boolean
     onClose: () => void
     heading: string
-    name: string
-    toUpload: Entities
     uploadProps: Omit<TUploadProps, 'file'>
 }
 
 export const UploadModal = (props: TUploadModalProps) => {
-    const { uploadProps, isOpen, onClose, heading, name, toUpload } = props
+    const { uploadProps, isOpen, onClose, heading } = props
 
     const { runWhenPresignedURLGenerated } = useUpload()
 
@@ -58,16 +55,10 @@ export const UploadModal = (props: TUploadModalProps) => {
             return
         }
 
-        runWhenPresignedURLGenerated(
-            {
-                ...uploadProps,
-                file
-            },
-            {
-                toUpload,
-                name
-            }
-        )
+        runWhenPresignedURLGenerated({
+            ...uploadProps,
+            file
+        })
 
         onClose()
     }
@@ -109,7 +100,7 @@ export const UploadModal = (props: TUploadModalProps) => {
                 }
                 {...alertProps}
             />
-            Uploading file for "{name}"
+            Uploading file for "{uploadProps.entityList[0]?.name}"
             <DForm.UploadBox
                 onInputChange={onInputChange}
                 onDropHandler={onDropHandler}

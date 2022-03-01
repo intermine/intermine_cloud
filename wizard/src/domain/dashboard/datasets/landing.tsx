@@ -57,10 +57,10 @@ const fetchDataAndFiles = async () => {
 
 const defaultUploadModalState = {
     isOpen: false,
-    name: '',
     uploadProps: {
-        fileList: [],
-        dataList: []
+        entity: Entities.Dataset,
+        entityList: [] as Data[],
+        fileList: [] as ModelFile[]
     }
 }
 
@@ -80,7 +80,7 @@ export const Landing = () => {
     }
 
     const getAction = (dataset: TDataset) => {
-        const { file, name } = dataset
+        const { file } = dataset
 
         if (file.uploaded) {
             return (
@@ -100,10 +100,10 @@ export const Landing = () => {
                 onClick={() =>
                     setUploadModalState({
                         isOpen: true,
-                        name,
                         uploadProps: {
+                            ...defaultUploadModalState.uploadProps,
                             fileList: [file],
-                            dataList: [dataset]
+                            entityList: [dataset]
                         }
                     })
                 }
@@ -188,7 +188,6 @@ export const Landing = () => {
 
             <UploadModal
                 {...uploadModalState}
-                toUpload={Entities.Dataset}
                 onClose={onUploadModalClose}
                 heading="Upload Dataset"
             />
