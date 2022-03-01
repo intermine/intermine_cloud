@@ -24,6 +24,7 @@ from compose.schemas.api.mine.get import MineGetQueryParams, MineQueryType
 from compose.schemas.api.mine.post import MineCreate
 from compose.schemas.api.mine.put import MineUpdate
 from compose.schemas.mine import Mine
+from compose.schemas.template import Template
 
 
 ######################
@@ -73,6 +74,7 @@ def get_mine(query_params: MineGetQueryParams, user_creds: User) -> List[Mine]:
 
     Raises:
         Exception: error
+        e: error
 
     Returns:
         List[Mine]: List of Mines returned from DB
@@ -246,6 +248,65 @@ def check_data_list_exist(inputs: List[Prop]) -> List[Prop]:
 
     return [
         Prop(data=data_list, description="List of Data Objects"),
+        Prop(data=user, description="User"),
+    ]
+
+
+def check_template_list_exist(inputs: List[Prop]) -> List[Prop]:
+    """Check data list exist step.
+
+    Args:
+        inputs (List[Prop]):
+            Expects
+                0: template_list
+                    Prop(data=template_list, description="List of template objects")
+                2: user
+                    Prop(data=user, description="User")
+
+    Raises:
+        FlowExecError: Flow execution failed
+
+    Returns:
+        List[Prop]:
+
+            Prop(data=template_list, description="List of Template Objects")
+
+            Prop(data=user, description="User")
+    """
+    try:
+        template_list: List[Template] = inputs[0].data
+        user: User = inputs[1].data
+    except Exception as e:
+        raise FlowExecError(
+            human_description="Parsing inputs failed",
+            error=e,
+            error_type=type(e),
+            is_user_facing=True,
+            error_in_function=get_outer_function(),
+        ) from e
+
+    try:
+        # TODO: Check template list existence
+        pass
+    except SQLAlchemyError as e:
+        raise FlowExecError(
+            human_description="Querying DB object failed",
+            error=e,
+            error_type=type(e),
+            is_user_facing=False,
+            error_in_function=get_outer_function(),
+        ) from e
+    except Exception as e:
+        raise FlowExecError(
+            human_description="Something bad happened",
+            error=e,
+            error_type=type(e),
+            is_user_facing=False,
+            error_in_function=get_outer_function(),
+        ) from e
+
+    return [
+        Prop(data=template_list, description="List of Template Objects"),
         Prop(data=user, description="User"),
     ]
 
