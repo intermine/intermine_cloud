@@ -6,8 +6,7 @@ import { DASHBOARD_MINES_LANDING_PATH } from '../../../../routes'
 import { dataApi, templateApi } from '../../../../services/api'
 import { DashboardForm as DForm } from '../../common/dashboard-form'
 import { useDashboardForm } from '../../common/dashboard-form/utils'
-import { useDashboardQuery } from '../../common/use-dashboard-query'
-import { useOnProgress } from '../../utils/hooks'
+import { useDashboardQuery, useOnProgress } from '../../hooks'
 import { initialFormFieldsValue } from './form-utils'
 
 type TSelectOption = {

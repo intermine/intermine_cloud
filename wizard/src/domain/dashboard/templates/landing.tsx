@@ -9,7 +9,7 @@ import { Template, ModelFile } from '@intermine/compose-rest-client'
 import { DASHBOARD_UPLOAD_TEMPLATE_PATH } from '../../../routes'
 import { DashboardErrorBoundary } from '../common/error-boundary'
 import { templateApi } from '../../../services/api'
-import { useDashboardQuery } from '../common/use-dashboard-query'
+import { useDashboardQuery } from '../hooks'
 import {
     AccordionListContainer,
     TAccordionListDatum
@@ -58,7 +58,6 @@ const fetchTemplateAndFiles = async () => {
 export const Landing = () => {
     const history = useHistory()
     const [data, setData] = useState<TAccordionListDatum[]>([])
-    const [isFailedToFetchData, setIsFailedToFetchData] = useState(false)
 
     const handleUploadClick = () => {
         history.push(DASHBOARD_UPLOAD_TEMPLATE_PATH)
@@ -103,10 +102,10 @@ export const Landing = () => {
         setData(lists)
     }
 
-    const { isLoading, query } = useDashboardQuery({
+    const { isLoading, query, isFailed } = useDashboardQuery({
         queryFn: fetchTemplateAndFiles,
         onSuccessful: onQuerySuccessful,
-        onError: () => setIsFailedToFetchData(true)
+        refetchInterval: 10_000
     })
 
     useEffect(() => {
@@ -129,9 +128,7 @@ export const Landing = () => {
                     isEmpty={data.length === 0}
                     isLoading={isLoading}
                     msgIfListIsEmpty={
-                        isFailedToFetchData
-                            ? MsgIfFailedToLoadList
-                            : MsgIfListEmpty
+                        isFailed ? MsgIfFailedToLoadList : MsgIfListEmpty
                     }
                 >
                     {data.map((item, idx) => {

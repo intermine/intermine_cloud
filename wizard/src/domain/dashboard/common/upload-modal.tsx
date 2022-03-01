@@ -1,13 +1,120 @@
-import { Modal } from '../../../components/modal'
+import { useEffect, useState } from 'react'
 import UploadIcon from '@intermine/chromatin/icons/System/upload-line'
 
-export const UploadModal = () => {
+import { Modal } from '../../../components/modal'
+import { DashboardForm as DForm } from '../common/dashboard-form'
+import { InlineAlertProps } from '@intermine/chromatin/inline-alert'
+import { useUpload, TUploadProps } from '../hooks'
+import { Entities } from './constants'
+
+export type TUploadModalProps = {
+    isOpen: boolean
+    onClose: () => void
+    heading: string
+    name: string
+    toUpload: Entities
+    uploadProps: Omit<TUploadProps, 'file'>
+}
+
+export const UploadModal = (props: TUploadModalProps) => {
+    const { uploadProps, isOpen, onClose, heading, name, toUpload } = props
+
+    const { runWhenPresignedURLGenerated } = useUpload()
+
+    const [file, setFile] = useState<File>()
+    const [alertProps, setAlertProps] = useState<InlineAlertProps>({
+        isOpen: false
+    })
+
+    const onInputChange = (event: React.FormEvent<HTMLInputElement>) => {
+        try {
+            const files = event.currentTarget.files
+            if (files && files.length > 0) {
+                setFile(files[0])
+            }
+        } catch (error) {
+            console.error(error)
+        }
+    }
+
+    const onDropHandler = (event: React.DragEvent) => {
+        try {
+            const files = event.dataTransfer.files
+            if (files) {
+                setFile(files[0])
+            }
+        } catch (error) {
+            console.error(error)
+        }
+    }
+
+    const onUploadClick = () => {
+        if (!file) {
+            setAlertProps({
+                isOpen: true,
+                type: 'error',
+                message: 'Please select a file'
+            })
+            return
+        }
+
+        runWhenPresignedURLGenerated(
+            {
+                ...uploadProps,
+                file
+            },
+            {
+                toUpload,
+                name
+            }
+        )
+
+        onClose()
+    }
+
+    useEffect(() => {
+        if (!isOpen) {
+            // eslint-disable-next-line unicorn/no-useless-undefined
+            setFile(undefined)
+        }
+    }, [isOpen])
+
     return (
         <Modal
-            isOpen={true}
+            isOpen={isOpen}
             type="success"
             HeaderIcon={UploadIcon}
-            onClose={() => {}}
-        ></Modal>
+            onClose={onClose}
+            heading={heading}
+            csx={{
+                content: {
+                    '&&': {
+                        maxWidth: '25rem'
+                    }
+                }
+            }}
+            primaryAction={{
+                children: 'Upload',
+                onClick: onUploadClick
+            }}
+            secondaryAction={{
+                children: 'Cancel',
+                onClick: onClose
+            }}
+        >
+            <DForm.InlineAlert
+                isDense
+                onClose={() =>
+                    setAlertProps((prev) => ({ ...prev, isOpen: false }))
+                }
+                {...alertProps}
+            />
+            Uploading file for "{name}"
+            <DForm.UploadBox
+                onInputChange={onInputChange}
+                onDropHandler={onDropHandler}
+            />
+            <DForm.UploadFileInfo file={file} />
+        </Modal>
     )
 }

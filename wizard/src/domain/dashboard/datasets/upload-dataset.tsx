@@ -1,16 +1,16 @@
 import { Box } from '@intermine/chromatin/box'
 
 import { DASHBOARD_DATASETS_LANDING_PATH } from '../../../routes'
+import { Entities } from '../common/constants'
 import { DashboardForm as DForm } from '../common/dashboard-form'
 import {
     useDashboardForm,
     useDashboardUpload
 } from '../common/dashboard-form/utils'
-import { useUpload } from '../page-templates/hooks'
 import {
-    formatUploadMachineContextForUseUploadProps,
-    UploadType
-} from '../page-templates/hooks/use-upload'
+    useUpload,
+    formatUploadMachineContextForUseUploadProps
+} from '../hooks'
 
 export const UploadDataset = () => {
     const {
@@ -46,7 +46,7 @@ export const UploadDataset = () => {
         serviceToGeneratePresignedURL: (ctx) => {
             const _ctx = formatUploadMachineContextForUseUploadProps(ctx)
             return serviceToGeneratePresignedURL(_ctx, {
-                toUpload: UploadType.Dataset,
+                toUpload: Entities.Dataset,
                 name: name.value,
                 description: description.value
             })
@@ -56,7 +56,7 @@ export const UploadDataset = () => {
             runWhenPresignedURLGenerated(_ctx, {
                 name: name.value,
                 description: description.value,
-                toUpload: UploadType.Dataset
+                toUpload: Entities.Dataset
             })
             resetForm()
         },

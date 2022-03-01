@@ -4,7 +4,7 @@ import { IconButton } from '@intermine/chromatin/icon-button'
 import LogoutIcon from '@intermine/chromatin/icons/Device/shut-down-line'
 
 import { useSharedReducer } from '../../../context'
-import { useDashboardLogout } from '../utils/hooks'
+import { useDashboardLogout } from '../hooks'
 
 type TLogoutProps = {
     className?: string

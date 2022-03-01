@@ -1,1 +1,1 @@
-export { useUpload } from './use-upload'
+export { useUpload } from '../../utils/hooks/use-upload'

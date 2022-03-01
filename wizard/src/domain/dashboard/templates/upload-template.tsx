@@ -1,16 +1,16 @@
 import { Box } from '@intermine/chromatin/box'
 
 import { DASHBOARD_TEMPLATES_LANDING_PATH } from '../../../routes'
+import { Entities } from '../common/constants'
 import { DashboardForm as DForm } from '../common/dashboard-form'
 import {
     useDashboardForm,
     useDashboardUpload
 } from '../common/dashboard-form/utils'
-import { useUpload } from '../page-templates/hooks'
 import {
-    formatUploadMachineContextForUseUploadProps,
-    UploadType
-} from '../page-templates/hooks/use-upload'
+    useUpload,
+    formatUploadMachineContextForUseUploadProps
+} from '../hooks'
 
 export const UploadTemplate = () => {
     const {
@@ -46,7 +46,7 @@ export const UploadTemplate = () => {
         serviceToGeneratePresignedURL: (ctx) => {
             const _ctx = formatUploadMachineContextForUseUploadProps(ctx)
             return serviceToGeneratePresignedURL(_ctx, {
-                toUpload: UploadType.Template,
+                toUpload: Entities.Template,
                 name: name.value,
                 description: description.value
             })
@@ -57,7 +57,7 @@ export const UploadTemplate = () => {
             runWhenPresignedURLGenerated(_ctx, {
                 name: name.value,
                 description: description.value,
-                toUpload: UploadType.Template
+                toUpload: Entities.Template
             })
             resetForm()
         },

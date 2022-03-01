@@ -1,6 +1,6 @@
 import { useContext, useEffect, useRef, useState } from 'react'
 import clsx from 'clsx'
-import { Button } from '@intermine/chromatin'
+import { Button, ButtonProps } from '@intermine/chromatin'
 import { Box } from '@intermine/chromatin/box'
 import { Typography } from '@intermine/chromatin/typography'
 import { IconButton } from '@intermine/chromatin/icon-button'
@@ -365,29 +365,22 @@ const Body = (props: TBodyProps) => {
     )
 }
 
-type TActionButton = {
-    onClick: () => void
-    color?: string
-    isLoading?: boolean
-    children: TElement
-    Icon?: TElement
-}
+type TActionButton<T> = ButtonProps<T>
 
-const ActionButton = (props: TActionButton) => {
-    const { isLoading, color, onClick, children, Icon } = props
-
+const ActionButton = <T,>(props: TActionButton<T>) => {
     return (
         <Button
-            isTextUppercase={false}
             isDense
-            variant={isLoading ? 'normal' : 'ghost'}
-            color={color}
-            onClick={onClick}
-            isLoading={isLoading}
-            LeftIcon={Icon}
-        >
-            {children}
-        </Button>
+            size="small"
+            variant="ghost"
+            csx={{
+                root: ({ spacing }) => ({
+                    paddingRight: spacing(1),
+                    paddingLeft: spacing(1)
+                })
+            }}
+            {...props}
+        />
     )
 }
 

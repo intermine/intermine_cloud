@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useHistory } from 'react-router-dom'
 import { Box } from '@intermine/chromatin/box'
-import { Button } from '@intermine/chromatin/button'
 import UploadIcon from '@intermine/chromatin/icons/System/upload-line'
 
 import { Data, ModelFile } from '@intermine/compose-rest-client'
@@ -10,10 +9,11 @@ import { WorkspaceHeading } from '../common/workspace-heading'
 import { DASHBOARD_UPLOAD_DATASET_PATH } from '../../../routes'
 import { DashboardErrorBoundary } from '../common/error-boundary'
 import { dataApi } from '../../../services/api'
-import { useDashboardQuery } from '../common/use-dashboard-query'
+import { useDashboardQuery } from '../hooks'
 import {
     AccordionListContainer,
-    TAccordionListDatum
+    TAccordionListDatum,
+    AccordionList
 } from '../common/accordion-list/accordion-list'
 // eslint-disable-next-line max-len
 import { LandingPageAccordionList } from '../common/accordion-list/landing-page-accordion-list'
@@ -22,6 +22,8 @@ import {
     extractAllFileIdsObjFromList,
     fetchAllFileUsingFileIds
 } from '../utils/misc'
+import { UploadModal } from '../common/upload-modal'
+import { Entities } from '../common/constants'
 
 type TDataset = Data & {
     file: ModelFile
@@ -53,35 +55,61 @@ const fetchDataAndFiles = async () => {
     return dataset
 }
 
+const defaultUploadModalState = {
+    isOpen: false,
+    name: '',
+    uploadProps: {
+        fileList: [],
+        dataList: []
+    }
+}
+
 export const Landing = () => {
     const history = useHistory()
     const [data, setData] = useState<TAccordionListDatum[]>([])
-    const [isFailedToFetchData, setIsFailedToFetchData] = useState(false)
+    const [uploadModalState, setUploadModalState] = useState(
+        defaultUploadModalState
+    )
 
     const handleUploadClick = () => {
         history.push(DASHBOARD_UPLOAD_DATASET_PATH)
     }
 
-    const getAction = (file: ModelFile) => {
+    const onUploadModalClose = () => {
+        setUploadModalState(defaultUploadModalState)
+    }
+
+    const getAction = (dataset: TDataset) => {
+        const { file, name } = dataset
+
         if (file.uploaded) {
             return (
-                <Button
+                <AccordionList.ActionButton
                     Component="a"
-                    variant="ghost"
                     color="primary"
-                    size="small"
-                    isDense
                     href={file.presigned_get}
                     target="_blank"
                 >
                     Download Dataset
-                </Button>
+                </AccordionList.ActionButton>
             )
         }
         return (
-            <Button variant="ghost" color="secondary" isDense size="small">
+            <AccordionList.ActionButton
+                color="secondary"
+                onClick={() =>
+                    setUploadModalState({
+                        isOpen: true,
+                        name,
+                        uploadProps: {
+                            fileList: [file],
+                            dataList: [dataset]
+                        }
+                    })
+                }
+            >
                 Retry Upload
-            </Button>
+            </AccordionList.ActionButton>
         )
     }
 
@@ -126,7 +154,7 @@ export const Landing = () => {
                         id: data.data_id + 'action',
                         body: (
                             <Box csx={{ root: { padding: '0.25rem' } }}>
-                                {getAction(data.file)}
+                                {getAction(data)}
                             </Box>
                         ),
                         heading: ''
@@ -137,10 +165,10 @@ export const Landing = () => {
         setData(lists)
     }
 
-    const { isLoading, query } = useDashboardQuery({
+    const { isLoading, isFailed, query } = useDashboardQuery({
         queryFn: () => fetchDataAndFiles(),
         onSuccessful: onQuerySuccessful,
-        onError: () => setIsFailedToFetchData(true)
+        refetchInterval: 10_000
     })
 
     useEffect(() => {
@@ -158,14 +186,18 @@ export const Landing = () => {
                 }}
             />
 
+            <UploadModal
+                {...uploadModalState}
+                toUpload={Entities.Dataset}
+                onClose={onUploadModalClose}
+                heading="Upload Dataset"
+            />
             <DashboardErrorBoundary errorMessage="Unable to load table.">
                 <AccordionListContainer
                     isEmpty={data.length === 0}
                     isLoading={isLoading}
                     msgIfListIsEmpty={
-                        isFailedToFetchData
-                            ? MsgIfFailedToLoadList
-                            : MsgIfListEmpty
+                        isFailed ? MsgIfFailedToLoadList : MsgIfListEmpty
                     }
                 >
                     {data.map((item, idx) => {

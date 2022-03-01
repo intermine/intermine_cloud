@@ -4,16 +4,16 @@ import { InlineAlertProps } from '@intermine/chromatin/inline-alert'
 import type { Data, ModelFile, Template } from '@intermine/compose-rest-client'
 import type { CancelTokenSource } from 'axios'
 
-import { uploadService } from '../../common/dashboard-form/utils'
-import { useOnProgress } from '../../utils/hooks'
-import { getDataSize } from '../../../../utils/get'
-import { dataApi, fileApi, templateApi } from '../../../../services/api'
+import { uploadService } from '../common/dashboard-form/utils'
+import { useOnProgress } from './use-on-progress'
+import { getDataSize } from '../../../utils/get'
+import { dataApi, fileApi, templateApi } from '../../../services/api'
 
-// eslint-disable-next-line max-len
-import { TUploadMachineContext } from '../../common/dashboard-form/upload-machine'
+import { TUploadMachineContext } from '../common/dashboard-form/upload-machine'
+import { Entities } from '../common/constants'
 
 export type TRunWhenPresignedURLGeneratedOptions = {
-    toUpload: UploadType
+    toUpload: Entities
     name?: string
     description?: string
     getProgressText?: (loaded: number, total: number) => string
@@ -25,19 +25,14 @@ enum GetMessageType {
     FailedToUploadToFile,
 }
 
-export enum UploadType {
-    Dataset,
-    Template,
-}
-
 export type TServiceToGeneratePreSignedURLOption = {
     name?: string
     description?: string
-    toUpload: UploadType
+    toUpload: Entities
 }
 
 export type TUseUploadProps = {
-    toUpload: UploadType
+    toUpload: Entities
 }
 
 export type TUploadProps = {
@@ -82,7 +77,7 @@ const serviceToGeneratePresignedURL = (
     const name = getTaskName(file.name, nameOption)
 
     switch (toUpload) {
-        case UploadType.Dataset:
+        case Entities.Dataset:
             return dataApi.dataPost({
                 data_list: [
                     {
@@ -94,7 +89,7 @@ const serviceToGeneratePresignedURL = (
                 ],
             })
 
-        case UploadType.Template:
+        case Entities.Template:
             return templateApi.templatePost({
                 template_list: [
                     {
@@ -110,8 +105,8 @@ const serviceToGeneratePresignedURL = (
                 ''.concat(
                     '[ServiceToGeneratePresignedURL]: toUpload',
                     ' is not of known type. Got ',
-                    toUpload,
-                    '. It should be UploadType.Dataset or UploadType.Template'
+                    toUpload.toString(),
+                    '. It should be Entities.Dataset or Entities.Template'
                 )
             )
     }
@@ -143,13 +138,13 @@ export const useUpload = () => {
         upload: TUploadProps,
         options: {
             _id?: string
-            toUpload: UploadType
+            toUpload: Entities
         }
     ) => {
         const { file, dataList, templateList, fileList } = upload
         const { _id, toUpload } = options
 
-        const list = toUpload === UploadType.Dataset ? dataList : templateList
+        const list = toUpload === Entities.Dataset ? dataList : templateList
 
         if (!Array.isArray(list) || !Array.isArray(fileList)) {
             if (process.env.NODE_ENV === 'development') {
@@ -159,7 +154,7 @@ export const useUpload = () => {
                     'File:',
                     fileList,
                     'To Upload:',
-                    toUpload === UploadType.Dataset ? 'Dataset' : 'Template',
+                    toUpload === Entities.Dataset ? 'Dataset' : 'Template',
                     'Upload Context',
                     upload
                 )
@@ -223,7 +218,7 @@ export const useUpload = () => {
 
     const onRetryRequest = (
         id: string,
-        toUpload: UploadType,
+        toUpload: Entities,
         upload: TUploadProps
     ) => {
         const { cancelTokenSource } = uploadFile(upload, { _id: id, toUpload })

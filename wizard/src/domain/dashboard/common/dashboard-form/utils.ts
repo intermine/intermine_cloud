@@ -20,7 +20,7 @@ import type {
     TOnProgressFailedProps,
     TOnProgressSuccessfulProps,
     TOnProgressUpdateProps,
-} from '../../utils/hooks'
+} from '../../hooks'
 
 export type TOnUploadSuccessfulEvent = Omit<
     TOnProgressSuccessfulProps,

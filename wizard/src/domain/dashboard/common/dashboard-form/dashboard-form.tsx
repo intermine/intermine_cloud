@@ -17,7 +17,7 @@ import {
     RestrictLogoutRestrictions,
     useDashboardWarningModal,
     useDashboardLogout
-} from '../../utils/hooks'
+} from '../../hooks'
 import { useSidebarReducer } from '../../../../context'
 import { handleOnBeforeUnload } from '../../utils/misc'
 

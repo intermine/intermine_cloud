@@ -9,7 +9,7 @@ import {
 import { ActionSection } from './action-section'
 import { ProgressItemView } from './progress-item-view'
 import { handleOnBeforeUnload } from '../utils/misc'
-import { RestrictLogoutRestrictions, useDashboardLogout } from '../utils/hooks'
+import { RestrictLogoutRestrictions, useDashboardLogout } from '../hooks'
 
 const _handleOnBeforeUnload = (event: Event) => {
     handleOnBeforeUnload(event)
