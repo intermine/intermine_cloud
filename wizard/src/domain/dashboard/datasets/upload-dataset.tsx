@@ -11,6 +11,9 @@ import {
     useUpload,
     formatUploadMachineContextForUseUploadProps
 } from '../hooks'
+import { getFileExt } from '../utils/misc'
+
+const { Dataset } = Entities
 
 export const UploadDataset = () => {
     const {
@@ -44,24 +47,32 @@ export const UploadDataset = () => {
         reset: resetUpload
     } = useDashboardUpload({
         serviceToGeneratePresignedURL: (ctx) => {
-            const _ctx = formatUploadMachineContextForUseUploadProps(ctx)
-            return serviceToGeneratePresignedURL(_ctx, {
-                toUpload: Entities.Dataset,
-                name: name.value,
-                description: description.value
+            const { file } = ctx
+
+            return serviceToGeneratePresignedURL({
+                entity: Dataset,
+                dataset: {
+                    ext: getFileExt(file),
+                    file_type: file.type ? file.type : getFileExt(file),
+                    name: name.value ? name.value : file.name
+                }
             })
         },
+
         runWhenPresignedURLGenerated: (ctx) => {
-            const _ctx = formatUploadMachineContextForUseUploadProps(ctx)
-            runWhenPresignedURLGenerated(_ctx, {
-                name: name.value,
-                description: description.value,
-                toUpload: Entities.Dataset
-            })
+            const _ctx = formatUploadMachineContextForUseUploadProps(
+                ctx,
+                Dataset
+            )
+            runWhenPresignedURLGenerated(_ctx)
             resetForm()
         },
+
         runWhenPresignedURLGenerationFailed: (ctx) => {
-            const _ctx = formatUploadMachineContextForUseUploadProps(ctx)
+            const _ctx = formatUploadMachineContextForUseUploadProps(
+                ctx,
+                Dataset
+            )
             runWhenPresignedURLGenerationFailed(_ctx)
         }
     })

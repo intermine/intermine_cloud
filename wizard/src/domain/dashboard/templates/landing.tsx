@@ -48,7 +48,7 @@ const fetchTemplateAndFiles = async () => {
     for (const template of templateList) {
         templates.push({
             ...template,
-            file: fileListObj[template.file_id] ?? {}
+            file: fileListObj[template.file_id]
         })
     }
 

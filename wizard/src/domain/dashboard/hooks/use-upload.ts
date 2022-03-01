@@ -1,7 +1,13 @@
 import { useState } from 'react'
 import { InlineAlertProps } from '@intermine/chromatin/inline-alert'
 
-import type { Data, ModelFile, Template } from '@intermine/compose-rest-client'
+import type {
+    Data,
+    ModelFile,
+    Template,
+    DataPostDataList,
+    TemplatePostTemplateList,
+} from '@intermine/compose-rest-client'
 import type { CancelTokenSource } from 'axios'
 
 import { uploadService } from '../common/dashboard-form/utils'
@@ -10,45 +16,34 @@ import { getDataSize } from '../../../utils/get'
 import { dataApi, fileApi, templateApi } from '../../../services/api'
 
 import { TUploadMachineContext } from '../common/dashboard-form/upload-machine'
-import { Entities } from '../common/constants'
-
-export type TRunWhenPresignedURLGeneratedOptions = {
-    toUpload: Entities
-    name?: string
-    description?: string
-    getProgressText?: (loaded: number, total: number) => string
-}
-
-enum GetMessageType {
-    Successful,
-    FailedToUpload,
-    FailedToUploadToFile,
-}
-
-export type TServiceToGeneratePreSignedURLOption = {
-    name?: string
-    description?: string
-    toUpload: Entities
-}
-
-export type TUseUploadProps = {
-    toUpload: Entities
-}
+import { Entities, UploadFileStatus } from '../common/constants'
 
 export type TUploadProps = {
     file: File
     fileList: ModelFile[]
-    dataList?: Data[]
-    templateList?: Template[]
+    entityList: Data[] | Template[]
+    entity: Entities
     errorMessage?: string
 }
 
-const getMsg = (type: GetMessageType, fileName: string) => {
+export type TRunWhenPresignedURLGeneratedOptions = TUploadProps & {
+    getProgressText?: (loaded: number, total: number) => string
+}
+
+export type TServiceToGeneratePreSignedURLOption = {
+    entity: Entities
+    dataset?: DataPostDataList
+    template?: TemplatePostTemplateList
+}
+
+const { Fail, FailToUploadFile, Successful } = UploadFileStatus
+
+const getMsg = (type: UploadFileStatus, fileName: string) => {
     switch (type) {
-        case GetMessageType.FailedToUpload:
+        case Fail:
             return 'Failed to upload ' + fileName
 
-        case GetMessageType.FailedToUploadToFile:
+        case FailToUploadFile:
             return `File ${fileName} uploaded, but we failed
             to register it as uploaded. This is considered as failed.
             Please upload the file again.`
@@ -58,58 +53,33 @@ const getMsg = (type: GetMessageType, fileName: string) => {
     }
 }
 
-const getTaskName = (fileName: string, optionName?: string): string => {
-    if (optionName) return optionName
-    return fileName
-}
-
-const getFileExt = (file: File): string => {
-    return file.name.slice(file.name.lastIndexOf('.') + 1, file.name.length)
-}
-
 const serviceToGeneratePresignedURL = (
-    uploadCtx: TUploadProps,
     options: TServiceToGeneratePreSignedURLOption
 ): Promise<unknown> => {
-    const { file } = uploadCtx
-    const { toUpload, name: nameOption, description = '' } = options
+    const { entity, dataset, template } = options
 
-    const name = getTaskName(file.name, nameOption)
-
-    switch (toUpload) {
-        case Entities.Dataset:
-            return dataApi.dataPost({
-                data_list: [
-                    {
-                        name,
-                        ext: getFileExt(file),
-                        file_type:
-                            file.type !== '' ? file.type : getFileExt(file),
-                    },
-                ],
-            })
-
-        case Entities.Template:
-            return templateApi.templatePost({
-                template_list: [
-                    {
-                        name,
-                        template_vars: [],
-                        description,
-                    },
-                ],
-            })
-
-        default:
-            throw new Error(
-                ''.concat(
-                    '[ServiceToGeneratePresignedURL]: toUpload',
-                    ' is not of known type. Got ',
-                    toUpload.toString(),
-                    '. It should be Entities.Dataset or Entities.Template'
-                )
-            )
+    if (entity === Entities.Dataset && typeof dataset === 'object') {
+        return dataApi.dataPost({
+            data_list: [dataset],
+        })
     }
+
+    if (entity === Entities.Template && typeof template === 'object') {
+        return templateApi.templatePost({
+            template_list: [template],
+        })
+    }
+
+    throw new Error(
+        'serviceToGeneratePresignedURL: entity format is not correct'
+    )
+}
+
+export type TUploadFileOptions = {
+    _id?: string
+    file: File
+    fileList: ModelFile[]
+    nameOfEntity: string
 }
 
 export const useUpload = () => {
@@ -134,41 +104,12 @@ export const useUpload = () => {
         onProgressRetry,
     } = useOnProgress()
 
-    const uploadFile = (
-        upload: TUploadProps,
-        options: {
-            _id?: string
-            toUpload: Entities
-        }
-    ) => {
-        const { file, dataList, templateList, fileList } = upload
-        const { _id, toUpload } = options
+    const uploadFile = (options: TUploadFileOptions) => {
+        const { _id, file, fileList, nameOfEntity } = options
 
-        const list = toUpload === Entities.Dataset ? dataList : templateList
-
-        if (!Array.isArray(list) || !Array.isArray(fileList)) {
-            if (process.env.NODE_ENV === 'development') {
-                console.error(
-                    'Data or File is not defined, Given: Data',
-                    list,
-                    'File:',
-                    fileList,
-                    'To Upload:',
-                    toUpload === Entities.Dataset ? 'Dataset' : 'Template',
-                    'Upload Context',
-                    upload
-                )
-            }
-
-            throw new Error('Data or File is not defined')
-        }
-
-        const failedMsg = getMsg(GetMessageType.FailedToUpload, list[0].name)
-        const failedToUploadToFileMsg = getMsg(
-            GetMessageType.FailedToUploadToFile,
-            list[0].name
-        )
-        const successMsg = getMsg(GetMessageType.Successful, list[0].name)
+        const failedMsg = getMsg(Fail, nameOfEntity)
+        const failedToUploadToFileMsg = getMsg(FailToUploadFile, nameOfEntity)
+        const successMsg = getMsg(Successful, nameOfEntity)
 
         const { id, cancelTokenSource } = uploadService({
             id: _id,
@@ -216,32 +157,34 @@ export const useUpload = () => {
         onProgressCancel({ id })
     }
 
-    const onRetryRequest = (
-        id: string,
-        toUpload: Entities,
-        upload: TUploadProps
-    ) => {
-        const { cancelTokenSource } = uploadFile(upload, { _id: id, toUpload })
+    const onRetryRequest = (upload: TUploadFileOptions & { _id: string }) => {
+        const { cancelTokenSource } = uploadFile(upload)
         onProgressRetry({
-            id,
+            id: upload._id,
             isDependentOnBrowser: true,
             onCancel: () => {
-                onCancelRequest(id, cancelTokenSource)
+                onCancelRequest(upload._id, cancelTokenSource)
             },
         })
     }
 
     const runWhenPresignedURLGenerated = (
-        upload: TUploadProps,
         options = {} as TRunWhenPresignedURLGeneratedOptions
     ) => {
         const {
-            name,
-            toUpload,
+            file,
+            fileList,
+            entityList,
             getProgressText = (l, t) => `${getDataSize(l)} / ${getDataSize(t)}`,
         } = options
-        const { file } = upload
-        const { id, cancelTokenSource } = uploadFile(upload, { toUpload })
+
+        const nameOfEntity = entityList[0].name
+
+        const { id, cancelTokenSource } = uploadFile({
+            file,
+            fileList,
+            nameOfEntity,
+        })
 
         onProgressStart({
             id,
@@ -250,11 +193,16 @@ export const useUpload = () => {
             },
             getProgressText,
             isDependentOnBrowser: true,
-            name: getTaskName(file.name, name),
+            name: nameOfEntity,
             totalSize: file.size,
             loadedSize: 0,
             onRetry: () => {
-                onRetryRequest(id, toUpload, upload)
+                onRetryRequest({
+                    _id: id,
+                    file,
+                    fileList,
+                    nameOfEntity,
+                })
             },
         })
 
@@ -281,7 +229,8 @@ export const useUpload = () => {
 }
 
 export const formatUploadMachineContextForUseUploadProps = (
-    ctx: TUploadMachineContext
+    ctx: TUploadMachineContext,
+    entity: Entities
 ): TUploadProps => {
     const { file, response, errorMessage } = ctx
 
@@ -294,11 +243,7 @@ export const formatUploadMachineContextForUseUploadProps = (
                 response
             )
         }
-        return {
-            file,
-            errorMessage,
-            fileList: [],
-        }
+        throw new Error('response is not defined')
     }
 
     const { file_list, data_list, template_list } = response.data.items
@@ -312,18 +257,29 @@ export const formatUploadMachineContextForUseUploadProps = (
                 file_list
             )
         }
-        return {
-            file,
-            errorMessage,
-            fileList: [],
+
+        throw new Error('file_list is not an array.')
+    }
+
+    const entityList = entity === Entities.Dataset ? data_list : template_list
+
+    if (!Array.isArray(entityList)) {
+        if (process.env.NODE_ENV === 'development') {
+            console.error(
+                'FormUploadMachineContextForUseUploadProps',
+                entity === Entities.Dataset ? 'data_list' : 'template_list',
+                'is not an array'
+            )
         }
+
+        throw new Error('Data or File is not defined')
     }
 
     return {
         file,
         fileList: file_list,
-        dataList: data_list,
-        templateList: template_list,
+        entityList,
         errorMessage,
+        entity,
     }
 }

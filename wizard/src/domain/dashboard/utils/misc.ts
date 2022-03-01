@@ -50,3 +50,7 @@ export const fetchAllFileUsingFileIds = async (
 
     return fileListObj
 }
+
+export const getFileExt = (file: File): string => {
+    return file.name.slice(file.name.lastIndexOf('.') + 1, file.name.length)
+}

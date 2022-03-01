@@ -12,6 +12,8 @@ import {
     formatUploadMachineContextForUseUploadProps
 } from '../hooks'
 
+const { Template } = Entities
+
 export const UploadTemplate = () => {
     const {
         runWhenPresignedURLGenerationFailed,
@@ -44,25 +46,33 @@ export const UploadTemplate = () => {
         reset: resetUpload
     } = useDashboardUpload({
         serviceToGeneratePresignedURL: (ctx) => {
-            const _ctx = formatUploadMachineContextForUseUploadProps(ctx)
-            return serviceToGeneratePresignedURL(_ctx, {
-                toUpload: Entities.Template,
-                name: name.value,
-                description: description.value
+            const { file } = ctx
+
+            return serviceToGeneratePresignedURL({
+                entity: Template,
+                template: {
+                    description: description.value,
+                    name: name.value ? name.value : file.name,
+                    template_vars: []
+                }
             })
         },
-        runWhenPresignedURLGenerated: (ctx) => {
-            const _ctx = formatUploadMachineContextForUseUploadProps(ctx)
 
-            runWhenPresignedURLGenerated(_ctx, {
-                name: name.value,
-                description: description.value,
-                toUpload: Entities.Template
-            })
+        runWhenPresignedURLGenerated: (ctx) => {
+            const _ctx = formatUploadMachineContextForUseUploadProps(
+                ctx,
+                Template
+            )
+
+            runWhenPresignedURLGenerated(_ctx)
             resetForm()
         },
+
         runWhenPresignedURLGenerationFailed: (ctx) => {
-            const _ctx = formatUploadMachineContextForUseUploadProps(ctx)
+            const _ctx = formatUploadMachineContextForUseUploadProps(
+                ctx,
+                Template
+            )
             runWhenPresignedURLGenerationFailed(_ctx)
         }
     })
