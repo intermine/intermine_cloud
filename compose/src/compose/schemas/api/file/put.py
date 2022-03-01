@@ -12,9 +12,9 @@ class FileUpdate(BaseModel):
     """Schema to parse update File requests."""
 
     file_id: UUID4
-    name: Optional[str]
-    ext: Optional[str]
-    file_type: Optional[str]
+    # name: Optional[str]
+    # ext: Optional[str]
+    # file_type: Optional[str]
     uploaded: Optional[bool]
 
 
