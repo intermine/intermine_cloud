@@ -1,4 +1,4 @@
-import { Modal as ChromatinModal } from '@intermine/chromatin/modal'
+import { Modal as ChromatinModal, ModalProps } from '@intermine/chromatin/modal'
 import { Box } from '@intermine/chromatin/box'
 import { Typography } from '@intermine/chromatin/typography'
 import { Button } from '@intermine/chromatin/button'
@@ -30,13 +30,16 @@ const useStyles = createStyle((theme) => {
             maxWidth: '20rem',
             width: '100%'
         },
+
         root: {
             background:
                 themeType === 'dark' ? light.getRGBA(0.1) : dark.getRGBA(0.1)
         },
+
         heading: {
             padding: spacing(2, 8)
         },
+
         iconContainer: {
             display: 'flex',
             justifyContent: 'space-between',
@@ -47,6 +50,7 @@ const useStyles = createStyle((theme) => {
             overflow: 'auto',
             padding: spacing(4, 8)
         },
+
         actionContainer: {
             display: 'flex',
             justifyContent: 'space-between',
@@ -57,6 +61,7 @@ const useStyles = createStyle((theme) => {
 
 export type TGlobalModalProps = TUseGlobalModalReducer['state'] & {
     onClose: TUseGlobalModalReducer['closeGlobalModal']
+    csx?: ModalProps['csx']
 }
 
 export const Modal = (props: TGlobalModalProps) => {
@@ -72,7 +77,8 @@ export const Modal = (props: TGlobalModalProps) => {
         HeaderIcon,
         isLoadingPrimaryAction = false,
         isLoadingSecondaryAction = false,
-        onClose
+        onClose,
+        csx
     } = props
 
     const getIcon = (): JSX.Element => {
@@ -103,6 +109,7 @@ export const Modal = (props: TGlobalModalProps) => {
             isOpen={isOpen}
             classes={classes}
             onRequestClose={onClose}
+            csx={csx}
         >
             <Box className={classes.iconContainer} variant="h3">
                 {getIcon()}
