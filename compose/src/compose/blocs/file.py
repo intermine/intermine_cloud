@@ -186,7 +186,7 @@ def update_file(file_update_list: List[FileUpdate], user_creds: User) -> List[Fi
                                         **updated_file.to_dict(),
                                     ),
                                     user_creds,
-                                    "GET",
+                                    "PUT",
                                 ),
                                 **updated_file.to_dict(),
                             )
