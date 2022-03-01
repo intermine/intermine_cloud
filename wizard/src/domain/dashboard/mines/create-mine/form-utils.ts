@@ -10,6 +10,7 @@ export type TCreateMineFormFields =
     | 'datasets'
     | 'description'
     | 'subDomain'
+    | 'action'
 
 type State = TUseDashboardFormState<
     Record<TCreateMineFormFields, TUseDashboardFormField>
@@ -75,6 +76,12 @@ export const initialFormFieldsValue: TUseDashboardFormFields<
     description: {
         value: '',
         options: {},
+    },
+    action: {
+        value: 'build',
+        options: {
+            isRequired: true,
+        },
     },
     template: {
         value: {},

@@ -1,5 +1,8 @@
 import { useEffect, useState } from 'react'
-import { Box } from '@intermine/chromatin'
+import { Box } from '@intermine/chromatin/box'
+import { FormControlLabel } from '@intermine/chromatin/form-control-label'
+import { Radio } from '@intermine/chromatin/radio'
+import { RadioGroup } from '@intermine/chromatin/radio-group'
 import { createStyle } from '@intermine/chromatin/styles'
 
 import { DASHBOARD_MINES_LANDING_PATH } from '../../../../routes'
@@ -77,7 +80,7 @@ export const CreateMine = () => {
         resetToInitialState
     } = useDashboardForm(initialFormFieldsValue)
 
-    const { subDomain, name, description, template, datasets } = state
+    const { subDomain, name, description, template, datasets, action } = state
     const {
         datasets: eDatasets,
         name: eName,
@@ -263,13 +266,40 @@ export const CreateMine = () => {
                         <Box>
                             {initialFormFieldsValue?.subDomain?.options
                                 ?.validator &&
+                                // eslint-disable-next-line max-len
                                 initialFormFieldsValue?.subDomain?.options?.validator(
-                                    subDomain.value
+                                    subDomain.value,
+                                    state
                                 ).isError === false &&
+                                // eslint-disable-next-line max-len
                                 'Checking whether this subdomain is available or not'}
                         </Box>
                     </DForm.Label>
-
+                    <DForm.Label
+                        main="Action"
+                        sub="Select whether you only want to build this
+                        mine or you want to build and deploy."
+                        csx={{ root: { marginBottom: 0 } }}
+                    />
+                    <RadioGroup
+                        name="mine-action"
+                        onChange={(v) =>
+                            updateDashboardFormState(
+                                'action',
+                                v.currentTarget.value
+                            )
+                        }
+                        value={action.value}
+                    >
+                        <FormControlLabel
+                            control={<Radio value="build" />}
+                            label="Build"
+                        />
+                        <FormControlLabel
+                            control={<Radio value="build-deploy" />}
+                            label="Build & Deploy"
+                        />
+                    </RadioGroup>
                     <DForm.Actions
                         actions={[
                             {

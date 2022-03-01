@@ -5,6 +5,7 @@ import { Modal } from '../../../components/modal'
 import { DashboardForm as DForm } from '../common/dashboard-form'
 import { InlineAlertProps } from '@intermine/chromatin/inline-alert'
 import { useUpload, TUploadProps } from '../hooks'
+import { getFileExt } from '../utils/misc'
 
 export type TUploadModalProps = {
     isOpen: boolean
@@ -52,6 +53,20 @@ export const UploadModal = (props: TUploadModalProps) => {
                 type: 'error',
                 message: 'Please select a file'
             })
+            return
+        }
+
+        const previousFileExtension = uploadProps.fileList[0].ext
+
+        if (getFileExt(file) !== previousFileExtension) {
+            setAlertProps({
+                isOpen: true,
+                type: 'error',
+                message: `File type is not same as previous. 
+                Previous file extension was "${previousFileExtension}" 
+                and current file extension is "${getFileExt(file)}"`
+            })
+
             return
         }
 
