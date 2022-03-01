@@ -13,6 +13,8 @@ class FileUpdate(BaseModel):
 
     file_id: UUID4
     name: Optional[str]
+    ext: Optional[str]
+    file_type: Optional[str]
     uploaded: Optional[bool]
 
 
