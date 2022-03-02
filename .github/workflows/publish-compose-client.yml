@@ -5,7 +5,7 @@ on:
         branches:
             - production
         paths:
-            - './compose/api/**'
+            - compose/api/**
 
 jobs:
     publish:
