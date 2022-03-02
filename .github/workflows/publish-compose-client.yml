@@ -1,0 +1,24 @@
+name: publish-compose-client
+
+on:
+    push:
+        branches:
+            - production
+
+jobs:
+    publish:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v1
+            - uses: actions/setup-node@v1
+              with:
+                  node-version: 12
+            - run: cd compose/api
+            - run: npm install
+            - run: npm build
+            - run: npm generate
+            - run: npm run copy
+            - run: cd client
+            - uses: JS-DevTools/npm-publish@v1
+              with:
+                  token: ${{ secrets.NPM_TOKEN }}
