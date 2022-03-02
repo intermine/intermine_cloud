@@ -13,13 +13,8 @@ jobs:
             - uses: actions/setup-node@v1
               with:
                   node-version: 12
-                
-            - working-directory: ./compose/api
-            - run: npm install
-            - run: npm run build
-            - run: npm run generate
-            - run: npm run copy
-            - uses: JS-DevTools/npm-publish@v1
-              working-directory: ./compose/api/client
-              with:
-                  token: ${{ secrets.NPM_TOKEN }}
+
+            - name: installing dependencies
+              working-directory: ./compose/api
+              run: npm install
+            
