@@ -1,28 +1,33 @@
 """Mine BLoCs."""
 
 from typing import Dict, List, Optional
+from uuid import uuid4
 
 from blackcap.db import DBSession
 from blackcap.flow import Flow, FlowExecError, FuncProp, get_outer_function, Prop, Step
 from blackcap.flow.step import dummy_backward
 from blackcap.schemas.user import User
+from compose.schemas.api.data.get import DataGetQueryParams, DataQueryType
 from logzero import logger
-from pydantic import ValidationError
+from pydantic import UUID4, ValidationError
 from pydantic.error_wrappers import ErrorWrapper
 from sqlalchemy import select
 from sqlalchemy.exc import SQLAlchemyError
 
+
+from compose.blocs.data import get_data
 from compose.blocs.file import (
     create_file_db_entry,
     create_file_presigned_urls,
     revert_file_db_entry,
 )
+from compose.blocs.template import get_template
 from compose.models.mine import MineDB
-from compose.schemas.data import Data
 from compose.schemas.api.mine.delete import MineDelete
 from compose.schemas.api.mine.get import MineGetQueryParams, MineQueryType
 from compose.schemas.api.mine.post import MineCreate
 from compose.schemas.api.mine.put import MineUpdate
+from compose.schemas.data import Data
 from compose.schemas.mine import Mine
 from compose.schemas.template import Template
 
@@ -200,7 +205,7 @@ def check_data_list_exist(inputs: List[Prop]) -> List[Prop]:
         inputs (List[Prop]):
             Expects
                 0: data_list
-                    Prop(data=data_list, description="List of data objects")
+                    Prop(data=data_ids, description="List of ids of data objects")
                 2: user
                     Prop(data=user, description="User")
 
@@ -215,7 +220,7 @@ def check_data_list_exist(inputs: List[Prop]) -> List[Prop]:
             Prop(data=user, description="User")
     """
     try:
-        data_list: List[Data] = inputs[0].data
+        data_ids: List[str] = inputs[0].data
         user: User = inputs[1].data
     except Exception as e:
         raise FlowExecError(
@@ -228,7 +233,15 @@ def check_data_list_exist(inputs: List[Prop]) -> List[Prop]:
 
     try:
         # TODO: Check data list existence
-        pass
+        data_query = DataGetQueryParams(query_type=DataQueryType.GET_ALL_DATA)
+        data_list: List[Data] = get_data(data_query, user)
+        data_list_ids = [str(data.data_id) for data in data_list]
+        # Use sets to optimize later
+        for data_id in data_ids:
+            if data_id not in data_list_ids:
+                # Raise a user descriptive error later
+                raise Exception("DATASET NOT FOUND")
+
     except SQLAlchemyError as e:
         raise FlowExecError(
             human_description="Querying DB object failed",
