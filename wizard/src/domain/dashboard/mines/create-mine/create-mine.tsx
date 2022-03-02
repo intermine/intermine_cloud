@@ -4,11 +4,15 @@ import { FormControlLabel } from '@intermine/chromatin/form-control-label'
 import { Radio } from '@intermine/chromatin/radio'
 import { RadioGroup } from '@intermine/chromatin/radio-group'
 import { createStyle } from '@intermine/chromatin/styles'
+import { InlineAlertProps } from '@intermine/chromatin/inline-alert'
 
 import { DASHBOARD_MINES_LANDING_PATH } from '../../../../routes'
 import { dataApi, templateApi } from '../../../../services/api'
 import { DashboardForm as DForm } from '../../common/dashboard-form'
-import { useDashboardForm } from '../../common/dashboard-form/utils'
+import {
+    TUseDashboardFormState,
+    useDashboardForm
+} from '../../common/dashboard-form/utils'
 import { useDashboardQuery, useOnProgress } from '../../hooks'
 import { initialFormFieldsValue } from './form-utils'
 
@@ -70,6 +74,18 @@ export const CreateMine = () => {
     const classes = useStyles()
     const [templateOptions, setTemplatesOptions] = useState<TSelectOption[]>([])
     const [datasetOptions, setDatasetOptions] = useState<TSelectOption[]>([])
+    const [inlineAlertProps, setInlineAlertProps] = useState<InlineAlertProps>(
+        {}
+    )
+
+    const _setInlineAlert = (p: InlineAlertProps) => {
+        setInlineAlertProps({
+            onClose: () => setInlineAlertProps({ isOpen: false }),
+            isOpen: true,
+            isDense: true,
+            ...p
+        })
+    }
 
     const {
         state,
@@ -92,37 +108,44 @@ export const CreateMine = () => {
         resetToInitialState()
     }
 
-    const { onProgressStart, onProgressUpdate, onProgressSuccessful } =
-        useOnProgress()
+    // const { onProgressStart, onProgressUpdate, onProgressSuccessful } =
+    //     useOnProgress()
 
-    const submitForm = () => {
-        onProgressStart({
-            id: subDomain.value,
-            getProgressText: (loadedSize, totalSize) =>
-                `${loadedSize}/${totalSize} steps`,
-            isDependentOnBrowser: false,
-            loadedSize: 1,
-            totalSize: 11,
-            name: name.value,
-            onCancel: () => console.log('Cancel'),
-            onRetry: () => console.log('Retry')
+    const submitForm = (
+        e: TUseDashboardFormState<typeof initialFormFieldsValue>
+    ) => {
+        _setInlineAlert({
+            message: 'We are offline, please try after sometime.',
+            type: 'error'
         })
+        // onProgressStart({
+        //     id: subDomain.value,
+        //     getProgressText: (loadedSize, totalSize) =>
+        //         `${loadedSize}/${totalSize} steps`,
+        //     isDependentOnBrowser: false,
+        //     loadedSize: 1,
+        //     totalSize: 11,
+        //     name: name.value,
+        //     onCancel: () => console.log('Cancel'),
+        //     onRetry: () => console.log('Retry')
+        // })
 
-        let l = 1
-        const i = setInterval(() => {
-            console.log(l)
-            onProgressUpdate({ id: subDomain.value, loadedSize: ++l })
-            if (l === 11) {
-                onProgressSuccessful({
-                    id: subDomain.value,
-                    successMsg: name.value + ' is successfully created.',
-                    to: {
-                        pathname: 'http://bluegenes.apps.intermine.org/flymine'
-                    }
-                })
-                clearInterval(i)
-            }
-        }, 100)
+        // let l = 1
+        // const i = setInterval(() => {
+        //     console.log(l)
+        //     onProgressUpdate({ id: subDomain.value, loadedSize: ++l })
+        //     if (l === 11) {
+        //         onProgressSuccessful({
+        //             id: subDomain.value,
+        //             successMsg: name.value + ' is successfully created.',
+        //             to: {
+        //                 pathname:
+        // 'http://bluegenes.apps.intermine.org/flymine'
+        //             }
+        //         })
+        //         clearInterval(i)
+        //     }
+        // }, 100)
 
         resetForm()
     }
@@ -152,6 +175,7 @@ export const CreateMine = () => {
                 pageHeading="Mines"
             />
             <DForm.Wrapper>
+                <DForm.InlineAlert {...inlineAlertProps} />
                 <DForm.Heading>Create a Mine</DForm.Heading>
                 <Box>
                     <DForm.Label
@@ -313,7 +337,9 @@ export const CreateMine = () => {
                                 children: 'Create Mine',
                                 key: 'create',
                                 onClick: () =>
-                                    handleFormSubmit(() => submitForm())
+                                    handleFormSubmit((state) =>
+                                        submitForm(state)
+                                    )
                             }
                         ]}
                     />
