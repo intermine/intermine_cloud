@@ -16,10 +16,7 @@ jobs:
 
             - name: installing dependencies
               working-directory: ./compose/api
-              run: npm install
-              run: npm run build
-              run: npm run generate
-              run: npm run copy
+              run: npm install && npm run build && npm run generate && npm run copy
             - name: publishing
               working-directory: ./compose/api/client
               uses: JS-DevTools/npm-publish@v1
