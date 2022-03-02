@@ -17,8 +17,8 @@ jobs:
             - name: installing dependencies
               working-directory: ./compose/api
               run: npm install && npm run build && npm run generate && npm run copy
-            - name: publishing
+            
+            - uses: JS-DevTools/npm-publish@v1
               working-directory: ./compose/api/client
-              uses: JS-DevTools/npm-publish@v1
               with:
                   token: ${{ secrets.NPM_TOKEN }}
