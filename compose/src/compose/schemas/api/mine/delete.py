@@ -1,11 +1,12 @@
 """Mine API DELETE schema."""
 
-from typing import List, Optional
+from typing import Any, Dict, List, Union
 
 from blackcap.schemas.api.common import ResponseSchema
-from blackcap.schemas.user import User
 from pydantic import BaseModel
 from pydantic.types import UUID4
+
+from compose.schemas.mine import Mine
 
 
 class MineDelete(BaseModel):
@@ -14,14 +15,13 @@ class MineDelete(BaseModel):
     mine_id: UUID4
 
 
-class MineDELETEResponse(ResponseSchema):
-    """Mine DELETE response schema."""
-
-    items: List[MineDelete] = []
-
-
 class MineDELETERequest(BaseModel):
     """Mine DELETE request schema."""
 
-    mines: List[MineDelete]
-    user: Optional[User]
+    mine_list: List[MineDelete]
+
+
+class MineDELETEResponse(ResponseSchema):
+    """Mine DELETE response schema."""
+
+    items: Dict[str, List[Union[Mine, Any]]] = {}

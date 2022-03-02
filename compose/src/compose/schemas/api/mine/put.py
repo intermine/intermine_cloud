@@ -1,8 +1,7 @@
 """Mine API PUT schema."""
-from typing import List, Optional
+from typing import Any, Dict, List, Optional, Union
 
 from blackcap.schemas.api.common import ResponseSchema
-from blackcap.schemas.user import User
 from pydantic import BaseModel
 from pydantic.types import UUID4
 
@@ -21,11 +20,10 @@ class MineUpdate(BaseModel):
 class MinePUTRequest(BaseModel):
     """Mine PUT request schema."""
 
-    mines: List[MineUpdate]
-    user: Optional[User]
+    mine_list: List[MineUpdate]
 
 
 class MinePUTResponse(ResponseSchema):
     """Mine PUT response schema."""
 
-    items: List[Mine] = []
+    items: Dict[str, List[Union[Mine, Any]]] = {}
