@@ -19,6 +19,6 @@ jobs:
               run: npm install && npm run build && npm run generate && npm run copy
             
             - uses: JS-DevTools/npm-publish@v1
-              working-directory: ./compose/api/client
               with:
                   token: ${{ secrets.NPM_TOKEN }}
+                  package: ./compose/api/client
