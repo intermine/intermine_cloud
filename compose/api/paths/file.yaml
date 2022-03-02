@@ -1,5 +1,5 @@
 
-summary: file resource endpoint
+summary: File resource endpoint
 description: file endpoint
 get:
   tags:
