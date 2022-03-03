@@ -88,3 +88,21 @@ For an example of performing this within CSC, see: https://github.com/lvarin/rcl
 - https://docs.csc.fi/cloud/pouta/install-client/
 - https://docs.csc.fi/cloud/rahti/tutorials/backup-postgres-allas/
 - https://docs.csc.fi/data/Allas/using_allas/python_library/
+
+## Rahti docker registry
+
+Sometimes you want to make a docker image available on Rahti without pushing it to dockerhub. You can do this by going to https://registry-console.rahti.csc.fi/registry and copying the *docker login* command. You can now build an image and push it to this registry.
+
+```bash
+docker build -t myimage .
+docker tag myimage docker-registry.rahti.csc.fi/myproject/myimage:0.0.1
+docker tag myimage docker-registry.rahti.csc.fi/myproject/myimage:latest
+docker push docker-registry.rahti.csc.fi/myproject/myimage:0.0.1
+docker push docker-registry.rahti.csc.fi/myproject/myimage:latest
+```
+
+Then use the repository tag: `docker-registry.default.svc:5000/myproject/myimage`
+
+
+#### Resources
+- https://docs.csc.fi/cloud/rahti/tutorials/docker_hub_manual_caching/
