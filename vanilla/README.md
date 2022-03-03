@@ -1,3 +1,38 @@
+## Deployment
+
+Firstly, login to the [Rahti console](https://rahti.csc.fi:8443) and click your username in the top-right followed by *Copy Login Command*. You will need the [OpenShift CLI](https://docs.openshift.com/container-platform/latest/cli_reference/openshift_cli/getting-started-cli.html) to use the login command.
+
+You should now be able to use `kubectl` and dependent commands like `helm` to manage your Rahti kubernetes cluster.
+
+### Installing
+
+Edit *values.yaml* so the mineName, objectStorage keys and bucket paths are correct. You will need to have uploaded each of the required resources to Allas (`rclone sync -P my-local-dir s3allas:mybucket/path`).
+
+```bash
+helm install -f values.yaml pombemine ../helm-operator/helm-charts/intermineinstance
+```
+
+### Uninstalling
+
+Most of the resources will be removed by using helm.
+
+```bash
+helm uninstall pombemine
+```
+
+If the builder job hasn't finished, this will continue to linger unless you delete it.
+
+```bash
+kubectl delete job.batch/pombemine-builder
+```
+
+Postgresql and solr use PVCs so their resources can be replaced without losing data. If you've changed their configuration or would like to start from an empty database, you will need to delete their PVCs.
+
+```bash
+kubectl delete pvc/data-pombemine-postgresql-0
+kubectl delete pvc/data-pombemine-solr-0
+```
+
 ## Allas Object Storage
 
 ```bash
