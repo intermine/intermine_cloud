@@ -8,6 +8,7 @@ import docker
 
 from intermine_builder import MineBuilder
 from intermine_builder.properties import create_properties, write_properties, write_solr_host
+from intermine_builder.project_xml import parse_project_xml
 
 # There really is no (clean) way to have both separate commands for the methods
 # that need to be handled differently, and dynamic resolution of method names.
@@ -99,11 +100,7 @@ def main(mine, task, **options):
         sys.exit(err.exit_status)
 
 
-@click.command()
-@click.option("--mine-path", type=click.Path(exists=True, file_okay=False), required=True, help="Path to mine directory to be prepared.")
-@click.option("--override", multiple=True, help="Example: --override webapp.path=kittenmine --override project.title=KittenMine")
-def prepare(**options):
-    """Make changes to the filesystem to faciliate building a mine - no containers used."""
+def prepare_fn(**options):
     mine_path = Path(options['mine_path'])
     mine_name = mine_path.name
 
@@ -123,3 +120,40 @@ def prepare(**options):
     properties = create_properties(**kwargs)
     write_properties(Path.home() / '.intermine' / (mine_name + '.properties'), properties)
     write_solr_host(mine_path, os.getenv('SOLR_HOST', 'localhost'), mine_name)
+
+
+@click.command()
+@click.option("--mine-path", type=click.Path(exists=True, file_okay=False), required=True, help="Path to mine directory to be prepared.")
+@click.option("--override", multiple=True, help="Example: --override webapp.path=kittenmine --override project.title=KittenMine")
+def prepare(**options):
+    """Make changes to the filesystem to faciliate building a mine - no containers used.
+    Expects envvars for dependent services to be present."""
+    prepare_fn(**options)
+
+
+@click.command()
+@click.option("--mine-path", type=click.Path(exists=True, file_okay=False), required=True, help="Path to mine directory to be prepared.")
+@click.option("--bio-path", type=click.Path(exists=True, file_okay=False), required=False, help="Path to optional bio directory to be installed.")
+@click.option("--override", multiple=True, help="Example: --override webapp.path=kittenmine --override project.title=KittenMine")
+def job(**options):
+    """Perform a complete build and deployment of a mine - no containers used.
+    Expects envvars for dependent services to be present."""
+    mine_path = Path(options['mine_path'])
+    mine_name = mine_path.name
+
+    prepare_fn(**options)
+
+    builder = MineBuilder(mine_name, mine_path=mine_path.parent, containerless=True)
+    if 'bio_path' in options:
+        builder.install(cwd=options['bio_path'], stacktrace=True)
+    builder.clean(stacktrace=True)
+    builder.build_db(stacktrace=True)
+
+    project = parse_project_xml(mine_path / "project.xml")
+    for source in project['sources']:
+        builder.integrate(source, stacktrace=True)
+    for postprocess in project['post-processing']:
+        builder.post_process(postprocess, stacktrace=True)
+
+    builder.build_user_db(stacktrace=True)
+    builder.deploy(stacktrace=True)

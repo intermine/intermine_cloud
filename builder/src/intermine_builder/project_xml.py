@@ -2,6 +2,7 @@
 
 import os
 import xml.etree.ElementTree as ET
+from pathlib import Path
 
 from intermine_builder.types import DataSource
 
@@ -11,6 +12,25 @@ def _read(project_xml_path: os.PathLike) -> ET.ElementTree:
 
 def _write(project_xml_path: os.PathLike, tree: ET.ElementTree) -> None:
     tree.write(project_xml_path)
+
+
+def parse_project_xml(project_xml_path: os.PathLike) -> dict:
+    tree = _read(project_xml_path)
+    root  = tree.getroot()
+
+    res = { 'sources': [], 'post-processing': [] }
+
+    sources_el = root.find('sources')
+    if sources_el:
+        for source in sources_el.findall('source'):
+            res['sources'].append(source.attrib['name'])
+
+    postprocessing_el = root.find('post-processing')
+    if postprocessing_el:
+        for postprocess in postprocessing_el.findall('post-process'):
+            res['post-processing'].append(postprocess.attrib['name'])
+
+    return res
 
 
 def append_source(project_xml_path: os.PathLike, source: DataSource) -> None:

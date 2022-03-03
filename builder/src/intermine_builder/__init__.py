@@ -1,6 +1,7 @@
 import os
 from pathlib import Path
 from typing import Any, ByteString, Dict, List, Optional, TypedDict
+import subprocess
 
 import docker
 
@@ -22,12 +23,21 @@ class MineBuilder:
     def __init__(self, mine: str,
             build_image: bool = False,
             data_path: Optional[os.PathLike] = None,
-            volumes: Optional[Dict] = None):
-        self.user = str(os.getuid()) + ":" + str(os.getgid())
+            mine_path: Optional[os.PathLike] = None,
+            volumes: Optional[Dict] = None,
+            containerless: bool = False):
+
         self.mine = mine
 
         self.data_path = Path(data_path) if data_path else (Path.cwd() / "data")
-        self.mine_path = self.data_path / "mine"
+        self.mine_path = Path(mine_path) if mine_path else (self.data_path / "mine")
+
+        # Remaining setup only makes sense when using a container.
+        if containerless:
+            self.containerless = True
+            return
+
+        self.user = str(os.getuid()) + ":" + str(os.getgid())
 
         # TODO centrally define all these paths, to make it easy to change and robust
         self.volumes = {
@@ -72,19 +82,28 @@ class MineBuilder:
                 "Missing docker network: " + DOCKER_NETWORK_NAME
             ) from exc
 
-    def __run(self, command):
-        res = self.client.containers.run(
-            image=self.image,
-            name="intermine-builder",
-            user=self.user,
-            volumes=self.volumes,
-            network=DOCKER_NETWORK_NAME,
-            command=command,
-            remove=True,
-            stdout=True,
-            stderr=True,
-            working_dir="/home/intermine/intermine/" + self.mine,
-        )
+    def __run(self, command, **kwargs):
+        cwd = kwargs.get("cwd")
+
+        if self.containerless:
+            res = subprocess.run(
+                command,
+                cwd=cwd or (self.mine_path / self.mine),
+                check=True
+            )
+        else:
+            res = self.client.containers.run(
+                image=self.image,
+                name="intermine-builder",
+                user=self.user,
+                volumes=self.volumes,
+                network=DOCKER_NETWORK_NAME,
+                command=command,
+                remove=True,
+                stdout=True,
+                stderr=True,
+                working_dir=cwd or ("/home/intermine/intermine/" + self.mine),
+            )
 
         return res
 
@@ -103,18 +122,17 @@ class MineBuilder:
 
     def __gradle(self, args: List[str], **kwargs):
         command = ["./gradlew"] + args
-        try:
-            if kwargs["stacktrace"]:
-                command += ["--stacktrace"]
-            if kwargs["info"]:
-                command += ["--info"]
-            if kwargs["debug"]:
-                command += ["--debug"]
-            if kwargs["scan"]:
-                command += ["--scan"]
-        except KeyError:
-            pass
-        return self.__run(command)
+
+        if kwargs.get("stacktrace"):
+            command += ["--stacktrace"]
+        if kwargs.get("info"):
+            command += ["--info"]
+        if kwargs.get("debug"):
+            command += ["--debug"]
+        if kwargs.get("scan"):
+            command += ["--scan"]
+
+        return self.__run(command, **kwargs)
 
     def clean(self, **kwargs):
         args = ["clean"]
@@ -144,6 +162,10 @@ class MineBuilder:
 
     def redeploy(self, **kwargs):
         args = ["cargoRedeployRemote"]
+        return self.__gradle(args, **kwargs)
+
+    def install(self, **kwargs):
+        args = ["install"]
         return self.__gradle(args, **kwargs)
 
     # Other commands

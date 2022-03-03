@@ -6,7 +6,7 @@ type: application
 version: 0.1.0
 dependencies:
   - name: postgresql
-    version: 10.13.4
+    version: 11.1.1
     repository: https://charts.bitnami.com/bitnami
   - name: solr
     version: 2.1.2

@@ -1,0 +1,185 @@
+# Default values for intermineinstance.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+image:
+  repository: intermine/bluegenes
+  # pullPolicy: Always
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: latest
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+podAnnotations: {}
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+service:
+  type: ClusterIP
+  port: 80
+
+ingress:
+  enabled: true
+  className: ""
+  annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  hostname: localhost
+  # hosts:
+  #   - host: localhost
+  #     paths:
+  #       - path: /
+  #         pathType: Prefix
+  tls: []
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
+
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+postgresql:
+  port: 5432
+  postgresqlPassword: postgres
+  auth:
+    postgresPassword: postgres
+  primary:
+    persistence:
+      # CSC Rahti would otherwise default to glusterfs-storage, which is less
+      # performant and requires tuning to avoid errors when using postgresql.
+      # https://github.com/gluster/glusterfs/issues/2056
+      storageClass: standard-rwo
+    initdb:
+      user: postgres
+      password: postgres
+      scripts:
+        init_mine.sql: |
+          update pg_database set datallowconn = TRUE where datname = 'template0';
+          use template0;
+          update pg_database set datistemplate = FALSE where datname = 'template1';
+          drop database template1;
+          create database template1 with template = template0 encoding = 'SQL_ASCII' LC_COLLATE='C' LC_CTYPE='C';
+          update pg_database set datistemplate = TRUE where datname = 'template1';
+          use template1;
+          update pg_database set datallowconn = FALSE where datname = 'template0';
+          ALTER USER postgres WITH SUPERUSER;
+          CREATE DATABASE "mine";
+          CREATE DATABASE "items-mine";
+          CREATE DATABASE "userprofile-mine";
+          GRANT ALL PRIVILEGES ON DATABASE "mine" to postgres;
+          GRANT ALL PRIVILEGES ON DATABASE "items-mine" to postgres;
+          GRANT ALL PRIVILEGES ON DATABASE "userprofile-mine" to postgres;
+    containerSecurityContext:
+      enabled: false
+    podSecurityContext:
+      enabled: false
+  readReplicas:
+    podSecurityContext:
+      enabled: false
+    containerSecurityContext:
+      enabled: false
+  metrics:
+    containerSecurityContext:
+      enabled: false
+
+solr:
+  persistence:
+    storageClass: standard-rwo
+  cloudEnabled: false
+  cloudBootstrap: false
+  zookeeper:
+    enabled: false
+  replicaCount: 1
+  collectionReplicas: 1
+  podSecurityContext:
+    enabled: false
+  containerSecurityContext:
+    enabled: false
+  metrics:
+    containerSecurityContext:
+      enabled: false
+    podSecurityContext:
+      enabled: false
+
+tomcat:
+  tomcatUsername: tomcat
+  tomcatPassword: tomcat
+  image:
+    repository: bitnami/tomcat
+    tag: 8.5.72
+  service:
+    type: ClusterIP
+    port: 8080
+  ingress:
+    enabled: true
+    hostname: legacy.localhost
+    pathType: Prefix
+  podSecurityContext:
+    enabled: false
+  containerSecurityContext:
+    enabled: false
+
+bluegenes:
+  backendServiceRoot: ""
+  serviceRoot: "legacy.localhost/pombemine"
+  mineName: "PombeMine"
+  mineNamespace: "pombemine"
+
+builder:
+  enabled: true
+  image:
+    repository: docker-registry.default.svc:5000/pombemine-staging/jobbuild
+    tag: latest
+  mineName: pombemine
+  objectStorage:
+    accessKey: 345b8f0e0d1a49d89ab6507fca3c88ae
+    secretKey: 7af16b6b794c43ff8ae380bf2107b6a6
+    endpoint: object.pouta.csc.fi
+    buckets:
+      minedir: staging/pombemine
+      data: staging/pombe
+      bio: staging/pombemine-bio-sources
