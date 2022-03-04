@@ -1,12 +1,12 @@
 dependencies:
 - name: postgresql
   repository: https://charts.bitnami.com/bitnami
-  version: 11.1.1
+  version: 11.1.3
 - name: solr
   repository: https://charts.bitnami.com/bitnami
-  version: 2.1.2
+  version: 3.0.7
 - name: tomcat
   repository: https://charts.bitnami.com/bitnami
-  version: 9.5.3
-digest: sha256:3e2630e778a3efb2912bb1ee5741cdda11fcb310f1d36c678bde916ee97fcc12
-generated: "2022-02-25T12:53:17.067852873Z"
+  version: 10.1.12
+digest: sha256:b9908fce65a6deb6acb9ccc484f8edb38713ea9d1d8b4bb41225daae1f22e6ee
+generated: "2022-03-04T12:54:22.109645556Z"

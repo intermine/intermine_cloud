@@ -132,7 +132,7 @@ def _prepare(**options):
 
     properties = create_properties(**kwargs)
     write_properties(Path.home() / '.intermine' / (mine_name + '.properties'), properties)
-    write_solr_host(mine_path, os.getenv('SOLR_HOST', 'localhost'), mine_name)
+    write_solr_host(mine_path, os.getenv('SOLR_HOST', 'localhost'))
 
 
 @click.command()

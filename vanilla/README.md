@@ -12,9 +12,26 @@ Edit *values.yaml* so the mineName, objectStorage keys and bucket paths are corr
 helm install -f values.yaml pombemine ../helm-operator/helm-charts/intermineinstance
 ```
 
+### Updating
+
+This uses the kubectl `-l` flag to only apply the resources matching a selector, which in this example is for tomcat.
+
+```bash
+helm template -f values.yaml pombemine ../helm-operator/helm-charts/intermineinstance | kubectl apply -f - -l app.kubernetes.io/name=tomcat
+```
+
+The same can be done for the other applications as well.
+
+- `app.kubernetes.io/name=tomcat`
+- `app.kubernetes.io/name=postgresql`
+- `app.kubernetes.io/name=solr`
+- `app.kubernetes.io/name=intermineinstance` for BlueGenes
+
+All of these use PVCs so no data is lost.
+
 ### Uninstalling
 
-Most of the resources will be removed by using helm.
+Most of the resources will be removed by helm.
 
 ```bash
 helm uninstall pombemine

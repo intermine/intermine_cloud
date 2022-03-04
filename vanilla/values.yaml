@@ -46,7 +46,7 @@ ingress:
   annotations: {}
     # kubernetes.io/ingress.class: nginx
     # kubernetes.io/tls-acme: "true"
-  hostname: localhost
+  hostname: pombemine-staging.rahtiapp.fi
   # hosts:
   #   - host: localhost
   #     paths:
@@ -127,6 +127,13 @@ postgresql:
       enabled: false
 
 solr:
+  auth:
+    enabled: false
+    adminUsername: solr
+    adminPassword: solr
+  coreNames:
+    - mine-search
+    - mine-autocomplete
   persistence:
     storageClass: standard-rwo
   cloudEnabled: false
@@ -156,10 +163,11 @@ tomcat:
     tag: 8.5.72
   service:
     type: ClusterIP
-    port: 8080
+    ports:
+      http: 8080
   ingress:
     enabled: true
-    hostname: legacy.localhost
+    hostname: legacy.pombemine-staging.rahtiapp.fi
     pathType: Prefix
   podSecurityContext:
     enabled: false
@@ -179,10 +187,10 @@ tomcat:
     subPath: tomcat-users.xml
 
 bluegenes:
-  backendServiceRoot: ""
-  serviceRoot: "legacy.localhost/pombemine"
-  mineName: "PombeMine"
-  mineNamespace: "pombemine"
+  backendServiceRoot: http://pombemine-tomcat:8080/pombemine
+  serviceRoot: https://pombemine-staging.rahtiapp.fi/pombemine
+  mineName: PombeMine
+  mineNamespace: pombemine
 
 builder:
   enabled: true

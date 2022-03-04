@@ -116,12 +116,12 @@ def _replace_property(filepath: os.PathLike, property: str, value: str):
         f.write('\n'.join(properties_replaced))
 
 
-def write_solr_host(minepath: os.PathLike, solr_host: str, mine_name: str):
+def write_solr_host(minepath: os.PathLike, solr_host: str):
     minepath = Path(minepath)
     p1_path = minepath / 'dbmodel' / 'resources' / 'keyword_search.properties'
     p2_path = minepath / 'dbmodel' / 'resources' / 'objectstoresummary.config.properties'
 
-    solr_url = 'http://' + solr_host + ':8983/solr/' + mine_name
+    solr_url = 'http://' + solr_host + ':8983/solr/mine'
 
     try:
         _replace_property(p1_path, 'index.solrurl', solr_url + '-search')

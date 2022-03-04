@@ -70,9 +70,15 @@ spec:
       containers:
       - name: {{.Release.Name}}-builder-job
         image: "{{.Values.builder.image.repository}}:{{.Values.builder.image.tag}}"
-        command: [sh, -c, "builder_job --properties-path /home/intermine/properties.pkl --mine-path /home/intermine/{{.Values.builder.mineName}} --bio-path /bio ; sleep 4h"]
-        # command: ["builder_job"]
-        # args: ["--mine-path", "/home/intermine/{{.Values.builder.mineName}}"]
+        # command: [sh, -c, "builder_job --properties-path /home/intermine/properties.pkl --mine-path /home/intermine/{{.Values.builder.mineName}} --bio-path /bio ; sleep 4h"]
+        command: ["builder_job"]
+        args:
+        - "--properties-path"
+        - "/home/intermine/properties.pkl"
+        - "--mine-path"
+        - "/home/intermine/{{.Values.builder.mineName}}"
+        - "--bio-path"
+        - "/bio"
         env:
         - name: PGHOST
           value: {{ template "common.names.fullname" .Subcharts.postgresql }}
@@ -179,12 +185,8 @@ stringData:
                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                   xsi:schemaLocation="http://tomcat.apache.org/xml tomcat-users.xsd"
                   version="1.0">
-
       <role rolename="manager-script"/>
       <role rolename="manager-jmx"/>
-      <role rolename="manager-gui"/>
-      <role rolename="manager-status"/>
       <user username="tomcat" password="tomcat" roles="manager-script,manager-jmx"/>
-      <user username="bob" password="whatever" roles="manager-gui,manager-status"/>
     </tomcat-users>
 {{- end }}
