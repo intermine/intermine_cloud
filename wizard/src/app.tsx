@@ -165,8 +165,6 @@ export const App = () => {
         })
     }, [])
 
-    console.log('Updating')
-
     return (
         <ThemeProvider theme={themeType === 'dark' ? darkTheme : lightTheme}>
             <Box
