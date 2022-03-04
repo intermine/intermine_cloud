@@ -9,7 +9,7 @@ import { clone } from '@intermine/chromatin/utils'
 import { Link, useHistory } from 'react-router-dom'
 import GoBackIcon from '@intermine/chromatin/icons/System/arrow-left-line'
 
-import { DomElementIDs } from '../../../constants/ids'
+import { DomElementIDs } from '../../../shared/constants'
 import { LOGIN_PATH } from '../../../routes'
 import {
     Form,

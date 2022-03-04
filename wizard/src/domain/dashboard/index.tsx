@@ -3,7 +3,7 @@ import { Switch, Route } from 'react-router-dom'
 import { Box } from '@intermine/chromatin/box'
 import { createStyle } from '@intermine/chromatin/styles'
 
-import { DomElementIDs } from '../../constants/ids'
+import { DomElementIDs } from '../../shared/constants'
 import {
     DASHBOARD_OVERVIEW_PATH,
     DASHBOARD_DATASETS_PATH,
@@ -15,8 +15,11 @@ import { RouteLoadingSpinner } from '../../components/route-loading-spinner'
 import { Sidebar } from './sidebar'
 import { AdditionalSidebar } from './additional-sidebar'
 import { DashboardErrorBoundary } from './common/error-boundary'
-import { useSidebarReducer } from '../../context'
-import { useStoreSelector, additionalSidebarSelector } from '../../store'
+import {
+    useStoreSelector,
+    additionalSidebarSelector,
+    sidebarSelector
+} from '../../store'
 
 const Overview = lazy(() => import('./overview'))
 const Datasets = lazy(() => import('./datasets'))
@@ -110,11 +113,7 @@ const Dashboard = () => {
     const { isOpen: isAdditionalSidebarOpen } = useStoreSelector(
         additionalSidebarSelector
     )
-    const sidebarReducer = useSidebarReducer()
-
-    const {
-        state: { isOpen: isSidebarOpen }
-    } = sidebarReducer
+    const { isOpen: isSidebarOpen } = useStoreSelector(sidebarSelector)
 
     const classes = useStyles({ isAdditionalSidebarOpen, isSidebarOpen })
 

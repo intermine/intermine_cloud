@@ -1,6 +1,6 @@
 import { Model200UserResponseAllOfItems } from '@intermine/compose-rest-client'
-import { ResponseStatus } from '../constants/response'
-import { TUserDetails } from '../context/types'
+import { ResponseStatus } from '../shared/constants'
+import { TAuthReducerUserDetails } from '../shared/types'
 import { authApi } from './api'
 
 const defaultUser = {
@@ -21,7 +21,7 @@ export type TGetUserFromUserListOption = {
 
 export const getUserFromUserList = (
     options: TGetUserFromUserListOption
-): Omit<TUserDetails, 'status'> => {
+): Omit<TAuthReducerUserDetails, 'status'> => {
     const { userIndex = 0, userList } = options
 
     if (!Array.isArray(userList)) {
@@ -52,7 +52,7 @@ export const getUserFromUserList = (
 }
 
 export const getCurrentUserDetails = async (): Promise<
-    TUserDetails & { status: ResponseStatus }
+    TAuthReducerUserDetails & { status: ResponseStatus }
 > => {
     try {
         const response = await authApi.authCheck()

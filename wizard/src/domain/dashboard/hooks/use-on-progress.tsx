@@ -1,6 +1,6 @@
 import { TProgressReducerItem } from '../../../shared/types'
 import { AdditionalSidebarTabs } from '../../../shared/constants'
-import { ProgressItemStatus } from '../../../constants/progress'
+import { ProgressItemStatus } from '../../../shared/constants'
 import {
     useStoreDispatch,
     updateAdditionalSidebar,

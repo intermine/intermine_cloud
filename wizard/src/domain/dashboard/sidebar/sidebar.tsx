@@ -12,7 +12,12 @@ import TemplateIcon from '@intermine/chromatin/icons/Design/paint-brush-line'
 import MinesIcon from '@intermine/chromatin/icons/Business/bubble-chart-fill'
 import CollapseIcon from '@intermine/chromatin/icons/System/arrow-left-line'
 
-import { useSidebarReducer } from '../../../context'
+import {
+    useStoreDispatch,
+    useStoreSelector,
+    updateSidebarState,
+    sidebarSelector
+} from '../../../store'
 import {
     DASHBOARD_OVERVIEW_PATH,
     DASHBOARD_DATASETS_PATH,
@@ -83,15 +88,13 @@ const useStyles = createStyle((theme) => {
 export const Sidebar = () => {
     const location = useLocation()
     const history = useHistory()
-    const sidebarReducer = useSidebarReducer()
+    const storeDispatch = useStoreDispatch()
+
     const {
-        state: {
-            isOpen,
-            isPageSwitchingAllowed,
-            onSidebarItemClick: _onSidebarItemClick
-        },
-        updateSidebarState
-    } = sidebarReducer
+        isOpen,
+        isPageSwitchingAllowed,
+        onSidebarItemClick: _onSidebarItemClick
+    } = useStoreSelector(sidebarSelector)
 
     const classes = useStyles({ isOpen })
 
@@ -176,7 +179,9 @@ export const Sidebar = () => {
                         <Button
                             variant="ghost"
                             onClick={() =>
-                                updateSidebarState({ isOpen: !isOpen })
+                                storeDispatch(
+                                    updateSidebarState({ isOpen: !isOpen })
+                                )
                             }
                             LeftIcon={<CollapseIcon />}
                             hasFullWidth

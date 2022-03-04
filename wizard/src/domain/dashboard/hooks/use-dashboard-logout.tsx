@@ -3,9 +3,12 @@ import shortid from 'shortid'
 import { ButtonCommonProps } from '@intermine/chromatin/button'
 import { AxiosResponse } from 'axios'
 
-import { useSharedReducer } from '../../../context'
-import { useStoreDispatch, addGlobalAlert } from '../../../store'
-import { ResponseStatus } from '../../../constants/response'
+import {
+    useStoreDispatch,
+    addGlobalAlert,
+    updateSharedState
+} from '../../../store'
+import { ResponseStatus } from '../../../shared/constants'
 import { LOGIN_PATH } from '../../../routes'
 import { useLogout } from '../../../hooks/use-logout'
 import { useDashboardWarningModal } from './use-dashboard-warning-modal'
@@ -24,8 +27,6 @@ export const useDashboardLogout = () => {
     const storeDispatch = useStoreDispatch()
 
     const { FormIsDirty, Uploading } = RestrictLogoutRestrictions
-
-    const { updateSharedReducer } = useSharedReducer()
 
     const { showWarningModal, closeWarningModal, updateWarningModal } =
         useDashboardWarningModal()
@@ -114,31 +115,35 @@ export const useDashboardLogout = () => {
         }
 
         if (type === FormIsDirty) {
-            updateSharedReducer({
-                isEditingAnyForm: true,
-                cbIfEditingFormAndUserRequestLogout: () => {
-                    showWarningModal({
-                        primaryAction,
-                        ...rest
-                    })
-                }
-            })
+            storeDispatch(
+                updateSharedState({
+                    isEditingAnyForm: true,
+                    cbIfEditingFormAndUserRequestLogout: () => {
+                        showWarningModal({
+                            primaryAction,
+                            ...rest
+                        })
+                    }
+                })
+            )
 
             return
         }
 
         if (type === Uploading) {
-            updateSharedReducer({
-                isUploadingAnyFile: true,
-                cbIfUploadingFileAndUserRequestLogout: () => {
-                    showWarningModal({
-                        primaryAction,
-                        msg: `If you logout, then all the uploads
+            storeDispatch(
+                updateSharedState({
+                    isUploadingAnyFile: true,
+                    cbIfUploadingFileAndUserRequestLogout: () => {
+                        showWarningModal({
+                            primaryAction,
+                            msg: `If you logout, then all the uploads
                             in progress will be lost.`,
-                        ...rest
-                    })
-                }
-            })
+                            ...rest
+                        })
+                    }
+                })
+            )
             return
         }
     }
@@ -148,19 +153,23 @@ export const useDashboardLogout = () => {
     }) => {
         const { type } = props
         if (type === FormIsDirty) {
-            updateSharedReducer({
-                isEditingAnyForm: false,
-                cbIfEditingFormAndUserRequestLogout: () => false
-            })
+            storeDispatch(
+                updateSharedState({
+                    isEditingAnyForm: false,
+                    cbIfEditingFormAndUserRequestLogout: () => false
+                })
+            )
 
             return
         }
 
         if (type === Uploading) {
-            updateSharedReducer({
-                isUploadingAnyFile: false,
-                cbIfUploadingFileAndUserRequestLogout: () => false
-            })
+            storeDispatch(
+                updateSharedState({
+                    isUploadingAnyFile: false,
+                    cbIfUploadingFileAndUserRequestLogout: () => false
+                })
+            )
         }
     }
 

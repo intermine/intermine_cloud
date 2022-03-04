@@ -8,7 +8,7 @@ import { TableCell, TableCellProps } from '@intermine/chromatin/table-cell'
 import { createStyle } from '@intermine/chromatin/styles'
 import { useDebouncedCallback } from '@intermine/chromatin/utils'
 
-import { DomElementIDs } from '../../../constants/ids'
+import { DomElementIDs } from '../../../shared/constants'
 import { RouteLoadingSpinner } from '../../../components/route-loading-spinner'
 
 const {

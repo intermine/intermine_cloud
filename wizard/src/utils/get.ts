@@ -1,4 +1,4 @@
-import { ResponseStatus } from '../constants/response'
+import { ResponseStatus } from '../shared/constants'
 
 const { UserOffline, ServerUnavailable, UnknownError, Ok } = ResponseStatus
 

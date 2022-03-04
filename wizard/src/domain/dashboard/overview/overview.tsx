@@ -1,6 +1,6 @@
 import { Box } from '@intermine/chromatin/box'
 import { useEffect } from 'react'
-import { ResponseStatus } from '../../../constants/response'
+import { ResponseStatus } from '../../../shared/constants'
 import {
     useStoreSelector,
     authSelector,

@@ -8,7 +8,7 @@ import {
 import GoBackIcon from '@intermine/chromatin/icons/System/arrow-left-line'
 import { clone } from '@intermine/chromatin/utils'
 
-import { DomElementIDs } from '../../../constants/ids'
+import { DomElementIDs } from '../../../shared/constants'
 import { LOGIN_PATH } from '../../../routes'
 import {
     Form,

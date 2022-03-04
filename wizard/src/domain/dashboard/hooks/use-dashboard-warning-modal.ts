@@ -1,7 +1,12 @@
 import { useHistory } from 'react-router'
 import { ButtonCommonProps } from '@intermine/chromatin/button'
 
-import { useGlobalModalReducer } from '../../../context'
+import {
+    useStoreDispatch,
+    updateGlobalModal,
+    closeGlobalModal,
+} from '../../../store'
+import { TGlobalModalReducer } from '../../../shared/types'
 
 type TUseDashboardWarningModalProps = {
     msg?: string
@@ -16,8 +21,11 @@ type TUseDashboardWarningModalProps = {
 
 export const useDashboardWarningModal = () => {
     const history = useHistory()
-    const { updateGlobalModalProps, closeGlobalModal } = useGlobalModalReducer()
+    const storeDispatch = useStoreDispatch()
 
+    const _updateGlobalModal = (payload: TGlobalModalReducer) => {
+        storeDispatch(updateGlobalModal(payload))
+    }
     const showWarningModal = (props: TUseDashboardWarningModalProps) => {
         const {
             msg = 'All your work will be lost.',
@@ -30,7 +38,7 @@ export const useDashboardWarningModal = () => {
             redirectTo,
         } = props
 
-        updateGlobalModalProps({
+        _updateGlobalModal({
             isOpen: true,
             heading: 'Are you sure?',
             type: 'warning',
@@ -57,6 +65,6 @@ export const useDashboardWarningModal = () => {
     return {
         showWarningModal,
         closeWarningModal: closeGlobalModal,
-        updateWarningModal: updateGlobalModalProps,
+        updateWarningModal: _updateGlobalModal,
     }
 }

@@ -12,7 +12,7 @@ import {
 } from '../../../store'
 import { AuthStates } from '../../../shared/constants'
 
-import { DomElementIDs, OtherIDs } from '../../../constants/ids'
+import { DomElementIDs, OtherIDs } from '../../../shared/constants'
 import {
     FORGOT_PASSWORD_PATH,
     REGISTER_PATH,
