@@ -3,6 +3,9 @@ import os
 import sys
 from pathlib import Path
 import pickle
+import subprocess
+import time
+import traceback
 
 import click
 import docker
@@ -151,6 +154,7 @@ def prepare(**options):
 @click.option("--bio-path", type=click.Path(exists=True, file_okay=False), required=False, help="Path to optional bio directory to be installed.")
 @click.option("--properties-path", type=click.Path(exists=True), required=False, help="Path to pickle file containing a dict of property overrides.")
 @click.option("--override", multiple=True, help="Example: --override webapp.path=kittenmine --override project.title=KittenMine")
+@click.option("--keep-alive", is_flag=True, required=False, help="Keep process alive when job fails. Has no effect when used with `--task`. Useful to keep a container running for troubleshooting.")
 def job(**options):
     """Perform a complete build and deployment of a mine - no containers used.
     Expects envvars for dependent services to be present."""
@@ -165,17 +169,26 @@ def job(**options):
         options['containerless'] = True
         return _task(mine_name, task, **options)
 
-    builder = MineBuilder(mine_name, mine_path=mine_path.parent, containerless=True)
-    if 'bio_path' in options:
-        builder.install(cwd=options['bio_path'], stacktrace=True)
-    builder.clean(stacktrace=True)
-    builder.build_db(stacktrace=True)
+    try:
+        builder = MineBuilder(mine_name, mine_path=mine_path.parent, containerless=True)
+        if 'bio_path' in options:
+            builder.install(cwd=options['bio_path'], stacktrace=True)
+        builder.clean(stacktrace=True)
+        builder.build_db(stacktrace=True)
 
-    project = parse_project_xml(mine_path / "project.xml")
-    for source in project['sources']:
-        builder.integrate(source, stacktrace=True)
-    for postprocess in project['post-processing']:
-        builder.post_process(postprocess, stacktrace=True)
+        project = parse_project_xml(mine_path / "project.xml")
+        for source in project['sources']:
+            builder.integrate(source, stacktrace=True)
+        for postprocess in project['post-processing']:
+            builder.post_process(postprocess, stacktrace=True)
 
-    builder.build_user_db(stacktrace=True)
-    builder.deploy(stacktrace=True)
+        builder.build_user_db(stacktrace=True)
+        builder.deploy(stacktrace=True)
+
+    except subprocess.CalledProcessError:
+        click.echo(traceback.format_exc(), err=True)
+
+        if options['keep_alive']:
+            click.echo("Process will be kept alive to allow manual intervention and troubleshooting.")
+            while True:
+                time.sleep(60)

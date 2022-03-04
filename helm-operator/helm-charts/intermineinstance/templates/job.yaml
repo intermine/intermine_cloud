@@ -39,22 +39,22 @@ spec:
               path: properties.pkl
       - name: minedir
         persistentVolumeClaim:
-          claimName: minedir
+          claimName: job-{{.Release.Name}}-minedir
       - name: data
         persistentVolumeClaim:
-          claimName: data
+          claimName: job-{{.Release.Name}}-data
       - name: bio
         persistentVolumeClaim:
-          claimName: bio
+          claimName: job-{{.Release.Name}}-bio
       initContainers:
       - name: get-artifacts
         image: rclone/rclone:1.57.0
         command: ["/bin/sh", "-c"]
         args:
         - >
-          rclone copy default:{{.Values.builder.objectStorage.buckets.minedir}} /mine &&
-          rclone copy default:{{.Values.builder.objectStorage.buckets.data}} /data &&
-          rclone copy default:{{.Values.builder.objectStorage.buckets.bio}} /bio &&
+          rclone sync default:{{.Values.builder.objectStorage.buckets.minedir}} /mine &&
+          rclone sync default:{{.Values.builder.objectStorage.buckets.data}} /data &&
+          rclone sync default:{{.Values.builder.objectStorage.buckets.bio}} /bio &&
           chmod +x /mine/gradlew &&
           chmod +x /bio/gradlew
         volumeMounts:
@@ -79,6 +79,7 @@ spec:
         - "/home/intermine/{{.Values.builder.mineName}}"
         - "--bio-path"
         - "/bio"
+        - "--keep-alive"
         env:
         - name: PGHOST
           value: {{ template "common.names.fullname" .Subcharts.postgresql }}
@@ -103,7 +104,7 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: minedir
+  name: job-{{.Release.Name}}-minedir
 spec:
   accessModes: ["ReadWriteOnce"]
   resources:
@@ -113,7 +114,7 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: data
+  name: job-{{.Release.Name}}-data
 spec:
   accessModes: ["ReadWriteOnce"]
   resources:
@@ -123,7 +124,7 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: bio
+  name: job-{{.Release.Name}}-bio
 spec:
   accessModes: ["ReadWriteOnce"]
   resources:
@@ -167,20 +168,6 @@ type: Opaque
 stringData:
   "tomcat-users.xml": |-
     <?xml version='1.0' encoding='utf-8'?>
-    <!--
-      Licensed to the Apache Software Foundation (ASF) under one or more
-      contributor license agreements.  See the NOTICE file distributed with
-      this work for additional information regarding copyright ownership.
-      The ASF licenses this file to You under the Apache License, Version 2.0
-      (the "License"); you may not use this file except in compliance with
-      the License.  You may obtain a copy of the License at
-          http://www.apache.org/licenses/LICENSE-2.0
-      Unless required by applicable law or agreed to in writing, software
-      distributed under the License is distributed on an "AS IS" BASIS,
-      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-      See the License for the specific language governing permissions and
-      limitations under the License.
-    -->
     <tomcat-users xmlns="http://tomcat.apache.org/xml"
                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                   xsi:schemaLocation="http://tomcat.apache.org/xml tomcat-users.xsd"
