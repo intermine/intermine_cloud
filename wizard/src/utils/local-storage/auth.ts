@@ -12,7 +12,7 @@ export const getAuthReducerFromLocalStorage = (
             return defaultValue
         }
 
-        return JSON.parse(authState)
+        return { ...defaultValue, ...JSON.parse(authState) }
     } catch {
         return defaultValue
     }

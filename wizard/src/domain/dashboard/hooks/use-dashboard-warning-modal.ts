@@ -26,6 +26,11 @@ export const useDashboardWarningModal = () => {
     const _updateGlobalModal = (payload: TGlobalModalReducer) => {
         storeDispatch(updateGlobalModal(payload))
     }
+
+    const _closeGlobalModal = () => {
+        storeDispatch(closeGlobalModal())
+    }
+
     const showWarningModal = (props: TUseDashboardWarningModalProps) => {
         const {
             msg = 'All your work will be lost.',
@@ -47,7 +52,7 @@ export const useDashboardWarningModal = () => {
                 ...primaryAction,
                 onClick: (event) => {
                     if (redirectTo) {
-                        closeGlobalModal()
+                        storeDispatch(closeGlobalModal())
                         history.push(redirectTo)
                     }
                     if (primaryAction.onClick) {
@@ -56,7 +61,7 @@ export const useDashboardWarningModal = () => {
                 },
             },
             secondaryAction: {
-                onClick: closeGlobalModal,
+                onClick: _closeGlobalModal,
                 ...secondaryAction,
             },
         })
@@ -64,7 +69,7 @@ export const useDashboardWarningModal = () => {
 
     return {
         showWarningModal,
-        closeWarningModal: closeGlobalModal,
+        closeWarningModal: _closeGlobalModal,
         updateWarningModal: _updateGlobalModal,
     }
 }

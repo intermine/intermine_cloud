@@ -15,7 +15,7 @@ export const getPreferencesReducerFromLocalStorage = (
             return defaultValue
         }
 
-        return JSON.parse(preferences)
+        return { ...defaultValue, ...JSON.parse(preferences) }
     } catch {
         return defaultValue
     }

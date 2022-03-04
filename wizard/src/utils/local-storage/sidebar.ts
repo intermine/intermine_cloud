@@ -13,14 +13,14 @@ export const getSidebarReducerFromLocalStorage = (
             return defaultValue
         }
 
-        return JSON.parse(sidebar)
+        return { ...defaultValue, ...JSON.parse(sidebar) }
     } catch {
         return defaultValue
     }
 }
 
-export const setSidebarReducerToLocalStorage = (
-    sidebar: Partial<TSidebarReducer>
-): void => {
+export const setSidebarReducerToLocalStorage = (sidebar: {
+    isOpen: boolean
+}): void => {
     setValueToLocalStorage(LOCAL_STORAGE_SIDEBAR_KEY, JSON.stringify(sidebar))
 }

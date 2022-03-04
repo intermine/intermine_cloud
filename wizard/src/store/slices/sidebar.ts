@@ -25,7 +25,6 @@ export const sidebarSlice = createSlice({
             state = { ...state, ...action.payload }
             setSidebarReducerToLocalStorage({
                 isOpen: state.isOpen,
-                isPageSwitchingAllowed: false,
             })
 
             return state
