@@ -21,7 +21,7 @@ export const Preferences = () => {
             return storeDispatch(updateAppTheme({ themeType: 'light' }))
         }
 
-        storeDispatch(updateAppTheme({ themeType: 'light' }))
+        storeDispatch(updateAppTheme({ themeType: 'dark' }))
     }
     return (
         <ActionSection

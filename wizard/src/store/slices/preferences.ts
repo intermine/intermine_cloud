@@ -2,7 +2,10 @@ import { ThemeType } from '@intermine/chromatin/styles'
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { TPreferencesReducer } from '../../shared/types'
 // eslint-disable-next-line max-len
-import { getPreferencesReducerFromLocalStorage } from '../../utils/local-storage/preferences'
+import {
+    getPreferencesReducerFromLocalStorage,
+    setPreferencesReducerToLocalStorage,
+} from '../../utils/local-storage/preferences'
 
 import type { RootState } from '../store'
 
@@ -21,6 +24,8 @@ export const preferencesSlice = createSlice({
             action: PayloadAction<{ themeType: ThemeType }>
         ) => {
             state.themeType = action.payload.themeType
+
+            setPreferencesReducerToLocalStorage(state)
             return state
         },
     },
