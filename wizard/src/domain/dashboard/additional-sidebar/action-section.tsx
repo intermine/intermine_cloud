@@ -4,8 +4,8 @@ import { Typography } from '@intermine/chromatin/typography'
 import { IconButton } from '@intermine/chromatin/icon-button'
 import CloseIcon from '@intermine/chromatin/icons/System/close-line'
 
-import { useAdditionalSidebarReducer } from '../../../context'
-import { AdditionalSidebarTabs } from '../../../constants/additional-sidebar'
+import { additionalSidebarActions, useStoreDispatch } from '../../../store'
+import { AdditionalSidebarTabs } from '../../../shared/constants'
 
 export type TActionSectionProps = {
     heading: string
@@ -24,9 +24,16 @@ const ActionSectionContent = (props: BoxBaseProps) => {
 
 const ActionSection = (props: TActionSectionProps) => {
     const { heading, children, isActive } = props
-    const additionalSidebarReducer = useAdditionalSidebarReducer()
-    const { updateAdditionalSidebarState } = additionalSidebarReducer
+    const storeDispatch = useStoreDispatch()
 
+    const closeAdditionalSidebar = () => {
+        storeDispatch(
+            additionalSidebarActions.updateAdditionalSidebar({
+                isOpen: false,
+                activeTab: AdditionalSidebarTabs.None
+            })
+        )
+    }
     return (
         <Box
             csx={{
@@ -50,12 +57,7 @@ const ActionSection = (props: TActionSectionProps) => {
                     Icon={<CloseIcon />}
                     color="error"
                     isDense
-                    onClick={() =>
-                        updateAdditionalSidebarState({
-                            isOpen: false,
-                            activeTab: AdditionalSidebarTabs.None
-                        })
-                    }
+                    onClick={closeAdditionalSidebar}
                 />
             </Box>
             <Divider />

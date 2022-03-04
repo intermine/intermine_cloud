@@ -15,7 +15,8 @@ import { RouteLoadingSpinner } from '../../components/route-loading-spinner'
 import { Sidebar } from './sidebar'
 import { AdditionalSidebar } from './additional-sidebar'
 import { DashboardErrorBoundary } from './common/error-boundary'
-import { useAdditionalSidebarReducer, useSidebarReducer } from '../../context'
+import { useSidebarReducer } from '../../context'
+import { useStoreSelector, additionalSidebarSelector } from '../../store'
 
 const Overview = lazy(() => import('./overview'))
 const Datasets = lazy(() => import('./datasets'))
@@ -106,12 +107,10 @@ const useStyles = createStyle((theme) => {
 })
 
 const Dashboard = () => {
-    const additionalSidebarReducer = useAdditionalSidebarReducer()
+    const { isOpen: isAdditionalSidebarOpen } = useStoreSelector(
+        additionalSidebarSelector
+    )
     const sidebarReducer = useSidebarReducer()
-
-    const {
-        state: { isOpen: isAdditionalSidebarOpen }
-    } = additionalSidebarReducer
 
     const {
         state: { isOpen: isSidebarOpen }

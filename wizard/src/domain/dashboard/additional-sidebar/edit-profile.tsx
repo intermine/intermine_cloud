@@ -1,14 +1,11 @@
-import { AdditionalSidebarTabs } from '../../../constants/additional-sidebar'
+import { AdditionalSidebarTabs } from '../../../shared/constants'
 
 // eslint-disable-next-line max-len
-import { useAdditionalSidebarReducer } from '../../../context'
+import { useStoreSelector, additionalSidebarSelector } from '../../../store'
 import { ActionSection } from './action-section'
 
 export const EditProfile = () => {
-    const additionalSidebarReducer = useAdditionalSidebarReducer()
-    const {
-        state: { activeTab }
-    } = additionalSidebarReducer
+    const { activeTab } = useStoreSelector(additionalSidebarSelector)
 
     return (
         <ActionSection

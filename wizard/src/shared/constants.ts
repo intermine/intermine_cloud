@@ -19,3 +19,10 @@ export enum AuthStates {
     Authorize = 'Authorize',
     NotAuthorize = 'NotAuthorize',
 }
+
+export enum AdditionalSidebarTabs {
+    ProgressTab = 'ProgressTab',
+    PreferencesTab = 'PreferencesTab',
+    EditProfileTab = 'EditProfileTab',
+    None = 'None',
+}

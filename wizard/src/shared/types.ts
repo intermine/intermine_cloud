@@ -1,8 +1,5 @@
-import { AuthStates } from './constants'
+import { AuthStates, AdditionalSidebarTabs } from './constants'
 
-/**
- * Auth
- */
 export type TAuthReducerUserDetails = {
     name: string
     organisation: string
@@ -11,9 +8,12 @@ export type TAuthReducerUserDetails = {
     isActive: boolean
 }
 
-export type TAuthReducerAuthState = AuthStates
-
 export type TAuthReducerState = {
-    authState: TAuthReducerAuthState
+    authState: AuthStates
     userDetails: TAuthReducerUserDetails
+}
+
+export type TAdditionalSidebarReducer = {
+    isOpen: boolean
+    activeTab: AdditionalSidebarTabs
 }

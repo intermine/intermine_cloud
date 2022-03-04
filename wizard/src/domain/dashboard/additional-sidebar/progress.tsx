@@ -1,11 +1,9 @@
 import { useEffect } from 'react'
 import { Typography } from '@intermine/chromatin/typography'
 
-import { AdditionalSidebarTabs } from '../../../constants/additional-sidebar'
-import {
-    useAdditionalSidebarReducer,
-    useProgressReducer
-} from '../../../context'
+import { AdditionalSidebarTabs } from '../../../shared/constants'
+import { useProgressReducer } from '../../../context'
+import { useStoreSelector, additionalSidebarSelector } from '../../../store'
 import { ActionSection } from './action-section'
 import { ProgressItemView } from './progress-item-view'
 import { handleOnBeforeUnload } from '../utils/misc'
@@ -16,12 +14,8 @@ const _handleOnBeforeUnload = (event: Event) => {
 }
 
 export const Progress = () => {
-    const additionalSidebarReducer = useAdditionalSidebarReducer()
     const progressReducer = useProgressReducer()
-
-    const {
-        state: { activeTab }
-    } = additionalSidebarReducer
+    const { activeTab } = useStoreSelector(additionalSidebarSelector)
 
     const {
         state: { progressItems, isRestrictUnmount, activeItems },

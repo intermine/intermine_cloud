@@ -1,11 +1,8 @@
-import {
-    useProgressReducer,
-    useGlobalAlertReducer,
-    useAdditionalSidebarReducer
-} from '../../../context'
+import { useProgressReducer, useGlobalAlertReducer } from '../../../context'
 import { TProgressItem } from '../../../context/types'
-import { AdditionalSidebarTabs } from '../../../constants/additional-sidebar'
+import { AdditionalSidebarTabs } from '../../../shared/constants'
 import { ProgressItemStatus } from '../../../constants/progress'
+import { useStoreDispatch, additionalSidebarActions } from '../../../store'
 
 export type TOnProgressUpdateProps = Partial<TProgressItem> & { id: string }
 export type TOnProgressSuccessfulProps = Partial<TProgressItem> & {
@@ -31,8 +28,8 @@ export type TOnProgressRetry = {
 const { Canceled, Completed, Failed, Running } = ProgressItemStatus
 
 export const useOnProgress = () => {
+    const storeDispatch = useStoreDispatch()
     const { addAlert } = useGlobalAlertReducer()
-    const { updateAdditionalSidebarState } = useAdditionalSidebarReducer()
     const {
         updateProgressItem,
         removeActiveItem,
@@ -71,10 +68,12 @@ export const useOnProgress = () => {
     const onProgressStart = (props: TOnProgressStartProps) => {
         const { id, isDependentOnBrowser, ...rest } = props
         addActiveItem({ id, isDependentOnBrowser })
-        updateAdditionalSidebarState({
-            isOpen: true,
-            activeTab: AdditionalSidebarTabs.ProgressTab
-        })
+        storeDispatch(
+            additionalSidebarActions.updateAdditionalSidebar({
+                isOpen: true,
+                activeTab: AdditionalSidebarTabs.ProgressTab
+            })
+        )
         addItemToProgress({
             id,
             status: Running,

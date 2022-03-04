@@ -6,16 +6,19 @@ import PreferencesIcon from '@intermine/chromatin/icons/Design/tools-line'
 import EditProfileIcon from '@intermine/chromatin/icons/User/user-settings-line'
 import { createStyle } from '@intermine/chromatin/styles'
 
+import { useProgressReducer } from '../../../context'
+import { AdditionalSidebarTabs } from '../../../shared/constants'
 import {
-    useAdditionalSidebarReducer,
-    useProgressReducer
-} from '../../../context'
-import { AdditionalSidebarTabs } from '../../../constants/additional-sidebar'
-
+    useStoreSelector,
+    additionalSidebarSelector,
+    useStoreDispatch,
+    additionalSidebarActions
+} from '../../../store'
 import { Progress } from './progress'
 import { EditProfile } from './edit-profile'
 import { Preferences } from './preferences'
 import { LogoutIconButton } from '../common/logout-icon-button'
+import { TAdditionalSidebarReducer } from '../../../shared/types'
 
 type TUseStyleProps = {
     isOpen: boolean
@@ -94,11 +97,8 @@ const useStyles = createStyle((theme) => {
 })
 
 export const AdditionalSidebar = () => {
-    const additionalSidebarReducer = useAdditionalSidebarReducer()
-    const {
-        updateAdditionalSidebarState,
-        state: { isOpen, activeTab }
-    } = additionalSidebarReducer
+    const storeDispatch = useStoreDispatch()
+    const { isOpen, activeTab } = useStoreSelector(additionalSidebarSelector)
 
     const progressReducer = useProgressReducer()
     const {
@@ -109,28 +109,31 @@ export const AdditionalSidebar = () => {
         isOpen
     })
 
+    const updateAdditionalSidebar = (obj: TAdditionalSidebarReducer) => {
+        storeDispatch(additionalSidebarActions.updateAdditionalSidebar(obj))
+    }
+
     const onClickActionIcon = (tab: AdditionalSidebarTabs) => {
-        if(isOpen && activeTab ===tab) {
+        if (isOpen && activeTab === tab) {
             /**
              * If additional sidebar is open and user clicked
              * on the same tab, then we are closing the tab
              */
-            updateAdditionalSidebarState({
+            updateAdditionalSidebar({
                 isOpen: false,
                 activeTab: None
             })
             return
         }
 
-        updateAdditionalSidebarState({
+        updateAdditionalSidebar({
             isOpen: true,
             activeTab: tab
         })
     }
 
-
     const onLogout = () => {
-        updateAdditionalSidebarState({
+        updateAdditionalSidebar({
             isOpen: false,
             activeTab: None
         })

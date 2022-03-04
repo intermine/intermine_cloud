@@ -94,29 +94,6 @@ export type TUseGlobalModalReducer = {
  */
 
 /**
- * Additional Sidebar
- */
-export type TAdditionalSidebarReducer = {
-    isOpen: boolean
-    activeTab: AdditionalSidebarTabs
-}
-
-export type TAdditionalSidebarReducerAction = {
-    type: AdditionalSidebarActions
-    data: Partial<TAdditionalSidebarReducer>
-}
-
-export type TUseAdditionalSidebarReducer = {
-    state: TAdditionalSidebarReducer
-    updateAdditionalSidebarState: (
-        data: Partial<TAdditionalSidebarReducer>
-    ) => void
-}
-/**
- * Additional Sidebar Ends
- */
-
-/**
  * Global Alert
  */
 export type TAlert = {
@@ -245,7 +222,6 @@ export type TAppContext = {
     preferencesReducer: TUsePreferencesReducer
     sidebarReducer: TUseSidebarReducer
     globalModalReducer: TUseGlobalModalReducer
-    additionalSidebarReducer: TUseAdditionalSidebarReducer
     globalAlertReducer: TUseGlobalAlertReducer
     progressReducer: TUseProgressReducer
     sharedReducer: TUseSharedReducer

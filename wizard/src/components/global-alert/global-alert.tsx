@@ -2,25 +2,21 @@ import { useLocation } from 'react-router'
 import { AlertGroup } from '@intermine/chromatin/alert-group'
 import { Alert } from '@intermine/chromatin/alert'
 
-import {
-    useAdditionalSidebarReducer,
-    useGlobalAlertReducer
-} from '../../context'
+import { useGlobalAlertReducer } from '../../context'
+import { useStoreSelector, additionalSidebarSelector } from '../../store'
 import { isAuthRoute } from '../../routes'
 
 export const GlobalAlert = () => {
     const globalAlertReducer = useGlobalAlertReducer()
-    const additionalSidebarReducer = useAdditionalSidebarReducer()
+    const { isOpen: isAdditionalSidebarOpen } = useStoreSelector(
+        additionalSidebarSelector
+    )
     const { pathname } = useLocation()
 
     const {
         state: { alerts },
         removeAlert
     } = globalAlertReducer
-
-    const {
-        state: { isOpen: isAdditionalSidebarOpen }
-    } = additionalSidebarReducer
 
     const getOrigin = (): { top: string; right: string } => {
         const top = '1.5rem'
