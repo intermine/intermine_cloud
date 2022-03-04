@@ -11,43 +11,12 @@ import {
     AdditionalSidebarTabs,
 } from '../constants/additional-sidebar'
 
-import { AuthStates, AuthActions } from '../constants/auth'
 import { GlobalAlertsActions } from '../constants/global-alert'
 import { GlobalModalActions } from '../constants/global-modal'
 import { PreferencesActions } from '../constants/preferences'
 import { ProgressActions, ProgressItemStatus } from '../constants/progress'
 import { SharedReducerActions } from '../constants/shared-reducer'
 import { SidebarActions } from '../constants/sidebar'
-
-/**
- * Auth
- */
-export type TUserDetails = {
-    name: string
-    organisation: string
-    email: string
-    id: string
-    isActive: boolean
-}
-
-export type TAuthReducer = {
-    authState: AuthStates
-    userDetails: TUserDetails
-}
-
-export type TAuthReducerAction = {
-    type: AuthActions
-    data: unknown
-}
-
-export type TUseAuthReducer = {
-    state: TAuthReducer
-    updateAuthState: (state: AuthStates) => void
-    updateUserDetails: (state: TUserDetails) => void
-}
-/**
- * Auth Ends
- */
 
 /**
  * Preferences
@@ -273,7 +242,6 @@ export type TUseSharedReducer = {
  * App Context
  */
 export type TAppContext = {
-    authReducer: TUseAuthReducer
     preferencesReducer: TUsePreferencesReducer
     sidebarReducer: TUseSidebarReducer
     globalModalReducer: TUseGlobalModalReducer

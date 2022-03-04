@@ -1,22 +1,25 @@
+import { TAuthReducerState } from '../../shared/types'
 import { getValueFromLocalStorage, setValueToLocalStorage } from './common'
-import { DEFAULT_AUTH } from '../../constants/auth'
-import { TAuthReducer } from '../../context/types'
 
 export const LOCAL_STORAGE_AUTH_KEY = 'AUTH'
 
-export const getAuthStateFromLocalStorage = (): TAuthReducer => {
+export const getAuthReducerFromLocalStorage = (
+    defaultValue: TAuthReducerState
+): TAuthReducerState => {
     try {
         const authState = getValueFromLocalStorage(LOCAL_STORAGE_AUTH_KEY)
         if (typeof authState !== 'string') {
-            return DEFAULT_AUTH
+            return defaultValue
         }
 
         return JSON.parse(authState)
     } catch {
-        return DEFAULT_AUTH
+        return defaultValue
     }
 }
 
-export const setAuthStateToLocalStorage = (state: TAuthReducer): void => {
+export const setAuthReducerToLocalStorage = (
+    state: TAuthReducerState
+): void => {
     setValueToLocalStorage(LOCAL_STORAGE_AUTH_KEY, JSON.stringify(state))
 }

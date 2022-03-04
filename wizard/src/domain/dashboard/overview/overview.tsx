@@ -1,27 +1,29 @@
 import { Box } from '@intermine/chromatin/box'
 import { useEffect } from 'react'
 import { ResponseStatus } from '../../../constants/response'
-import { useAuthReducer } from '../../../context'
+import {
+    useStoreSelector,
+    authSelector,
+    authActions,
+    useStoreDispatch
+} from '../../../store'
 import { getCurrentUserDetails } from '../../../services/utils'
 
 import { WorkspaceHeading } from '../common/workspace-heading'
 
 export const Overview = () => {
-    const {
-        updateUserDetails,
-        state: { userDetails }
-    } = useAuthReducer()
+    const { userDetails } = useStoreSelector(authSelector)
+    const storeDispatch = useStoreDispatch()
 
     const fetchUserDetails = async () => {
         const response = await getCurrentUserDetails()
 
         if (response.status === ResponseStatus.Ok) {
-            updateUserDetails(response)
+            storeDispatch(authActions.updateUserDetails(response))
         }
         // If we want to show error if we fail to load user details
         // then we can add code for that here.
     }
-
     const getHeading = (): string => {
         if (typeof userDetails.name === 'string' && userDetails.name !== '') {
             return `Hey, ${userDetails.name}!`

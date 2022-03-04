@@ -1,7 +1,6 @@
 import { useContext } from 'react'
 /* eslint-disable max-len */
 import { useAdditionalSidebarReducer as _useAdditionalSidebarReducer } from './reducers/additional-sidebar-reducer'
-import { useAuthReducer as _useAuthReducer } from './reducers/auth-reducer'
 import { useGlobalAlertReducer as _useGlobalAlertReducer } from './reducers/global-alert-reducer'
 import { useGlobalModalReducer as _useGlobalModalReducer } from './reducers/global-modal-reducer'
 import { usePreferencesReducer as _usePreferencesReducer } from './reducers/preferences-reducer'
@@ -14,10 +13,6 @@ import { AppContext } from './app-context'
 import { TAppContext } from './types'
 
 const store = () => useContext(AppContext)
-
-export const useAuthReducer = () => {
-    return store().authReducer
-}
 
 export const useSidebarReducer = () => {
     return store().sidebarReducer
@@ -49,7 +44,6 @@ export const useSharedReducer = () => {
 
 export const useStore = (): TAppContext => {
     return {
-        authReducer: _useAuthReducer(),
         preferencesReducer: _usePreferencesReducer(),
         sidebarReducer: _useSidebarReducer(),
         globalModalReducer: _useGlobalModalReducer(),

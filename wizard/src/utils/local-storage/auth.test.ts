@@ -1,9 +1,28 @@
 import {
-    getAuthStateFromLocalStorage,
-    setAuthStateToLocalStorage,
+    getAuthReducerFromLocalStorage,
+    setAuthReducerToLocalStorage,
 } from './auth'
 
-import { AuthStates, DEFAULT_AUTH } from '../../constants/auth'
+import { AuthStates } from '../../shared/constants'
+
+const defaultAuthState = {
+    authState: AuthStates.NotAuthorize,
+    userDetails: {
+        email: '',
+        id: '',
+        isActive: false,
+        name: '',
+        organisation: '',
+    },
+}
+
+const randomUserDetails = {
+    email: 'random',
+    id: 'random',
+    isActive: true,
+    name: 'random',
+    organisation: 'random',
+}
 
 describe('Testing local-storage/auth', () => {
     beforeEach(() => {
@@ -14,14 +33,16 @@ describe('Testing local-storage/auth', () => {
         /**
          * If nothing is there, then it should return not authorize.
          */
-        expect(getAuthStateFromLocalStorage()).toEqual(DEFAULT_AUTH)
+        expect(getAuthReducerFromLocalStorage(defaultAuthState)).toEqual(
+            defaultAuthState
+        )
 
-        setAuthStateToLocalStorage({
-            userDetails: {},
+        setAuthReducerToLocalStorage({
+            userDetails: randomUserDetails,
             authState: AuthStates.Authorize,
         })
-        expect(getAuthStateFromLocalStorage()).toEqual({
-            userDetails: {},
+        expect(getAuthReducerFromLocalStorage(defaultAuthState)).toEqual({
+            userDetails: randomUserDetails,
             authState: AuthStates.Authorize,
         })
     })

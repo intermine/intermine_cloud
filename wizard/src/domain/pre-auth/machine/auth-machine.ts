@@ -1,9 +1,9 @@
-import { createMachine, assign, ServiceMap, TypegenDisabled } from 'xstate'
+import { createMachine, assign, ServiceMap } from 'xstate'
 import { clone } from '@intermine/chromatin/utils'
-import { AuthStates } from '../../../constants/auth'
+import { AuthStates } from '../../../shared/constants'
 import { authApi, userApi } from '../../../services/api'
 
-import { TUserDetails } from '../../../context/types'
+import { TAuthReducerUserDetails } from '../../../shared/types'
 import {
     getResponseMessageUsingResponseStatus,
     getResponseStatus,
@@ -28,7 +28,7 @@ export type TResetPasswordPayload = {
 
 export type TAuthMachineContext = {
     errorMessage?: string
-    userDetails?: TUserDetails
+    userDetails?: TAuthReducerUserDetails
     authState?: AuthStates
     isRequestFailed?: boolean
 }

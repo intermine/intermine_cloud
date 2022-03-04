@@ -1,6 +1,5 @@
 export {
     useAdditionalSidebarReducer,
-    useAuthReducer,
     useGlobalAlertReducer,
     useGlobalModalReducer,
     usePreferencesReducer,

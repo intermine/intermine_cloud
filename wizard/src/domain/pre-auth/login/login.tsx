@@ -5,20 +5,22 @@ import { InlineAlert } from '@intermine/chromatin/inline-alert'
 import { Button } from '@intermine/chromatin/button'
 import { clone } from '@intermine/chromatin/utils'
 
-import { useAuthReducer, useGlobalAlertReducer } from '../../../context'
-import { AuthStates } from '../../../constants/auth'
+import { useGlobalAlertReducer } from '../../../context'
+import { useStoreDispatch, authActions } from '../../../store'
+import { AuthStates } from '../../../shared/constants'
+
 import { DomElementIDs, OtherIDs } from '../../../constants/ids'
 import {
     FORGOT_PASSWORD_PATH,
     REGISTER_PATH,
-    DASHBOARD_OVERVIEW_PATH,
+    DASHBOARD_OVERVIEW_PATH
 } from '../../../routes'
 import {
     Form,
     FormHeader,
     FormGroup,
     FormBody,
-    FormAction,
+    FormAction
 } from '../../../components/form'
 import { Logo } from '../../../components/logo'
 import { authMachine, TLoginPayload } from '../machine/auth-machine'
@@ -34,19 +36,18 @@ type TInputFields = {
 const defaultFieldValue: TInputField = {
     errorMessage: '',
     value: '',
-    isError: false,
+    isError: false
 }
 
 export const Login = () => {
-    const authReducer = useAuthReducer()
+    const storeDispatch = useStoreDispatch()
+
     const history = useHistory()
     const { removeAlert } = useGlobalAlertReducer()
 
-    const { updateAuthState } = authReducer
-
     const [{ password, email }, setFields] = useState<TInputFields>({
         password: clone(defaultFieldValue),
-        email: clone(defaultFieldValue),
+        email: clone(defaultFieldValue)
     })
 
     const [authMachineState, dispatch] = useMachine(authMachine)
@@ -76,7 +77,7 @@ export const Login = () => {
 
         const payload: TLoginPayload = {
             email: email.value,
-            password: password.value,
+            password: password.value
         }
 
         dispatch('LOGIN', payload)
@@ -87,7 +88,7 @@ export const Login = () => {
         removeAlert(OtherIDs.UnauthorizeAlert)
 
         // Updating AuthState
-        updateAuthState(AuthStates.Authorize)
+        storeDispatch(authActions.updateAuthState(AuthStates.Authorize))
 
         // Redirecting
         const query = new URLSearchParams(history.location.search)
@@ -124,7 +125,7 @@ export const Login = () => {
                     onClose={() => setIsInlineAlertOpen(false)}
                     isDense
                     csx={{
-                        root: ({ spacing }) => ({ marginBottom: spacing(5) }),
+                        root: ({ spacing }) => ({ marginBottom: spacing(5) })
                     }}
                 />
                 <FormGroup
@@ -135,7 +136,7 @@ export const Login = () => {
                         placeholder: 'Email',
                         value: email.value,
                         onChange: (event) =>
-                            updateValue(setFields, 'email', event),
+                            updateValue(setFields, 'email', event)
                     }}
                     errorMessage={email.errorMessage}
                 />
@@ -149,7 +150,7 @@ export const Login = () => {
                         placeholder: 'Password',
                         value: password.value,
                         onChange: (event) =>
-                            updateValue(setFields, 'password', event),
+                            updateValue(setFields, 'password', event)
                     }}
                     errorMessage={password.errorMessage}
                 >
@@ -158,7 +159,7 @@ export const Login = () => {
                         Component={Link}
                         to={{
                             pathname: FORGOT_PASSWORD_PATH,
-                            search: history.location.search,
+                            search: history.location.search
                         }}
                         type="button"
                         variant="ghost"
@@ -168,8 +169,8 @@ export const Login = () => {
                         csx={{
                             root: ({ spacing }) => ({
                                 marginTop: spacing(2),
-                                padding: '0.25rem',
-                            }),
+                                padding: '0.25rem'
+                            })
                         }}
                     >
                         Forgot Password?
@@ -181,16 +182,16 @@ export const Login = () => {
                     children: 'Login',
                     isDisabled: isMakingLoginRequest,
                     isLoading: isMakingLoginRequest,
-                    onClick: handleLoginClick,
+                    onClick: handleLoginClick
                 }}
                 secondaryAction={{
                     children: 'Create account',
                     Component: Link,
                     to: {
                         pathname: REGISTER_PATH,
-                        search: history.location.search,
+                        search: history.location.search
                     },
-                    isDisabled: isMakingLoginRequest,
+                    isDisabled: isMakingLoginRequest
                 }}
             />
         </Form>

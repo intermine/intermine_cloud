@@ -5,13 +5,10 @@ import { Box } from '@intermine/chromatin/box'
 import { createStyle } from '@intermine/chromatin/styles'
 import 'regenerator-runtime'
 
-import { AuthStates } from './constants/auth'
-import { OtherIDs } from './constants/ids'
-import {
-    useAuthReducer,
-    useGlobalAlertReducer,
-    usePreferencesReducer
-} from './context'
+import { AuthStates, OtherIDs } from './shared/constants'
+import { useGlobalAlertReducer, usePreferencesReducer } from './context'
+import { authSelector, useStoreSelector } from './store'
+
 import { RouteLoadingSpinner } from './components/route-loading-spinner'
 import { darkTheme, lightTheme } from './constants/theme'
 import { PageNotFound } from './components/page-not-found'
@@ -76,11 +73,11 @@ export const App = () => {
     const history = useHistory()
     const { pathname } = useLocation()
 
-    const authReducer = useAuthReducer()
+    const auth = useStoreSelector(authSelector)
+
     const preferenceReducer = usePreferencesReducer()
     const { addAlert } = useGlobalAlertReducer()
 
-    const { state: auth } = authReducer
     const {
         state: { themeType }
     } = preferenceReducer
@@ -161,6 +158,8 @@ export const App = () => {
             })
         })
     }, [])
+
+    console.log('Updating')
 
     return (
         <ThemeProvider theme={themeType === 'dark' ? darkTheme : lightTheme}>
