@@ -26,6 +26,7 @@ export const authSlice = createSlice({
         updateAuthState: (state, action: PayloadAction<AuthStates>) => {
             state.authState = action.payload
             setAuthReducerToLocalStorage(state)
+            return state
         },
         updateUserDetails: (
             state,
@@ -33,6 +34,7 @@ export const authSlice = createSlice({
         ) => {
             state.userDetails = action.payload
             setAuthReducerToLocalStorage(state)
+            return state
         },
     },
 })
