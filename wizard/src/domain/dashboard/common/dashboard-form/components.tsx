@@ -14,7 +14,7 @@ import {
 import { Input, InputProps } from '@intermine/chromatin/input'
 import { createStyle } from '@intermine/chromatin/styles'
 import { scrollToTop } from '../../../../utils/misc'
-import { DomElementIDs } from '../../../../constants/ids'
+import { DomElementIDs } from '../../../../shared/constants'
 
 export type TDashboardFormProps = React.FormHTMLAttributes<HTMLFormElement>
 

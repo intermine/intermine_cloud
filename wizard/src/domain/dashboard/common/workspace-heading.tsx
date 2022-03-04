@@ -10,7 +10,7 @@ import {
 } from '@intermine/chromatin/icon-button'
 import ArrowLeftIcon from '@intermine/chromatin/icons/System/arrow-left-s-line'
 
-import { DomElementIDs } from '../../../constants/ids'
+import { DomElementIDs } from '../../../shared/constants'
 
 export type TWorkspaceHeadingProps = {
     heading: TypographyBaseProps

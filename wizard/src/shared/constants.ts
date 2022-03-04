@@ -1,3 +1,8 @@
+import { createTheme } from '@intermine/chromatin/styles'
+
+export const lightTheme = createTheme({ themeType: 'light' })
+export const darkTheme = createTheme({ themeType: 'dark' })
+
 export enum DomElementIDs {
     Navbar = 'navbar',
     WorkspaceContainer = 'workspace-container',
@@ -32,4 +37,12 @@ export enum ProgressItemStatus {
     Canceled = 'Canceled',
     Completed = 'Completed',
     Failed = 'Failed',
+}
+
+export enum ResponseStatus {
+    Ok,
+    UserOffline,
+    ServerUnavailable,
+    UnknownError,
+    Failed,
 }

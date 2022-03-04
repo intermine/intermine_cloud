@@ -18,7 +18,7 @@ import {
     useDashboardWarningModal,
     useDashboardLogout
 } from '../../hooks'
-import { useSidebarReducer } from '../../../../context'
+import { updateSidebarState, useStoreDispatch } from '../../../../store'
 import { handleOnBeforeUnload } from '../../utils/misc'
 
 export type TDashboardFormProps = React.FormHTMLAttributes<HTMLFormElement> & {
@@ -32,7 +32,8 @@ const _handleOnBeforeUnload = (event: Event) => {
 export const DashboardForm = (props: TDashboardFormProps) => {
     const { isDirty, ...rest } = props
 
-    const { updateSidebarState } = useSidebarReducer()
+    const storeDispatch = useStoreDispatch()
+
     const { showWarningModal } = useDashboardWarningModal()
     const {
         removeAdditionalSidebarLogoutWithModalRestriction,
@@ -41,10 +42,13 @@ export const DashboardForm = (props: TDashboardFormProps) => {
 
     useEffect(() => {
         if (isDirty) {
-            updateSidebarState({
-                isPageSwitchingAllowed: false,
-                onSidebarItemClick: (to) => showWarningModal({ redirectTo: to })
-            })
+            storeDispatch(
+                updateSidebarState({
+                    isPageSwitchingAllowed: false,
+                    onSidebarItemClick: (to) =>
+                        showWarningModal({ redirectTo: to })
+                })
+            )
             window.addEventListener('beforeunload', _handleOnBeforeUnload)
             restrictAdditionalSidebarLogoutWithModal({
                 type: RestrictLogoutRestrictions.FormIsDirty
@@ -52,10 +56,12 @@ export const DashboardForm = (props: TDashboardFormProps) => {
         }
 
         return () => {
-            updateSidebarState({
-                isPageSwitchingAllowed: true,
-                onSidebarItemClick: () => false
-            })
+            storeDispatch(
+                updateSidebarState({
+                    isPageSwitchingAllowed: true,
+                    onSidebarItemClick: () => false
+                })
+            )
 
             removeAdditionalSidebarLogoutWithModalRestriction({
                 type: RestrictLogoutRestrictions.FormIsDirty

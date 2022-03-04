@@ -9,7 +9,7 @@ import { createStyle } from '@intermine/chromatin/styles'
 import { useDebouncedCallback } from '@intermine/chromatin/utils'
 import DownArrow from '@intermine/chromatin/icons/System/arrow-down-s-line'
 
-import { DomElementIDs } from '../../../../constants/ids'
+import { DomElementIDs } from '../../../../shared/constants'
 // eslint-disable-next-line max-len
 import { RouteLoadingSpinner } from '../../../../components/route-loading-spinner'
 import { AccordionListContext } from './context'

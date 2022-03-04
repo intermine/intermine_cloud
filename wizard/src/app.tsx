@@ -6,16 +6,16 @@ import { createStyle } from '@intermine/chromatin/styles'
 import 'regenerator-runtime'
 
 import { AuthStates, OtherIDs } from './shared/constants'
-import { usePreferencesReducer } from './context'
 import {
     authSelector,
     useStoreSelector,
     addGlobalAlert,
-    useStoreDispatch
+    useStoreDispatch,
+    preferencesSelector
 } from './store'
 
 import { RouteLoadingSpinner } from './components/route-loading-spinner'
-import { darkTheme, lightTheme } from './constants/theme'
+import { darkTheme, lightTheme } from './shared/constants'
 import { PageNotFound } from './components/page-not-found'
 import { GlobalModal } from './components/global-modal'
 import {
@@ -82,12 +82,7 @@ export const App = () => {
     const storeDispatch = useStoreDispatch()
 
     const auth = useStoreSelector(authSelector)
-
-    const preferenceReducer = usePreferencesReducer()
-
-    const {
-        state: { themeType }
-    } = preferenceReducer
+    const { themeType } = useStoreSelector(preferencesSelector)
 
     const _addGlobalAlert = (payload: TGlobalAlertReducerAlert) => {
         storeDispatch(addGlobalAlert(payload))

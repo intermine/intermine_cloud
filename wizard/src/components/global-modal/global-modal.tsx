@@ -1,10 +1,17 @@
 import { Modal } from '../modal'
 
-import { useGlobalModalReducer } from '../../context'
+import {
+    useStoreDispatch,
+    useStoreSelector,
+    globalModalSelector,
+    closeGlobalModal
+} from '../../store'
 
 export const GlobalModal = () => {
-    const globalModalReducer = useGlobalModalReducer()
-    const { state, closeGlobalModal } = globalModalReducer
+    const storeDispatch = useStoreDispatch()
+    const state = useStoreSelector(globalModalSelector)
 
-    return <Modal {...state} onClose={closeGlobalModal} />
+    return (
+        <Modal {...state} onClose={() => storeDispatch(closeGlobalModal())} />
+    )
 }

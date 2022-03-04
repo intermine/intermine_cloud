@@ -11,12 +11,12 @@ import RemoveIcon from '@intermine/chromatin/icons/System/close-line'
 import CancelIcon from '@intermine/chromatin/icons/System/forbid-line'
 import RetryIcon from '@intermine/chromatin/icons/System/arrow-go-forward-line'
 
-import { TProgressItem } from '../../../context/types'
-import { ProgressItemStatus } from '../../../constants/progress'
+import { TProgressReducerItem } from '../../../shared/types'
+import { ProgressItemStatus } from '../../../shared/constants'
 import { Button } from '@intermine/chromatin'
 import { Link } from 'react-router-dom'
 
-type TProgressItemViewProps = TProgressItem & {
+type TProgressItemViewProps = TProgressReducerItem & {
     onRemoveItem: (id: string) => void
 }
 

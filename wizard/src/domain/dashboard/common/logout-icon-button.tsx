@@ -3,7 +3,7 @@ import { Tooltip } from '@intermine/chromatin/tooltip'
 import { IconButton } from '@intermine/chromatin/icon-button'
 import LogoutIcon from '@intermine/chromatin/icons/Device/shut-down-line'
 
-import { useSharedReducer } from '../../../context'
+import { useStoreSelector, sharedSelector } from '../../../store'
 import { useDashboardLogout } from '../hooks'
 
 type TLogoutProps = {
@@ -26,13 +26,11 @@ export const LogoutIconButton = (props: TLogoutProps) => {
     const { dashboardLogout, showAlertOnFailedLogoutAttempt } =
         useDashboardLogout()
     const {
-        state: {
-            isEditingAnyForm,
-            isUploadingAnyFile,
-            cbIfEditingFormAndUserRequestLogout,
-            cbIfUploadingFileAndUserRequestLogout
-        }
-    } = useSharedReducer()
+        isEditingAnyForm,
+        isUploadingAnyFile,
+        cbIfEditingFormAndUserRequestLogout,
+        cbIfUploadingFileAndUserRequestLogout
+    } = useStoreSelector(sharedSelector)
 
     const { className, onLogout, tooltipPlacement = 'left' } = props
     const [isMakingPostRequest, setIsMakingPostRequest] = useState(false)

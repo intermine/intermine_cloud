@@ -2,7 +2,11 @@ import { configureStore } from '@reduxjs/toolkit'
 import additionalSidebarReducer from './slices/additional-sidebar-slice'
 import authReducer from './slices/auth-slice'
 import globalAlertReducer from './slices/global-alert'
-import progressReducer from './slices/progress-slice'
+import progressReducer from './slices/progress'
+import sidebarReducer from './slices/sidebar'
+import preferencesReducer from './slices/preferences'
+import sharedReducer from './slices/shared'
+import globalModalReducer from './slices/global-modal'
 
 export const store = configureStore({
     reducer: {
@@ -10,6 +14,10 @@ export const store = configureStore({
         additionalSidebar: additionalSidebarReducer,
         globalAlert: globalAlertReducer,
         progress: progressReducer,
+        sidebar: sidebarReducer,
+        preferences: preferencesReducer,
+        shared: sharedReducer,
+        globalModal: globalModalReducer,
     },
 })
 
