@@ -1,6 +1,6 @@
 """Mine BLoCs."""
 
-from typing import Dict, List, Optional
+from typing import List
 
 from blackcap.db import DBSession
 from blackcap.flow import Flow, FlowExecError, FuncProp, get_outer_function, Prop, Step
@@ -12,17 +12,25 @@ from pydantic.error_wrappers import ErrorWrapper
 from sqlalchemy import select
 from sqlalchemy.exc import SQLAlchemyError
 
+
+from compose.blocs.data import get_data
 from compose.blocs.file import (
     create_file_db_entry,
     create_file_presigned_urls,
+    get_file,
     revert_file_db_entry,
 )
+from compose.blocs.template import get_template
 from compose.models.mine import MineDB
-from compose.schemas.data import Data
+from compose.schemas.api.data.get import DataGetQueryParams, DataQueryType
+from compose.schemas.api.file.get import FileGetQueryParams, FileQueryType
 from compose.schemas.api.mine.delete import MineDelete
 from compose.schemas.api.mine.get import MineGetQueryParams, MineQueryType
 from compose.schemas.api.mine.post import MineCreate
 from compose.schemas.api.mine.put import MineUpdate
+from compose.schemas.api.template.get import TemplateGetQueryParams, TemplateQueryType
+from compose.schemas.data import Data
+from compose.schemas.file import File
 from compose.schemas.mine import Mine
 from compose.schemas.template import Template
 
@@ -200,7 +208,7 @@ def check_data_list_exist(inputs: List[Prop]) -> List[Prop]:
         inputs (List[Prop]):
             Expects
                 0: data_list
-                    Prop(data=data_list, description="List of data objects")
+                    Prop(data=data_ids, description="List of ids of data objects")
                 2: user
                     Prop(data=user, description="User")
 
@@ -212,10 +220,12 @@ def check_data_list_exist(inputs: List[Prop]) -> List[Prop]:
 
             Prop(data=data_list, description="List of Data Objects")
 
+            Prop(data=file_list, description="List of File Objects")
+
             Prop(data=user, description="User")
     """
     try:
-        data_list: List[Data] = inputs[0].data
+        data_ids: List[str] = inputs[0].data
         user: User = inputs[1].data
     except Exception as e:
         raise FlowExecError(
@@ -227,8 +237,27 @@ def check_data_list_exist(inputs: List[Prop]) -> List[Prop]:
         ) from e
 
     try:
-        # TODO: Check data list existence
-        pass
+        # Check data list existence
+        data_query = DataGetQueryParams(query_type=DataQueryType.GET_ALL_DATA)
+        data_list: List[Data] = get_data(data_query, user)
+        data_list_ids = [str(data.data_id) for data in data_list]
+        # Use sets to optimize later
+        for data_id in data_ids:
+            if data_id not in data_list_ids:
+                # Raise a user descriptive error later
+                raise Exception("DATASET NOT FOUND")
+
+        # Check for uploaded files
+        file_query = FileGetQueryParams(query_type=FileQueryType.GET_ALL_FILES)
+        file_list: List[File] = get_file(file_query, user)
+        file_list_parent_ids = [
+            file.parent_id for file in file_list if file.uploaded is True
+        ]
+        for data_id in data_ids:
+            if data_id not in file_list_parent_ids:
+                # Raise a user descriptive error later
+                raise Exception("DATASET NOT UPLOADED")
+
     except SQLAlchemyError as e:
         raise FlowExecError(
             human_description="Querying DB object failed",
@@ -248,6 +277,7 @@ def check_data_list_exist(inputs: List[Prop]) -> List[Prop]:
 
     return [
         Prop(data=data_list, description="List of Data Objects"),
+        Prop(data=file_list, description="List of File Objects"),
         Prop(data=user, description="User"),
     ]
 
@@ -258,8 +288,8 @@ def check_template_list_exist(inputs: List[Prop]) -> List[Prop]:
     Args:
         inputs (List[Prop]):
             Expects
-                0: template_list
-                    Prop(data=template_list, description="List of template objects")
+                0: template_id
+                    Prop(data=template_id, description="template object id")
                 2: user
                     Prop(data=user, description="User")
 
@@ -270,11 +300,11 @@ def check_template_list_exist(inputs: List[Prop]) -> List[Prop]:
         List[Prop]:
 
             Prop(data=template_list, description="List of Template Objects")
-
+            Prop(data=file_list, description="List of File Objects")
             Prop(data=user, description="User")
     """
     try:
-        template_list: List[Template] = inputs[0].data
+        template_id: str = inputs[0].data
         user: User = inputs[1].data
     except Exception as e:
         raise FlowExecError(
@@ -286,8 +316,22 @@ def check_template_list_exist(inputs: List[Prop]) -> List[Prop]:
         ) from e
 
     try:
-        # TODO: Check template list existence
-        pass
+        # Check for template existence
+        template_query = TemplateGetQueryParams(
+            query_type=TemplateQueryType.GET_TEMPLATE_BY_ID, template_id=template_id
+        )
+        template_list: List[Template] = get_template(template_query, user)
+        if len(template_list) == 0:
+            raise Exception("TEMPLATE NOT FOUND")
+        # Check for file existence
+        file_query = FileGetQueryParams(
+            query_type=FileQueryType.GET_FILE_BY_ID, file_id=template_list[0].file_id
+        )
+        file_list: List[File] = get_file(file_query, user)
+        if len(file_list) == 0:
+            raise Exception("TEMPLATE FILE NOT FOUND")
+        elif file_list[0].uploaded is False:
+            raise Exception("TEMPLATE NOT UPLOADED")
     except SQLAlchemyError as e:
         raise FlowExecError(
             human_description="Querying DB object failed",
@@ -307,6 +351,7 @@ def check_template_list_exist(inputs: List[Prop]) -> List[Prop]:
 
     return [
         Prop(data=template_list, description="List of Template Objects"),
+        Prop(data=file_list, description="List of File Objects"),
         Prop(data=user, description="User"),
     ]
 
@@ -448,7 +493,6 @@ def generate_create_mine_flow(
     create_db_entry_step = Step(create_mine_db_entry, revert_mine_db_entry)
     create_file_step = Step(create_file_db_entry, revert_file_db_entry)
     create_file_presigned_url_step = Step(create_file_presigned_urls, dummy_backward)
-    update_db_entry_step = Step(update_mine_db_entry, rewind_mine_db_entry)
 
     flow = Flow()
 
@@ -472,15 +516,10 @@ def generate_create_mine_flow(
         params={"index": 1},
         description="Outputs of second step",
     )
-    update_db_entry_step_func_prop = FuncProp(
-        func=flow.get_froward_output,
-        params={"index": 2},
-        description="Outputs of third step",
-    )
+
     flow.add_step(create_file_step, [create_file_step_func_prop])
     flow.add_step(
         create_file_presigned_url_step, [create_file_presigned_url_step_func_prop]
     )
-    flow.add_step(update_db_entry_step, [update_db_entry_step_func_prop])
 
     return flow

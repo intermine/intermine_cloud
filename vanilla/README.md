@@ -1,3 +1,55 @@
+## Deployment
+
+Firstly, login to the [Rahti console](https://rahti.csc.fi:8443) and click your username in the top-right followed by *Copy Login Command*. You will need the [OpenShift CLI](https://docs.openshift.com/container-platform/latest/cli_reference/openshift_cli/getting-started-cli.html) to use the login command.
+
+You should now be able to use `kubectl` and dependent commands like `helm` to manage your Rahti kubernetes cluster.
+
+### Installing
+
+Edit *values.yaml* so the mineName, objectStorage keys and bucket paths are correct. You will need to have uploaded each of the required resources to Allas (`rclone sync -P my-local-dir s3allas:mybucket/path`).
+
+```bash
+helm install -f values.yaml pombemine ../helm-operator/helm-charts/intermineinstance
+```
+
+### Updating
+
+This uses the kubectl `-l` flag to only apply the resources matching a selector, which in this example is for tomcat.
+
+```bash
+helm template -f values.yaml pombemine ../helm-operator/helm-charts/intermineinstance | kubectl apply -f - -l app.kubernetes.io/name=tomcat
+```
+
+The same can be done for the other applications as well.
+
+- `app.kubernetes.io/name=tomcat`
+- `app.kubernetes.io/name=postgresql`
+- `app.kubernetes.io/name=solr`
+- `app.kubernetes.io/name=intermineinstance` for BlueGenes
+
+All of these use PVCs so no data is lost.
+
+### Uninstalling
+
+Most of the resources will be removed by helm.
+
+```bash
+helm uninstall pombemine
+```
+
+If the builder job hasn't finished, this will continue to linger unless you delete it.
+
+```bash
+kubectl delete job.batch/pombemine-builder
+```
+
+Postgresql and solr use PVCs so their resources can be replaced without losing data. If you've changed their configuration or would like to start from an empty database, you will need to delete their PVCs.
+
+```bash
+kubectl delete pvc/data-pombemine-postgresql-0
+kubectl delete pvc/data-pombemine-solr-0
+```
+
 ## Allas Object Storage
 
 ```bash
@@ -53,3 +105,21 @@ For an example of performing this within CSC, see: https://github.com/lvarin/rcl
 - https://docs.csc.fi/cloud/pouta/install-client/
 - https://docs.csc.fi/cloud/rahti/tutorials/backup-postgres-allas/
 - https://docs.csc.fi/data/Allas/using_allas/python_library/
+
+## Rahti docker registry
+
+Sometimes you want to make a docker image available on Rahti without pushing it to dockerhub. You can do this by going to https://registry-console.rahti.csc.fi/registry and copying the *docker login* command. You can now build an image and push it to this registry.
+
+```bash
+docker build -t myimage .
+docker tag myimage docker-registry.rahti.csc.fi/myproject/myimage:0.0.1
+docker tag myimage docker-registry.rahti.csc.fi/myproject/myimage:latest
+docker push docker-registry.rahti.csc.fi/myproject/myimage:0.0.1
+docker push docker-registry.rahti.csc.fi/myproject/myimage:latest
+```
+
+Then use the repository tag: `docker-registry.default.svc:5000/myproject/myimage`
+
+
+#### Resources
+- https://docs.csc.fi/cloud/rahti/tutorials/docker_hub_manual_caching/

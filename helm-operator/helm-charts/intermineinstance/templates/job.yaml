@@ -1,0 +1,179 @@
+{{- if .Values.builder.enabled }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: "{{.Release.Name}}-builder"
+  labels:
+    app.kubernetes.io/managed-by: {{.Release.Service | quote }}
+    app.kubernetes.io/instance: {{.Release.Name | quote }}
+    helm.sh/chart: "{{.Chart.Name}}-{{.Chart.Version}}"
+  annotations:
+    # This is what defines this resource as a hook. Without this line, the
+    # job is considered part of the release.
+    "helm.sh/hook": post-install
+    "helm.sh/hook-weight": "-5"
+    "helm.sh/hook-delete-policy": hook-succeeded
+spec:
+  template:
+    metadata:
+      name: "{{.Release.Name}}-builder"
+      labels:
+        app.kubernetes.io/managed-by: {{.Release.Service | quote }}
+        app.kubernetes.io/instance: {{.Release.Name | quote }}
+        helm.sh/chart: "{{.Chart.Name}}-{{.Chart.Version}}"
+    spec:
+      volumes:
+      - name: rclone-conf
+        secret:
+          secretName: rclone-conf
+          defaultMode: 420
+          items:
+            - key: rclone.conf
+              path: rclone.conf
+      - name: properties-pkl
+        secret:
+          secretName: properties-pkl
+          defaultMode: 420
+          items:
+            - key: properties.pkl
+              path: properties.pkl
+      - name: minedir
+        persistentVolumeClaim:
+          claimName: job-{{.Release.Name}}-minedir
+      - name: data
+        persistentVolumeClaim:
+          claimName: job-{{.Release.Name}}-data
+      - name: bio
+        persistentVolumeClaim:
+          claimName: job-{{.Release.Name}}-bio
+      initContainers:
+      - name: get-artifacts
+        image: rclone/rclone:1.57.0
+        command: ["/bin/sh", "-c"]
+        args:
+        - >
+          rclone sync default:{{.Values.builder.objectStorage.buckets.minedir}} /mine &&
+          rclone sync default:{{.Values.builder.objectStorage.buckets.data}} /data &&
+          rclone sync default:{{.Values.builder.objectStorage.buckets.bio}} /bio &&
+          chmod +x /mine/gradlew &&
+          chmod +x /bio/gradlew
+        volumeMounts:
+        - mountPath: /.rclone.conf
+          name: rclone-conf
+          subPath: rclone.conf
+        - mountPath: /mine
+          name: minedir
+        - mountPath: /data
+          name: data
+        - mountPath: /bio
+          name: bio
+      containers:
+      - name: {{.Release.Name}}-builder-job
+        image: "{{.Values.builder.image.repository}}:{{.Values.builder.image.tag}}"
+        # command: [sh, -c, "builder_job --properties-path /home/intermine/properties.pkl --mine-path /home/intermine/{{.Values.builder.mineName}} --bio-path /bio ; sleep 4h"]
+        command: ["builder_job"]
+        args:
+        - "--properties-path"
+        - "/home/intermine/properties.pkl"
+        - "--mine-path"
+        - "/home/intermine/{{.Values.builder.mineName}}"
+        - "--bio-path"
+        - "/bio"
+        - "--keep-alive"
+        env:
+        - name: PGHOST
+          value: {{ template "common.names.fullname" .Subcharts.postgresql }}
+        - name: SOLR_HOST
+          value: {{ template "common.names.fullname" .Subcharts.solr }}
+        - name: TOMCAT_HOST
+          value: {{ template "common.names.fullname" .Subcharts.tomcat }}
+        volumeMounts:
+        - mountPath: /home/intermine/properties.pkl
+          name: properties-pkl
+          subPath: properties.pkl
+        - mountPath: /home/intermine/{{.Values.builder.mineName}}
+          name: minedir
+        - mountPath: /data
+          name: data
+        - mountPath: /bio
+          name: bio
+      restartPolicy: Never
+  backoffLimit: 1
+  # ttlSecondsAfterFinished: 100
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: job-{{.Release.Name}}-minedir
+spec:
+  accessModes: ["ReadWriteOnce"]
+  resources:
+    requests:
+      storage: 200Mi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: job-{{.Release.Name}}-data
+spec:
+  accessModes: ["ReadWriteOnce"]
+  resources:
+    requests:
+      storage: 10Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: job-{{.Release.Name}}-bio
+spec:
+  accessModes: ["ReadWriteOnce"]
+  resources:
+    requests:
+      storage: 50Mi
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: rclone-conf
+type: Opaque
+stringData:
+  "rclone.conf": |-
+    [default]
+    type = s3
+    provider = Other
+    env_auth = false
+    access_key_id = {{.Values.builder.objectStorage.accessKey}}
+    secret_access_key = {{.Values.builder.objectStorage.secretKey}}
+    endpoint = {{.Values.builder.objectStorage.endpoint}}
+    location_constraint = regionOne
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: properties-pkl
+type: Opaque
+stringData:
+  "properties.pkl": |-
+    {
+      {{- range $k, $v := .Values.builder.properties }}
+      '{{ $k }}': '{{ $v }}',
+      {{- end }}
+    }
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: tomcat-users
+type: Opaque
+stringData:
+  "tomcat-users.xml": |-
+    <?xml version='1.0' encoding='utf-8'?>
+    <tomcat-users xmlns="http://tomcat.apache.org/xml"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xsi:schemaLocation="http://tomcat.apache.org/xml tomcat-users.xsd"
+                  version="1.0">
+      <role rolename="manager-script"/>
+      <role rolename="manager-jmx"/>
+      <user username="tomcat" password="tomcat" roles="manager-script,manager-jmx"/>
+    </tomcat-users>
+{{- end }}

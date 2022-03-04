@@ -1,7 +1,7 @@
 {{- if .Values.ingress.enabled -}}
 {{- $fullName := include "intermineinstance.fullname" . -}}
 {{- $svcPort := .Values.service.port -}}
-{{- $imService := .Values.tomcat.fullnameOverride -}}
+{{- $imService := include "common.names.fullname" .Subcharts.tomcat -}}
 {{- $imServicePort := .Values.tomcat.service.port -}}
 {{- $mine := .Values.bluegenes.mineNamespace -}}
 {{- if and .Values.ingress.className (not (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion)) }}

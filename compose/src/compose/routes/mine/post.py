@@ -5,9 +5,8 @@ import json
 from pathlib import Path
 import shutil
 from tempfile import TemporaryDirectory
-from typing import List
 
-
+from blackcap.flow import Executor, FlowExecError, FlowStatus
 from blackcap.schemas.user import User
 from flask import make_response, request, Response
 from pydantic import parse_obj_as, ValidationError
@@ -16,7 +15,7 @@ import requests
 
 from compose.blocs.data import get_data
 from compose.blocs.file import create_file, get_file, update_file
-from compose.blocs.mine import create_mine
+from compose.blocs.mine import generate_create_mine_flow
 from compose.blocs.rendered_template import (
     create_rendered_template,
     update_rendered_template,
@@ -26,7 +25,7 @@ from compose.routes.mine import mine_bp
 from compose.schemas.api.data.get import DataGetQueryParams, DataQueryType
 from compose.schemas.api.file.get import FileGetQueryParams, FileQueryType
 from compose.schemas.api.file.put import FileUpdate
-from compose.schemas.api.mine.post import MinePOSTResponse
+from compose.schemas.api.mine.post import MinePOSTRequest, MinePOSTResponse
 from compose.schemas.api.rendered_template.put import RenderedTemplateUpdate
 from compose.schemas.api.template.get import TemplateGetQueryParams, TemplateQueryType
 from compose.schemas.file import File
@@ -62,7 +61,9 @@ def post(user: User) -> Response:  # noqa: C901
     """
     # Parse json from request
     try:
-        mine_create = parse_obj_as(List[Mine], json.loads(request.data))
+        mine_create_request_list = parse_obj_as(
+            MinePOSTRequest, json.loads(request.data)
+        ).mine_list
     except ValidationError as e:
         response_body = MinePOSTResponse(
             msg="json validation failed", errors={"main": e.errors()}
@@ -74,6 +75,44 @@ def post(user: User) -> Response:  # noqa: C901
         )
         return make_response(response_body.json(), HTTPStatus.INTERNAL_SERVER_ERROR)
 
+    # Generate create mine flow
+    try:
+        create_mine_flow = generate_create_mine_flow(mine_create_request_list, user)
+    except FlowExecError:
+        response_body = MinePOSTResponse(
+            msg="internal databse error", errors={"main": ["unknown internal error"]}
+        )
+        return make_response(response_body.json(), HTTPStatus.INTERNAL_SERVER_ERROR)
+    except Exception:
+        response_body = MinePOSTResponse(
+            msg="unknown error", errors={"main": ["unknown internal error"]}
+        )
+        return make_response(response_body.json(), HTTPStatus.INTERNAL_SERVER_ERROR)
+
+    # Excute the flow
+    executor = Executor(create_mine_flow, {})
+    executed_flow = executor.run()
+
+    # Check flow status and return
+    if executed_flow.status == FlowStatus.PASSED:
+        # return fetched data in response
+        response_body = MinePOSTResponse(
+            msg="data successfully created",
+            items={
+                "mine_list": executed_flow.forward_outputs[-1][0].data,
+            },
+        )
+        return make_response(response_body.json(), HTTPStatus.OK)
+    else:
+        # handle errors
+        # return processed errors in response
+        response_body = MinePOSTResponse(
+            msg="failed to create data", errors={"main": []}
+        )
+        return make_response(response_body.json(), HTTPStatus.OK)
+
+    # --------------------------------
+    # --------------------------------
     created_mines = []
     # iterate over mine list
     for mine in mine_create:

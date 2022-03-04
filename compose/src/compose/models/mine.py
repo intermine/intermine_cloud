@@ -11,6 +11,7 @@ class MineDB(DBModel, SurrogatePKUUID, TimestampMixin):
     __tablename__ = "mine"
     name = Column(String, nullable=False)
     description = Column(String)
+    subdomain = Column(String, unique=True)
     preference = Column(JSON, nullable=False)
     state = Column(JSON, nullable=False)
     protagonist_id = reference_col("protagonist")

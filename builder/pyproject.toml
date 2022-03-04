@@ -7,9 +7,10 @@ license = "LGPL 2.1"
 
 [tool.poetry.scripts]
 builder = "intermine_builder.cli:main"
-# Ideally it would be part of the command above, but I fear that supporting two
-# distinct usages in Click is an impossible battle.
+# Ideally these would be part of the command above, but I fear that supporting
+# multiple distinct usages in Click is an impossible battle.
 builder_prepare = "intermine_builder.cli:prepare"
+builder_job = "intermine_builder.cli:job"
 
 [tool.poetry.dependencies]
 python = "^3.8"

@@ -35,7 +35,7 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             - name: http
-              containerPort: 80
+              containerPort: 5000
               protocol: TCP
           livenessProbe:
             httpGet:
@@ -49,7 +49,9 @@ spec:
             {{- toYaml .Values.resources | nindent 12 }}
           env:
             - name: SERVER_PORT
-              value: "80"
+              value: "5000"
+            - name: BLUEGENES_TOOL_PATH
+              value: "/tools"
             - name: BLUEGENES_BACKEND_SERVICE_ROOT
               value: {{ .Values.bluegenes.backendServiceRoot }}
             - name: BLUEGENES_DEFAULT_SERVICE_ROOT
@@ -58,6 +60,9 @@ spec:
               value: {{ .Values.bluegenes.mineName }}
             - name: BLUEGENES_DEFAULT_NAMESPACE
               value: {{ .Values.bluegenes.mineNamespace }}
+          volumeMounts:
+            - name: tools
+              mountPath: /tools
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
@@ -70,3 +75,7 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      volumes:
+        - name: tools
+          persistentVolumeClaim:
+            claimName: data-{{.Release.Name}}-tools
