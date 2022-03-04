@@ -21,7 +21,7 @@ export const additionalSidebarSlice = createSlice({
     },
 })
 
-export const additionalSidebarActions = additionalSidebarSlice.actions
+export const { updateAdditionalSidebar } = additionalSidebarSlice.actions
 export const additionalSidebarSelector = (state: RootState) =>
     state.additionalSidebar
 

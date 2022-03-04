@@ -45,7 +45,8 @@ export const globalAlertSlice = createSlice({
     },
 })
 
-export const globalAlertActions = globalAlertSlice.actions
+export const { updateGlobalAlert, addGlobalAlert, removeGlobalAlert } =
+    globalAlertSlice.actions
 export const globalAlertSelector = (state: RootState) => state.globalAlert
 
 export default globalAlertSlice.reducer

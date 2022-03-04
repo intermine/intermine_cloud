@@ -4,8 +4,8 @@ import { AdditionalSidebarTabs } from '../../../shared/constants'
 import { ProgressItemStatus } from '../../../constants/progress'
 import {
     useStoreDispatch,
-    additionalSidebarActions,
-    globalAlertActions
+    updateAdditionalSidebar,
+    addGlobalAlert
 } from '../../../store'
 import { TGlobalAlertReducerAlert } from '../../../shared/types'
 
@@ -41,8 +41,8 @@ export const useOnProgress = () => {
         addItemToProgress
     } = useProgressReducer()
 
-    const addGlobalAlert = (payload: TGlobalAlertReducerAlert) => {
-        storeDispatch(globalAlertActions.addGlobalAlert(payload))
+    const _addGlobalAlert = (payload: TGlobalAlertReducerAlert) => {
+        storeDispatch(addGlobalAlert(payload))
     }
 
     const onProgressUpdate = (props: TOnProgressUpdateProps) => {
@@ -53,7 +53,7 @@ export const useOnProgress = () => {
         const { successMsg, id, ...rest } = props
         removeActiveItem(id)
         updateProgressItem({ id, status: Completed, ...rest })
-        addGlobalAlert({
+        _addGlobalAlert({
             id: id + 'success',
             isOpen: true,
             message: successMsg,
@@ -65,7 +65,7 @@ export const useOnProgress = () => {
         const { failedMsg, id, ...rest } = props
         removeActiveItem(id)
         updateProgressItem({ id, status: Failed, ...rest })
-        addGlobalAlert({
+        _addGlobalAlert({
             id: id + 'error',
             isOpen: true,
             message: failedMsg,
@@ -77,7 +77,7 @@ export const useOnProgress = () => {
         const { id, isDependentOnBrowser, ...rest } = props
         addActiveItem({ id, isDependentOnBrowser })
         storeDispatch(
-            additionalSidebarActions.updateAdditionalSidebar({
+            updateAdditionalSidebar({
                 isOpen: true,
                 activeTab: AdditionalSidebarTabs.ProgressTab
             })

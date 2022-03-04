@@ -5,13 +5,12 @@ import { Alert } from '@intermine/chromatin/alert'
 import {
     useStoreSelector,
     additionalSidebarSelector,
-    globalAlertActions,
+    removeGlobalAlert,
     globalAlertSelector,
     useStoreDispatch
 } from '../../store'
 import { isAuthRoute } from '../../routes'
 
-const { removeGlobalAlert } = globalAlertActions
 export const GlobalAlert = () => {
     const storeDispatch = useStoreDispatch()
     const { isOpen: isAdditionalSidebarOpen } = useStoreSelector(

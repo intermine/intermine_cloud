@@ -7,8 +7,8 @@ import { clone } from '@intermine/chromatin/utils'
 
 import {
     useStoreDispatch,
-    authActions,
-    globalAlertActions
+    updateAuthState,
+    removeGlobalAlert
 } from '../../../store'
 import { AuthStates } from '../../../shared/constants'
 
@@ -88,13 +88,13 @@ export const Login = () => {
     const onLoginSuccessful = () => {
         // Remove unauthorize alert.
         storeDispatch(
-            globalAlertActions.removeGlobalAlert({
+            removeGlobalAlert({
                 id: OtherIDs.UnauthorizeAlert
             })
         )
 
         // Updating AuthState
-        storeDispatch(authActions.updateAuthState(AuthStates.Authorize))
+        storeDispatch(updateAuthState(AuthStates.Authorize))
 
         // Redirecting
         const query = new URLSearchParams(history.location.search)

@@ -10,7 +10,7 @@ import { usePreferencesReducer } from './context'
 import {
     authSelector,
     useStoreSelector,
-    globalAlertActions,
+    addGlobalAlert,
     useStoreDispatch
 } from './store'
 
@@ -89,8 +89,8 @@ export const App = () => {
         state: { themeType }
     } = preferenceReducer
 
-    const addGlobalAlert = (payload: TGlobalAlertReducerAlert) => {
-        storeDispatch(globalAlertActions.addGlobalAlert(payload))
+    const _addGlobalAlert = (payload: TGlobalAlertReducerAlert) => {
+        storeDispatch(addGlobalAlert(payload))
     }
 
     const onLocationChange = () => {
@@ -105,7 +105,7 @@ export const App = () => {
              * Showing an alert to user stating why we redirected user to
              * login page.
              */
-            addGlobalAlert({
+            _addGlobalAlert({
                 id: OtherIDs.UnauthorizeAlert,
                 isOpen: true,
                 message: `You are not logged in. 
@@ -150,7 +150,7 @@ export const App = () => {
 
     useEffect(() => {
         window.addEventListener('offline', () => {
-            addGlobalAlert({
+            _addGlobalAlert({
                 isOpen: true,
                 id: 'offline-alert',
                 title: 'Connectivity Issue',
@@ -160,7 +160,7 @@ export const App = () => {
         })
 
         window.addEventListener('online', () => {
-            addGlobalAlert({
+            _addGlobalAlert({
                 isOpen: true,
                 id: 'online-alert',
                 title: 'Online',

@@ -4,13 +4,12 @@ import { ButtonCommonProps } from '@intermine/chromatin/button'
 import { AxiosResponse } from 'axios'
 
 import { useSharedReducer } from '../../../context'
-import { useStoreDispatch, globalAlertActions } from '../../../store'
+import { useStoreDispatch, addGlobalAlert } from '../../../store'
 import { ResponseStatus } from '../../../constants/response'
 import { LOGIN_PATH } from '../../../routes'
 import { useLogout } from '../../../hooks/use-logout'
 import { useDashboardWarningModal } from './use-dashboard-warning-modal'
 
-const { addGlobalAlert } = globalAlertActions
 export enum RestrictLogoutRestrictions {
     FormIsDirty = 'FormIsDirty',
     Uploading = 'Uploading'

@@ -1,5 +1,5 @@
 import { AuthStates } from '../shared/constants'
-import { useStoreDispatch, authActions } from '../store'
+import { useStoreDispatch, updateAuthState } from '../store'
 import { authApi } from '../services/api'
 import { getResponseStatus } from '../utils/get'
 import { AxiosError, AxiosResponse } from 'axios'
@@ -12,7 +12,7 @@ export const useLogout = () => {
     const logout = async (): Promise<TLogoutReturn> => {
         try {
             const response = await authApi.authDelete()
-            storeDispatch(authActions.updateAuthState(AuthStates.NotAuthorize))
+            storeDispatch(updateAuthState(AuthStates.NotAuthorize))
             return {
                 ...response,
                 config: {},
@@ -24,9 +24,7 @@ export const useLogout = () => {
             if (status === 401) {
                 // Unauthorize means user is already logout.
                 // So it is nice to update app state as well.
-                storeDispatch(
-                    authActions.updateAuthState(AuthStates.NotAuthorize)
-                )
+                storeDispatch(updateAuthState(AuthStates.NotAuthorize))
             }
 
             return {

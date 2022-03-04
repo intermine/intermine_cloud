@@ -12,7 +12,7 @@ import {
     useStoreSelector,
     additionalSidebarSelector,
     useStoreDispatch,
-    additionalSidebarActions
+    updateAdditionalSidebar
 } from '../../../store'
 import { Progress } from './progress'
 import { EditProfile } from './edit-profile'
@@ -109,8 +109,8 @@ export const AdditionalSidebar = () => {
         isOpen
     })
 
-    const updateAdditionalSidebar = (obj: TAdditionalSidebarReducer) => {
-        storeDispatch(additionalSidebarActions.updateAdditionalSidebar(obj))
+    const _updateAdditionalSidebar = (payload: TAdditionalSidebarReducer) => {
+        storeDispatch(updateAdditionalSidebar(payload))
     }
 
     const onClickActionIcon = (tab: AdditionalSidebarTabs) => {
@@ -119,21 +119,21 @@ export const AdditionalSidebar = () => {
              * If additional sidebar is open and user clicked
              * on the same tab, then we are closing the tab
              */
-            updateAdditionalSidebar({
+            _updateAdditionalSidebar({
                 isOpen: false,
                 activeTab: None
             })
             return
         }
 
-        updateAdditionalSidebar({
+        _updateAdditionalSidebar({
             isOpen: true,
             activeTab: tab
         })
     }
 
     const onLogout = () => {
-        updateAdditionalSidebar({
+        _updateAdditionalSidebar({
             isOpen: false,
             activeTab: None
         })

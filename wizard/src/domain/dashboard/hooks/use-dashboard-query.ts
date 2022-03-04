@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import shortid from 'shortid'
 
-import { useStoreDispatch, globalAlertActions } from '../../../store'
+import { useStoreDispatch, addGlobalAlert } from '../../../store'
 import {
     getResponseMessageUsingResponseStatus,
     getResponseStatus,
@@ -29,8 +29,6 @@ export type TUseDashboardQueryState = {
     response: unknown
     isFailed: boolean
 }
-
-const { addGlobalAlert } = globalAlertActions
 
 export const useDashboardQuery = <T>(props: TUseDashboardQuery<T>) => {
     const storeDispatch = useStoreDispatch()

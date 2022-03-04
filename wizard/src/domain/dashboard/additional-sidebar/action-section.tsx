@@ -4,7 +4,7 @@ import { Typography } from '@intermine/chromatin/typography'
 import { IconButton } from '@intermine/chromatin/icon-button'
 import CloseIcon from '@intermine/chromatin/icons/System/close-line'
 
-import { additionalSidebarActions, useStoreDispatch } from '../../../store'
+import { updateAdditionalSidebar, useStoreDispatch } from '../../../store'
 import { AdditionalSidebarTabs } from '../../../shared/constants'
 
 export type TActionSectionProps = {
@@ -28,7 +28,7 @@ const ActionSection = (props: TActionSectionProps) => {
 
     const closeAdditionalSidebar = () => {
         storeDispatch(
-            additionalSidebarActions.updateAdditionalSidebar({
+            updateAdditionalSidebar({
                 isOpen: false,
                 activeTab: AdditionalSidebarTabs.None
             })
