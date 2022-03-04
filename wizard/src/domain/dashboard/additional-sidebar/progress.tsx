@@ -2,8 +2,13 @@ import { useEffect } from 'react'
 import { Typography } from '@intermine/chromatin/typography'
 
 import { AdditionalSidebarTabs } from '../../../shared/constants'
-import { useProgressReducer } from '../../../context'
-import { useStoreSelector, additionalSidebarSelector } from '../../../store'
+import {
+    useStoreSelector,
+    additionalSidebarSelector,
+    progressSelector,
+    removeItemFromProgress,
+    useStoreDispatch
+} from '../../../store'
 import { ActionSection } from './action-section'
 import { ProgressItemView } from './progress-item-view'
 import { handleOnBeforeUnload } from '../utils/misc'
@@ -14,13 +19,14 @@ const _handleOnBeforeUnload = (event: Event) => {
 }
 
 export const Progress = () => {
-    const progressReducer = useProgressReducer()
+    const storeDispatch = useStoreDispatch()
     const { activeTab } = useStoreSelector(additionalSidebarSelector)
 
     const {
-        state: { progressItems, isRestrictUnmount, activeItems },
-        removeItemFromProgress
-    } = progressReducer
+        items: progressItems,
+        isRestrictUnmount,
+        activeItems
+    } = useStoreSelector(progressSelector)
 
     const {
         removeAdditionalSidebarLogoutWithModalRestriction,
@@ -33,7 +39,7 @@ export const Progress = () => {
         for (const id in _active) {
             if (activeItems[id].isDependentOnBrowser) {
                 progressItems[id].onCancel()
-                removeItemFromProgress(id)
+                storeDispatch(removeItemFromProgress({ id }))
             }
         }
     }

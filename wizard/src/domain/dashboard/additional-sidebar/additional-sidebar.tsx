@@ -6,13 +6,13 @@ import PreferencesIcon from '@intermine/chromatin/icons/Design/tools-line'
 import EditProfileIcon from '@intermine/chromatin/icons/User/user-settings-line'
 import { createStyle } from '@intermine/chromatin/styles'
 
-import { useProgressReducer } from '../../../context'
 import { AdditionalSidebarTabs } from '../../../shared/constants'
 import {
     useStoreSelector,
     additionalSidebarSelector,
     useStoreDispatch,
-    updateAdditionalSidebar
+    updateAdditionalSidebar,
+    progressSelector
 } from '../../../store'
 import { Progress } from './progress'
 import { EditProfile } from './edit-profile'
@@ -100,10 +100,7 @@ export const AdditionalSidebar = () => {
     const storeDispatch = useStoreDispatch()
     const { isOpen, activeTab } = useStoreSelector(additionalSidebarSelector)
 
-    const progressReducer = useProgressReducer()
-    const {
-        state: { activeItems }
-    } = progressReducer
+    const { activeItems } = useStoreSelector(progressSelector)
 
     const classes = useStyles({
         isOpen

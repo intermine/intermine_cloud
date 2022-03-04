@@ -89,63 +89,6 @@ export type TUseGlobalModalReducer = {
  */
 
 /**
- * Progress
- */
-export type TProgressItem = {
-    id: string
-    name: string
-    status: ProgressItemStatus
-    totalSize: number
-    loadedSize: number
-    getProgressText: (loadedSize: number, totalSize: number) => string
-    onRetry: () => void
-    onCancel: () => void
-    getOnSuccessViewButtonProps?: () => {
-        to: LinkProps['to']
-        title: string
-        target?: HTMLAttributeAnchorTarget
-    }
-    getRunningStatusText?: (loadedSize: number, totalSize: number) => string
-}
-
-export type TProgressItems = {
-    [X in string]: TProgressItem
-}
-
-export type TProgressActiveItem = {
-    id: string
-    isDependentOnBrowser: boolean
-}
-
-export type TProgressActiveItems = {
-    [X in string]: TProgressActiveItem
-}
-
-export type TProgressReducer = {
-    progressItems: TProgressItems
-    activeItems: TProgressActiveItems
-    isRestrictUnmount: boolean
-}
-
-export type TProgressReducerAction = {
-    type: ProgressActions
-    data: unknown
-}
-
-export type TUseProgressReducer = {
-    state: TProgressReducer
-    addItemToProgress: (data: TProgressItem) => void
-    updateProgressItem: (data: Partial<TProgressItem>) => void
-    removeItemFromProgress: (id: string) => void
-    addActiveItem: (data: TProgressActiveItem) => void
-    removeActiveItem: (id: string) => void
-}
-
-/**
- * Progress Ends
- */
-
-/**
  * Shared
  */
 
@@ -185,6 +128,5 @@ export type TAppContext = {
     preferencesReducer: TUsePreferencesReducer
     sidebarReducer: TUseSidebarReducer
     globalModalReducer: TUseGlobalModalReducer
-    progressReducer: TUseProgressReducer
     sharedReducer: TUseSharedReducer
 }

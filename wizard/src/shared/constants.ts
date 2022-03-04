@@ -26,3 +26,10 @@ export enum AdditionalSidebarTabs {
     EditProfileTab = 'EditProfileTab',
     None = 'None',
 }
+
+export enum ProgressItemStatus {
+    Running = 'Running',
+    Canceled = 'Canceled',
+    Completed = 'Completed',
+    Failed = 'Failed',
+}

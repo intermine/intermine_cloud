@@ -1,24 +1,29 @@
-import { useProgressReducer } from '../../../context'
-import { TProgressItem } from '../../../context/types'
+import { TProgressReducerItem } from '../../../shared/types'
 import { AdditionalSidebarTabs } from '../../../shared/constants'
 import { ProgressItemStatus } from '../../../constants/progress'
 import {
     useStoreDispatch,
     updateAdditionalSidebar,
-    addGlobalAlert
+    addGlobalAlert,
+    updateProgressItem,
+    addItemToProgress,
+    removeActiveItemFromProgress,
+    addActiveItemToProgress
 } from '../../../store'
 import { TGlobalAlertReducerAlert } from '../../../shared/types'
 
-export type TOnProgressUpdateProps = Partial<TProgressItem> & { id: string }
-export type TOnProgressSuccessfulProps = Partial<TProgressItem> & {
+export type TOnProgressUpdateProps = Partial<TProgressReducerItem> & {
+    id: string
+}
+export type TOnProgressSuccessfulProps = Partial<TProgressReducerItem> & {
     successMsg: string
     id: string
 }
-export type TOnProgressFailedProps = Partial<TProgressItem> & {
+export type TOnProgressFailedProps = Partial<TProgressReducerItem> & {
     failedMsg: string
     id: string
 }
-export type TOnProgressStartProps = Omit<TProgressItem, 'status'> & {
+export type TOnProgressStartProps = Omit<TProgressReducerItem, 'status'> & {
     isDependentOnBrowser: boolean
 }
 export type TOnProgressCancel = {
@@ -34,25 +39,19 @@ const { Canceled, Completed, Failed, Running } = ProgressItemStatus
 
 export const useOnProgress = () => {
     const storeDispatch = useStoreDispatch()
-    const {
-        updateProgressItem,
-        removeActiveItem,
-        addActiveItem,
-        addItemToProgress
-    } = useProgressReducer()
 
     const _addGlobalAlert = (payload: TGlobalAlertReducerAlert) => {
         storeDispatch(addGlobalAlert(payload))
     }
 
     const onProgressUpdate = (props: TOnProgressUpdateProps) => {
-        updateProgressItem({ ...props })
+        storeDispatch(updateProgressItem({ ...props }))
     }
 
     const onProgressSuccessful = (props: TOnProgressSuccessfulProps) => {
         const { successMsg, id, ...rest } = props
-        removeActiveItem(id)
-        updateProgressItem({ id, status: Completed, ...rest })
+        storeDispatch(removeActiveItemFromProgress({ id }))
+        storeDispatch(updateProgressItem({ id, status: Completed, ...rest }))
         _addGlobalAlert({
             id: id + 'success',
             isOpen: true,
@@ -63,8 +62,8 @@ export const useOnProgress = () => {
 
     const onProgressFailed = (props: TOnProgressFailedProps) => {
         const { failedMsg, id, ...rest } = props
-        removeActiveItem(id)
-        updateProgressItem({ id, status: Failed, ...rest })
+        storeDispatch(removeActiveItemFromProgress({ id }))
+        storeDispatch(updateProgressItem({ id, status: Failed, ...rest }))
         _addGlobalAlert({
             id: id + 'error',
             isOpen: true,
@@ -75,30 +74,32 @@ export const useOnProgress = () => {
 
     const onProgressStart = (props: TOnProgressStartProps) => {
         const { id, isDependentOnBrowser, ...rest } = props
-        addActiveItem({ id, isDependentOnBrowser })
+        storeDispatch(addActiveItemToProgress({ id, isDependentOnBrowser }))
         storeDispatch(
             updateAdditionalSidebar({
                 isOpen: true,
                 activeTab: AdditionalSidebarTabs.ProgressTab
             })
         )
-        addItemToProgress({
-            id,
-            status: Running,
-            ...rest
-        })
+        storeDispatch(
+            addItemToProgress({
+                id,
+                status: Running,
+                ...rest
+            })
+        )
     }
 
     const onProgressCancel = (props: TOnProgressCancel) => {
         const { id } = props
-        removeActiveItem(id)
-        updateProgressItem({ id, status: Canceled })
+        storeDispatch(removeActiveItemFromProgress({ id }))
+        storeDispatch(updateProgressItem({ id, status: Canceled }))
     }
 
     const onProgressRetry = (props: TOnProgressRetry) => {
         const { id, isDependentOnBrowser, onCancel } = props
-        addActiveItem({ id, isDependentOnBrowser })
-        updateProgressItem({ id, status: Running, onCancel })
+        storeDispatch(addActiveItemToProgress({ id, isDependentOnBrowser }))
+        storeDispatch(updateProgressItem({ id, status: Running, onCancel }))
     }
 
     return {

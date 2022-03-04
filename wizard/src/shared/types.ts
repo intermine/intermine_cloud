@@ -1,5 +1,12 @@
 import { AlertProps } from '@intermine/chromatin/alert'
-import { AuthStates, AdditionalSidebarTabs } from './constants'
+import { HTMLAttributeAnchorTarget } from 'react'
+import { LinkProps } from 'react-router-dom'
+
+import {
+    AuthStates,
+    AdditionalSidebarTabs,
+    ProgressItemStatus,
+} from './constants'
 
 export type TAuthReducerUserDetails = {
     name: string
@@ -29,7 +36,33 @@ export type TGlobalAlertReducerAlert = {
 }
 
 export type TGlobalAlertReducer = {
-    alerts: {
-        [x: string]: TGlobalAlertReducerAlert
+    alerts: Record<string, TGlobalAlertReducerAlert>
+}
+
+export type TProgressReducerItem = {
+    id: string
+    name: string
+    status: ProgressItemStatus
+    totalSize: number
+    loadedSize: number
+    getProgressText: (loadedSize: number, totalSize: number) => string
+    onRetry: () => void
+    onCancel: () => void
+    getOnSuccessViewButtonProps?: () => {
+        to: LinkProps['to']
+        title: string
+        target?: HTMLAttributeAnchorTarget
     }
+    getRunningStatusText?: (loadedSize: number, totalSize: number) => string
+}
+
+export type TProgressReducerActiveItem = {
+    id: string
+    isDependentOnBrowser: boolean
+}
+
+export type TProgressReducer = {
+    items: Record<string, TProgressReducerItem>
+    activeItems: Record<string, TProgressReducerActiveItem>
+    isRestrictUnmount: boolean
 }
