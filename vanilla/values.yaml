@@ -148,6 +148,9 @@ solr:
 tomcat:
   tomcatUsername: tomcat
   tomcatPassword: tomcat
+  tomcatAllowRemoteManagement: 1
+  persistence:
+    storageClass: standard-rwo
   image:
     repository: bitnami/tomcat
     tag: 8.5.72
@@ -162,6 +165,18 @@ tomcat:
     enabled: false
   containerSecurityContext:
     enabled: false
+  extraVolumes:
+  - name: tomcat-users
+    secret:
+      secretName: tomcat-users
+      defaultMode: 420
+      items:
+      - key: tomcat-users.xml
+        path: tomcat-users.xml
+  extraVolumeMounts:
+  - mountPath: /opt/bitnami/tomcat/conf/tomcat-users.xml
+    name: tomcat-users
+    subPath: tomcat-users.xml
 
 bluegenes:
   backendServiceRoot: ""
@@ -175,9 +190,14 @@ builder:
     repository: docker-registry.default.svc:5000/pombemine-staging/jobbuild
     tag: latest
   mineName: pombemine
+  properties:
+    webapp.path: pombemine
+    project.title: PombeMine
+    project.subTitle: An integrated database for S. pombe genomics
+    project.releaseVersion: First draft
   objectStorage:
-    accessKey: 345b8f0e0d1a49d89ab6507fca3c88ae
-    secretKey: 7af16b6b794c43ff8ae380bf2107b6a6
+    accessKey: fillMeIn
+    secretKey: fillMeIn
     endpoint: object.pouta.csc.fi
     buckets:
       minedir: staging/pombemine
