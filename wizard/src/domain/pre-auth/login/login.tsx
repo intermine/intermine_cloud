@@ -5,8 +5,11 @@ import { InlineAlert } from '@intermine/chromatin/inline-alert'
 import { Button } from '@intermine/chromatin/button'
 import { clone } from '@intermine/chromatin/utils'
 
-import { useGlobalAlertReducer } from '../../../context'
-import { useStoreDispatch, authActions } from '../../../store'
+import {
+    useStoreDispatch,
+    authActions,
+    globalAlertActions
+} from '../../../store'
 import { AuthStates } from '../../../shared/constants'
 
 import { DomElementIDs, OtherIDs } from '../../../constants/ids'
@@ -43,7 +46,6 @@ export const Login = () => {
     const storeDispatch = useStoreDispatch()
 
     const history = useHistory()
-    const { removeAlert } = useGlobalAlertReducer()
 
     const [{ password, email }, setFields] = useState<TInputFields>({
         password: clone(defaultFieldValue),
@@ -85,7 +87,11 @@ export const Login = () => {
 
     const onLoginSuccessful = () => {
         // Remove unauthorize alert.
-        removeAlert(OtherIDs.UnauthorizeAlert)
+        storeDispatch(
+            globalAlertActions.removeGlobalAlert({
+                id: OtherIDs.UnauthorizeAlert
+            })
+        )
 
         // Updating AuthState
         storeDispatch(authActions.updateAuthState(AuthStates.Authorize))

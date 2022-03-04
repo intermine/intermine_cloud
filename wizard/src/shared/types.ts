@@ -1,3 +1,4 @@
+import { AlertProps } from '@intermine/chromatin/alert'
 import { AuthStates, AdditionalSidebarTabs } from './constants'
 
 export type TAuthReducerUserDetails = {
@@ -16,4 +17,19 @@ export type TAuthReducerState = {
 export type TAdditionalSidebarReducer = {
     isOpen: boolean
     activeTab: AdditionalSidebarTabs
+}
+
+export type TGlobalAlertReducerAlert = {
+    id: string
+    type?: AlertProps['type']
+    message?: string
+    title?: string
+    onClose?: () => void
+    isOpen?: boolean
+}
+
+export type TGlobalAlertReducer = {
+    alerts: {
+        [x: string]: TGlobalAlertReducerAlert
+    }
 }

@@ -1,11 +1,13 @@
 import { configureStore } from '@reduxjs/toolkit'
-import additionalSidebarSlice from './slices/additional-sidebar-slice'
-import authSlice from './slices/auth-slice'
+import additionalSidebarReducer from './slices/additional-sidebar-slice'
+import authReducer from './slices/auth-slice'
+import globalAlertReducer from './slices/global-alert'
 
 export const store = configureStore({
     reducer: {
-        auth: authSlice,
-        additionalSidebar: additionalSidebarSlice,
+        auth: authReducer,
+        additionalSidebar: additionalSidebarReducer,
+        globalAlert: globalAlertReducer,
     },
 })
 

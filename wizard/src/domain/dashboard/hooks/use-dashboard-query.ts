@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import shortid from 'shortid'
 
-import { useGlobalAlertReducer } from '../../../context'
+import { useStoreDispatch, globalAlertActions } from '../../../store'
 import {
     getResponseMessageUsingResponseStatus,
     getResponseStatus,
@@ -30,7 +30,11 @@ export type TUseDashboardQueryState = {
     isFailed: boolean
 }
 
+const { addGlobalAlert } = globalAlertActions
+
 export const useDashboardQuery = <T>(props: TUseDashboardQuery<T>) => {
+    const storeDispatch = useStoreDispatch()
+
     const [state, setState] = useState<TUseDashboardQueryState>({
         isFetched: false,
         isLoading: true,
@@ -38,8 +42,6 @@ export const useDashboardQuery = <T>(props: TUseDashboardQuery<T>) => {
         response: {} as unknown,
         isFailed: false,
     })
-
-    const { addAlert } = useGlobalAlertReducer()
 
     const updateState = (val: Partial<TUseDashboardQueryState>) => {
         setState((prev) => ({ ...prev, ...val }))
@@ -101,16 +103,18 @@ export const useDashboardQuery = <T>(props: TUseDashboardQuery<T>) => {
 
             if (hasToShowAlertOnError) {
                 const status = getResponseStatus(_error.response)
-                addAlert({
-                    id: shortid.generate(),
-                    message: getResponseMessageUsingResponseStatus(
-                        _error.response,
-                        status
-                    ),
-                    isOpen: true,
-                    title: 'Error',
-                    type: 'error',
-                })
+                storeDispatch(
+                    addGlobalAlert({
+                        id: shortid.generate(),
+                        message: getResponseMessageUsingResponseStatus(
+                            _error.response,
+                            status
+                        ),
+                        isOpen: true,
+                        title: 'Error',
+                        type: 'error',
+                    })
+                )
             }
 
             if (typeof onError === 'function') {

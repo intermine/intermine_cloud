@@ -1,8 +1,13 @@
-import { useProgressReducer, useGlobalAlertReducer } from '../../../context'
+import { useProgressReducer } from '../../../context'
 import { TProgressItem } from '../../../context/types'
 import { AdditionalSidebarTabs } from '../../../shared/constants'
 import { ProgressItemStatus } from '../../../constants/progress'
-import { useStoreDispatch, additionalSidebarActions } from '../../../store'
+import {
+    useStoreDispatch,
+    additionalSidebarActions,
+    globalAlertActions
+} from '../../../store'
+import { TGlobalAlertReducerAlert } from '../../../shared/types'
 
 export type TOnProgressUpdateProps = Partial<TProgressItem> & { id: string }
 export type TOnProgressSuccessfulProps = Partial<TProgressItem> & {
@@ -29,13 +34,16 @@ const { Canceled, Completed, Failed, Running } = ProgressItemStatus
 
 export const useOnProgress = () => {
     const storeDispatch = useStoreDispatch()
-    const { addAlert } = useGlobalAlertReducer()
     const {
         updateProgressItem,
         removeActiveItem,
         addActiveItem,
         addItemToProgress
     } = useProgressReducer()
+
+    const addGlobalAlert = (payload: TGlobalAlertReducerAlert) => {
+        storeDispatch(globalAlertActions.addGlobalAlert(payload))
+    }
 
     const onProgressUpdate = (props: TOnProgressUpdateProps) => {
         updateProgressItem({ ...props })
@@ -45,7 +53,7 @@ export const useOnProgress = () => {
         const { successMsg, id, ...rest } = props
         removeActiveItem(id)
         updateProgressItem({ id, status: Completed, ...rest })
-        addAlert({
+        addGlobalAlert({
             id: id + 'success',
             isOpen: true,
             message: successMsg,
@@ -57,7 +65,7 @@ export const useOnProgress = () => {
         const { failedMsg, id, ...rest } = props
         removeActiveItem(id)
         updateProgressItem({ id, status: Failed, ...rest })
-        addAlert({
+        addGlobalAlert({
             id: id + 'error',
             isOpen: true,
             message: failedMsg,

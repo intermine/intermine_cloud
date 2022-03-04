@@ -6,11 +6,6 @@ import type { ThemeType } from '@intermine/chromatin/styles'
 import { HTMLAttributeAnchorTarget } from 'react'
 import { LinkProps } from 'react-router-dom'
 
-import {
-    AdditionalSidebarActions,
-    AdditionalSidebarTabs,
-} from '../constants/additional-sidebar'
-
 import { GlobalAlertsActions } from '../constants/global-alert'
 import { GlobalModalActions } from '../constants/global-modal'
 import { PreferencesActions } from '../constants/preferences'
@@ -91,38 +86,6 @@ export type TUseGlobalModalReducer = {
 
 /**
  * Modal Ends
- */
-
-/**
- * Global Alert
- */
-export type TAlert = {
-    id: string
-    type?: AlertProps['type']
-    message?: string
-    title?: string
-    onClose?: () => void
-    isOpen?: boolean
-}
-
-export type TGlobalAlertReducer = {
-    alerts: { [x: string]: TAlert }
-}
-
-export type TGlobalAlertReducerAction = {
-    type: GlobalAlertsActions
-    data: unknown
-}
-
-export type TUseGlobalAlertReducer = {
-    state: TGlobalAlertReducer
-    addAlert: (data: TAlert) => void
-    removeAlert: (id: string) => void
-    updateAlert: (data: TAlert) => void
-}
-
-/**
- * Global Alert Ends
  */
 
 /**
@@ -222,7 +185,6 @@ export type TAppContext = {
     preferencesReducer: TUsePreferencesReducer
     sidebarReducer: TUseSidebarReducer
     globalModalReducer: TUseGlobalModalReducer
-    globalAlertReducer: TUseGlobalAlertReducer
     progressReducer: TUseProgressReducer
     sharedReducer: TUseSharedReducer
 }

@@ -6,8 +6,13 @@ import { createStyle } from '@intermine/chromatin/styles'
 import 'regenerator-runtime'
 
 import { AuthStates, OtherIDs } from './shared/constants'
-import { useGlobalAlertReducer, usePreferencesReducer } from './context'
-import { authSelector, useStoreSelector } from './store'
+import { usePreferencesReducer } from './context'
+import {
+    authSelector,
+    useStoreSelector,
+    globalAlertActions,
+    useStoreDispatch
+} from './store'
 
 import { RouteLoadingSpinner } from './components/route-loading-spinner'
 import { darkTheme, lightTheme } from './constants/theme'
@@ -21,6 +26,7 @@ import {
     DASHBOARD_OVERVIEW_PATH
 } from './routes'
 import { GlobalAlert } from './components/global-alert'
+import { TGlobalAlertReducerAlert } from './shared/types'
 
 const Dashboard = lazy(() => import('./domain/dashboard'))
 const PreAuth = lazy(() => import('./domain/pre-auth'))
@@ -73,14 +79,19 @@ export const App = () => {
     const history = useHistory()
     const { pathname } = useLocation()
 
+    const storeDispatch = useStoreDispatch()
+
     const auth = useStoreSelector(authSelector)
 
     const preferenceReducer = usePreferencesReducer()
-    const { addAlert } = useGlobalAlertReducer()
 
     const {
         state: { themeType }
     } = preferenceReducer
+
+    const addGlobalAlert = (payload: TGlobalAlertReducerAlert) => {
+        storeDispatch(globalAlertActions.addGlobalAlert(payload))
+    }
 
     const onLocationChange = () => {
         if (auth.authState !== Authorize && isAuthRoute(pathname)) {
@@ -94,7 +105,7 @@ export const App = () => {
              * Showing an alert to user stating why we redirected user to
              * login page.
              */
-            addAlert({
+            addGlobalAlert({
                 id: OtherIDs.UnauthorizeAlert,
                 isOpen: true,
                 message: `You are not logged in. 
@@ -139,7 +150,7 @@ export const App = () => {
 
     useEffect(() => {
         window.addEventListener('offline', () => {
-            addAlert({
+            addGlobalAlert({
                 isOpen: true,
                 id: 'offline-alert',
                 title: 'Connectivity Issue',
@@ -149,7 +160,7 @@ export const App = () => {
         })
 
         window.addEventListener('online', () => {
-            addAlert({
+            addGlobalAlert({
                 isOpen: true,
                 id: 'online-alert',
                 title: 'Online',

@@ -3,12 +3,14 @@ import shortid from 'shortid'
 import { ButtonCommonProps } from '@intermine/chromatin/button'
 import { AxiosResponse } from 'axios'
 
-import { useSharedReducer, useGlobalAlertReducer } from '../../../context'
+import { useSharedReducer } from '../../../context'
+import { useStoreDispatch, globalAlertActions } from '../../../store'
 import { ResponseStatus } from '../../../constants/response'
 import { LOGIN_PATH } from '../../../routes'
 import { useLogout } from '../../../hooks/use-logout'
 import { useDashboardWarningModal } from './use-dashboard-warning-modal'
 
+const { addGlobalAlert } = globalAlertActions
 export enum RestrictLogoutRestrictions {
     FormIsDirty = 'FormIsDirty',
     Uploading = 'Uploading'
@@ -20,10 +22,11 @@ export type TRestrictAdditionalSidebarLogoutWithModalProps = {
 }
 
 export const useDashboardLogout = () => {
+    const storeDispatch = useStoreDispatch()
+
     const { FormIsDirty, Uploading } = RestrictLogoutRestrictions
 
     const { updateSharedReducer } = useSharedReducer()
-    const { addAlert } = useGlobalAlertReducer()
 
     const { showWarningModal, closeWarningModal, updateWarningModal } =
         useDashboardWarningModal()
@@ -74,13 +77,15 @@ export const useDashboardLogout = () => {
                 we don't know why. Please try to refresh this page.`
         }
 
-        addAlert({
-            id: shortid.generate(),
-            isOpen: true,
-            type: 'error',
-            message,
-            title: 'Error'
-        })
+        storeDispatch(
+            addGlobalAlert({
+                id: shortid.generate(),
+                isOpen: true,
+                type: 'error',
+                message,
+                title: 'Error'
+            })
+        )
     }
 
     const restrictAdditionalSidebarLogoutWithModal = (

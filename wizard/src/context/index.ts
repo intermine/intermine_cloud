@@ -1,5 +1,4 @@
 export {
-    useGlobalAlertReducer,
     useGlobalModalReducer,
     usePreferencesReducer,
     useSidebarReducer,
