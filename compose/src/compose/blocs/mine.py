@@ -6,10 +6,14 @@ from blackcap.db import DBSession
 from blackcap.flow import Flow, FlowExecError, FuncProp, get_outer_function, Prop, Step
 from blackcap.flow.step import dummy_backward
 from blackcap.schemas.user import User
+from compose.blocs.rendered_template import (
+    create_rendered_template,
+    update_rendered_template,
+)
 from logzero import logger
 from pydantic import ValidationError
 from pydantic.error_wrappers import ErrorWrapper
-from sqlalchemy import select
+from sqlalchemy import desc, select
 from sqlalchemy.exc import SQLAlchemyError
 
 
@@ -32,7 +36,7 @@ from compose.schemas.api.template.get import TemplateGetQueryParams, TemplateQue
 from compose.schemas.data import Data
 from compose.schemas.file import File
 from compose.schemas.mine import Mine
-from compose.schemas.template import Template
+from compose.schemas.template import RenderedTemplate, Template
 
 
 ######################
@@ -490,14 +494,56 @@ def generate_create_mine_flow(
     Returns:
         Flow: Create data flow
     """
-    create_db_entry_step = Step(create_mine_db_entry, revert_mine_db_entry)
-    create_file_step = Step(create_file_db_entry, revert_file_db_entry)
+    check_data_list_exist_step = Step(check_data_list_exist, dummy_backward)
+    check_template_list_exist_step = Step(check_template_list_exist, dummy_backward)
+    create_rendered_template_db_entry_step = Step(
+        create_rendered_template_db_entry, revert_rendered_template_db_entry
+    )
+    create_file_db_entry_step = Step(create_file_db_entry, revert_file_db_entry)
     create_file_presigned_url_step = Step(create_file_presigned_urls, dummy_backward)
+    create_and_upload_rendered_template_step = Step(
+        create_and_upload_rendered_template, dummy_backward
+    )
+    create_mine_db_entry_step = Step(create_mine_db_entry, revert_mine_db_entry)
+    update_rendered_template_step = Step(
+        update_rendered_template_db_entry, rewind_rendered_template_db_entry
+    )
 
     flow = Flow()
 
+    # 0: Add check data list step
+    mine_data_ids = [
+        data_id for mine in mine_create_request_list for data_id in mine.data_file_ids
+    ]
     flow.add_step(
-        create_db_entry_step,
+        check_data_list_exist_step,
+        [Prop(data=mine_data_ids, description="List of data ids")],
+    )
+
+    # 1: Add check template list step
+    mine_template_ids = [mine.template_id for mine in mine_create_request_list]
+    flow.add_step(
+        check_template_list_exist_step,
+        [Prop(data=mine_template_ids, description="List of template ids")],
+    )
+
+    # 2: Add create render template step
+    rendered_template_create_request_list: List[RenderedTemplateCreate] = [
+        RenderedTemplateCreate() for mine in mine_create_request_list
+    ]
+    flow.add_step(
+        create_rendered_template_db_entry_step,
+        Prop(
+            data=rendered_template_create_request_list,
+            description="List of RenderedTemplateCreate request",
+        ),
+    )
+
+    # 3: Create file entry for rendered template
+    flow.add_step()
+
+    flow.add_step(
+        create_mine_db_entry_step,
         [
             Prop(
                 data=mine_create_request_list,
