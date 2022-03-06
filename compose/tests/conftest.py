@@ -14,12 +14,20 @@ from minio.api import Minio
 from minio.deleteobjects import DeleteObject
 import pytest
 
+from compose.blocs.data import create_data
 from compose.blocs.file import create_file
+from compose.blocs.rendered_template import create_rendered_template
+from compose.blocs.template import create_template
 from compose.configs import config_registry
 from compose.routes import register_blueprints, register_extensions
 from compose.schemas.api.auth.post import AuthPOSTRequest
+from compose.schemas.api.data.post import DataCreate
 from compose.schemas.api.file.post import FileCreate
+from compose.schemas.api.rendered_template.post import RenderedTemplateCreate
+from compose.schemas.api.template.post import TemplateCreate
+from compose.schemas.data import Data
 from compose.schemas.file import File
+from compose.schemas.template import RenderedTemplate, Template
 
 config = config_registry.get_config()
 
@@ -72,6 +80,40 @@ def file(user: User) -> File:
     )
     created_file = create_file([file_create], user)[0]
     return created_file
+
+
+@pytest.fixture(scope="session")
+def data(user: User) -> Data:
+    data_create = DataCreate(name="randomDataset", ext="gff", file_type="Sequencing")
+    created_data = create_data([data_create], user)[0]
+    return created_data
+
+
+@pytest.fixture(scope="session")
+def template(user: User) -> Template:
+    template_create = TemplateCreate(
+        name="randomTemplate", description="Random Template", template_vars=[]
+    )
+    created_template: Template = create_template(
+        [template_create],
+        user,
+    )[0]
+    return created_template
+
+
+@pytest.fixture(scope="session")
+def rendered_template(user: User, template: Template) -> RenderedTemplate:
+    rendered_template_create = RenderedTemplateCreate(
+        name="randomTemplate",
+        description="Random Template",
+        template_vars=[],
+        parent_template_id=template.template_id,
+    )
+    created_rendered_template: RenderedTemplate = create_rendered_template(
+        [rendered_template_create],
+        user,
+    )[0]
+    return created_rendered_template
 
 
 @pytest.fixture(scope="session")
