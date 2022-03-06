@@ -1,6 +1,6 @@
 export { DashboardForm } from './dashboard-form'
-
-export { uploadService } from './utils'
+export * from './utils'
+export * from './hooks'
 
 export type {
     TUploadDatasetReturn,
@@ -9,5 +9,3 @@ export type {
     TOnUploadProgressEvent,
     TOnUploadFailedEvent,
 } from './utils'
-
-export type { TUploadProps } from './upload'
