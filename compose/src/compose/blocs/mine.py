@@ -14,7 +14,7 @@ from compose.blocs.rendered_template import (
     update_rendered_template_db_entry,
 )
 from logzero import logger
-from pydantic import ValidationError
+from pydantic import UUID4, ValidationError
 from pydantic.error_wrappers import ErrorWrapper
 from sqlalchemy import select
 from sqlalchemy.exc import SQLAlchemyError
@@ -216,7 +216,7 @@ def check_data_list_exist(inputs: List[Prop]) -> List[Prop]:
             Expects
                 0: data_list
                     Prop(data=data_ids, description="List of ids of data objects")
-                2: user
+                1: user
                     Prop(data=user, description="User")
 
     Raises:
@@ -258,7 +258,7 @@ def check_data_list_exist(inputs: List[Prop]) -> List[Prop]:
         file_query = FileGetQueryParams(query_type=FileQueryType.GET_ALL_FILES)
         file_list: List[File] = get_file(file_query, user)
         file_list_parent_ids = [
-            file.parent_id for file in file_list if file.uploaded is True
+            str(file.parent_id) for file in file_list if file.uploaded is True
         ]
         for data_id in data_ids:
             if data_id not in file_list_parent_ids:
@@ -311,7 +311,7 @@ def check_template_list_exist(inputs: List[Prop]) -> List[Prop]:
             Prop(data=user, description="User")
     """
     try:
-        template_ids: List[str] = inputs[0].data
+        template_ids: List[UUID4] = inputs[0].data
         user: User = inputs[1].data
     except Exception as e:
         raise FlowExecError(
@@ -328,7 +328,7 @@ def check_template_list_exist(inputs: List[Prop]) -> List[Prop]:
             query_type=TemplateQueryType.GET_ALL_TEMPLATES
         )
         template_list: List[Template] = get_template(template_query, user)
-        template_list_ids = [str(template.template_id) for template in template_list]
+        template_list_ids = [template.template_id for template in template_list]
         # Use sets to optimize later
         for template_id in template_ids:
             if template_id not in template_list_ids:
@@ -445,11 +445,13 @@ def revert_mine_db_entry(inputs: List[Prop]) -> List[Prop]:
             Expects
                 0: mine_create_request_list
                     Prop(data=data_create_request_list, description="List of create data objects")
-                1: user
+                1: created_rendered_template_list
+                    Prop(data=created_rendered_template_list, description="List of create rendered_template objects")
+                2: user
                     Prop(data=user, description="User")
-                2: created_mine_list
+                3: created_mine_list
                     Prop(data=created_mine_list, description="List of created mine objects")
-                3: user
+                4: user
                     Prop(data=user, description="User")
 
     Raises:
@@ -464,8 +466,8 @@ def revert_mine_db_entry(inputs: List[Prop]) -> List[Prop]:
             Prop(data=user, description="User")
     """
     try:
-        created_mine_list: List[Mine] = inputs[2].data
-        user: User = inputs[3].data
+        created_mine_list: List[Mine] = inputs[3].data
+        user: User = inputs[4].data
     except Exception as e:
         raise FlowExecError(
             human_description="Parsing inputs failed",
@@ -535,14 +537,20 @@ def generate_create_mine_flow(
     ]
     flow.add_step(
         check_data_list_exist_step,
-        [Prop(data=mine_data_ids, description="List of data ids")],
+        [
+            Prop(data=mine_data_ids, description="List of data ids"),
+            Prop(data=user, description="user creds"),
+        ],
     )
 
     # * 1: Check template list
     mine_template_ids = [mine.template_id for mine in mine_create_request_list]
     flow.add_step(
         check_template_list_exist_step,
-        [Prop(data=mine_template_ids, description="List of template ids")],
+        [
+            Prop(data=mine_template_ids, description="List of template ids"),
+            Prop(data=user, description="user creds"),
+        ],
     )
 
     # * 2: Create render template db entry
@@ -577,7 +585,7 @@ def generate_create_mine_flow(
         [created_file_list_func_prop],
     )
 
-    # * 6: Render and upload template
+    # * 5: Render and upload template
     presigned_file_list_func_prop = FuncProp(
         func=flow.get_froward_output,
         params={"index": 4},
@@ -592,7 +600,7 @@ def generate_create_mine_flow(
         ],
     )
 
-    # * 7: Create mine db entry
+    # * 6: Create mine db entry
     flow.add_step(
         create_mine_db_entry_step,
         [
@@ -600,14 +608,14 @@ def generate_create_mine_flow(
                 data=mine_create_request_list,
                 description="List of DataCreate Objects",
             ),
-            Prop(data=user, description="User"),
+            created_rendered_template_list_func_prop,
         ],
     )
 
-    # * 8: Update rendered template db entry
+    # * 7: Update rendered template db entry
     created_mine_list_func_prop = FuncProp(
         func=flow.get_froward_output,
-        params={"index": 7},
+        params={"index": 6},
         description="created mine list and user props",
     )
     flow.add_step(
