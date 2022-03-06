@@ -53,7 +53,7 @@ class RenderedTemplate(BaseModel):
     description: str = ""
     template_vars: List[TemplateVar] = []
     template_context: TemplateContext = TemplateContext()
-    parent_mine_id: UUID4
+    parent_mine_id: Optional[UUID4]
     file_id: Optional[UUID4]
 
     @property
