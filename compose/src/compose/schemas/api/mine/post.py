@@ -1,6 +1,6 @@
 """Mine API POST schema."""
 
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, List, Union, Optional
 
 
 from blackcap.schemas.api.common import ResponseSchema
@@ -18,7 +18,9 @@ class MineCreate(BaseModel):
     preference: Dict = {}
     state: Dict = {}
     template_id: UUID4
-    data_file_ids: List[UUID4]
+    rendered_template_id: Optional[UUID4]
+    rendered_template_file_id: Optional[UUID4]
+    data_file_ids: List[str]
 
 
 class MinePOSTRequest(BaseModel):
