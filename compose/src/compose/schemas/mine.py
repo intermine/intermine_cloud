@@ -21,10 +21,11 @@ class Mine(BaseModel):
     mine_id: UUID4
     name: str
     description: str = ""
+    subdomain: str
     preference: Dict = {}
     state: Dict = {}
     mine_jobs: Optional[MineJobs]
     protagonist_id: UUID4
-    template_id: UUID4
+    rendered_template_id: UUID4
     rendered_template_file_id: UUID4
     data_file_ids: List[UUID4]

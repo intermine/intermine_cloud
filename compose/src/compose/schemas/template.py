@@ -47,11 +47,12 @@ class Template(BaseModel):
 class RenderedTemplate(BaseModel):
     """RenderedTemplate schema."""
 
-    rendered_template_id: Optional[UUID4]
+    rendered_template_id: UUID4
+    parent_template_id: UUID4
     name: str
-    description: Optional[str]
-    template_vars: List[TemplateVar]
-    template_context: Optional[TemplateContext]
+    description: str = ""
+    template_vars: List[TemplateVar] = []
+    template_context: TemplateContext = TemplateContext()
     parent_mine_id: Optional[UUID4]
     file_id: Optional[UUID4]
 

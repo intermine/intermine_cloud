@@ -22,7 +22,7 @@ from compose.schemas.api.file.post import FileCreate
 from compose.schemas.api.file.put import FileUpdate
 from compose.schemas.data import Data
 from compose.schemas.file import File
-from compose.schemas.template import Template
+from compose.schemas.template import RenderedTemplate, Template
 
 
 config = config_registry.get_config()
@@ -259,7 +259,9 @@ def create_file_db_entry(inputs: List[Prop]) -> List[Prop]:
             Prop(data=user, description="User")
     """
     try:
-        created_parent_list: List[Union[Data, Template]] = inputs[0].data
+        created_parent_list: List[Union[Data, Template, RenderedTemplate]] = inputs[
+            0
+        ].data
         user: User = inputs[1].data
     except Exception as e:
         raise FlowExecError(
@@ -282,6 +284,15 @@ def create_file_db_entry(inputs: List[Prop]) -> List[Prop]:
                 )
             )
         created_file_list = create_file(file_create_list, user)
+
+        # Add file id to rendered templates
+        for parent in created_parent_list:
+            for file in created_file_list:
+                if (
+                    file.parent_id == parent.get_id()
+                    and type(parent) == RenderedTemplate
+                ):
+                    parent.file_id = file.file_id
     except SQLAlchemyError as e:
         raise FlowExecError(
             human_description="Creating DB object failed",

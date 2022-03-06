@@ -1,11 +1,12 @@
 """RenderedTemplate API DELETE schema."""
 
-from typing import List, Optional
+from typing import Any, Dict, List, Union
 
 from blackcap.schemas.api.common import ResponseSchema
-from blackcap.schemas.user import User
 from pydantic import BaseModel
 from pydantic.types import UUID4
+
+from compose.schemas.template import RenderedTemplate
 
 
 class RenderedTemplateDelete(BaseModel):
@@ -14,14 +15,13 @@ class RenderedTemplateDelete(BaseModel):
     rendered_template_id: UUID4
 
 
-class RenderedTemplateDELETEResponse(ResponseSchema):
-    """RenderedTemplate DELETE response schema."""
-
-    items: List[RenderedTemplateDelete] = []
-
-
 class RenderedTemplateDELETERequest(BaseModel):
     """RenderedTemplate DELETE request schema."""
 
-    rendered_templates: List[RenderedTemplateDelete]
-    user: Optional[User]
+    rendered_templates_list: List[RenderedTemplateDelete]
+
+
+class RenderedTemplateDELETEResponse(ResponseSchema):
+    """RenderedTemplate DELETE response schema."""
+
+    items: Dict[str, List[Union[RenderedTemplate, Any]]] = {}

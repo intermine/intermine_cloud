@@ -1,5 +1,6 @@
 """RenderedTemplateDB model."""
 
+from blackcap.models.meta.helpers import GUID
 from blackcap.models.meta.mixins import DBModel, SurrogatePKUUID, TimestampMixin
 from blackcap.models.meta.orm import reference_col
 from sqlalchemy import Column, JSON, String
@@ -14,5 +15,6 @@ class RenderedTemplateDB(DBModel, SurrogatePKUUID, TimestampMixin):
     template_vars = Column(JSON)
     template_context = Column(JSON)
     parent_mine_id = reference_col("mine", nullable=True)
+    parent_template_id = Column(GUID, nullable=False)
     file_id = reference_col("file", nullable=True)
     protagonist_id = reference_col("protagonist")
