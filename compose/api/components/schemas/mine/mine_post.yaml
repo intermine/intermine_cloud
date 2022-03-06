@@ -15,7 +15,7 @@ properties:
         preference:
           type: object
         template_id:
-          type: object
+          type: string
         data_ids:
           type: array
           items:
@@ -25,5 +25,5 @@ properties:
         - "subdomain"
         - "template_id"
         - "data_ids"
-  required:
-    - "mine_list"
+required:
+  - "mine_list"
