@@ -7,13 +7,16 @@ from blackcap.flow import Flow, FlowExecError, FuncProp, get_outer_function, Pro
 from blackcap.flow.step import dummy_backward
 from blackcap.schemas.user import User
 from compose.blocs.rendered_template import (
-    create_rendered_template,
-    update_rendered_template,
+    create_rendered_template_db_entry,
+    render_and_upload_rendered_template,
+    revert_rendered_template_db_entry,
+    rewind_rendered_template_db_entry,
+    update_rendered_template_db_entry,
 )
 from logzero import logger
 from pydantic import ValidationError
 from pydantic.error_wrappers import ErrorWrapper
-from sqlalchemy import desc, select
+from sqlalchemy import select
 from sqlalchemy.exc import SQLAlchemyError
 
 
@@ -32,11 +35,12 @@ from compose.schemas.api.mine.delete import MineDelete
 from compose.schemas.api.mine.get import MineGetQueryParams, MineQueryType
 from compose.schemas.api.mine.post import MineCreate
 from compose.schemas.api.mine.put import MineUpdate
+from compose.schemas.api.rendered_template.post import RenderedTemplateCreate
 from compose.schemas.api.template.get import TemplateGetQueryParams, TemplateQueryType
 from compose.schemas.data import Data
 from compose.schemas.file import File
 from compose.schemas.mine import Mine
-from compose.schemas.template import RenderedTemplate, Template
+from compose.schemas.template import Template
 
 
 ######################
@@ -110,7 +114,7 @@ def get_mine(query_params: MineGetQueryParams, user_creds: User) -> List[Mine]:
             .where(MineDB.id == query_params.mine_id)
         )
     if query_params.query_type == MineQueryType.GET_MINES_BY_PROTAGONIST_ID:
-        if query_params.mine_id is None:
+        if query_params.protagonist_id is None:
             e = ValidationError(
                 errors=[
                     ErrorWrapper(ValueError("field required"), "protagonist_id"),
@@ -376,9 +380,9 @@ def create_mine_db_entry(inputs: List[Prop]) -> List[Prop]:
 
     Returns:
         List[Prop]:
-            Created data objects
+            Created mine objects
 
-            Prop(data=created_data_list, description="List of created Data Objects")
+            Prop(data=created_mine_list, description="List of created mine Objects")
 
             Prop(data=user, description="User")
     """
@@ -446,7 +450,7 @@ def revert_mine_db_entry(inputs: List[Prop]) -> List[Prop]:
             Prop(data=user, description="User")
     """
     try:
-        created_mine_list: List[Data] = inputs[2].data
+        created_mine_list: List[Mine] = inputs[2].data
         user: User = inputs[3].data
     except Exception as e:
         raise FlowExecError(
@@ -501,8 +505,8 @@ def generate_create_mine_flow(
     )
     create_file_db_entry_step = Step(create_file_db_entry, revert_file_db_entry)
     create_file_presigned_url_step = Step(create_file_presigned_urls, dummy_backward)
-    create_and_upload_rendered_template_step = Step(
-        create_and_upload_rendered_template, dummy_backward
+    render_and_upload_rendered_template_step = Step(
+        render_and_upload_rendered_template, dummy_backward
     )
     create_mine_db_entry_step = Step(create_mine_db_entry, revert_mine_db_entry)
     update_rendered_template_step = Step(
@@ -511,7 +515,7 @@ def generate_create_mine_flow(
 
     flow = Flow()
 
-    # 0: Add check data list step
+    # * 0: Check data list
     mine_data_ids = [
         data_id for mine in mine_create_request_list for data_id in mine.data_file_ids
     ]
@@ -520,28 +524,61 @@ def generate_create_mine_flow(
         [Prop(data=mine_data_ids, description="List of data ids")],
     )
 
-    # 1: Add check template list step
+    # * 1: Check template list
     mine_template_ids = [mine.template_id for mine in mine_create_request_list]
     flow.add_step(
         check_template_list_exist_step,
         [Prop(data=mine_template_ids, description="List of template ids")],
     )
 
-    # 2: Add create render template step
-    rendered_template_create_request_list: List[RenderedTemplateCreate] = [
-        RenderedTemplateCreate() for mine in mine_create_request_list
-    ]
+    # * 2: Create render template db entry
+    checked_template_list_func_prop = FuncProp(
+        func=flow.get_froward_output,
+        params={"index": 1},
+        description="checked template list and user props",
+    )
     flow.add_step(
-        create_rendered_template_db_entry_step,
-        Prop(
-            data=rendered_template_create_request_list,
-            description="List of RenderedTemplateCreate request",
-        ),
+        create_rendered_template_db_entry_step, [checked_template_list_func_prop]
     )
 
-    # 3: Create file entry for rendered template
-    flow.add_step()
+    # * 3: Create file entry for rendered template
+    created_rendered_template_list_func_prop = FuncProp(
+        func=flow.get_froward_output,
+        params={"index": 2},
+        description="created rendred template list and user props",
+    )
+    flow.add_step(
+        create_file_db_entry_step,
+        [created_rendered_template_list_func_prop],
+    )
 
+    # * 4: Create file presigned urls for rendered template
+    created_file_list_func_prop = FuncProp(
+        func=flow.get_froward_output,
+        params={"index": 3},
+        description="created file list and user props",
+    )
+    flow.add_step(
+        create_file_presigned_url_step,
+        [created_file_list_func_prop],
+    )
+
+    # * 6: Render and upload template
+    presigned_file_list_func_prop = FuncProp(
+        func=flow.get_froward_output,
+        params={"index": 4},
+        description="presigned file list and user props",
+    )
+    flow.add_step(
+        render_and_upload_rendered_template_step,
+        [
+            created_rendered_template_list_func_prop,
+            presigned_file_list_func_prop,
+            checked_template_list_func_prop,
+        ],
+    )
+
+    # * 7: Create mine db entry
     flow.add_step(
         create_mine_db_entry_step,
         [
@@ -552,20 +589,19 @@ def generate_create_mine_flow(
             Prop(data=user, description="User"),
         ],
     )
-    create_file_step_func_prop = FuncProp(
-        func=flow.get_froward_output,
-        params={"index": 0},
-        description="Outputs of first step",
-    )
-    create_file_presigned_url_step_func_prop = FuncProp(
-        func=flow.get_froward_output,
-        params={"index": 1},
-        description="Outputs of second step",
-    )
 
-    flow.add_step(create_file_step, [create_file_step_func_prop])
+    # * 8: Update rendered template db entry
+    created_mine_list_func_prop = FuncProp(
+        func=flow.get_froward_output,
+        params={"index": 7},
+        description="created mine list and user props",
+    )
     flow.add_step(
-        create_file_presigned_url_step, [create_file_presigned_url_step_func_prop]
+        update_rendered_template_step,
+        [
+            created_mine_list_func_prop,
+            created_file_list_func_prop,
+        ],
     )
 
     return flow
