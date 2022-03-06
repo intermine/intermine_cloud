@@ -16,6 +16,7 @@ class RenderedTemplateCreate(BaseModel):
     template_vars: List[TemplateVar] = []
     template_context: TemplateContext = TemplateContext()
     parent_mine_id: Optional[UUID4]
+    parent_template_id: UUID4
     file_id: Optional[UUID4]
 
 
