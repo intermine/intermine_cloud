@@ -258,6 +258,8 @@ def create_rendered_template_db_entry(inputs: List[Prop]) -> List[Prop]:
             Expects
                 0: checked_template_list
                     Prop(data=checked_template_list, description="List of checked template objects")
+                1: checked_template_file_list
+                    Prop(data=checked_template_file_list, description="List of checked template file objects")
                 2: user
                     Prop(data=user, description="User")
 
@@ -274,7 +276,7 @@ def create_rendered_template_db_entry(inputs: List[Prop]) -> List[Prop]:
     """
     try:
         checked_template_list: List[Template] = inputs[0].data
-        user: User = inputs[1].data
+        user: User = inputs[2].data
     except Exception as e:
         raise FlowExecError(
             human_description="Parsing inputs failed",
