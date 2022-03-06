@@ -284,6 +284,15 @@ def create_file_db_entry(inputs: List[Prop]) -> List[Prop]:
                 )
             )
         created_file_list = create_file(file_create_list, user)
+
+        # Add file id to rendered templates
+        for parent in created_parent_list:
+            for file in created_file_list:
+                if (
+                    file.parent_id == parent.get_id()
+                    and type(parent) == RenderedTemplate
+                ):
+                    parent.file_id = file.file_id
     except SQLAlchemyError as e:
         raise FlowExecError(
             human_description="Creating DB object failed",

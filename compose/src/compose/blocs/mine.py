@@ -35,12 +35,11 @@ from compose.schemas.api.mine.delete import MineDelete
 from compose.schemas.api.mine.get import MineGetQueryParams, MineQueryType
 from compose.schemas.api.mine.post import MineCreate
 from compose.schemas.api.mine.put import MineUpdate
-from compose.schemas.api.rendered_template.post import RenderedTemplateCreate
 from compose.schemas.api.template.get import TemplateGetQueryParams, TemplateQueryType
 from compose.schemas.data import Data
 from compose.schemas.file import File
 from compose.schemas.mine import Mine
-from compose.schemas.template import Template
+from compose.schemas.template import RenderedTemplate, Template
 
 
 ######################
@@ -66,7 +65,7 @@ def create_mine(mine_list: List[MineCreate], user_creds: User) -> List[Mine]:
             mine_db_create_list: List[MineDB] = [
                 MineDB(
                     protagonist_id=user_creds.user_id,
-                    **mine.dict(),
+                    **mine.dict(exclude={"template_id"}),
                 )
                 for mine in mine_list
             ]
@@ -226,7 +225,7 @@ def check_data_list_exist(inputs: List[Prop]) -> List[Prop]:
     Returns:
         List[Prop]:
 
-            Prop(data=data_list, description="List of Data Objects")
+            Prop(data=data_ids, description="List of Data Objects ids")
 
             Prop(data=file_list, description="List of File Objects")
 
@@ -296,8 +295,8 @@ def check_template_list_exist(inputs: List[Prop]) -> List[Prop]:
     Args:
         inputs (List[Prop]):
             Expects
-                0: template_id
-                    Prop(data=template_id, description="template object id")
+                0: template_ids
+                    Prop(data=template_ids, description="template object ids")
                 2: user
                     Prop(data=user, description="User")
 
@@ -312,7 +311,7 @@ def check_template_list_exist(inputs: List[Prop]) -> List[Prop]:
             Prop(data=user, description="User")
     """
     try:
-        template_id: str = inputs[0].data
+        template_ids: List[str] = inputs[0].data
         user: User = inputs[1].data
     except Exception as e:
         raise FlowExecError(
@@ -324,22 +323,28 @@ def check_template_list_exist(inputs: List[Prop]) -> List[Prop]:
         ) from e
 
     try:
-        # Check for template existence
+        # Check template list existence
         template_query = TemplateGetQueryParams(
-            query_type=TemplateQueryType.GET_TEMPLATE_BY_ID, template_id=template_id
+            query_type=TemplateQueryType.GET_ALL_TEMPLATES
         )
         template_list: List[Template] = get_template(template_query, user)
-        if len(template_list) == 0:
-            raise Exception("TEMPLATE NOT FOUND")
-        # Check for file existence
-        file_query = FileGetQueryParams(
-            query_type=FileQueryType.GET_FILE_BY_ID, file_id=template_list[0].file_id
-        )
+        template_list_ids = [str(template.template_id) for template in template_list]
+        # Use sets to optimize later
+        for template_id in template_ids:
+            if template_id not in template_list_ids:
+                # Raise a user descriptive error later
+                raise Exception("TEMPLATE NOT FOUND")
+
+        # Check for uploaded files
+        file_query = FileGetQueryParams(query_type=FileQueryType.GET_ALL_FILES)
         file_list: List[File] = get_file(file_query, user)
-        if len(file_list) == 0:
-            raise Exception("TEMPLATE FILE NOT FOUND")
-        elif file_list[0].uploaded is False:
-            raise Exception("TEMPLATE NOT UPLOADED")
+        file_list_parent_ids = [
+            file.parent_id for file in file_list if file.uploaded is True
+        ]
+        for template_id in template_ids:
+            if template_id not in file_list_parent_ids:
+                # Raise a user descriptive error later
+                raise Exception("TEMPLATE NOT UPLOADED")
     except SQLAlchemyError as e:
         raise FlowExecError(
             human_description="Querying DB object failed",
@@ -372,8 +377,11 @@ def create_mine_db_entry(inputs: List[Prop]) -> List[Prop]:
             Expects
                 0: mine_create_request_list
                     Prop(data=mine_create_request_list, description="List of create mine objects")
+                1: created_rendered_template_list
+                    Prop(data=created_rendered_template_list, description="List of create rendered_template objects")
                 2: user
                     Prop(data=user, description="User")
+
 
     Raises:
         FlowExecError: Flow execution failed
@@ -388,7 +396,8 @@ def create_mine_db_entry(inputs: List[Prop]) -> List[Prop]:
     """
     try:
         mine_create_request_list: List[MineCreate] = inputs[0].data
-        user: User = inputs[1].data
+        created_rendered_template_list: List[RenderedTemplate] = inputs[1].data
+        user: User = inputs[2].data
     except Exception as e:
         raise FlowExecError(
             human_description="Parsing inputs failed",
@@ -399,6 +408,11 @@ def create_mine_db_entry(inputs: List[Prop]) -> List[Prop]:
         ) from e
 
     try:
+        for mine in mine_create_request_list:
+            for rendered_template in created_rendered_template_list:
+                if mine.template_id == rendered_template.parent_template_id:
+                    mine.rendered_template_id = rendered_template.rendered_template_id
+                    mine.rendered_template_file_id = rendered_template.file_id
         created_mine_list = create_mine(mine_create_request_list, user)
     except SQLAlchemyError as e:
         raise FlowExecError(
