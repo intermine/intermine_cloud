@@ -15,4 +15,5 @@ class FileDB(DBModel, SurrogatePKUUID, TimestampMixin):
     file_type = Column(String, nullable=False)
     uploaded = Column(Boolean, nullable=False)
     parent_id = Column(GUID, nullable=False)
+    parent_template_id = Column(GUID, nullable=False)
     protagonist_id = reference_col("protagonist")
