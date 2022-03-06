@@ -1,0 +1,19 @@
+description: Mine schema
+type: object
+properties:
+  data_id:
+    type: string
+  name:
+    type: string
+  ext:
+    type: string
+  file_type:
+    type: string
+  file_id:
+    type: string
+required:
+  - "data_id"
+  - "name"
+  - "ext"
+  - "file_type"
+  - "file_id"

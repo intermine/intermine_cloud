@@ -1,19 +1,29 @@
 description: Mine create schema
 type: object
 properties:
-  name:
-    type: string
-  description:
-    type: string
-  preference:
-    type: object
-  template_id:
-    type: object
-  data_ids:
+  mine_list:
     type: array
     items:
-      type: string
-required:
-  - "template_id"
-  - "data_ids"
-  - "name"
+      type: object
+      properties:
+        name:
+          type: string
+        subdomain:
+          type: string
+        description:
+          type: string
+        preference:
+          type: object
+        template_id:
+          type: object
+        data_ids:
+          type: array
+          items:
+            type: string
+      required:
+        - "name"
+        - "subdomain"
+        - "template_id"
+        - "data_ids"
+  required:
+    - "mine_list"

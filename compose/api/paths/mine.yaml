@@ -28,7 +28,7 @@ get:
       content:
         application/json:
           schema:
-            $ref: "../components/schemas/200_response.yaml"
+            $ref: "../components/schemas/mine/200_mine_response.yaml"
     "401":
       description: "Bad request"
       content:
@@ -46,7 +46,7 @@ post:
     content:
       application/json:
         schema:
-          type: array
+          type: object
           items:
             $ref: "../components/schemas/mine/mine_post.yaml"
   responses:
@@ -55,7 +55,7 @@ post:
       content:
         application/json:
           schema:
-            $ref: "../components/schemas/200_response.yaml"
+            $ref: "../components/schemas/mine/200_mine_post_response.yaml"
     "401":
       description: "Bad request"
       content:

@@ -1,0 +1,14 @@
+description : "200 Data POST Response"
+allOf:
+  - $ref: "200_mine_response.yaml"
+  - type: object
+    properties:
+      items:
+        type: object
+        properties:
+          mine_list:
+            type: array
+            items:
+              $ref: "mine.yaml"
+        required:
+          - "mine_list"
