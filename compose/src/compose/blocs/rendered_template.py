@@ -1,13 +1,19 @@
 """RenderedTemplate BLoCs."""
 
-from typing import List, Optional
+from typing import List
+from pathlib import Path
+import shutil
+from tempfile import TemporaryDirectory
 
 from blackcap.db import DBSession
+from blackcap.flow import FlowExecError, get_outer_function, Prop
 from blackcap.schemas.user import User
 from logzero import logger
 from pydantic import ValidationError
 from pydantic.error_wrappers import ErrorWrapper
+import requests
 from sqlalchemy import select
+from sqlalchemy.exc import SQLAlchemyError
 
 from compose.models.rendered_templates import RenderedTemplateDB
 from compose.schemas.api.rendered_template.delete import RenderedTemplateDelete
@@ -17,7 +23,10 @@ from compose.schemas.api.rendered_template.get import (
 )
 from compose.schemas.api.rendered_template.post import RenderedTemplateCreate
 from compose.schemas.api.rendered_template.put import RenderedTemplateUpdate
-from compose.schemas.template import RenderedTemplate
+from compose.schemas.file import File
+from compose.schemas.mine import Mine
+from compose.schemas.template import RenderedTemplate, Template
+from compose.utils.io import make_archive
 
 ###
 # CRUD BLoCs
@@ -239,3 +248,381 @@ def delete_rendered_template(
 ###
 # Flow BLoCs
 ###
+
+
+def create_rendered_template_db_entry(inputs: List[Prop]) -> List[Prop]:
+    """Forward function for create db entry step.
+
+    Args:
+        inputs (List[Prop]):
+            Expects
+                0: checked_template_list
+                    Prop(data=checked_template_list, description="List of checked template objects")
+                2: user
+                    Prop(data=user, description="User")
+
+    Raises:
+        FlowExecError: Flow execution failed
+
+    Returns:
+        List[Prop]:
+            Created rendered_template objects
+
+            Prop(data=created_rendered_template_list, description="List of created rendered_template Objects")
+
+            Prop(data=user, description="User")
+    """
+    try:
+        checked_template_list: List[Template] = inputs[0].data
+        user: User = inputs[1].data
+    except Exception as e:
+        raise FlowExecError(
+            human_description="Parsing inputs failed",
+            error=e,
+            error_type=type(e),
+            is_user_facing=True,
+            error_in_function=get_outer_function(),
+        ) from e
+
+    try:
+        rendered_template_create_request_list = [
+            RenderedTemplateCreate(
+                name=template.name,
+                description=template.description,
+                parent_template_id=template.template_id,
+            )
+            for template in checked_template_list
+        ]
+        created_rendered_template_list = create_rendered_template(
+            rendered_template_create_request_list, user
+        )
+    except SQLAlchemyError as e:
+        raise FlowExecError(
+            human_description="Creating DB object failed",
+            error=e,
+            error_type=type(e),
+            is_user_facing=False,
+            error_in_function=get_outer_function(),
+        ) from e
+    except Exception as e:
+        raise FlowExecError(
+            human_description="Something bad happened",
+            error=e,
+            error_type=type(e),
+            is_user_facing=False,
+            error_in_function=get_outer_function(),
+        ) from e
+
+    return [
+        Prop(
+            data=created_rendered_template_list,
+            description="List of created rendered_template Objects",
+        ),
+        Prop(data=user, description="User"),
+    ]
+
+
+def revert_rendered_template_db_entry(inputs: List[Prop]) -> List[Prop]:
+    """Revert function for create db entry step.
+
+    Args:
+        inputs (List[Prop]):
+            Expects
+                0: rendered_template_create_request_list
+                    Prop(data=data_create_request_list, description="List of create data objects")
+                1: user
+                    Prop(data=user, description="User")
+                2: created_rendered_template_list
+                    Prop(data=created_rendered_template_list, description="List of created rendered_template objects")
+                3: user
+                    Prop(data=user, description="User")
+
+    Raises:
+        FlowExecError: Flow execution failed
+
+    Returns:
+        List[Prop]:
+            Deleted rendered_template objects
+
+            Prop(data=deleted_rendered_template_list, description="List of deleted rendered_template Objects")
+
+            Prop(data=user, description="User")
+    """
+    try:
+        created_rendered_template_list: List[RenderedTemplate] = inputs[2].data
+        user: User = inputs[3].data
+    except Exception as e:
+        raise FlowExecError(
+            human_description="Parsing inputs failed",
+            error=e,
+            error_type=type(e),
+            is_user_facing=True,
+            error_in_function=get_outer_function(),
+        ) from e
+
+    try:
+        deleted_rendered_template_list = delete_rendered_template(
+            created_rendered_template_list, user
+        )
+    except SQLAlchemyError as e:
+        raise FlowExecError(
+            human_description="Deleting DB object failed",
+            error=e,
+            error_type=type(e),
+            is_user_facing=False,
+            error_in_function=get_outer_function(),
+        ) from e
+    except Exception as e:
+        raise FlowExecError(
+            human_description="Something bad happened",
+            error=e,
+            error_type=type(e),
+            is_user_facing=False,
+            error_in_function=get_outer_function(),
+        ) from e
+
+    return [
+        Prop(
+            data=deleted_rendered_template_list,
+            description="List of deleted rendered_template Objects",
+        ),
+        Prop(data=user, description="User"),
+    ]
+
+
+def update_rendered_template_db_entry(inputs: List[Prop]) -> List[Prop]:
+    """Forward function for updating mine info in created rendered_template object.
+
+    Args:
+        inputs (List[Prop]):
+            Expects
+                0: created_mine_list
+                    Prop(data=created_mine_list, description="List of created mine objects")
+                1: user
+                    Prop(data=user, description="User")
+                2: craeted_file_list
+                    Prop(data=created_file_list, description="List of created file objects")
+                3: user
+                    Prop(data=user, description="User")
+
+    Raises:
+        FlowExecError: Flow execution failed
+
+    Returns:
+        List[Prop]:
+            Updated rendered_template objects
+
+            Prop(data=updated_rendered_template_list, description="List of updated rendered_template Objects")
+
+            Prop(data=user, description="User")
+    """
+    try:
+        created_mine_list: List[Mine] = inputs[0].data
+        created_file_list: List[File] = inputs[2].data
+        user: User = inputs[3].data
+    except Exception as e:
+        raise FlowExecError(
+            human_description="Parsing inputs failed",
+            error=e,
+            error_type=type(e),
+            is_user_facing=True,
+            error_in_function=get_outer_function(),
+        ) from e
+
+    rendered_template_update_list: List[RenderedTemplateUpdate] = []
+    for file in created_file_list:
+        rendered_template_update = RenderedTemplateUpdate(
+            rendered_template_id=file.parent_id, file_id=file.file_id
+        )
+        rendered_template_update_list.append(rendered_template_update)
+
+    # TODO: Optimize later
+    for mine in created_mine_list:
+        for rendered_template_update in rendered_template_update_list:
+            if mine.rendered_template_file_id == rendered_template_update.file_id:
+                rendered_template_update.parent_mine_id = mine.mine_id
+
+    try:
+        updated_rendered_template_list = update_rendered_template(
+            rendered_template_update_list, user
+        )
+    except SQLAlchemyError as e:
+        raise FlowExecError(
+            human_description="Updating DB object failed",
+            error=e,
+            error_type=type(e),
+            is_user_facing=False,
+            error_in_function=get_outer_function(),
+        ) from e
+    except Exception as e:
+        raise FlowExecError(
+            human_description="Something bad happened",
+            error=e,
+            error_type=type(e),
+            is_user_facing=False,
+            error_in_function=get_outer_function(),
+        ) from e
+
+    return [
+        Prop(
+            data=updated_rendered_template_list,
+            description="List of updated rendered_template Objects",
+        ),
+        Prop(data=user, description="User"),
+    ]
+
+
+def rewind_rendered_template_db_entry(inputs: List[Prop]) -> List[Prop]:
+    """Backward function for updating rendered_template step.
+
+    Args:
+        inputs (List[Prop]):
+            Expects
+                0: craeted_mine_list
+                    Prop(data=created_mine_list, description="List of created mine objects")
+                1: craeted_file_list
+                    Prop(data=created_file_list, description="List of created file objects")
+                2: user
+                    Prop(data=user, description="User")
+                3: updated_rendered_template_list
+                    Prop(data=updated_rendered_template_list, description="List of updated rendered_template objects")
+                4: user
+                    Prop(data=user, description="User")
+
+    Raises:
+        FlowExecError: Flow execution failed
+
+    Returns:
+        List[Prop]:
+            Reverted data objects
+
+            Prop(data=reverted_data_list, description="List of reverted Data Objects")
+
+            Prop(data=user, description="User")
+    """
+    try:
+        updated_rendered_template_list = inputs[3].data
+        user = inputs[4].data
+    except Exception as e:
+        raise FlowExecError(
+            human_description="Parsing inputs failed",
+            error=e,
+            error_type=type(e),
+            is_user_facing=True,
+            error_in_function=get_outer_function(),
+        ) from e
+
+    # NOTE: This the last step of the flow. So this function is not needed at the moment.
+    # NOTE: So, this is just a skeleton for future implementation, if needed.
+
+    return [
+        Prop(
+            data=updated_rendered_template_list,
+            description="List of updated rendered_template Objects",
+        ),
+        Prop(data=user, description="User"),
+    ]
+
+
+def render_and_upload_rendered_template(inputs: List[Prop]) -> List[Prop]:
+    """Forward function for rendering and uploading rendered_template object.
+
+    Args:
+        inputs (List[Prop]):
+            Expects
+                0: craeted_rendered_template_list
+                    Prop(data=created_rendered_template_list, description="List of created rendered_template objects")
+                1: user
+                    Prop(data=user, description="User")
+                2: created_rendered_template_file_list
+                    Prop(data=created_rendered_template_file_list, description="List of created file objects")
+                3: user
+                    Prop(data=user, description="User")
+                4: template_list
+                    Prop(data=template_list, description="List of checked template objects")
+                5: template_file_list
+                    Prop(data=template_file_list, description="List of created file objects")
+                6: user
+                    Prop(data=user, description="User")
+
+    Raises:
+        FlowExecError: Flow execution failed
+
+    Returns:
+        List[Prop]:
+            created rendered_template objects
+
+            Prop(data=created_rendered_template_list, description="List of created rendered_template Objects")
+
+            Prop(data=user, description="User")
+    """
+    try:
+        created_rendered_template_list: List[RenderedTemplate] = inputs[0].data
+        rendered_template_file_list: List[File] = inputs[2].data
+        checked_template_list: List[File] = inputs[4].data
+        checked_template_file_list: List[File] = inputs[5].data
+        user: User = inputs[6].data
+    except Exception as e:
+        raise FlowExecError(
+            human_description="Parsing inputs failed",
+            error=e,
+            error_type=type(e),
+            is_user_facing=True,
+            error_in_function=get_outer_function(),
+        ) from e
+
+    try:
+        for rendered_template in created_rendered_template_list:
+            # Create archive of the rendered template in a temp dir
+            with TemporaryDirectory() as tempd:
+                for file in checked_template_file_list:
+                    # find the right file
+                    if file.parent_id == rendered_template.parent_template_id:
+                        # Download template
+                        resp = requests.get(file.presigned_get, stream=True)
+                        with open(
+                            Path(tempd).joinpath("template.tar"), "wb"
+                        ) as download_file:
+                            for data in resp.iter_content(chunk_size=1024):
+                                download_file.write(data)
+                # Unpack archive
+                shutil.unpack_archive(
+                    Path(tempd).joinpath("template.tar"),
+                    Path(tempd).joinpath("template"),
+                )
+
+                # Render the fetched template with provided template vars
+                # TODO: Do it properly later, for now just cp the downloaded template
+                shutil.copytree(
+                    Path(tempd).joinpath("template"), Path(tempd).joinpath("rendered")
+                )
+
+                archive_path = make_archive(
+                    "rendered", Path(tempd).joinpath("rendered"), Path(tempd)
+                )
+
+                # upload rendered template
+                with open(archive_path, "rb") as f:
+                    for file in rendered_template_file_list:
+                        if file.parent_id == rendered_template.rendered_template_id:
+                            requests.put(
+                                url=file.presigned_put,
+                                data=f,
+                            )
+
+    except Exception as e:
+        raise FlowExecError(
+            human_description="Something bad happened",
+            error=e,
+            error_type=type(e),
+            is_user_facing=False,
+            error_in_function=get_outer_function(),
+        ) from e
+
+    return [
+        Prop(
+            data=created_rendered_template_list,
+            description="List of created rendered_template Objects",
+        ),
+        Prop(data=user, description="User"),
+    ]
