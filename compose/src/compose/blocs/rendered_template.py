@@ -5,6 +5,8 @@ from typing import List, Optional
 from blackcap.db import DBSession
 from blackcap.schemas.user import User
 from logzero import logger
+from pydantic import ValidationError
+from pydantic.error_wrappers import ErrorWrapper
 from sqlalchemy import select
 
 from compose.models.rendered_templates import RenderedTemplateDB
@@ -13,18 +15,23 @@ from compose.schemas.api.rendered_template.get import (
     RenderedTemplateGetQueryParams,
     RenderedTemplateQueryType,
 )
+from compose.schemas.api.rendered_template.post import RenderedTemplateCreate
 from compose.schemas.api.rendered_template.put import RenderedTemplateUpdate
 from compose.schemas.template import RenderedTemplate
 
+###
+# CRUD BLoCs
+###
+
 
 def create_rendered_template(
-    rendered_template_list: List[RenderedTemplate], user_creds: Optional[User] = None
+    rendered_template_list: List[RenderedTemplateCreate], user_creds: User
 ) -> List[RenderedTemplate]:
     """Create rendered template objects.
 
     Args:
-        rendered_template_list (List[RenderedTemplate]): List of rendered template objects to create.
-        user_creds (Optional[User], optional): User credentials. Defaults to None.
+        rendered_template_list (List[RenderedTemplateCreate]): List of rendered template objects to create.
+        user_creds (User): User credentials.
 
     Raises:
         Exception: database error
@@ -37,9 +44,7 @@ def create_rendered_template(
             rendered_template_db_create_list: List[RenderedTemplateDB] = [
                 RenderedTemplateDB(
                     protagonist_id=user_creds.user_id,
-                    **rendered_template.dict(
-                        exclude={"rendered_template_id", "presigned_url"}
-                    ),
+                    **rendered_template.dict(),
                 )
                 for rendered_template in rendered_template_list
             ]
@@ -55,13 +60,13 @@ def create_rendered_template(
 
 
 def get_rendered_template(
-    query_params: RenderedTemplateGetQueryParams, user_creds: Optional[User] = None
+    query_params: RenderedTemplateGetQueryParams, user_creds: User
 ) -> List[RenderedTemplate]:
     """Query DB for RenderedTemplates.
 
     Args:
         query_params (RenderedTemplateGetQueryParams): Query params from request
-        user_creds (Optional[User], optional): User credentials. Defaults to None.
+        user_creds (User): User credentials.
 
     Raises:
         Exception: error
@@ -72,17 +77,37 @@ def get_rendered_template(
     stmt = ""
 
     if query_params.query_type == RenderedTemplateQueryType.GET_ALL_RENDERED_TEMPLATES:
-        stmt = select(RenderedTemplateDB)
-    if query_params.query_type == RenderedTemplateQueryType.GET_RENDERED_TEMPLATE_BY_ID:
         stmt = select(RenderedTemplateDB).where(
-            RenderedTemplateDB.id == query_params.rendered_template_id
+            RenderedTemplateDB.protagonist_id == user_creds.user_id
+        )
+    if query_params.query_type == RenderedTemplateQueryType.GET_RENDERED_TEMPLATE_BY_ID:
+        if query_params.template_id is None:
+            e = ValidationError(
+                errors=[
+                    ErrorWrapper(ValueError("field required"), "template_id"),
+                ],
+                model=RenderedTemplateGetQueryParams,
+            )
+            raise e
+        stmt = (
+            select(RenderedTemplateDB)
+            .where(RenderedTemplateDB.protagonist_id == user_creds.user_id)
+            .where(RenderedTemplateDB.id == query_params.template_id)
         )
     if (
         query_params.query_type
         == RenderedTemplateQueryType.GET_RENDERED_TEMPLATES_BY_PROTAGONIST_ID
     ):
+        if query_params.protagonist_id is None:
+            e = ValidationError(
+                errors=[
+                    ErrorWrapper(ValueError("field required"), "protagonist_id"),
+                ],
+                model=RenderedTemplateGetQueryParams,
+            )
+            raise e
         stmt = select(RenderedTemplateDB).where(
-            RenderedTemplateDB.id == query_params.protagonist_id
+            RenderedTemplateDB.id == user_creds.user_id
         )
 
     with DBSession() as session:
@@ -101,86 +126,116 @@ def get_rendered_template(
 
 
 def update_rendered_template(
-    rendered_template_update: RenderedTemplateUpdate, user_creds: Optional[User] = None
-) -> RenderedTemplate:
+    rendered_template_update_list: List[RenderedTemplateUpdate], user_creds: User
+) -> List[RenderedTemplate]:
     """Update RenderedTemplate in the DB from RenderedTemplateUpdate request.
 
     Args:
-        rendered_template_update (RenderedTemplateUpdate): RenderedTemplateUpdate request
-        user_creds (Optional[User], optional): User credentials. Defaults to None.
+        rendered_template_update_list (List[RenderedTemplateUpdate]): List of RenderedTemplateUpdate request
+        user_creds (User): User credentials.
 
     Raises:
         Exception: error
 
     Returns:
-        RenderedTemplate: Instance of Updated RenderedTemplate
+        List[RenderedTemplate]: List of Instance of Updated RenderedTemplate
     """
-    stmt = select(RenderedTemplateDB).where(
-        RenderedTemplateDB.id == rendered_template_update.rendered_template_id
+    stmt = (
+        select(RenderedTemplateDB)
+        .where(RenderedTemplateDB.protagonist_id == user_creds.user_id)
+        .where(
+            RenderedTemplateDB.id.in_(
+                [
+                    rendered_template_update.rendered_template_id
+                    for rendered_template_update in rendered_template_update_list
+                ]
+            )
+        )
     )
     with DBSession() as session:
         try:
-            rendered_template_list: List[RenderedTemplateDB] = (
+            rendered_template_db_update_list: List[RenderedTemplateDB] = (
                 session.execute(stmt).scalars().all()
             )
-            if len(rendered_template_list) == 1:
-                rendered_template_update_dict = rendered_template_update.dict(
-                    exclude_defaults=True
-                )
-                rendered_template_update_dict.pop("rendered_template_id")
-                updated_rendered_template = rendered_template_list[0].update(
-                    session, **rendered_template_update_dict
-                )
-                return RenderedTemplate(
-                    rendered_template_id=updated_rendered_template.id,
-                    **updated_rendered_template.to_dict(),
-                )
-            if len(rendered_template_list) == 0:
-                # TODO: Raise not found
-                pass
+            updated_rendered_template_list = []
+            for rendered_template in rendered_template_db_update_list:
+                for rendered_template_update in rendered_template_update_list:
+                    if (
+                        rendered_template_update.rendered_template_id
+                        == rendered_template.id
+                    ):
+                        rendered_template_update_dict = rendered_template_update.dict(
+                            exclude_defaults=True
+                        )
+                        rendered_template_update_dict.pop("rendered_template_id")
+                        updated_rendered_template = rendered_template.update(
+                            session, **rendered_template_update_dict
+                        )
+                        updated_rendered_template_list.append(
+                            RenderedTemplate(
+                                rendered_template_id=updated_rendered_template.id,
+                                **updated_rendered_template.to_dict(),
+                            )
+                        )
+            return updated_rendered_template_list
         except Exception as e:
             session.rollback()
             logger.error(
-                f"Unable to update rendered template: {rendered_template_update.dict()} due to {e}"
+                f"Unable to update rendered_template: {rendered_template.to_dict()} due to {e}"
             )
             raise e
 
 
 def delete_rendered_template(
-    rendered_template_delete: RenderedTemplateDelete, user_creds: Optional[User] = None
-) -> RenderedTemplate:
+    rendered_template_delete_list: List[RenderedTemplateDelete], user_creds: User
+) -> List[RenderedTemplate]:
     """Delete rendered template in the DB from RenderedTemplateDelete request.
 
     Args:
-        rendered_template_delete (RenderedTemplateDelete): RenderedTemplateDelete request
-        user_creds (Optional[User], optional): User credentials. Defaults to None.
+        rendered_template_delete_list (List[RenderedTemplateDelete]): List of RenderedTemplateDelete request
+        user_creds (User): User credentials.
 
     Raises:
         Exception: error
 
     Returns:
-        RenderedTemplate: Instance of Deleted RenderedTemplate
+        List[RenderedTemplate]: List of Instance of Deleted RenderedTemplate
     """
-    stmt = select(RenderedTemplateDB).where(
-        RenderedTemplateDB.id == rendered_template_delete.rendered_template_id
+    stmt = (
+        select(RenderedTemplateDB)
+        .where(RenderedTemplateDB.protagonist_id == user_creds.user_id)
+        .where(
+            RenderedTemplateDB.id.in_(
+                [
+                    rendered_template.rendered_template_id
+                    for rendered_template in rendered_template_delete_list
+                ]
+            )
+        )
     )
     with DBSession() as session:
         try:
-            rendered_template_list: List[RenderedTemplateDB] = (
+            rendered_template_db_delete_list: List[RenderedTemplateDB] = (
                 session.execute(stmt).scalars().all()
             )
-            if len(rendered_template_list) == 1:
-                deleted_rendered_template = rendered_template_list[0].delete(session)
-                return RenderedTemplate(
-                    rendered_template_id=deleted_rendered_template.id,
-                    **deleted_rendered_template.to_dict(),
+            deleted_rendered_template_list = []
+            for rendered_template in rendered_template_db_delete_list:
+                rendered_template.delete(session)
+                deleted_rendered_template_list.append(
+                    RenderedTemplate(
+                        rendered_template_id=rendered_template.id,
+                        **rendered_template.to_dict(),
+                    )
                 )
-            if len(rendered_template_list) == 0:
-                # TODO: Raise not found
-                pass
+            return deleted_rendered_template_list
         except Exception as e:
             session.rollback()
             logger.error(
-                f"Unable to delete rendered template: {rendered_template_delete.dict()} due to {e}"
+                f"Unable to delete rendered_template: {rendered_template.to_dict()} due to {e}"
             )
             raise e
+
+
+###
+# Flow BLoCs
+###
