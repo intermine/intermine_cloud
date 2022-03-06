@@ -55,7 +55,7 @@
     },
     "dependencies": {
         "@intermine/chromatin": "0.0.24",
-        "@intermine/compose-rest-client": "^1.2.8",
+        "@intermine/compose-rest-client": "^1.2.11",
         "@reduxjs/toolkit": "^1.8.0",
         "@types/axios": "^0.14.0",
         "@types/react": "^17.0.31",
