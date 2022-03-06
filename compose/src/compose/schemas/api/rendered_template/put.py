@@ -1,5 +1,5 @@
 """RenderedTemplate API PUT schema."""
-from typing import List, Optional
+from typing import Any, Dict, List, Optional, Union
 
 from blackcap.schemas.api.common import ResponseSchema
 from blackcap.schemas.user import User
@@ -14,18 +14,17 @@ class RenderedTemplateUpdate(BaseModel):
 
     rendered_template_id: UUID4
     name: Optional[str]
-    status: Optional[str]
     parent_mine_id: Optional[UUID4]
+    file_id: Optional[UUID4]
 
 
 class RenderedTemplatePUTRequest(BaseModel):
     """RenderedTemplate PUT request schema."""
 
-    rendered_templates: List[RenderedTemplateUpdate]
-    user: Optional[User]
+    rendered_template_list: List[RenderedTemplateUpdate]
 
 
 class RenderedTemplatePUTResponse(ResponseSchema):
     """RenderedTemplate PUT response schema."""
 
-    items: List[RenderedTemplate] = []
+    items: Dict[str, List[Union[RenderedTemplate, Any]]] = {}
