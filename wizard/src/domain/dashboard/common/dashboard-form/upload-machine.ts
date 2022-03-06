@@ -169,6 +169,7 @@ export const uploadMachine = createMachine<
         },
         services: {
             generatePresignedURL: (ctx, event) => {
+                console.log('Generating url')
                 if (event.type === 'GENERATE_PRESIGNED_URL') {
                     return event.serviceToGeneratePresignedURL(ctx)
                 }

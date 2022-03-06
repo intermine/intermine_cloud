@@ -5,20 +5,26 @@ import { Radio } from '@intermine/chromatin/radio'
 import { RadioGroup } from '@intermine/chromatin/radio-group'
 import { createStyle } from '@intermine/chromatin/styles'
 import { InlineAlertProps } from '@intermine/chromatin/inline-alert'
+import { useForm, Controller } from 'react-hook-form'
 
 import { DASHBOARD_MINES_LANDING_PATH } from '../../../../routes'
 import { dataApi, templateApi } from '../../../../services/api'
 import { DashboardForm as DForm } from '../../common/dashboard-form'
-import {
-    TUseDashboardFormState,
-    useDashboardForm
-} from '../../common/dashboard-form/utils'
-import { useDashboardQuery, useOnProgress } from '../../hooks'
-import { initialFormFieldsValue } from './form-utils'
+
+import { useDashboardQuery } from '../../hooks'
 
 type TSelectOption = {
     label: string
     value: string
+}
+
+type TCreateMineFormFields = {
+    template: TSelectOption
+    datasets: TSelectOption[]
+    subDomain: string
+    name: string
+    description: string
+    action: 'build' | 'build-deploy'
 }
 
 const fetchTemplatesAndDatasets = async () => {
@@ -88,66 +94,35 @@ export const CreateMine = () => {
     }
 
     const {
-        state,
-        errorFields,
-        isDirty,
-        updateDashboardFormState,
-        handleFormSubmit,
-        resetToInitialState
-    } = useDashboardForm(initialFormFieldsValue)
-
-    const { subDomain, name, description, template, datasets, action } = state
-    const {
-        datasets: eDatasets,
-        name: eName,
-        subDomain: eSubDomain,
-        template: eTemplate
-    } = errorFields
+        reset,
+        control,
+        formState: { isDirty, errors },
+        handleSubmit
+    } = useForm<TCreateMineFormFields>({
+        defaultValues: {
+            action: 'build',
+            datasets: [],
+            description: '',
+            name: '',
+            subDomain: '',
+            template: {}
+        }
+    })
 
     const resetForm = () => {
-        resetToInitialState()
+        reset()
     }
 
     // const { onProgressStart, onProgressUpdate, onProgressSuccessful } =
     //     useOnProgress()
 
-    const submitForm = (
-        e: TUseDashboardFormState<typeof initialFormFieldsValue>
-    ) => {
-        _setInlineAlert({
-            message: 'We are offline, please try after sometime.',
-            type: 'error'
-        })
-        // onProgressStart({
-        //     id: subDomain.value,
-        //     getProgressText: (loadedSize, totalSize) =>
-        //         `${loadedSize}/${totalSize} steps`,
-        //     isDependentOnBrowser: false,
-        //     loadedSize: 1,
-        //     totalSize: 11,
-        //     name: name.value,
-        //     onCancel: () => console.log('Cancel'),
-        //     onRetry: () => console.log('Retry')
+    const submitForm = (data: TCreateMineFormFields) => {
+        // _setInlineAlert({
+        //     message: 'We are offline, please try after sometime.',
+        //     type: 'error'
         // })
-
-        // let l = 1
-        // const i = setInterval(() => {
-        //     console.log(l)
-        //     onProgressUpdate({ id: subDomain.value, loadedSize: ++l })
-        //     if (l === 11) {
-        //         onProgressSuccessful({
-        //             id: subDomain.value,
-        //             successMsg: name.value + ' is successfully created.',
-        //             to: {
-        //                 pathname:
-        // 'http://bluegenes.apps.intermine.org/flymine'
-        //             }
-        //         })
-        //         clearInterval(i)
-        //     }
-        // }, 100)
-
-        resetForm()
+        console.log(data)
+        // resetForm()
     }
 
     const onFetchSuccessful = (response: {
@@ -168,8 +143,10 @@ export const CreateMine = () => {
         query()
     }, [])
 
+    console.log('errr', errors)
+
     return (
-        <DForm isDirty={isDirty}>
+        <DForm isDirty={isDirty} onSubmit={handleSubmit(submitForm)}>
             <DForm.PageHeading
                 landingPageUrl={DASHBOARD_MINES_LANDING_PATH}
                 pageHeading="Mines"
@@ -183,102 +160,120 @@ export const CreateMine = () => {
                         sub="Make sure you have already uploaded the 
                             template. There are also some of the pre-existing 
                             templates."
-                        isError={Boolean(eTemplate)}
-                        errorMsg={eTemplate?.errorMsg}
+                        isError={Boolean(errors.template)}
+                        // errorMsg={eTemplate?.errorMsg}
                         hasAsterisk
                     >
-                        <DForm.Select
-                            value={template.value}
-                            options={templateOptions}
-                            placeholder="Select template"
-                            isLoading={isLoading}
-                            onChange={(val) =>
-                                updateDashboardFormState('template', val)
-                            }
+                        <Controller
+                            render={({ field }) => (
+                                <DForm.Select
+                                    {...field}
+                                    options={templateOptions}
+                                    placeholder="Select template"
+                                    isLoading={isLoading}
+                                />
+                            )}
+                            name="template"
+                            control={control}
+                            rules={{
+                                validate: (_template) => {
+                                    if (!Array.isArray(_template)) return false
+                                    return true
+                                }
+                            }}
                         />
                     </DForm.Label>
+
                     <DForm.Label
                         main="Select dataset(s)"
                         sub="Make sure you have already uploaded the
                             dataset. You can select multiple dataset."
-                        isError={Boolean(eDatasets)}
-                        errorMsg={eDatasets?.errorMsg}
+                        // isError={Boolean(eDatasets)}
+                        // errorMsg={eDatasets?.errorMsg}
                         hasAsterisk
                     >
-                        <DForm.Select
-                            closeMenuOnSelect={false}
-                            value={datasets.value}
-                            options={datasetOptions}
-                            isMulti
-                            isLoading={isLoading}
-                            onChange={(val) =>
-                                updateDashboardFormState('datasets', val)
-                            }
+                        <Controller
+                            render={({ field }) => (
+                                <DForm.Select
+                                    {...field}
+                                    closeMenuOnSelect={false}
+                                    options={datasetOptions}
+                                    isMulti
+                                    isLoading={isLoading}
+                                />
+                            )}
+                            name="datasets"
+                            control={control}
                         />
                     </DForm.Label>
+
                     <DForm.Label
                         main="Name of your new Mine"
                         sub="This will be the name under which your mine is
                             publicly available. Some examples are HumanMine,
                             FlyMine, CovidMine, etc."
-                        isError={Boolean(eName)}
+                        // isError={Boolean(eName)}
                         hasAsterisk
                         errorMsg="Name is required"
                     >
-                        <DForm.Input
-                            value={name.value}
-                            onChange={(event) =>
-                                updateDashboardFormState(
-                                    'name',
-                                    event.currentTarget.value
-                                )
-                            }
-                            placeholder="Enter mine name"
-                            isError={Boolean(eName)}
+                        <Controller
+                            render={({ field }) => (
+                                <DForm.Input
+                                    {...field}
+                                    placeholder="Enter mine name"
+                                />
+                            )}
+                            control={control}
+                            name="name"
                         />
                     </DForm.Label>
+
                     <DForm.Label
                         main="Describe your Mine"
                         sub="This will help other users to get an 
                             idea about your mine. You can write something 
                             like: An integrated data warehouse for..."
                     >
-                        <DForm.Input
-                            rows={5}
-                            Component="textarea"
-                            placeholder="Description of your mine"
-                            value={description.value}
-                            onChange={(event) =>
-                                updateDashboardFormState(
-                                    'description',
-                                    event.currentTarget.value
-                                )
-                            }
+                        <Controller
+                            render={({ field }) => (
+                                <DForm.Input
+                                    {...field}
+                                    rows={5}
+                                    Component="textarea"
+                                    placeholder="Description of your mine"
+                                />
+                            )}
+                            control={control}
+                            name="description"
                         />
                     </DForm.Label>
+
                     <DForm.Label
                         hasAsterisk
                         main="Sub Domain"
                         sub="We will host your newly built mine under this
                             sub-domain. Please don't include any special
                             character."
-                        isError={Boolean(eSubDomain)}
-                        errorMsg={eSubDomain?.errorMsg}
+                        // isError={Boolean(eSubDomain)}
+                        // errorMsg={eSubDomain?.errorMsg}
                     >
                         <Box display="flex">
-                            <DForm.Input
-                                classes={{
-                                    inputRoot: classes.subdomainInput
+                            <Controller
+                                render={({ field }) => (
+                                    <DForm.Input
+                                        {...field}
+                                        classes={{
+                                            inputRoot: classes.subdomainInput
+                                        }}
+                                        // eslint-disable-next-line max-len
+                                        placeholder="my-first-intermine-database"
+                                    />
+                                )}
+                                control={control}
+                                name="subDomain"
+                                rules={{
+                                    required: true
                                 }}
-                                placeholder="my-first-intermine-database"
-                                value={subDomain.value}
-                                isError={Boolean(eSubDomain)}
-                                onChange={(event) =>
-                                    updateDashboardFormState(
-                                        'subDomain',
-                                        event.currentTarget.value
-                                    )
-                                }
                             />
                             <Box
                                 isContentCenter
@@ -287,7 +282,7 @@ export const CreateMine = () => {
                                 .intermine.org
                             </Box>
                         </Box>
-                        <Box>
+                        {/* <Box>
                             {initialFormFieldsValue?.subDomain?.options
                                 ?.validator &&
                                 // eslint-disable-next-line max-len
@@ -297,7 +292,7 @@ export const CreateMine = () => {
                                 ).isError === false &&
                                 // eslint-disable-next-line max-len
                                 'Checking whether this subdomain is available or not'}
-                        </Box>
+                        </Box> */}
                     </DForm.Label>
                     <DForm.Label
                         main="Action"
@@ -305,25 +300,34 @@ export const CreateMine = () => {
                         mine or you want to build and deploy."
                         csx={{ root: { marginBottom: 0 } }}
                     />
-                    <RadioGroup
-                        name="mine-action"
-                        onChange={(v) =>
-                            updateDashboardFormState(
-                                'action',
-                                v.currentTarget.value
-                            )
-                        }
-                        value={action.value}
-                    >
-                        <FormControlLabel
-                            control={<Radio value="build" />}
-                            label="Build"
-                        />
-                        <FormControlLabel
-                            control={<Radio value="build-deploy" />}
-                            label="Build & Deploy"
-                        />
-                    </RadioGroup>
+                    <Controller
+                        render={({ field }) => (
+                            <RadioGroup {...field} name="action">
+                                <FormControlLabel
+                                    control={
+                                        <Radio
+                                            value="build"
+                                            // isChecked={field.value === 'build'}
+                                        />
+                                    }
+                                    label="Build"
+                                />
+                                <FormControlLabel
+                                    control={
+                                        <Radio
+                                            value="build-deploy"
+                                            // isChecked={
+                                            //     field.value === 'build-deploy'
+                                            // }
+                                        />
+                                    }
+                                    label="Build & Deploy"
+                                />
+                            </RadioGroup>
+                        )}
+                        control={control}
+                        name="action"
+                    />
                     <DForm.Actions
                         actions={[
                             {
@@ -336,10 +340,7 @@ export const CreateMine = () => {
                                 color: 'primary',
                                 children: 'Create Mine',
                                 key: 'create',
-                                onClick: () =>
-                                    handleFormSubmit((state) =>
-                                        submitForm(state)
-                                    )
+                                type: 'submit'
                             }
                         ]}
                     />

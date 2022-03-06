@@ -9,7 +9,7 @@ import {
     TUploadMachineEvents,
     TUploadMachineState,
     uploadMachine,
-} from '../upload-machine'
+} from './upload-machine'
 
 export type TUseDashboardUploadMachineState = State<
     TUploadMachineContext,

@@ -1,3 +1,5 @@
+// This file is @deprecated
+
 import { useState, useReducer } from 'react'
 import { clone } from '@intermine/chromatin/utils'
 
@@ -66,25 +68,47 @@ const defaultValidator = (v: any) => {
 }
 
 const enum FormReducerActionType {
-    UpdateInputValue,
+    UpdateState,
+    ResetState,
 }
 
-type TFormReducerAction<T> = {
+type TFormReducerAction<T extends TUseDashboardFormState<any>> = {
     type: FormReducerActionType
-    payload: T
+    payload: {
+        key: keyof T
+        value: Record<string, any>
+    }
 }
 
-const formReducer = <S, A>(state: S, action: TFormReducerAction<A>): S => {
+const formReducer = <
+    S extends TUseDashboardFormState<any>,
+    A extends TUseDashboardFormState<any>
+>(
+    state: S,
+    action: TFormReducerAction<A>
+): S => {
     const { type, payload } = action
 
     switch (type) {
-        case FormReducerActionType.UpdateInputValue:
-            return { ...state, ...payload }
+        case FormReducerActionType.UpdateState:
+            const { key, value } = payload
+            return {
+                ...state,
+                [key]: {
+                    ...state[key],
+                    ...value,
+                },
+            }
+        case FormReducerActionType.ResetState:
+            return { ...action.payload }
         default:
             throw new Error(`FormReducer: action type is unknown, got: ${type}`)
     }
 }
 
+/**
+ * @deprecated
+ */
 export const useDashboardForm = <T extends TUseDashboardFormFields>(
     fields: T
 ): TUseDashboardFormReturn<T> => {
@@ -99,12 +123,13 @@ export const useDashboardForm = <T extends TUseDashboardFormFields>(
         return newState
     }
 
-    const [state, setState] = useReducer<
+    const [state, dispatch] = useReducer<
         (
             state: TUseDashboardFormReturn<T>['state'],
-            action: any
+            action: TFormReducerAction<TUseDashboardFormReturn<T>['state']>
         ) => TUseDashboardFormReturn<T>['state']
     >(formReducer, getInitialValue())
+
     const [isDirty, setIsDirty] = useState(false)
 
     const [errorFields, setErrorFields] = useState<
@@ -115,14 +140,17 @@ export const useDashboardForm = <T extends TUseDashboardFormFields>(
         delete errorFields[key]
         setErrorFields(errorFields)
         setIsDirty(true)
-        setState((prev) => ({
-            ...prev,
-            [key]: {
-                ...prev[key],
-                value,
-                isError: false,
+
+        dispatch({
+            type: FormReducerActionType.UpdateState,
+            payload: {
+                key,
+                value: {
+                    value,
+                    isError: false,
+                },
             },
-        }))
+        })
     }
 
     const handleFormSubmit: TUseDashboardFormReturn<T>['handleFormSubmit'] = (
@@ -167,7 +195,10 @@ export const useDashboardForm = <T extends TUseDashboardFormFields>(
     }
 
     const resetToInitialState = () => {
-        setState(getInitialValue())
+        dispatch({
+            type: FormReducerActionType.ResetState,
+            payload: getInitialValue(),
+        })
         setErrorFields({})
         setIsDirty(false)
     }

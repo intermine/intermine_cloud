@@ -212,7 +212,9 @@ export const useUpload = () => {
         })
     }
 
-    const runWhenPresignedURLGenerationFailed = (upload: TUploadProps) => {
+    const runWhenPresignedURLGenerationFailed = (upload: {
+        errorMessage?: string
+    }) => {
         const { errorMessage = 'Unknown error occurred' } = upload
         _setInlineAlert({
             message: errorMessage,

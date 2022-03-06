@@ -1,12 +1,10 @@
 import { Box } from '@intermine/chromatin/box'
+import { useForm, Controller } from 'react-hook-form'
 
 import { DASHBOARD_DATASETS_LANDING_PATH } from '../../../routes'
 import { Entities } from '../common/constants'
 import { DashboardForm as DForm } from '../common/dashboard-form'
-import {
-    useDashboardForm,
-    useDashboardUpload
-} from '../common/dashboard-form/utils'
+import { useDashboardUpload } from '../common/dashboard-form'
 import {
     useUpload,
     formatUploadMachineContextForUseUploadProps
@@ -15,27 +13,30 @@ import { getFileExt } from '../utils/misc'
 
 const { Dataset } = Entities
 
+type TUploadDatasetFormFields = {
+    name: string
+    description: string
+}
+
 export const UploadDataset = () => {
+    const {
+        control,
+        reset,
+        formState: { isDirty },
+        getValues
+    } = useForm<TUploadDatasetFormFields>({
+        defaultValues: {
+            description: '',
+            name: ''
+        }
+    })
+
     const {
         serviceToGeneratePresignedURL,
         runWhenPresignedURLGenerationFailed,
         runWhenPresignedURLGenerated,
         inlineAlertProps
     } = useUpload()
-
-    const {
-        state: { name, description },
-        isDirty,
-        resetToInitialState,
-        updateDashboardFormState
-    } = useDashboardForm({
-        name: {
-            value: ''
-        },
-        description: {
-            value: ''
-        }
-    })
 
     const {
         generatePresignedURL,
@@ -54,7 +55,7 @@ export const UploadDataset = () => {
                 dataset: {
                     ext: getFileExt(file),
                     file_type: file.type ? file.type : getFileExt(file),
-                    name: name.value ? name.value : file.name
+                    name: getValues('name') ? getValues('name') : file.name
                 }
             })
         },
@@ -69,16 +70,14 @@ export const UploadDataset = () => {
         },
 
         runWhenPresignedURLGenerationFailed: (ctx) => {
-            const _ctx = formatUploadMachineContextForUseUploadProps(
-                ctx,
-                Dataset
-            )
-            runWhenPresignedURLGenerationFailed(_ctx)
+            runWhenPresignedURLGenerationFailed({
+                errorMessage: ctx.errorMessage
+            })
         }
     })
 
     const resetForm = () => {
-        resetToInitialState()
+        reset()
         resetUpload()
     }
 
@@ -97,15 +96,16 @@ export const UploadDataset = () => {
                         main="Name"
                         sub="Name of your dataset."
                     >
-                        <DForm.Input
-                            value={name.value}
-                            onChange={(event) =>
-                                updateDashboardFormState(
-                                    'name',
-                                    event.currentTarget.value
-                                )
-                            }
-                            placeholder="Dataset Name"
+                        <Controller
+                            render={({ field }) => (
+                                <DForm.Input
+                                    {...field}
+                                    isDisabled={isGeneratingPresignedURL}
+                                    placeholder="Dataset Name"
+                                />
+                            )}
+                            control={control}
+                            name="name"
                         />
                     </DForm.Label>
                     <DForm.Label
@@ -115,17 +115,18 @@ export const UploadDataset = () => {
                         having information about..."
                         isDisabled={isGeneratingPresignedURL}
                     >
-                        <DForm.Input
-                            rows={5}
-                            value={description.value}
-                            Component="textarea"
-                            placeholder="Description of your dataset"
-                            onChange={(event) =>
-                                updateDashboardFormState(
-                                    'description',
-                                    event.currentTarget.value
-                                )
-                            }
+                        <Controller
+                            render={({ field }) => (
+                                <DForm.Input
+                                    {...field}
+                                    isDisabled={isGeneratingPresignedURL}
+                                    rows={5}
+                                    Component="textarea"
+                                    placeholder="Description of your dataset"
+                                />
+                            )}
+                            control={control}
+                            name="description"
                         />
                     </DForm.Label>
 

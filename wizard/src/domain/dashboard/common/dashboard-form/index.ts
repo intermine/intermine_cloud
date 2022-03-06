@@ -1,6 +1,6 @@
 export { DashboardForm } from './dashboard-form'
+export * from './use-dashboard-upload'
 export * from './utils'
-export * from './hooks'
 
 export type {
     TUploadDatasetReturn,
