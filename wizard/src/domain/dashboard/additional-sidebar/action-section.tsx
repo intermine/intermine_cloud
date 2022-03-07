@@ -9,7 +9,7 @@ import { AdditionalSidebarTabs } from '../../../shared/constants'
 
 export type TActionSectionProps = {
     heading: string
-    children: React.ReactChild | React.ReactChild[]
+    children: React.ReactNode
     isActive?: boolean
 }
 
