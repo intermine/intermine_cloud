@@ -3,7 +3,7 @@ import { useHistory } from 'react-router-dom'
 import { Box } from '@intermine/chromatin/box'
 import AddIcon from '@intermine/chromatin/icons/System/add-fill'
 
-import { Mine, ModelFile } from '@intermine/compose-rest-client'
+import { Mine } from '@intermine/compose-rest-client'
 
 import { WorkspaceHeading } from '../common/workspace-heading'
 import { DASHBOARD_CREATE_MINE_PATH } from '../../../routes'
@@ -17,11 +17,8 @@ import {
 } from '../common/accordion-list/accordion-list'
 // eslint-disable-next-line max-len
 import { LandingPageAccordionList } from '../common/accordion-list/landing-page-accordion-list'
-import { StatusTag } from '../common/status-tag'
 
-import { UploadModal } from '../common/upload-modal'
-import { Entities } from '../common/constants'
-
+type TMines = Mine[]
 const MsgIfListEmpty = (
     <Box>
         You haven't created any min yet!
@@ -32,11 +29,9 @@ const MsgIfListEmpty = (
 
 const MsgIfFailedToLoadList = <Box>Failed to load mines.</Box>
 
-const fetchMines = async () => {
+const fetchMines = async (): Promise<TMines> => {
     const res = await mineApi.mineGet('get_all_mines')
-
-    console.log('res', res)
-    return {}
+    return res.data.items.mine_list
 }
 
 export const Landing = () => {
@@ -47,8 +42,44 @@ export const Landing = () => {
         history.push(DASHBOARD_CREATE_MINE_PATH)
     }
 
-    const onQuerySuccessful = (res: Record<string, any>) => {
-        console.log('Query Result', res)
+    const getAction = (mine: Mine) => {
+        return (
+            <AccordionList.ActionButton color="secondary">
+                Build & Deploy
+            </AccordionList.ActionButton>
+        )
+    }
+
+    const onQuerySuccessful = (mines: TMines) => {
+        const lists: TAccordionListDatum[] = []
+        for (const mine of mines) {
+            lists.push({
+                id: mine.mine_id,
+                bodyItem: { content: mine.description },
+                headerItems: [
+                    {
+                        id: mine.mine_id + 'header-name',
+                        body: mine.name,
+                        heading: 'Name'
+                    },
+                    {
+                        id: mine.mine_id + 'header-sub-domain',
+                        body: mine.subdomain,
+                        heading: 'File Type'
+                    },
+                    {
+                        id: mine.mine_id + 'action',
+                        body: (
+                            <Box csx={{ root: { padding: '0.25rem' } }}>
+                                {getAction(mine)}
+                            </Box>
+                        ),
+                        heading: ''
+                    }
+                ]
+            })
+        }
+        setData(lists)
     }
 
     const { isLoading, isFailed, query } = useDashboardQuery({
