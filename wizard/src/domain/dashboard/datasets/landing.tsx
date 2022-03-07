@@ -118,7 +118,6 @@ export const Landing = () => {
         for (const data of dataset) {
             lists.push({
                 id: data.data_id,
-                file_id: data.file_id,
                 bodyItem: { content: '' },
                 headerItems: [
                     {

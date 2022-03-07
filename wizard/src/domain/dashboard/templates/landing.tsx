@@ -122,7 +122,6 @@ export const Landing = () => {
         for (const template of templates) {
             lists.push({
                 id: template.template_id,
-                file_id: template.file_id,
                 bodyItem: { content: template.description },
                 headerItems: [
                     {

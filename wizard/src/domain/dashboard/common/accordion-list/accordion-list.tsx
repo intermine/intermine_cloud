@@ -35,7 +35,6 @@ export type TAccordionListBodyItem = {
 
 export type TAccordionListDatum = {
     id: TID
-    file_id: TID
     headerItems: Array<TAccordionListHeaderItem>
     bodyItem: TAccordionListBodyItem
 }
