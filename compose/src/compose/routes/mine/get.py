@@ -56,5 +56,7 @@ def get(user: User) -> Response:
         return make_response(response_body.json(), HTTPStatus.INTERNAL_SERVER_ERROR)
 
     # return fetched mines in response
-    response_body = MineGetResponse(msg="data successfully retrieved", items=mine_list)
+    response_body = MineGetResponse(
+        msg="data successfully retrieved", items={"mine_list": mine_list}
+    )
     return make_response(response_body.json(), HTTPStatus.OK)
