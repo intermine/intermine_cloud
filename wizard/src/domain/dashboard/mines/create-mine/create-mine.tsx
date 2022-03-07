@@ -10,13 +10,13 @@ import { useForm, Controller } from 'react-hook-form'
 import { DASHBOARD_MINES_LANDING_PATH } from '../../../../routes'
 import { dataApi, templateApi } from '../../../../services/api'
 import { DashboardForm as DForm } from '../../common/dashboard-form'
-
 import { useDashboardQuery } from '../../hooks'
-
-type TSelectOption = {
-    label: string
-    value: string
-}
+import {
+    TSelectOption,
+    datasetsValidator,
+    subDomainNameValidator,
+    templateValidator
+} from './form-utils'
 
 type TCreateMineFormFields = {
     template: TSelectOption
@@ -143,8 +143,6 @@ export const CreateMine = () => {
         query()
     }, [])
 
-    console.log('errr', errors)
-
     return (
         <DForm isDirty={isDirty} onSubmit={handleSubmit(submitForm)}>
             <DForm.PageHeading
@@ -161,7 +159,7 @@ export const CreateMine = () => {
                             template. There are also some of the pre-existing 
                             templates."
                         isError={Boolean(errors.template)}
-                        // errorMsg={eTemplate?.errorMsg}
+                        errorMsg="Template is required"
                         hasAsterisk
                     >
                         <Controller
@@ -171,15 +169,13 @@ export const CreateMine = () => {
                                     options={templateOptions}
                                     placeholder="Select template"
                                     isLoading={isLoading}
+                                    isError={Boolean(errors.template)}
                                 />
                             )}
                             name="template"
                             control={control}
                             rules={{
-                                validate: (_template) => {
-                                    if (!Array.isArray(_template)) return false
-                                    return true
-                                }
+                                validate: templateValidator
                             }}
                         />
                     </DForm.Label>
@@ -188,8 +184,9 @@ export const CreateMine = () => {
                         main="Select dataset(s)"
                         sub="Make sure you have already uploaded the
                             dataset. You can select multiple dataset."
-                        // isError={Boolean(eDatasets)}
-                        // errorMsg={eDatasets?.errorMsg}
+                        isError={Boolean(errors.datasets)}
+                        errorMsg={`Dataset is required.
+                        Please select at least one dataset`}
                         hasAsterisk
                     >
                         <Controller
@@ -200,10 +197,14 @@ export const CreateMine = () => {
                                     options={datasetOptions}
                                     isMulti
                                     isLoading={isLoading}
+                                    isError={Boolean(errors.datasets)}
                                 />
                             )}
                             name="datasets"
                             control={control}
+                            rules={{
+                                validate: datasetsValidator
+                            }}
                         />
                     </DForm.Label>
 
@@ -212,7 +213,7 @@ export const CreateMine = () => {
                         sub="This will be the name under which your mine is
                             publicly available. Some examples are HumanMine,
                             FlyMine, CovidMine, etc."
-                        // isError={Boolean(eName)}
+                        isError={Boolean(errors.name)}
                         hasAsterisk
                         errorMsg="Name is required"
                     >
@@ -220,11 +221,15 @@ export const CreateMine = () => {
                             render={({ field }) => (
                                 <DForm.Input
                                     {...field}
+                                    isError={Boolean(errors.name)}
                                     placeholder="Enter mine name"
                                 />
                             )}
                             control={control}
                             name="name"
+                            rules={{
+                                required: true
+                            }}
                         />
                     </DForm.Label>
 
@@ -254,8 +259,8 @@ export const CreateMine = () => {
                         sub="We will host your newly built mine under this
                             sub-domain. Please don't include any special
                             character."
-                        // isError={Boolean(eSubDomain)}
-                        // errorMsg={eSubDomain?.errorMsg}
+                        isError={Boolean(errors.subDomain)}
+                        errorMsg={errors.subDomain?.message}
                     >
                         <Box display="flex">
                             <Controller
@@ -267,12 +272,14 @@ export const CreateMine = () => {
                                         }}
                                         // eslint-disable-next-line max-len
                                         placeholder="my-first-intermine-database"
+                                        isError={Boolean(errors.subDomain)}
                                     />
                                 )}
                                 control={control}
                                 name="subDomain"
                                 rules={{
-                                    required: true
+                                    required: 'Sub domain is required',
+                                    validate: subDomainNameValidator
                                 }}
                             />
                             <Box
@@ -282,17 +289,11 @@ export const CreateMine = () => {
                                 .intermine.org
                             </Box>
                         </Box>
-                        {/* <Box>
-                            {initialFormFieldsValue?.subDomain?.options
-                                ?.validator &&
-                                // eslint-disable-next-line max-len
-                                initialFormFieldsValue?.subDomain?.options?.validator(
-                                    subDomain.value,
-                                    state
-                                ).isError === false &&
-                                // eslint-disable-next-line max-len
-                                'Checking whether this subdomain is available or not'}
-                        </Box> */}
+                        {/* 
+                            <Box>
+                                Add error message here
+                            </Box> 
+                        */}
                     </DForm.Label>
                     <DForm.Label
                         main="Action"
@@ -304,23 +305,11 @@ export const CreateMine = () => {
                         render={({ field }) => (
                             <RadioGroup {...field} name="action">
                                 <FormControlLabel
-                                    control={
-                                        <Radio
-                                            value="build"
-                                            // isChecked={field.value === 'build'}
-                                        />
-                                    }
+                                    control={<Radio value="build" />}
                                     label="Build"
                                 />
                                 <FormControlLabel
-                                    control={
-                                        <Radio
-                                            value="build-deploy"
-                                            // isChecked={
-                                            //     field.value === 'build-deploy'
-                                            // }
-                                        />
-                                    }
+                                    control={<Radio value="build-deploy" />}
                                     label="Build & Deploy"
                                 />
                             </RadioGroup>
