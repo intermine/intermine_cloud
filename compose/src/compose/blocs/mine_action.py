@@ -5,12 +5,82 @@ from typing import List
 from blackcap.flow import Flow, FlowExecError, FuncProp, get_outer_function, Prop, Step
 from blackcap.flow.step import dummy_backward
 from blackcap.schemas.user import User
+from sqlalchemy.exc import SQLAlchemyError
 
+from compose.blocs.mine import get_mine
 from compose.schemas.api.mine.action.post import MineActionCreate
+from compose.schemas.api.mine.get import Mine, MineGetQueryParams, MineQueryType
 
 ###
 # Flow BLoCs
 ###
+
+
+def check_mine_list_exist(inputs: List[Prop]) -> List[Prop]:
+    """Check data list exist step.
+
+    Args:
+        inputs (List[Prop]):
+            Expects
+                0: mine_id_list
+                    Prop(data=mine_id_list, description="List of ids of mine objects")
+                1: user
+                    Prop(data=user, description="User")
+
+    Raises:
+        FlowExecError: Flow execution failed
+
+    Returns:
+        List[Prop]:
+
+            Prop(data=mine_list, description="List of Mine Objects ids")
+
+            Prop(data=user, description="User")
+    """
+    try:
+        mine_id_list: List[str] = inputs[0].data
+        user: User = inputs[1].data
+    except Exception as e:
+        raise FlowExecError(
+            human_description="Parsing inputs failed",
+            error=e,
+            error_type=type(e),
+            is_user_facing=True,
+            error_in_function=get_outer_function(),
+        ) from e
+
+    try:
+        # Check mine list existence
+        mine_query = MineGetQueryParams(query_type=MineQueryType.GET_ALL_MINE)
+        mine_list: List[Mine] = get_mine(mine_query, user)
+        mine_list_ids = [str(mine.mine_id) for mine in mine_list]
+        # Use sets to optimize later
+        for mine_id in mine_id_list:
+            if mine_id not in mine_list_ids:
+                # Raise a user descriptive error later
+                raise Exception("MINE NOT FOUND")
+
+    except SQLAlchemyError as e:
+        raise FlowExecError(
+            human_description="Querying DB object failed",
+            error=e,
+            error_type=type(e),
+            is_user_facing=False,
+            error_in_function=get_outer_function(),
+        ) from e
+    except Exception as e:
+        raise FlowExecError(
+            human_description="Something bad happened",
+            error=e,
+            error_type=type(e),
+            is_user_facing=False,
+            error_in_function=get_outer_function(),
+        ) from e
+
+    return [
+        Prop(data=mine_list, description="List of Mine Objects"),
+        Prop(data=user, description="User"),
+    ]
 
 
 def generate_create_mine_action_flow(
@@ -25,8 +95,7 @@ def generate_create_mine_action_flow(
     Returns:
         Flow: Create data flow
     """
-
-    check_mine_list_step = Step({}, dummy_backward)
+    check_mine_list_step = Step(check_mine_list_exist, dummy_backward)
     create_job_db_entry_step = Step()
     create_schedule_db_entry_step = Step()
     publish_schedule_msg_step = Step({}, dummy_backward)
@@ -35,12 +104,13 @@ def generate_create_mine_action_flow(
     flow = Flow()
 
     # * 0: Check mine existence
+    mine_id_list = [mine.mine_id for mine in mine_action_create_request_list]
     flow.add_step(
         check_mine_list_step,
         [
             Prop(
-                data=mine_action_create_request_list,
-                description="List of mine action create objects",
+                data=mine_id_list,
+                description="List of mine ids",
             ),
             Prop(data=user, description="User credentials"),
         ],
