@@ -8,7 +8,7 @@ import { InlineAlertProps } from '@intermine/chromatin/inline-alert'
 import { useForm, Controller } from 'react-hook-form'
 
 import { DASHBOARD_MINES_LANDING_PATH } from '../../../../routes'
-import { dataApi, templateApi } from '../../../../services/api'
+import { dataApi, mineApi, templateApi } from '../../../../services/api'
 import { DashboardForm as DForm } from '../../common/dashboard-form'
 import { useDashboardQuery } from '../../hooks'
 import {
@@ -116,13 +116,41 @@ export const CreateMine = () => {
     // const { onProgressStart, onProgressUpdate, onProgressSuccessful } =
     //     useOnProgress()
 
-    const submitForm = (data: TCreateMineFormFields) => {
-        // _setInlineAlert({
-        //     message: 'We are offline, please try after sometime.',
-        //     type: 'error'
-        // })
+    const submitForm = async (data: TCreateMineFormFields) => {
         console.log(data)
-        // resetForm()
+        const { action, datasets, description, name, subDomain, template } =
+            data
+        try {
+            const response = await mineApi.minePost({
+                mine_list: [
+                    {
+                        data_file_ids: datasets.map((v) => v.value),
+                        name,
+                        subdomain: subDomain,
+                        template_id: template.value,
+                        description,
+                        preference: {}
+                    }
+                ]
+            })
+
+            console.log('Response', response)
+
+            // Add action
+
+            _setInlineAlert({
+                message: 'Mine created successfully',
+                type: 'success'
+            })
+            resetForm()
+        } catch (error) {
+            _setInlineAlert({
+                message: 'Something went wrong. Please try again',
+                type: 'error'
+            })
+
+            console.error(error)
+        }
     }
 
     const onFetchSuccessful = (response: {
