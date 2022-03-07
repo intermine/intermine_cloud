@@ -188,7 +188,7 @@ tomcat:
 
 bluegenes:
   backendServiceRoot: http://pombemine-tomcat:8080/pombemine
-  serviceRoot: https://pombemine-staging.rahtiapp.fi/pombemine
+  serviceRoot: http://pombemine-staging.rahtiapp.fi/pombemine
   mineName: PombeMine
   mineNamespace: pombemine
 
