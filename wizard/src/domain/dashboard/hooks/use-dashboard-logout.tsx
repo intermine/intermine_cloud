@@ -1,5 +1,5 @@
 import { useHistory } from 'react-router'
-import shortid from 'shortid'
+import { nanoid } from 'nanoid'
 import { ButtonCommonProps } from '@intermine/chromatin/button'
 import { AxiosResponse } from 'axios'
 
@@ -79,7 +79,7 @@ export const useDashboardLogout = () => {
 
         storeDispatch(
             addGlobalAlert({
-                id: shortid.generate(),
+                id: nanoid(),
                 isOpen: true,
                 type: 'error',
                 message,

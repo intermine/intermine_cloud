@@ -1,18 +1,65 @@
+import { useEffect, useState } from 'react'
 import { useHistory } from 'react-router-dom'
 import { Box } from '@intermine/chromatin/box'
-import { WorkspaceHeading } from '../common/workspace-heading'
 import AddIcon from '@intermine/chromatin/icons/System/add-fill'
 
+import { Mine, ModelFile } from '@intermine/compose-rest-client'
+
+import { WorkspaceHeading } from '../common/workspace-heading'
 import { DASHBOARD_CREATE_MINE_PATH } from '../../../routes'
-import { WorkspaceTable } from '../common/workspace-table'
 import { DashboardErrorBoundary } from '../common/error-boundary'
+import { mineApi } from '../../../services/api'
+import { useDashboardQuery } from '../hooks'
+import {
+    AccordionListContainer,
+    TAccordionListDatum,
+    AccordionList
+} from '../common/accordion-list/accordion-list'
+// eslint-disable-next-line max-len
+import { LandingPageAccordionList } from '../common/accordion-list/landing-page-accordion-list'
+import { StatusTag } from '../common/status-tag'
+
+import { UploadModal } from '../common/upload-modal'
+import { Entities } from '../common/constants'
+
+const MsgIfListEmpty = (
+    <Box>
+        You haven't created any min yet!
+        <br />
+        Use the 'Create New Mine' button to create.
+    </Box>
+)
+
+const MsgIfFailedToLoadList = <Box>Failed to load mines.</Box>
+
+const fetchMines = async () => {
+    const res = await mineApi.mineGet('get_all_mines')
+
+    console.log('res', res)
+    return {}
+}
 
 export const Landing = () => {
     const history = useHistory()
+    const [data, setData] = useState<TAccordionListDatum[]>([])
 
     const handleUploadClick = () => {
         history.push(DASHBOARD_CREATE_MINE_PATH)
     }
+
+    const onQuerySuccessful = (res: Record<string, any>) => {
+        console.log('Query Result', res)
+    }
+
+    const { isLoading, isFailed, query } = useDashboardQuery({
+        queryFn: () => fetchMines(),
+        onSuccessful: onQuerySuccessful,
+        refetchInterval: 10_000
+    })
+
+    useEffect(() => {
+        query()
+    }, [])
 
     return (
         <Box>
@@ -26,19 +73,24 @@ export const Landing = () => {
             />
 
             <DashboardErrorBoundary errorMessage="Unable to load table.">
-                <WorkspaceTable
-                    data={{
-                        header: { id: '', row: { id: '', cells: [] } },
-                        body: { id: '', rows: [] }
-                    }}
-                    emptyTableMessage={
-                        <div>
-                            You haven't crated any mine yet! <br /> Use the
-                            'Create New Mine' button to create a mine.
-                        </div>
+                <AccordionListContainer
+                    isEmpty={data.length === 0}
+                    isLoading={isLoading}
+                    msgIfListIsEmpty={
+                        isFailed ? MsgIfFailedToLoadList : MsgIfListEmpty
                     }
-                    isFetchingData={false}
-                />
+                >
+                    {data.map((item, idx) => {
+                        return (
+                            <LandingPageAccordionList
+                                key={item.id}
+                                isFirstItem={idx === 0}
+                                isLastItem={idx + 1 === data.length}
+                                item={item}
+                            />
+                        )
+                    })}
+                </AccordionListContainer>
             </DashboardErrorBoundary>
         </Box>
     )

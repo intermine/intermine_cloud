@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import shortid from 'shortid'
+import { nanoid } from 'nanoid'
 
 import { useStoreDispatch, addGlobalAlert } from '../../../store'
 import {
@@ -103,7 +103,7 @@ export const useDashboardQuery = <T>(props: TUseDashboardQuery<T>) => {
                 const status = getResponseStatus(_error.response)
                 storeDispatch(
                     addGlobalAlert({
-                        id: shortid.generate(),
+                        id: nanoid(),
                         message: getResponseMessageUsingResponseStatus(
                             _error.response,
                             status

@@ -1,5 +1,5 @@
 import axios, { CancelTokenSource } from 'axios'
-import shortid from 'shortid'
+import { nanoid } from 'nanoid'
 
 import { throttle } from '../../../../utils/throttle'
 
@@ -39,7 +39,7 @@ export const uploadService = (
     const CancelToken = axios.CancelToken
     const source = CancelToken.source()
     const {
-        id = shortid.generate(),
+        id = nanoid(),
         url,
         file,
         onFailed,
