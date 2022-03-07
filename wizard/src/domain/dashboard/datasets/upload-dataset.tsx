@@ -1,4 +1,5 @@
 import { Box } from '@intermine/chromatin/box'
+import { useEffect } from 'react'
 import { useForm, Controller } from 'react-hook-form'
 
 import { DASHBOARD_DATASETS_LANDING_PATH } from '../../../routes'
@@ -80,6 +81,27 @@ export const UploadDataset = () => {
         reset()
         resetUpload()
     }
+
+    useEffect(() => {
+        console.log('Running')
+        const { file } = uploadMachineState.context
+        if (file) {
+            console.log('File', file)
+
+            const reader = new FileReader()
+            reader.onload = function (progressEvent) {
+                // Entire file
+                console.log(this.result)
+
+                // By lines
+                var lines = this.result.split('\n')
+                for (var line = 0; line < 2; line++) {
+                    console.log(lines[line])
+                }
+            }
+            reader.readAsText(file)
+        }
+    }, [uploadMachineState.context.file])
 
     return (
         <Box>
