@@ -4,6 +4,7 @@ import { ThemeProvider } from '@intermine/chromatin/styles'
 import { Box } from '@intermine/chromatin/box'
 import { createStyle } from '@intermine/chromatin/styles'
 import 'regenerator-runtime'
+import { AxiosError } from 'axios'
 
 import { AuthStates, OtherIDs } from './shared/constants'
 import {
@@ -27,6 +28,8 @@ import {
 } from './routes'
 import { GlobalAlert } from './components/global-alert'
 import { TGlobalAlertReducerAlert } from './shared/types'
+import { authApi } from './services/api'
+import { useAppReset } from './hooks/use-app-reset'
 
 const Dashboard = lazy(() => import('./domain/dashboard'))
 const PreAuth = lazy(() => import('./domain/pre-auth'))
@@ -77,6 +80,7 @@ export const App = () => {
     useStyles()
 
     const history = useHistory()
+    const { resetApp } = useAppReset()
     const { pathname } = useLocation()
 
     const storeDispatch = useStoreDispatch()
@@ -88,13 +92,17 @@ export const App = () => {
         storeDispatch(addGlobalAlert(payload))
     }
 
-    const onLocationChange = () => {
+    const redirectToLogin = () => {
+        history.push(`${LOGIN_PATH}?${OtherIDs.URLReferer}=${pathname}`)
+    }
+
+    const redirectOnMount = () => {
         if (auth.authState !== Authorize && isAuthRoute(pathname)) {
             /**
              * If not authorize and user tries to navigate to
              * auth page.
              */
-            history.push(`${LOGIN_PATH}?${OtherIDs.URLReferer}=${pathname}`)
+            redirectToLogin()
 
             /**
              * Showing an alert to user stating why we redirected user to
@@ -104,7 +112,7 @@ export const App = () => {
                 id: OtherIDs.UnauthorizeAlert,
                 isOpen: true,
                 message: `You are not logged in. 
-                Please login to continue.`,
+                    Please login to continue.`,
                 title: 'Unauthorise',
                 type: 'warning'
             })
@@ -161,12 +169,51 @@ export const App = () => {
         })
     }
 
-    useEffect(() => {
-        onLocationChange()
-    }, [pathname])
+    const checkUserAuthenticity = async () => {
+        try {
+            // This will thrown an error if user is not authenticated.
+            await authApi.authCheck()
+        } catch (error) {
+            if (!error || typeof error !== 'object') {
+                /**
+                 * This condition means user might be offline.
+                 * So we are trying to fetch authenticity after
+                 * 10 seconds.
+                 */
+                setTimeout(checkUserAuthenticity, 10_000)
+                return
+            }
+
+            const { response } = error as AxiosError
+
+            if (response && response.status === 401) {
+                _addGlobalAlert({
+                    id: 'authentication-failed',
+                    isOpen: true,
+                    title: 'Session Expired',
+                    message: 'Please login again to continue.',
+                    type: 'error'
+                })
+                resetApp()
+                redirectToLogin()
+                return
+            }
+
+            /**
+             * If we reach here then it means there is some issue in our
+             * server. So we are retrying to fetch data from server after
+             * 10 seconds.
+             */
+            setTimeout(checkUserAuthenticity, 10_000)
+        }
+    }
 
     useEffect(() => {
+        redirectOnMount()
         addOfflineAndOnlineEventListener()
+        if (auth.authState === Authorize) {
+            checkUserAuthenticity()
+        }
     }, [])
 
     return (
