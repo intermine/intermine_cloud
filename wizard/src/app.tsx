@@ -139,17 +139,13 @@ export const App = () => {
         }
     }
 
-    useEffect(() => {
-        onLocationChange()
-    }, [pathname])
-
-    useEffect(() => {
+    const addOfflineAndOnlineEventListener = () => {
         window.addEventListener('offline', () => {
             _addGlobalAlert({
                 isOpen: true,
                 id: 'offline-alert',
                 title: 'Connectivity Issue',
-                message: 'It seems like you are offline.',
+                message: 'It seems you are offline.',
                 type: 'warning'
             })
         })
@@ -163,6 +159,14 @@ export const App = () => {
                 type: 'info'
             })
         })
+    }
+
+    useEffect(() => {
+        onLocationChange()
+    }, [pathname])
+
+    useEffect(() => {
+        addOfflineAndOnlineEventListener()
     }, [])
 
     return (
