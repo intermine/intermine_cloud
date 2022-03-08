@@ -9,7 +9,7 @@ import InfoIcon from '@intermine/chromatin/icons/System/information-line'
 import SuccessIcon from '@intermine/chromatin/icons/System/check-line'
 import ErrorIcon from '@intermine/chromatin/icons/System/error-warning-line'
 import { ChromatinIcon } from '@intermine/chromatin/icons/types'
-import { TUseGlobalModalReducer } from '../../context/types'
+import { TGlobalModalReducer } from '../../shared/types'
 
 const useStyles = createStyle((theme) => {
     const { themeType, palette, elevation, spacing } = theme
@@ -27,7 +27,7 @@ const useStyles = createStyle((theme) => {
             color: neutral[30],
             display: 'flex',
             flexDirection: 'column',
-            maxWidth: '20rem',
+            maxWidth: '30rem',
             width: '100%'
         },
 
@@ -59,8 +59,8 @@ const useStyles = createStyle((theme) => {
     }
 })
 
-export type TGlobalModalProps = TUseGlobalModalReducer['state'] & {
-    onClose: TUseGlobalModalReducer['closeGlobalModal']
+export type TGlobalModalProps = TGlobalModalReducer & {
+    onClose: () => void
     csx?: ModalProps['csx']
 }
 

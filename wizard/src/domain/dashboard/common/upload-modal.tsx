@@ -92,13 +92,6 @@ export const UploadModal = (props: TUploadModalProps) => {
             HeaderIcon={UploadIcon}
             onClose={onClose}
             heading={heading}
-            csx={{
-                content: {
-                    '&&': {
-                        maxWidth: '25rem'
-                    }
-                }
-            }}
             primaryAction={{
                 children: 'Upload',
                 onClick: onUploadClick
