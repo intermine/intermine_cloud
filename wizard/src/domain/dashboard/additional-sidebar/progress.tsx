@@ -78,7 +78,9 @@ export const Progress = () => {
                     return (
                         <ProgressItemView
                             key={id}
-                            onRemoveItem={removeItemFromProgress}
+                            onRemoveItem={(id) => {
+                                storeDispatch(removeItemFromProgress({ id }))
+                            }}
                             {...progressItems[key]}
                         />
                     )
