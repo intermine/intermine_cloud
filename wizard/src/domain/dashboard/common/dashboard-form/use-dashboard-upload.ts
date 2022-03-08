@@ -56,7 +56,7 @@ export const useDashboardUpload = (
 
     const onInputChange = (event: React.FormEvent<HTMLInputElement>) => {
         try {
-            const files = event.currentTarget.files
+            const files = (event.target as HTMLInputElement).files
             if (files && files.length > 0) {
                 setFile(files[0])
             }
