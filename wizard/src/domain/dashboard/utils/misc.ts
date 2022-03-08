@@ -1,6 +1,7 @@
 import { ModelFile } from '@intermine/compose-rest-client'
 
 import { fileApi } from '../../../services/api'
+import { FileTypes } from '../common/constants'
 
 export const handleOnBeforeUnload = (event: Event) => {
     event.preventDefault()
@@ -53,4 +54,26 @@ export const fetchAllFileUsingFileIds = async (
 
 export const getFileExt = (file: File): string => {
     return file.name.slice(file.name.lastIndexOf('.') + 1, file.name.length)
+}
+
+export const getFileType = (file: File): FileTypes => {
+    const ext = getFileExt(file).toLowerCase()
+    const { Csv, Fasta, Gff, Tar, Tsv, Unknown, Zip } = FileTypes
+
+    switch (ext) {
+        case 'fasta':
+            return Fasta
+        case 'gff':
+            return Gff
+        case 'csv':
+            return Csv
+        case 'tsv':
+            return Tsv
+        case 'tar':
+            return Tar
+        case 'zip':
+            return Zip
+        default:
+            return Unknown
+    }
 }

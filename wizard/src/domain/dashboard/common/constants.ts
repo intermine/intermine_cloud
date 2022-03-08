@@ -9,3 +9,14 @@ export enum UploadFileStatus {
     Fail,
     FailToUploadFile,
 }
+
+export enum FileTypes {
+    Fasta,
+    Gff,
+    Tsv,
+    Csv,
+    Isa,
+    Zip,
+    Tar,
+    Unknown,
+}
