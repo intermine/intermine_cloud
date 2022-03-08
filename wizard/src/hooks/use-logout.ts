@@ -1,18 +1,18 @@
-import { AuthStates } from '../shared/constants'
-import { useStoreDispatch, updateAuthState } from '../store'
-import { authApi } from '../services/api'
-import { getResponseStatus } from '../utils/get'
 import { AxiosError, AxiosResponse } from 'axios'
 
+import { authApi } from '../services/api'
+import { getResponseStatus } from '../utils/get'
+import { useAppReset } from './use-app-reset'
+
 export const useLogout = () => {
-    const storeDispatch = useStoreDispatch()
+    const { resetApp } = useAppReset()
 
     type TLogoutReturn = AxiosResponse
 
     const logout = async (): Promise<TLogoutReturn> => {
         try {
             const response = await authApi.authDelete()
-            storeDispatch(updateAuthState(AuthStates.NotAuthorize))
+            resetApp()
             return {
                 ...response,
                 config: {},
@@ -24,7 +24,7 @@ export const useLogout = () => {
             if (status === 401) {
                 // Unauthorize means user is already logout.
                 // So it is nice to update app state as well.
-                storeDispatch(updateAuthState(AuthStates.NotAuthorize))
+                resetApp()
             }
 
             return {
