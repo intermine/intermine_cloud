@@ -1,6 +1,8 @@
 from typing import Dict, List, Optional
 from jinja2 import Environment, PackageLoader
 import yaml
+import requests
+import json
 
 from blackcap.cluster.base import BaseCluster
 from blackcap.schemas.job import Job
@@ -8,8 +10,10 @@ from blackcap.schemas.schedule import Schedule
 from blackcap.messenger import messenger_registry
 from blackcap.configs import config_registry
 
+
 config = config_registry.get_config()
 messenger = messenger_registry.get_messenger(config.MESSENGER)
+jinjaEnv = Environment(loader=PackageLoader("demon"))
 
 
 def _report_mineprogress(workflow_yaml: str, extra_data: Optional[Dict] = None) -> None:
@@ -30,13 +34,29 @@ def _report_mineprogress(workflow_yaml: str, extra_data: Optional[Dict] = None) 
     messenger.publish({"data": progress_report}, "mineprogress")
 
 
+def _submit_workflow(workflow_template: str, workflow_meta: Dict, context: Dict) -> None:
+    tmpl = jinjaEnv.get_template(workflow_template)
+
+    workflow_yaml = tmpl.render(**context)
+
+    _report_mineprogress(workflow_yaml, extra_data=workflow_meta)
+
+    workflow_json = json.dumps({
+        'namespace': 'argo',
+        'serverDryRun': False,
+        'workflow': yaml.safe_load(workflow_yaml)
+    })
+
+    requests.post(config.ARGO_ENDPOINT + "/api/v1/workflows/argo", json=workflow_json)
+
+
 class ArgoCluster(BaseCluster):
     CONFIG_KEY_VAL = "ARGO"
 
     def prepare_job(self: "BaseCluster", schedule: Schedule) -> None:
         pass
 
-    def submit_job(self: "BaseCluster", schedule: Schedule) -> str:
+    def submit_job(self: "BaseCluster", schedule: Schedule) -> None:
         context = schedule.job.specification
         workflow_meta = {
             "workflow_name": schedule.job.name,
@@ -66,16 +86,8 @@ class ArgoCluster(BaseCluster):
             #     "get_bio": "http://localhost:9000/my-bucket/bio.tgz?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=yGoQ32Xqe9DDM3wdXQ8j%2F20211126%2F%2Fs3%2Faws4_request&X-Amz-Date=20211126T163836Z&X-Amz-Expires=604800&X-Amz-SignedHeaders=host&X-Amz-Signature=b1632c3c613f00c8e690ea323732e1b5ed93b0fb29afed3e601dd7d8b67659d3",
             # }
 
-            tmpl = Environment(loader=PackageLoader("demon")).get_template(
-                "minebuilder.yaml.template"
-            )
-            minebuilder_workflow = tmpl.render(**context)
+            _submit_workflow("minebuilder.yaml.template", workflow_meta, context)
 
-            _report_mineprogress(minebuilder_workflow, extra_data=workflow_meta)
-
-            messenger.publish(
-                {"data": {"workflow": minebuilder_workflow}}, "minebuilder"
-            )
         elif schedule.job.job_type == "deploy":
             # Example context
             # context = {
@@ -86,16 +98,8 @@ class ArgoCluster(BaseCluster):
             #     "get_solr": "http://localhost:9000/my-bucket/bio.tgz?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=yGoQ32Xqe9DDM3wdXQ8j%2F20211126%2F%2Fs3%2Faws4_request&X-Amz-Date=20211126T163836Z&X-Amz-Expires=604800&X-Amz-SignedHeaders=host&X-Amz-Signature=b1632c3c613f00c8e690ea323732e1b5ed93b0fb29afed3e601dd7d8b67659d3",
             # }
 
-            tmpl = Environment(loader=PackageLoader("demon")).get_template(
-                "minedeployer.yaml.template"
-            )
-            minedeployer_workflow = tmpl.render(**context)
+            _submit_workflow("minedeployer.yaml.template", workflow_meta, context)
 
-            _report_mineprogress(minedeployer_workflow, extra_data=workflow_meta)
-
-            messenger.publish(
-                {"data": {"workflow": minedeployer_workflow}}, "minedeployer"
-            )
 
     def get_job_status(self: "BaseCluster", job_id: str) -> List[str]:
         pass
