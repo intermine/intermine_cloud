@@ -11,7 +11,7 @@ from pydantic import parse_obj_as, ValidationError
 
 from compose.blocs.data import generate_create_data_flow
 from compose.routes.data import data_bp
-from compose.schemas.api.data.post import DataPOSTResponse, DataPOSTRequest
+from compose.schemas.api.data.post import DataPOSTRequest, DataPOSTResponse
 from compose.utils.auth import check_authentication
 
 
