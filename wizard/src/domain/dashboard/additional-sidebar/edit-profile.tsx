@@ -118,7 +118,8 @@ export const EditProfile = () => {
                         label="Email"
                         inputProps={{
                             value: getValues('email'),
-                            isDisabled: true
+                            isDisabled: true,
+                            size: 'small'
                         }}
                     />
                     <Controller
@@ -126,7 +127,8 @@ export const EditProfile = () => {
                             <FormGroup
                                 label="Name"
                                 inputProps={{
-                                    ...field
+                                    ...field,
+                                    size: 'small'
                                 }}
                             />
                         )}
@@ -139,7 +141,8 @@ export const EditProfile = () => {
                             <FormGroup
                                 label="Organisation"
                                 inputProps={{
-                                    ...field
+                                    ...field,
+                                    size: 'small'
                                 }}
                             />
                         )}
