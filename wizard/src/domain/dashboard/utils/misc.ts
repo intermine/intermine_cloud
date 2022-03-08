@@ -3,6 +3,8 @@ import { ModelFile } from '@intermine/compose-rest-client'
 import { fileApi } from '../../../services/api'
 import { FileTypes } from '../common/constants'
 
+const { Csv, Fasta, Gff, Tar, Tsv, Unknown, Zip } = FileTypes
+
 export const handleOnBeforeUnload = (event: Event) => {
     event.preventDefault()
 
@@ -56,10 +58,7 @@ export const getFileExt = (file: File): string => {
     return file.name.slice(file.name.lastIndexOf('.') + 1, file.name.length)
 }
 
-export const getFileType = (file: File): FileTypes => {
-    const ext = getFileExt(file).toLowerCase()
-    const { Csv, Fasta, Gff, Tar, Tsv, Unknown, Zip } = FileTypes
-
+export const getFileTypeUsingExt = (ext: string): FileTypes => {
     switch (ext) {
         case 'fasta':
             return Fasta
@@ -76,4 +75,33 @@ export const getFileType = (file: File): FileTypes => {
         default:
             return Unknown
     }
+}
+
+export const getFileType = (file: File): FileTypes => {
+    const ext = getFileExt(file).toLowerCase()
+    return getFileTypeUsingExt(ext)
+}
+
+type TAreFileTypeSameOption = {
+    firstFileType: FileTypes
+    secondFileType: FileTypes
+}
+
+export const areFileTypeSame = (option: TAreFileTypeSameOption) => {
+    const { firstFileType, secondFileType } = option
+
+    if (firstFileType === secondFileType) return false
+
+    /**
+     * Question for csv and tsv are same. So we can
+     * consider csv and tsv as same file.
+     */
+    if (
+        (firstFileType === Csv || firstFileType === Tsv) &&
+        (secondFileType === Csv || secondFileType === Tsv)
+    ) {
+        return false
+    }
+
+    return true
 }
