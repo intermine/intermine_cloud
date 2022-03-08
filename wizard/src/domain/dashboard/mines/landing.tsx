@@ -45,7 +45,7 @@ export const Landing = () => {
     const getAction = (mine: Mine) => {
         return (
             <AccordionList.ActionButton color="secondary">
-                Build & Deploy
+                Deploy
             </AccordionList.ActionButton>
         )
     }
