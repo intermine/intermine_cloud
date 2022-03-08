@@ -44,5 +44,5 @@ pytest-mock = "^3.6.1"
 demon = "demon.cli.main:main"
 
 [build-system]
-requires = ["poetry-core>=1.0.0"]
+requires = ["poetry-core>=1.1.10"]
 build-backend = "poetry.core.masonry.api"

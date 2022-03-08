@@ -18,3 +18,4 @@ class DemonDefaultConfig(DefaultConfig):
     MESSENGER: str = "NATS"
     NATS_ENDPOINT: str = "nats://0.0.0.0:4222"
     CLUSTER: str = "ARGO"
+    ARGO_ENDPOINT: str = "argo-workflows:2746"
