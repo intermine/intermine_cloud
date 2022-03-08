@@ -9,6 +9,7 @@ import { useState } from 'react'
 export type TUploadBoxProps = {
     isError?: boolean
     isDisabled?: boolean
+    accept?: string
     onInputChange: (event: React.FormEvent<HTMLInputElement>) => void
     onDropHandler: (event: React.DragEvent) => void
 }
@@ -75,7 +76,8 @@ export const UploadBox = (props: TUploadBoxProps) => {
         isDisabled = false,
         isError = false,
         onInputChange,
-        onDropHandler: _onDropHandler
+        onDropHandler: _onDropHandler,
+        accept
     } = props
     const [dragEvent, setDragEvent] = useState({
         isDragOver: false
@@ -124,6 +126,7 @@ export const UploadBox = (props: TUploadBoxProps) => {
                 </Typography>
                 <InputBase
                     type="file"
+                    accept={accept}
                     isHidden
                     onChange={onInputChange}
                     isDisabled={isDisabled}
