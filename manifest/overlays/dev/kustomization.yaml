@@ -4,6 +4,7 @@ bases:
 - ../../base
 resources:
 - argo.yaml
+- intermine.yaml
 patches:
 - traefik.yaml
 - argo_artifact_repositories.yaml

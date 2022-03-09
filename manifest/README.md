@@ -1,6 +1,7 @@
 ## TODO
 
-- Fix namespaces (?) -- perhaps so each component have their own namespace in addition to `workflows`
+- Deploy `intermine/helm-operator:0.0.1` to dockerhub
+- Fix namespaces (the way it is now, workflows probably don't work) -- perhaps so each component have their own namespace in addition to `workflows`
 - Expose Argo web server in *base/argo.yaml* so you don't have to use Argo CLI for dashboard.
 
 ## Development
@@ -19,4 +20,5 @@ kubectl apply -k overlays/dev
 helm template traefik/traefik > base/traefik.yaml
 curl https://raw.githubusercontent.com/argoproj/argo-workflows/master/manifests/install.yaml > base/argo.yaml
 helm template argo-artifacts minio/minio --set fullnameOverride=argo-artifacts
+pushd ../helm-operator ; kustomize build config/default > ../manifest/base/intermine.yaml ; popd
 ```

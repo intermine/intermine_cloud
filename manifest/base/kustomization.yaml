@@ -3,3 +3,5 @@ resources:
 - argo.yaml
 - argo_artifact_repositories.yaml
 - minio.yaml
+- intermine.yaml
+- intermine_rbac.yaml
