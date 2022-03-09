@@ -6,7 +6,6 @@ from blackcap.db import DBSession
 from blackcap.flow import Flow, FlowExecError, FuncProp, get_outer_function, Prop, Step
 from blackcap.flow.step import dummy_backward
 from blackcap.schemas.user import User
-from compose.schemas.api.template.post import TemplateCreate
 from logzero import logger
 from pydantic import ValidationError
 from pydantic.error_wrappers import ErrorWrapper
@@ -22,6 +21,7 @@ from compose.blocs.file import (
 from compose.models.template import TemplateDB
 from compose.schemas.api.template.delete import TemplateDelete
 from compose.schemas.api.template.get import TemplateGetQueryParams, TemplateQueryType
+from compose.schemas.api.template.post import TemplateCreate
 from compose.schemas.api.template.put import TemplateUpdate
 from compose.schemas.file import File
 from compose.schemas.template import Template
@@ -32,12 +32,12 @@ from compose.schemas.template import Template
 
 
 def create_template(
-    template_list: List[TemplateCreate], user_creds: User
+    template_create_list: List[TemplateCreate], user_creds: User
 ) -> List[Template]:
     """Create template objects.
 
     Args:
-        template_list (List[TemplateCreate]): List of template objects to create.
+        template_create_list (List[TemplateCreate]): List of template objects to create.
         user_creds (User): User credentials.
 
     Raises:
@@ -53,7 +53,7 @@ def create_template(
                     protagonist_id=user_creds.user_id,
                     **template.dict(),
                 )
-                for template in template_list
+                for template in template_create_list
             ]
             TemplateDB.bulk_create(template_db_create_list, session)
             return [
@@ -126,8 +126,8 @@ def get_template(
 
 
 def update_template(
-    template_update_list: List[TemplateUpdate], user_creds: Optional[User] = None
-) -> Template:
+    template_update_list: List[TemplateUpdate], user_creds: User
+) -> List[Template]:
     """Update Template in the DB from TemplateUpdate request.
 
     Args:
@@ -138,7 +138,7 @@ def update_template(
         Exception: error
 
     Returns:
-        Template: Instance of Updated Template
+        List[Template]: List of Instance of Updated Template
     """
     stmt = (
         select(TemplateDB)
@@ -182,13 +182,13 @@ def update_template(
 
 
 def delete_template(
-    template_delete_list: List[TemplateDelete], user_creds: Optional[User] = None
+    template_delete_list: List[TemplateDelete], user_creds: User
 ) -> Template:
     """Delete template in the DB from TemplateDelete request.
 
     Args:
         template_delete_list (List[TemplateDelete]): List of TemplateDelete request
-        user_creds (Optional[User], optional): User credentials. Defaults to None.
+        user_creds (User): User credentials.
 
     Raises:
         Exception: error
