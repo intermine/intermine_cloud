@@ -1,9 +1,9 @@
 import { Box } from '@intermine/chromatin/box'
-import React, { useEffect, useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useForm, Controller } from 'react-hook-form'
 
 import { DASHBOARD_DATASETS_LANDING_PATH } from '../../../../routes'
-import { Entities } from '../../common/constants'
+import { Entities, FileTypes } from '../../common/constants'
 import { DashboardForm as DForm } from '../../common/dashboard-form'
 import { useDashboardUpload } from '../../common/dashboard-form'
 import {
@@ -12,6 +12,11 @@ import {
 } from '../../hooks'
 import { areFileTypeSame, getFileExt, getFileType } from '../../utils/misc'
 import { FileChangeWarningModal } from './file-change-warning-modal'
+import {
+    defaultUploadDatasetFormFields,
+    TUploadDatasetFormFields
+} from './form-utils'
+import { GetFileRelatedQuestions } from './get-file-related-questions'
 
 const { Dataset } = Entities
 
@@ -20,27 +25,23 @@ const { Dataset } = Entities
  */
 const fileAcceptString = '.fasta,.gff,.tsv,.csv'
 
-type TUploadDatasetFormFields = {
-    name: string
-    description: string
-}
-
 export const UploadDataset = () => {
     const [modalProps, setModalProps] = useState({
         isOpen: false,
         primaryAction: () => null
     })
 
+    const [fileType, setFileType] = useState<FileTypes>(FileTypes.Unknown)
+
     const {
         control,
         reset,
-        formState: { isDirty },
-        getValues
+        formState: { isDirty, dirtyFields },
+        getValues,
+        handleSubmit,
+        resetField
     } = useForm<TUploadDatasetFormFields>({
-        defaultValues: {
-            description: '',
-            name: ''
-        }
+        defaultValues: defaultUploadDatasetFormFields
     })
 
     const {
@@ -88,6 +89,12 @@ export const UploadDataset = () => {
         }
     })
 
+    const hasAnsweredAnyFileRelatedQuestions = (): boolean => {
+        if (dirtyFields.fasta || dirtyFields.gff || dirtyFields.tsvOrCsv)
+            return true
+        return false
+    }
+
     const isAllowedToChangeFile = (file?: File) => {
         const { file: currentFile } = uploadMachineState.context
 
@@ -107,34 +114,38 @@ export const UploadDataset = () => {
     }
 
     const onDropHandler = (event: React.DragEvent) => {
-        const file = event.dataTransfer.files[0]
-        if (isAllowedToChangeFile(file)) {
-            setModalProps({
-                isOpen: true,
-                primaryAction: () => {
-                    _onDropHandler(event)
-                    closeModal()
-                    return null
-                }
-            })
-            return
+        if (hasAnsweredAnyFileRelatedQuestions()) {
+            const file = event.dataTransfer.files[0]
+            if (isAllowedToChangeFile(file)) {
+                setModalProps({
+                    isOpen: true,
+                    primaryAction: () => {
+                        _onDropHandler(event)
+                        closeModal()
+                        return null
+                    }
+                })
+                return
+            }
         }
 
         _onDropHandler(event)
     }
 
     const onInputChange = (event: React.FormEvent<HTMLInputElement>) => {
-        const files = event.currentTarget.files
-        if (files && isAllowedToChangeFile(files[0])) {
-            setModalProps({
-                isOpen: true,
-                primaryAction: () => {
-                    _onInputChange(event)
-                    closeModal()
-                    return null
-                }
-            })
-            return
+        if (hasAnsweredAnyFileRelatedQuestions()) {
+            const files = event.currentTarget.files
+            if (files && isAllowedToChangeFile(files[0])) {
+                setModalProps({
+                    isOpen: true,
+                    primaryAction: () => {
+                        _onInputChange(event)
+                        closeModal()
+                        return null
+                    }
+                })
+                return
+            }
         }
 
         _onInputChange(event)
@@ -143,19 +154,27 @@ export const UploadDataset = () => {
     const resetForm = () => {
         reset()
         resetUpload()
+        setFileType(FileTypes.Unknown)
+    }
+
+    const onFormSubmit = (data) => {
+        console.log('Data', data)
     }
 
     useEffect(() => {
         const { file } = uploadMachineState.context
         if (file) {
-            console.log('File Format', getFileType(file))
+            setFileType(getFileType(file))
         }
     }, [uploadMachineState.context.file])
 
     return (
         <Box>
             <FileChangeWarningModal {...modalProps} onClose={closeModal} />
-            <DForm isDirty={isDirty || isUploadDirty}>
+            <DForm
+                isDirty={isDirty || isUploadDirty}
+                onSubmit={handleSubmit(onFormSubmit)}
+            >
                 <DForm.PageHeading
                     landingPageUrl={DASHBOARD_DATASETS_LANDING_PATH}
                     pageHeading="Datasets"
@@ -204,7 +223,11 @@ export const UploadDataset = () => {
 
                     <DForm.Label
                         main="Select a file"
-                        sub="You can select .fasta, .gff, .csv, .tsv"
+                        sub={
+                            fileType !== FileTypes.Unknown
+                                ? 'Click here if you want to change file'
+                                : 'You can select .fasta, .gff, .csv, .tsv'
+                        }
                         hasAsterisk
                         isError={uploadMachineState.value === 'fileMissing'}
                         errorMsg="Please select a file."
@@ -214,12 +237,18 @@ export const UploadDataset = () => {
                             onInputChange={onInputChange}
                             onDropHandler={onDropHandler}
                             accept={fileAcceptString}
+                            isHidden={fileType !== FileTypes.Unknown}
+                        />
+                        <DForm.UploadFileInfo
+                            file={uploadMachineState.context.file}
                         />
                     </DForm.Label>
-                    <DForm.UploadFileInfo
-                        file={uploadMachineState.context.file}
-                    />
 
+                    <GetFileRelatedQuestions
+                        control={control}
+                        fileType={fileType}
+                        resetFields={resetField}
+                    />
                     <Box>
                         <DForm.Actions
                             actions={[
@@ -235,7 +264,8 @@ export const UploadDataset = () => {
                                     key: 'upload',
                                     color: 'primary',
                                     children: 'Upload Dataset',
-                                    onClick: generatePresignedURL,
+                                    // onClick: generatePresignedURL,
+                                    type: 'submit',
                                     isDisabled: isGeneratingPresignedURL,
                                     isLoading: isGeneratingPresignedURL
                                 }

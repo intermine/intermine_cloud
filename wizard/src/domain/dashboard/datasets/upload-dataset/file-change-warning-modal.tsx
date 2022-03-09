@@ -18,9 +18,9 @@ export const FileChangeWarningModal = (props: TFileChangeWarningModalProps) => {
             secondaryAction={{ children: 'Cancel', onClick: onClose }}
             onClose={onClose}
         >
-            You have selected a file whose file type is different from the
-            previous file. It means you'll lose all the information you have
-            added.
+            You have answered some questions related to current file. If you
+            change file whose file type is different to current file then you'll
+            lose all the answers you have added.
         </Modal>
     )
 }
