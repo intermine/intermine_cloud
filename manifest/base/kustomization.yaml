@@ -1,0 +1,5 @@
+resources:
+- traefik.yaml
+- argo.yaml
+- argo_artifact_repositories.yaml
+- minio.yaml

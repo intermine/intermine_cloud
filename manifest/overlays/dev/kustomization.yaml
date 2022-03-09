@@ -1,0 +1,9 @@
+commonLabels:
+  env: dev
+bases:
+- ../../base
+resources:
+- argo.yaml
+patches:
+- traefik.yaml
+- argo_artifact_repositories.yaml
