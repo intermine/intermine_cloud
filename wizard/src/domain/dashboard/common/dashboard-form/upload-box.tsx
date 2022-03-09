@@ -8,6 +8,7 @@ import { useState } from 'react'
 
 export type TUploadBoxProps = {
     isError?: boolean
+    isHidden?: boolean
     isDisabled?: boolean
     accept?: string
     onInputChange: (event: React.FormEvent<HTMLInputElement>) => void
@@ -17,6 +18,7 @@ export type TUploadBoxProps = {
 type TUseStyleProps = {
     isDisabled: boolean
     isError: boolean
+    isHidden: boolean
     dragEvent: {
         isDragOver: boolean
     }
@@ -30,9 +32,9 @@ const useBoxStyles = createStyle((theme) => {
 
     return {
         uploadBox: (props: TUseStyleProps) => ({
-            border: '5px dashed',
-            borderRadius: '0.5rem',
-            height: '8rem',
+            borderStyle: 'dashed',
+            borderRadius: '0.25rem',
+            borderWidth: '0.125rem',
             margin: spacing(3, 0),
             width: '100%',
             transition: '0.3s',
@@ -47,6 +49,12 @@ const useBoxStyles = createStyle((theme) => {
             }),
             ...(props.isError && {
                 borderColor: error.main
+            }),
+            ...(props.isHidden && {
+                borderWidth: 0,
+                height: 0,
+                margin: 0,
+                opacity: 0
             })
         }),
         label: {
@@ -75,6 +83,7 @@ export const UploadBox = (props: TUploadBoxProps) => {
     const {
         isDisabled = false,
         isError = false,
+        isHidden = false,
         onInputChange,
         onDropHandler: _onDropHandler,
         accept
@@ -99,7 +108,7 @@ export const UploadBox = (props: TUploadBoxProps) => {
         _onDropHandler(event)
     }
 
-    const classes = useBoxStyles({ isDisabled, dragEvent, isError })
+    const classes = useBoxStyles({ isDisabled, dragEvent, isError, isHidden })
 
     return (
         <Box
