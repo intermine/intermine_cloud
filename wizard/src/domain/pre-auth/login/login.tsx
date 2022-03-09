@@ -16,7 +16,8 @@ import { DomElementIDs, OtherIDs } from '../../../shared/constants'
 import {
     FORGOT_PASSWORD_PATH,
     REGISTER_PATH,
-    DASHBOARD_OVERVIEW_PATH
+    DASHBOARD_OVERVIEW_PATH,
+    isAuthRoute
 } from '../../../routes'
 import {
     Form,
@@ -86,10 +87,16 @@ export const Login = () => {
     }
 
     const onLoginSuccessful = () => {
-        // Remove unauthorize alert.
+        // Removing alerts.
         storeDispatch(
             removeGlobalAlert({
                 id: OtherIDs.UnauthorizeAlert
+            })
+        )
+
+        storeDispatch(
+            removeGlobalAlert({
+                id: OtherIDs.SessionExpiredAlert
             })
         )
 
@@ -98,8 +105,24 @@ export const Login = () => {
 
         // Redirecting
         const query = new URLSearchParams(history.location.search)
-        const redirectURL =
+        let redirectURL =
             query.get(OtherIDs.URLReferer) || DASHBOARD_OVERVIEW_PATH
+
+        if (!isAuthRoute(redirectURL)) {
+            /**
+             * If redirectURL is not auth route, then there is no point
+             * in redirecting user to non-auth path after login.
+             *
+             * This condition is very rare and possibly never occurs
+             * but it's better to handle this because we are totally
+             * dependent on localStorage initially for guessing user's
+             * auth state. It is highly likely then in future we
+             * might do some changes in the way we are using localStorage
+             * which might break usual flow.
+             */
+            redirectURL = DASHBOARD_OVERVIEW_PATH
+        }
+
         history.push(redirectURL)
     }
 
