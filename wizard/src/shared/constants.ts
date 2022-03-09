@@ -17,6 +17,7 @@ export enum DomElementIDs {
 
 export enum OtherIDs {
     UnauthorizeAlert = 'UnauthorizeAlert',
+    SessionExpiredAlert = 'SessionExpiredAlert',
     URLReferer = 'next',
 }
 

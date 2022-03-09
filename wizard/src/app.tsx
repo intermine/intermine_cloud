@@ -188,7 +188,7 @@ export const App = () => {
 
             if (response && response.status === 401) {
                 _addGlobalAlert({
-                    id: 'authentication-failed',
+                    id: OtherIDs.SessionExpiredAlert,
                     isOpen: true,
                     title: 'Session Expired',
                     message: 'Please login again to continue.',
