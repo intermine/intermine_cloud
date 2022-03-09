@@ -18,7 +18,7 @@ type TServerResponse = {
 }
 
 export type TUploadMachineContext = {
-    file: File
+    file?: File
     errorMessage?: string
     response?: AxiosResponse<TServerResponse>
 }
