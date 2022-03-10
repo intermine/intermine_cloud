@@ -49,7 +49,7 @@ const useStyles = createStyle((theme) => {
             padding: spacing(2, 4),
             transition: '0.3s',
             ...(themeType === 'dark' && {
-                background: neutral[10],
+                background: darkGrey[30],
                 margin: '0 0 1px 0'
             }),
             ...(themeType === 'light' && {
@@ -84,7 +84,7 @@ const useStyles = createStyle((theme) => {
         },
         body: {
             borderTop:
-                '1px solid ' + (themeType === 'dark' ? darkGrey[50] : grey[30]),
+                '1px solid ' + (themeType === 'dark' ? darkGrey[40] : grey[30]),
             display: 'flex',
             flexDirection: 'column',
             marginTop: spacing(3),
