@@ -8,6 +8,7 @@ import {
     IconButton,
     IconButtonCommonProps
 } from '@intermine/chromatin/icon-button'
+import { Tooltip } from '@intermine/chromatin/tooltip'
 import ArrowLeftIcon from '@intermine/chromatin/icons/System/arrow-left-s-line'
 
 import { DomElementIDs } from '../../../shared/constants'
@@ -38,16 +39,18 @@ export const WorkspaceHeading = (props: TWorkspaceHeadingProps) => {
         >
             <Box isContentAlignCenter>
                 {backAction && (
-                    <IconButton
-                        Icon={<ArrowLeftIcon />}
-                        csx={{
-                            root: ({ spacing }) => ({ margin: spacing(2) })
-                        }}
-                        color="neutral"
-                        size="large"
-                        isDense
-                        {...backAction}
-                    />
+                    <Tooltip message="Go Back" placement="bottom">
+                        <IconButton
+                            Icon={<ArrowLeftIcon />}
+                            csx={{
+                                root: ({ spacing }) => ({ margin: spacing(2) })
+                            }}
+                            color="neutral"
+                            size="large"
+                            isDense
+                            {...backAction}
+                        />
+                    </Tooltip>
                 )}
                 <Box
                     csx={{ root: { display: 'flex', flexDirection: 'column' } }}
