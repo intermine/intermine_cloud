@@ -1,6 +1,6 @@
 ## Deployment
 
-Firstly, login to the [Rahti console](https://rahti.csc.fi:8443) and click your username in the top-right followed by *Copy Login Command*. You will need the [OpenShift CLI](https://docs.openshift.com/container-platform/latest/cli_reference/openshift_cli/getting-started-cli.html) to use the login command.
+Firstly, login to the [Rahti console](https://rahti.csc.fi:8443) and click your username in the top-right followed by *Copy Login Command*. You will need the [OpenShift CLI](https://github.com/openshift/origin/releases) to use the login command.
 
 You should now be able to use `kubectl` and dependent commands like `helm` to manage your Rahti kubernetes cluster.
 
