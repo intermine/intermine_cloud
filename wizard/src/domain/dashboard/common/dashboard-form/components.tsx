@@ -89,7 +89,7 @@ export const FormHeading = (props: TypographyBaseProps) => {
     return (
         <FormTypography
             className={clsx(classes.formHeading, className)}
-            variant="h1"
+            variant="h3"
             {...rest}
         />
     )
@@ -118,18 +118,18 @@ export const FormLabel = (props: TFormLabelProps) => {
             {main && (
                 <FormTypography
                     color={isError ? 'error' : 'undefined'}
-                    variant="h3"
+                    variant="h4"
                 >
                     {main}
                     {hasAsterisk && (
-                        <Typography Component="span" variant="h3" color="error">
+                        <Typography Component="span" variant="h4" color="error">
                             *
                         </Typography>
                     )}
                 </FormTypography>
             )}
             {sub && (
-                <FormTypography variant="body" color="neutral.20">
+                <FormTypography variant="bodySm" color="neutral.20">
                     {sub}
                 </FormTypography>
             )}

@@ -97,7 +97,7 @@ export const FormPageHeading = (props: TFormPageHeading) => {
 
     return (
         <WorkspaceHeading
-            heading={{ variant: 'h2', children: pageHeading }}
+            heading={{ variant: 'h1', children: pageHeading }}
             backAction={{ onClick: handleOnClickBack }}
         />
     )
