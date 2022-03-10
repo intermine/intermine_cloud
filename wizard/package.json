@@ -54,7 +54,7 @@
         "webpack-merge": "^5.8.0"
     },
     "dependencies": {
-        "@intermine/chromatin": "0.0.24",
+        "@intermine/chromatin": "0.0.26",
         "@intermine/compose-rest-client": "^1.2.11",
         "@reduxjs/toolkit": "^1.8.0",
         "@types/axios": "^0.14.0",
