@@ -76,7 +76,7 @@ const useStyles = createStyle((theme) => {
         }),
 
         workspaceContainer: (props: TUseStyleProps) => ({
-            backgroundColor: themeType === 'dark' ? darkGrey[30] : light.hex,
+            backgroundColor: themeType === 'dark' ? '#1a1a1a' : light.hex,
             borderRadius: '1rem',
             display: 'flex',
             justifyContent: 'center',
@@ -97,7 +97,7 @@ const useStyles = createStyle((theme) => {
         },
 
         additionalSidebarContainer: (props: TUseStyleProps) => ({
-            backgroundColor: themeType === 'dark' ? darkGrey[30] : light.hex,
+            backgroundColor: themeType === 'dark' ? '#1a1a1a' : light.hex,
             bottom: '1rem',
             top: '1rem',
             width: props.isAdditionalSidebarOpen ? '20rem' : '3rem',
