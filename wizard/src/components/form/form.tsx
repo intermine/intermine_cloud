@@ -1,8 +1,8 @@
 import { Card } from '@intermine/chromatin/card'
 import { createStyle } from '@intermine/chromatin/styles'
 import React, { useEffect, useRef } from 'react'
-export type TFormProps = {
-    children: React.ReactChild | React.ReactChild[]
+
+export type TFormProps = React.FormHTMLAttributes<HTMLFormElement> & {
     id: string
 }
 
@@ -40,7 +40,7 @@ const useStyles = createStyle((theme) => {
 })
 
 export const Form = (props: TFormProps) => {
-    const { children, id } = props
+    const { children, id, ...rest } = props
     const classes = useStyles()
     const formRef = useRef<HTMLFormElement>(null)
 
@@ -51,7 +51,7 @@ export const Form = (props: TFormProps) => {
     }, [])
 
     return (
-        <form ref={formRef} id={id} className={classes.form}>
+        <form ref={formRef} id={id} className={classes.form} {...rest}>
             <Card hoverVariant="none" className={classes.card}>
                 {children}
             </Card>

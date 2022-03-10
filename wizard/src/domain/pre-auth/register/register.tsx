@@ -59,7 +59,7 @@ export const Register = () => {
         isOpen: false
     })
 
-    const handleRegisterClick = () => {
+    const submitForm = () => {
         setInlineAlertProps((prev) => ({
             ...prev,
             isOpen: false
@@ -176,7 +176,13 @@ export const Register = () => {
     const isMakingRequest = authMachineState.value === 'register'
 
     return (
-        <Form id={DomElementIDs.RegisterForm}>
+        <Form
+            id={DomElementIDs.RegisterForm}
+            onSubmit={(event) => {
+                event.preventDefault()
+                submitForm()
+            }}
+        >
             <FormHeader logo={<Logo />} />
             <FormBody>
                 <InlineAlert
@@ -298,7 +304,7 @@ export const Register = () => {
             <FormAction
                 primaryAction={{
                     children: 'Register',
-                    onClick: handleRegisterClick,
+                    type: 'submit',
                     isLoading: isMakingRequest,
                     isDisabled: isMakingRequest
                 }}

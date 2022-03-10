@@ -56,7 +56,7 @@ export const Login = () => {
     const [authMachineState, dispatch] = useMachine(authMachine)
     const [isInlineAlertOpen, setIsInlineAlertOpen] = useState(false)
 
-    const handleLoginClick = () => {
+    const submitForm = () => {
         setIsInlineAlertOpen(false)
 
         const errorFields: [keyof TInputFields, string][] = []
@@ -144,7 +144,13 @@ export const Login = () => {
     const isMakingLoginRequest = authMachineState.value === 'login'
 
     return (
-        <Form id={DomElementIDs.LoginForm}>
+        <Form
+            id={DomElementIDs.LoginForm}
+            onSubmit={(event) => {
+                event.preventDefault()
+                submitForm()
+            }}
+        >
             <FormHeader logo={<Logo />} />
             <FormBody>
                 <InlineAlert
@@ -211,7 +217,7 @@ export const Login = () => {
                     children: 'Login',
                     isDisabled: isMakingLoginRequest,
                     isLoading: isMakingLoginRequest,
-                    onClick: handleLoginClick
+                    type: 'submit'
                 }}
                 secondaryAction={{
                     children: 'Create account',

@@ -48,7 +48,7 @@ export const ForgotPassword = () => {
         isOpen: false
     })
 
-    const handleResetClick = () => {
+    const submitForm = () => {
         setInlineAlertProps((prev) => ({
             ...prev,
             isOpen: false
@@ -99,7 +99,13 @@ export const ForgotPassword = () => {
 
     const isMakingRequest = authMachineState.value === 'resetPassword'
     return (
-        <Form id={DomElementIDs.ForgotPasswordForm}>
+        <Form
+            id={DomElementIDs.ForgotPasswordForm}
+            onSubmit={(event) => {
+                event.preventDefault()
+                submitForm()
+            }}
+        >
             <FormHeader logo={<Logo />} />
             <FormBody>
                 <InlineAlert
@@ -131,9 +137,9 @@ export const ForgotPassword = () => {
             <FormAction
                 primaryAction={{
                     children: 'Send Password Reset Link',
-                    onClick: handleResetClick,
                     isDisabled: isMakingRequest,
-                    isLoading: isMakingRequest
+                    isLoading: isMakingRequest,
+                    type: 'submit'
                 }}
                 secondaryAction={{
                     children: 'Login',
