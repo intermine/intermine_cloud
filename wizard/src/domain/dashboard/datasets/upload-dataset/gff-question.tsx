@@ -22,26 +22,45 @@ export const GFFQuestions = (props: TGFFQuestionProps) => {
     }, [])
     return (
         <>
-            {/* <DForm.Label
-                main="Describe your Dataset"
-                sub="This will help other users to get an idea about
-                        this dataset. You can write something like: A dataset 
-                        having information about..."
+            <DForm.Heading>
+                We have some question related to the file you have selected.
+            </DForm.Heading>
+            <DForm.Label main="What is the NCBI taxonomy ID">
+                <Controller
+                    render={({ field }) => (
+                        <DForm.Input {...field} placeholder="Taxonomy ID" />
+                    )}
+                    control={control}
+                    name="gff.taxonId"
+                />
+            </DForm.Label>
+            <DForm.Label main="Name of data source">
+                <Controller
+                    render={({ field }) => (
+                        <DForm.Input
+                            {...field}
+                            placeholder="Name of data source"
+                        />
+                    )}
+                    control={control}
+                    name="gff.dataSourceName"
+                />
+            </DForm.Label>
+            <DForm.Label
+                main="What type of sequence features are in this file"
+                sub="It can be 'Gene' or 'Chromosome' or ..."
             >
                 <Controller
                     render={({ field }) => (
                         <DForm.Input
                             {...field}
-                            rows={5}
-                            Component="textarea"
-                            placeholder="Description of your dataset"
+                            placeholder="Sequence features"
                         />
                     )}
                     control={control}
-                    name="description"
+                    name="gff.seqClsName"
                 />
-            </DForm.Label> */}
-            <DForm.Label main="GFF question" />
+            </DForm.Label>
         </>
     )
 }

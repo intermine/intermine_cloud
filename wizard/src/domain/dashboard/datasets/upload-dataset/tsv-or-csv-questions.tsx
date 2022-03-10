@@ -1,3 +1,5 @@
+import { FormControlLabel } from '@intermine/chromatin/form-control-label'
+import { Checkbox } from '@intermine/chromatin/checkbox'
 import { useEffect } from 'react'
 import { Controller } from 'react-hook-form'
 
@@ -23,26 +25,37 @@ export const TsvOrCsvQuestions = (props: TTsvOrCsvQuestionProps) => {
 
     return (
         <>
-            {/* <DForm.Label
-                main="Describe your Dataset"
-                sub="This will help other users to get an idea about
-                        this dataset. You can write something like: A dataset 
-                        having information about..."
-            >
+            <DForm.Heading>
+                We have some question related to the file you have selected.
+            </DForm.Heading>
+
+            <DForm.Label main="Name of data source">
                 <Controller
                     render={({ field }) => (
                         <DForm.Input
                             {...field}
-                            rows={5}
-                            Component="textarea"
-                            placeholder="Description of your dataset"
+                            placeholder="Name of data source"
                         />
                     )}
                     control={control}
-                    name="description"
+                    name="tsvOrCsv.dataSourceName"
                 />
-            </DForm.Label> */}
-            <DForm.Label main="TSV question" />
+            </DForm.Label>
+            <Controller
+                render={({ field: { value, ...rest } }) => (
+                    <FormControlLabel
+                        csx={{
+                            root: ({ spacing }) => ({
+                                marginBottom: spacing(8)
+                            })
+                        }}
+                        label="Does it have a header?"
+                        control={<Checkbox {...rest} isChecked={value} />}
+                    />
+                )}
+                control={control}
+                name="tsvOrCsv.hasHeader"
+            />
         </>
     )
 }

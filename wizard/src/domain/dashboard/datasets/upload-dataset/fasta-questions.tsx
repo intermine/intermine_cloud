@@ -23,6 +23,9 @@ export const FastaQuestions = (props: TFastaQuestionProps) => {
 
     return (
         <>
+            <DForm.Heading>
+                We have some question related to the file you have selected.
+            </DForm.Heading>
             <DForm.Label main="What is the NCBI taxonomy ID">
                 <Controller
                     render={({ field }) => (
