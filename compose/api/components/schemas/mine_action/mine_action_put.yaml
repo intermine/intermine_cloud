@@ -1,0 +1,7 @@
+description: Mine action update schema
+type: object
+properties:
+  mine_id:
+    type: string
+required:
+  - "mine_id"
