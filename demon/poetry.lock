@@ -152,7 +152,7 @@ uvloop = ["uvloop (>=0.15.2)"]
 
 [[package]]
 name = "blackcap"
-version = "0.27.0"
+version = "0.36.0"
 description = "Shared library for Orchestra"
 category = "main"
 optional = false
@@ -161,8 +161,8 @@ python-versions = ">=3.8,<4.0"
 [package.dependencies]
 alembic = ">=1.6.5,<2.0.0"
 bcrypt = ">=3.2.0,<4.0.0"
-celery = ">=5.1.0,<6.0.0"
-click = "<8.0"
+celery = ">=5.2.3,<6.0.0"
+click = ">=8.0,<9.0"
 Flask = ">=2.0.1,<3.0.0"
 Flask-Cors = ">=3.0.10,<4.0.0"
 google-cloud-pubsub = ">=2.5.0,<3.0.0"
@@ -187,26 +187,26 @@ python-versions = "~=3.7"
 
 [[package]]
 name = "celery"
-version = "5.1.2"
+version = "5.2.3"
 description = "Distributed Task Queue."
 category = "main"
 optional = false
-python-versions = ">=3.6,"
+python-versions = ">=3.7,"
 
 [package.dependencies]
 billiard = ">=3.6.4.0,<4.0"
-click = ">=7.0,<8.0"
+click = ">=8.0.3,<9.0"
 click-didyoumean = ">=0.0.3"
 click-plugins = ">=1.1.1"
-click-repl = ">=0.1.6"
-kombu = ">=5.1.0,<6.0"
-pytz = ">0.0-dev"
+click-repl = ">=0.2.0"
+kombu = ">=5.2.3,<6.0"
+pytz = ">=2021.3"
 vine = ">=5.0.0,<6.0"
 
 [package.extras]
 arangodb = ["pyArango (>=1.3.2)"]
 auth = ["cryptography"]
-azureblockblob = ["azure-storage-blob (==12.6.0)"]
+azureblockblob = ["azure-storage-blob (==12.9.0)"]
 brotli = ["brotli (>=1.0.0)", "brotlipy (>=0.7.0)"]
 cassandra = ["cassandra-driver (<3.21.0)"]
 consul = ["python-consul2"]
@@ -216,21 +216,21 @@ couchdb = ["pycouchdb"]
 django = ["Django (>=1.11)"]
 dynamodb = ["boto3 (>=1.9.178)"]
 elasticsearch = ["elasticsearch"]
-eventlet = ["eventlet (>=0.26.1)"]
-gevent = ["gevent (>=1.0.0)"]
+eventlet = ["eventlet (>=0.32.0)"]
+gevent = ["gevent (>=1.5.0)"]
 librabbitmq = ["librabbitmq (>=1.5.0)"]
 memcache = ["pylibmc"]
-mongodb = ["pymongo[srv] (>=3.3.0)"]
+mongodb = ["pymongo[srv] (>=3.11.1)"]
 msgpack = ["msgpack"]
 pymemcache = ["python-memcached"]
 pyro = ["pyro4"]
 pytest = ["pytest-celery"]
-redis = ["redis (>=3.2.0)"]
+redis = ["redis (>=3.4.1,!=4.0.0,!=4.0.1)"]
 s3 = ["boto3 (>=1.9.125)"]
 slmq = ["softlayer-messaging (>=1.0.3)"]
 solar = ["ephem"]
 sqlalchemy = ["sqlalchemy"]
-sqs = ["boto3 (>=1.9.125)", "pycurl (==7.43.0.5)"]
+sqs = ["kombu"]
 tblib = ["tblib (>=1.3.0)", "tblib (>=1.5.0)"]
 yaml = ["PyYAML (>=3.10)"]
 zookeeper = ["kazoo (>=1.3.1)"]
@@ -284,11 +284,14 @@ unicode_backport = ["unicodedata2"]
 
 [[package]]
 name = "click"
-version = "7.1.2"
+version = "8.0.4"
 description = "Composable command line interface toolkit"
 category = "main"
 optional = false
-python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
+python-versions = ">=3.6"
+
+[package.dependencies]
+colorama = {version = "*", markers = "platform_system == \"Windows\""}
 
 [[package]]
 name = "click-didyoumean"
@@ -600,7 +603,7 @@ gitdb = ">=4.0.1,<5"
 
 [[package]]
 name = "google-api-core"
-version = "2.6.1"
+version = "2.7.1"
 description = "Google API client core library"
 category = "main"
 optional = false
@@ -640,18 +643,18 @@ reauth = ["pyu2f (>=0.1.5)"]
 
 [[package]]
 name = "google-cloud-pubsub"
-version = "2.10.0"
+version = "2.11.0"
 description = "Google Cloud Pub/Sub API client library"
 category = "main"
 optional = false
 python-versions = ">=3.6"
 
 [package.dependencies]
-google-api-core = {version = ">=1.28.0,<3.0.0dev", extras = ["grpc"]}
+google-api-core = {version = ">=1.31.5,<2.0.0 || >2.3.0,<3.0.0dev", extras = ["grpc"]}
 grpc-google-iam-v1 = ">=0.12.3,<0.13dev"
 grpcio = ">=1.38.1,<2.0dev"
 grpcio-status = ">=1.16.0"
-proto-plus = ">=1.7.1"
+proto-plus = ">=1.15.0"
 
 [package.extras]
 libcst = ["libcst (>=0.3.10)"]
@@ -795,7 +798,7 @@ python-versions = "*"
 
 [[package]]
 name = "itsdangerous"
-version = "2.1.0"
+version = "2.1.1"
 description = "Safely pass data to untrusted environments and back."
 category = "main"
 optional = false
@@ -890,11 +893,11 @@ colorama = {version = "*", markers = "sys_platform == \"win32\""}
 
 [[package]]
 name = "mako"
-version = "1.1.6"
-description = "A super-fast templating language that borrows the  best ideas from the existing templating languages."
+version = "1.2.0"
+description = "A super-fast templating language that borrows the best ideas from the existing templating languages."
 category = "main"
 optional = false
-python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
+python-versions = ">=3.7"
 
 [package.dependencies]
 MarkupSafe = ">=0.9.2"
@@ -902,6 +905,7 @@ MarkupSafe = ">=0.9.2"
 [package.extras]
 babel = ["babel"]
 lingua = ["lingua"]
+testing = ["pytest"]
 
 [[package]]
 name = "markupsafe"
@@ -921,7 +925,7 @@ python-versions = "*"
 
 [[package]]
 name = "minio"
-version = "7.1.4"
+version = "7.1.5"
 description = "MinIO Python SDK for Amazon S3 Compatible Cloud Storage"
 category = "main"
 optional = false
@@ -1635,7 +1639,7 @@ testing = ["pytest (>=6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytest-
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "63efd4cabb8cfcbac37070baab8a06e5dcdc67b020fecf538d1bd8e10f5e3eb3"
+content-hash = "26d6fe053c3b5b6e4aa3d0aa923d3a4fc54d489cd749bbd9510094c590d2d71e"
 
 [metadata.files]
 alembic = [
@@ -1688,16 +1692,16 @@ black = [
     {file = "black-21.12b0.tar.gz", hash = "sha256:77b80f693a569e2e527958459634f18df9b0ba2625ba4e0c2d5da5be42e6f2b3"},
 ]
 blackcap = [
-    {file = "blackcap-0.27.0-py3-none-any.whl", hash = "sha256:568392ad451d5b1cad36aa1bd47700077d2b640b9e076a2ad6757fdac149a722"},
-    {file = "blackcap-0.27.0.tar.gz", hash = "sha256:6358d1d9a07850583c45c343941f3964538b5e81e73a797a2edec70e475d5307"},
+    {file = "blackcap-0.36.0-py3-none-any.whl", hash = "sha256:9a7ccec6bd7e0da19d7a946faa3da2728c40a8c28e4aaa3788d6a88867698827"},
+    {file = "blackcap-0.36.0.tar.gz", hash = "sha256:fa205701fee2af1f2fe76f77a1388beed23b0f58856e6069be266751a1547b73"},
 ]
 cachetools = [
     {file = "cachetools-5.0.0-py3-none-any.whl", hash = "sha256:8fecd4203a38af17928be7b90689d8083603073622229ca7077b72d8e5a976e4"},
     {file = "cachetools-5.0.0.tar.gz", hash = "sha256:486471dfa8799eb7ec503a8059e263db000cdda20075ce5e48903087f79d5fd6"},
 ]
 celery = [
-    {file = "celery-5.1.2-py3-none-any.whl", hash = "sha256:9dab2170b4038f7bf10ef2861dbf486ddf1d20592290a1040f7b7a1259705d42"},
-    {file = "celery-5.1.2.tar.gz", hash = "sha256:8d9a3de9162965e97f8e8cc584c67aad83b3f7a267584fa47701ed11c3e0d4b0"},
+    {file = "celery-5.2.3-py3-none-any.whl", hash = "sha256:8aacd02fc23a02760686d63dde1eb0daa9f594e735e73ea8fb15c2ff15cb608c"},
+    {file = "celery-5.2.3.tar.gz", hash = "sha256:e2cd41667ad97d4f6a2f4672d1c6a6ebada194c619253058b5f23704aaadaa82"},
 ]
 certifi = [
     {file = "certifi-2021.10.8-py2.py3-none-any.whl", hash = "sha256:d62a0163eb4c2344ac042ab2bdf75399a71a2d8c7d47eac2e2ee91b9d6339569"},
@@ -1768,8 +1772,8 @@ charset-normalizer = [
     {file = "charset_normalizer-2.0.12-py3-none-any.whl", hash = "sha256:6881edbebdb17b39b4eaaa821b438bf6eddffb4468cf344f09f89def34a8b1df"},
 ]
 click = [
-    {file = "click-7.1.2-py2.py3-none-any.whl", hash = "sha256:dacca89f4bfadd5de3d7489b7c8a566eee0d3676333fbb50030263894c38c0dc"},
-    {file = "click-7.1.2.tar.gz", hash = "sha256:d2b5255c7c6349bc1bd1e59e08cd12acbbd63ce649f2588755783aa94dfb6b1a"},
+    {file = "click-8.0.4-py3-none-any.whl", hash = "sha256:6a7a62563bbfabfda3a38f3023a1db4a35978c0abd76f6c9605ecd6554d6d9b1"},
+    {file = "click-8.0.4.tar.gz", hash = "sha256:8458d7b1287c5fb128c90e23381cf99dcde74beaf6c7ff6384ce84d6fe090adb"},
 ]
 click-didyoumean = [
     {file = "click-didyoumean-0.3.0.tar.gz", hash = "sha256:f184f0d851d96b6d29297354ed981b7dd71df7ff500d82fa6d11f0856bee8035"},
@@ -1921,16 +1925,16 @@ gitpython = [
     {file = "GitPython-3.1.27.tar.gz", hash = "sha256:1c885ce809e8ba2d88a29befeb385fcea06338d3640712b59ca623c220bb5704"},
 ]
 google-api-core = [
-    {file = "google-api-core-2.6.1.tar.gz", hash = "sha256:80cf307660624f84c754d68c3c6cd31780368019741d87e0c5df5ed84730ed26"},
-    {file = "google_api_core-2.6.1-py3-none-any.whl", hash = "sha256:eadba785e358e61be576f2a93f361bb15f144162814c7b3303e78c12288aa33f"},
+    {file = "google-api-core-2.7.1.tar.gz", hash = "sha256:b0fa577e512f0c8e063386b974718b8614586a798c5894ed34bedf256d9dae24"},
+    {file = "google_api_core-2.7.1-py3-none-any.whl", hash = "sha256:6be1fc59e2a7ba9f66808bbc22f976f81e4c3e7ab20fa0620ce42686288787d0"},
 ]
 google-auth = [
     {file = "google-auth-2.6.0.tar.gz", hash = "sha256:ad160fc1ea8f19e331a16a14a79f3d643d813a69534ba9611d2c80dc10439dad"},
     {file = "google_auth-2.6.0-py2.py3-none-any.whl", hash = "sha256:218ca03d7744ca0c8b6697b6083334be7df49b7bf76a69d555962fd1a7657b5f"},
 ]
 google-cloud-pubsub = [
-    {file = "google-cloud-pubsub-2.10.0.tar.gz", hash = "sha256:95d9f311e8a7af6909f2ae7696ae6e30aa675f04ef1d0208d6851e828811f0e0"},
-    {file = "google_cloud_pubsub-2.10.0-py2.py3-none-any.whl", hash = "sha256:9ff6f72d62a5390ae5ae418d101c1a9ca3dfd3798239df916a12820f1b25cc12"},
+    {file = "google-cloud-pubsub-2.11.0.tar.gz", hash = "sha256:6ed3c9d97f88d1ff02dd80c1f5b6703efec75a7aacabd9285ac4fe0b22b50203"},
+    {file = "google_cloud_pubsub-2.11.0-py2.py3-none-any.whl", hash = "sha256:4cef16ef78b533f5177aaafc85c9ceac29a61afdbd2efad017999859c7ea5ed4"},
 ]
 googleapis-common-protos = [
     {file = "googleapis-common-protos-1.55.0.tar.gz", hash = "sha256:53eb313064738f45d5ac634155ae208e121c963659627b90dfcb61ef514c03e1"},
@@ -2066,8 +2070,8 @@ iniconfig = [
     {file = "iniconfig-1.1.1.tar.gz", hash = "sha256:bc3af051d7d14b2ee5ef9969666def0cd1a000e121eaea580d4a313df4b37f32"},
 ]
 itsdangerous = [
-    {file = "itsdangerous-2.1.0-py3-none-any.whl", hash = "sha256:29285842166554469a56d427addc0843914172343784cb909695fdbe90a3e129"},
-    {file = "itsdangerous-2.1.0.tar.gz", hash = "sha256:d848fcb8bc7d507c4546b448574e8a44fc4ea2ba84ebf8d783290d53e81992f5"},
+    {file = "itsdangerous-2.1.1-py3-none-any.whl", hash = "sha256:935642cd4b987cdbee7210080004033af76306757ff8b4c0a506a4b6e06f02cf"},
+    {file = "itsdangerous-2.1.1.tar.gz", hash = "sha256:7b7d3023cd35d9cb0c1fd91392f8c95c6fa02c59bf8ad64b8849be3401b95afb"},
 ]
 jinja2 = [
     {file = "Jinja2-3.0.3-py3-none-any.whl", hash = "sha256:077ce6014f7b40d03b47d1f1ca4b0fc8328a692bd284016f806ed0eaca390ad8"},
@@ -2090,8 +2094,8 @@ logzero = [
     {file = "logzero-1.7.0.tar.gz", hash = "sha256:7f73ddd3ae393457236f081ffebd044a3aa2e423a47ae6ddb5179ab90d0ad082"},
 ]
 mako = [
-    {file = "Mako-1.1.6-py2.py3-none-any.whl", hash = "sha256:afaf8e515d075b22fad7d7b8b30e4a1c90624ff2f3733a06ec125f5a5f043a57"},
-    {file = "Mako-1.1.6.tar.gz", hash = "sha256:4e9e345a41924a954251b95b4b28e14a301145b544901332e658907a7464b6b2"},
+    {file = "Mako-1.2.0-py3-none-any.whl", hash = "sha256:23aab11fdbbb0f1051b93793a58323ff937e98e34aece1c4219675122e57e4ba"},
+    {file = "Mako-1.2.0.tar.gz", hash = "sha256:9a7c7e922b87db3686210cf49d5d767033a41d4010b284e747682c92bddd8b39"},
 ]
 markupsafe = [
     {file = "MarkupSafe-2.1.0-cp310-cp310-macosx_10_9_universal2.whl", hash = "sha256:3028252424c72b2602a323f70fbf50aa80a5d3aa616ea6add4ba21ae9cc9da4c"},
@@ -2140,8 +2144,8 @@ mccabe = [
     {file = "mccabe-0.6.1.tar.gz", hash = "sha256:dd8d182285a0fe56bace7f45b5e7d1a6ebcbf524e8f3bd87eb0f125271b8831f"},
 ]
 minio = [
-    {file = "minio-7.1.4-py3-none-any.whl", hash = "sha256:958b87a447c7a904278e00ad824d85893f38c00e555fd121982be483d17dbb9a"},
-    {file = "minio-7.1.4.tar.gz", hash = "sha256:cea0d0d6fd6cb1361d43e5007126bad5e5e4af2e781c3912aecae66ad46b4aed"},
+    {file = "minio-7.1.5-py3-none-any.whl", hash = "sha256:524b1305cc4d9df2fab727f7e8d9d5dae7ddf85b5565a574cb94944d1f7c6cae"},
+    {file = "minio-7.1.5.tar.gz", hash = "sha256:f33bb3d2a1b790d6ffc7b981c3f38c4f404d61c46de3cbd087fbf9d36a5f05ea"},
 ]
 mypy = [
     {file = "mypy-0.812-cp35-cp35m-macosx_10_9_x86_64.whl", hash = "sha256:a26f8ec704e5a7423c8824d425086705e381b4f1dfdef6e3a1edab7ba174ec49"},
