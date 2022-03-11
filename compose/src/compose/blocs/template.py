@@ -1,6 +1,6 @@
 """Template BLoCs."""
 
-from typing import List, Optional
+from typing import List
 
 from blackcap.db import DBSession
 from blackcap.flow import Flow, FlowExecError, FuncProp, get_outer_function, Prop, Step
@@ -11,7 +11,6 @@ from pydantic import ValidationError
 from pydantic.error_wrappers import ErrorWrapper
 from sqlalchemy import select
 from sqlalchemy.exc import SQLAlchemyError
-
 
 from compose.blocs.file import (
     create_file_db_entry,
@@ -86,7 +85,7 @@ def get_template(
     if query_params.query_type == TemplateQueryType.GET_ALL_TEMPLATES:
         stmt = select(TemplateDB).where(TemplateDB.protagonist_id == user_creds.user_id)
     if query_params.query_type == TemplateQueryType.GET_TEMPLATE_BY_ID:
-        if query_params.data_id is None:
+        if query_params.template_id is None:
             e = ValidationError(
                 errors=[
                     ErrorWrapper(ValueError("field required"), "template_id"),
@@ -100,7 +99,7 @@ def get_template(
             .where(TemplateDB.id == query_params.template_id)
         )
     if query_params.query_type == TemplateQueryType.GET_TEMPLATES_BY_PROTAGONIST_ID:
-        if query_params.data_id is None:
+        if query_params.protagonist_id is None:
             e = ValidationError(
                 errors=[
                     ErrorWrapper(ValueError("field required"), "protagonist_id"),
@@ -183,7 +182,7 @@ def update_template(
 
 def delete_template(
     template_delete_list: List[TemplateDelete], user_creds: User
-) -> Template:
+) -> List[Template]:
     """Delete template in the DB from TemplateDelete request.
 
     Args:
@@ -194,7 +193,7 @@ def delete_template(
         Exception: error
 
     Returns:
-        Template: Instance of Deleted Template
+        List[Template]: Instance of Deleted Template
     """
     stmt = (
         select(TemplateDB)
@@ -309,7 +308,7 @@ def revert_template_db_entry(inputs: List[Prop]) -> List[Prop]:
 
     Returns:
         List[Prop]:
-            Deleted data objects
+            Deleted template objects
 
             Prop(data=deleted_template_list, description="List of deleted Template Objects")
 
@@ -479,7 +478,7 @@ def generate_create_template_flow(
         user (User): User credentials.
 
     Returns:
-        Flow: Create data flow
+        Flow: Create template flow
     """
     create_db_entry_step = Step(create_template_db_entry, revert_template_db_entry)
     create_file_step = Step(create_file_db_entry, revert_file_db_entry)
@@ -493,7 +492,7 @@ def generate_create_template_flow(
         [
             Prop(
                 data=template_create_request_list,
-                description="List of DataCreate Objects",
+                description="List of TemplateCreate Objects",
             ),
             Prop(data=user, description="User"),
         ],
