@@ -1,4 +1,4 @@
-description : "200 Data Response"
+description : "200 Mine Response"
 allOf:
   - $ref: "../../schemas/200_response.yaml"
   - type: object

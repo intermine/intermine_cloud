@@ -1,4 +1,4 @@
-description : "200 Data POST Response"
+description : "200 Mine POST Response"
 allOf:
   - $ref: "200_mine_response.yaml"
   - type: object

@@ -1,8 +1,8 @@
 description: Mine delete schema
 type: object
 properties:
-  data_id:
+  mine_id:
     type: string
 required:
-  - "data_id"
+  - "mine_id"
 

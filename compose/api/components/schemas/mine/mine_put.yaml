@@ -10,4 +10,4 @@ properties:
   preference:
     type: object
 required:
-  - "data_id"
+  - "mine_id"
