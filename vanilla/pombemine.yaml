@@ -1,0 +1,37 @@
+# Values used for pombemine. Feel free to make changes or copy it for an
+# entirely different mine.
+
+ingress:
+  # Bluegenes
+  hostname: pombemine-staging.rahtiapp.fi
+
+tomcat:
+  ingress:
+    # Intermine webapp and web services
+    hostname: legacy.pombemine-staging.rahtiapp.fi
+
+bluegenes:
+  # backendServiceRoot is an internal address -- only change the /pombemine
+  # path if you've changed the mineNamespace/webapp.path but don't touch the
+  # rest.
+  backendServiceRoot: http://pombemine-tomcat:8080/pombemine
+  serviceRoot: http://pombemine-staging.rahtiapp.fi/pombemine
+  mineName: PombeMine
+  mineNamespace: pombemine
+
+builder:
+  mineName: pombemine
+  # These are used for the ~/.intermine/<mine>.properties file. You can add any
+  # key and it will override the default specified here:
+  # https://github.com/intermine/intermine_cloud/blob/master/builder/src/intermine_builder/properties.py
+  properties:
+    webapp.path: pombemine
+    project.title: PombeMine
+    project.subTitle: An integrated database for S. pombe genomics
+    project.releaseVersion: First draft
+  # Allas
+  objectStorage:
+    buckets:
+      minedir: staging/pombemine
+      data: staging/pombe
+      bio: staging/pombemine-bio-sources

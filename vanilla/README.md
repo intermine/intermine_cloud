@@ -6,28 +6,19 @@ You should now be able to use `kubectl` and dependent commands like `helm` to ma
 
 ### Installing
 
-Edit *values.yaml* so the mineName, objectStorage keys and bucket paths are correct. You will need to have uploaded each of the required resources to Allas (`rclone sync -P my-local-dir s3allas:mybucket/path`).
+Edit *pombemine.yaml* and *secrets.yaml* so the mineName, objectStorage keys and bucket paths are correct. You will need to have uploaded each of the required resources to Allas (`rclone sync -P my-local-dir s3allas:mybucket/path`).
 
 ```bash
-helm install -f values.yaml pombemine ../helm-operator/helm-charts/intermineinstance
+helm install -f values.yaml -f pombemine.yaml -f secrets.yaml pombemine ../helm-operator/helm-charts/intermineinstance
 ```
 
-### Updating
+### Upgrading
 
-This uses the kubectl `-l` flag to only apply the resources matching a selector, which in this example is for tomcat.
+If you've made changes to the charts or values and wish to get a previously installed release up-to-date, you can use the upgrade command.
 
 ```bash
-helm template -f values.yaml pombemine ../helm-operator/helm-charts/intermineinstance | kubectl apply -f - -l app.kubernetes.io/name=tomcat
+helm upgrade -f values.yaml -f pombemine.yaml -f secrets.yaml pombemine ../helm-operator/helm-charts/intermineinstance
 ```
-
-The same can be done for the other applications as well.
-
-- `app.kubernetes.io/name=tomcat`
-- `app.kubernetes.io/name=postgresql`
-- `app.kubernetes.io/name=solr`
-- `app.kubernetes.io/name=intermineinstance` for BlueGenes
-
-All of these use PVCs so no data is lost.
 
 ### Uninstalling
 
@@ -49,6 +40,23 @@ Postgresql and solr use PVCs so their resources can be replaced without losing d
 kubectl delete pvc/data-pombemine-postgresql-0
 kubectl delete pvc/data-pombemine-solr-0
 ```
+
+### Advanced usage
+
+#### Cherry-picking
+
+This uses the kubectl `-l` flag to only apply the resources matching a selector, which in this example is for tomcat.
+
+```bash
+helm template -f values.yaml -f pombemine.yaml -f secrets.yaml pombemine ../helm-operator/helm-charts/intermineinstance | kubectl apply -f - -l app.kubernetes.io/name=tomcat
+```
+
+The same can be done for the other applications as well.
+
+- `app.kubernetes.io/name=tomcat`
+- `app.kubernetes.io/name=postgresql`
+- `app.kubernetes.io/name=solr`
+- `app.kubernetes.io/name=intermineinstance` for BlueGenes
 
 ## Allas Object Storage
 

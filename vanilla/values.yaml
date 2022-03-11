@@ -1,6 +1,10 @@
 # Default values for intermineinstance.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
+################################ WARNING ######################################
+# These are the defaults -- if something is specific to your mine/deployment, #
+# change pombemine.yaml or secrets.yaml instead.                              #
+###############################################################################
 
 replicaCount: 1
 
@@ -46,7 +50,7 @@ ingress:
   annotations: {}
     # kubernetes.io/ingress.class: nginx
     # kubernetes.io/tls-acme: "true"
-  hostname: pombemine-staging.rahtiapp.fi
+  hostname: localhost
   # hosts:
   #   - host: localhost
   #     paths:
@@ -167,7 +171,7 @@ tomcat:
       http: 8080
   ingress:
     enabled: true
-    hostname: legacy.pombemine-staging.rahtiapp.fi
+    hostname: legacy.localhost
     pathType: Prefix
   podSecurityContext:
     enabled: false
@@ -186,28 +190,10 @@ tomcat:
     name: tomcat-users
     subPath: tomcat-users.xml
 
-bluegenes:
-  backendServiceRoot: http://pombemine-tomcat:8080/pombemine
-  serviceRoot: http://pombemine-staging.rahtiapp.fi/pombemine
-  mineName: PombeMine
-  mineNamespace: pombemine
-
 builder:
   enabled: true
   image:
-    repository: docker-registry.default.svc:5000/pombemine-staging/jobbuild
+    repository: intermine/jobbuild
     tag: latest
-  mineName: pombemine
-  properties:
-    webapp.path: pombemine
-    project.title: PombeMine
-    project.subTitle: An integrated database for S. pombe genomics
-    project.releaseVersion: First draft
   objectStorage:
-    accessKey: fillMeIn
-    secretKey: fillMeIn
     endpoint: object.pouta.csc.fi
-    buckets:
-      minedir: staging/pombemine
-      data: staging/pombe
-      bio: staging/pombemine-bio-sources
