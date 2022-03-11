@@ -20,6 +20,10 @@ bluegenes:
   mineNamespace: pombemine
 
 builder:
+  # Optional task to perform instead of doing a full build.
+  # You can specify the name of any method here:
+  # https://github.com/intermine/intermine_cloud/blob/master/builder/src/intermine_builder/__init__.py
+  #task: redeploy
   mineName: pombemine
   # These are used for the ~/.intermine/<mine>.properties file. You can add any
   # key and it will override the default specified here:

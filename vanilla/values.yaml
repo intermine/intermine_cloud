@@ -193,6 +193,7 @@ tomcat:
 builder:
   enabled: true
   image:
+    #repository: docker-registry.default.svc:5000/pombemine-staging/jobbuild
     repository: intermine/jobbuild
     tag: latest
   objectStorage:

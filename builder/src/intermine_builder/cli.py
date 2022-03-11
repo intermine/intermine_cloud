@@ -23,7 +23,7 @@ BUILDER_CONSTRUCTOR_OPTIONS = ["build_image", "data_path", "mine_path", "volumes
 
 def _task(mine, task, **options):
 
-    builder_options = {k: options[k] for k in BUILDER_CONSTRUCTOR_OPTIONS}
+    builder_options = {k: options.get(k) for k in BUILDER_CONSTRUCTOR_OPTIONS}
     builder = MineBuilder(mine, **builder_options)
 
     try:
@@ -36,36 +36,36 @@ def _task(mine, task, **options):
         log = None
 
         if task == "create_properties_file":
-            # TODO parse options['overrides_properties'] which is path to .properties file
+            # TODO parse options.get('overrides_properties') which is path to .properties file
             click.echo(task + " task is not implemented yet", err=True)
         elif task == "add_data_source":
-            if not options["name"] or not options["type"]:
+            if not options.get("name") or not options.get("type"):
                 click.echo(task + " task requires --name and --type", err=True)
                 return
             props = (
                 [
                     dict([kv.split("=") for kv in prop.split(",")])
-                    for prop in options["property"]
+                    for prop in options.get("property")
                 ]
-                if options["property"]
+                if options.get("property")
                 else []
             )
-            source = {"name": options["name"], "type": options["type"], "properties": props}
+            source = {"name": options.get("name"), "type": options.get("type"), "properties": props}
             log = method(source)
         elif task == "integrate":
-            if not options["source"]:
+            if not options.get("source"):
                 click.echo(task + " task requires --source", err=True)
                 return
-            log = method(options["source"], **options)
+            log = method(options.get("source"), **options)
         elif task == "post_process":
-            if not options["process"]:
+            if not options.get("process"):
                 click.echo(task + " task requires --process", err=True)
                 return
-            log = method(options["process"], **options)
+            log = method(options.get("process"), **options)
         else:
             log = method(**options)
 
-        if options["log"] and log:
+        if options.get("log") and log:
             click.echo(log)
 
     except docker.errors.ContainerError as err:
@@ -155,6 +155,16 @@ def prepare(**options):
 @click.option("--properties-path", type=click.Path(exists=True), required=False, help="Path to pickle file containing a dict of property overrides.")
 @click.option("--override", multiple=True, help="Example: --override webapp.path=kittenmine --override project.title=KittenMine")
 @click.option("--keep-alive", is_flag=True, required=False, help="Keep process alive when job fails. Has no effect when used with `--task`. Useful to keep a container running for troubleshooting.")
+# integrate task
+@click.option("--source")
+@click.option("--action")
+# post_process task
+@click.option("--process")
+# all tasks that use gradle
+@click.option("--stacktrace", is_flag=True)
+@click.option("--info", is_flag=True)
+@click.option("--debug", is_flag=True)
+@click.option("--scan", is_flag=True)
 def job(**options):
     """Perform a complete build and deployment of a mine - no containers used.
     Expects envvars for dependent services to be present."""
@@ -163,17 +173,20 @@ def job(**options):
 
     _prepare(**options)
 
-    task = options.get("task")
-    if task:
-        options['mine_path'] = mine_path.parent
-        options['containerless'] = True
-        return _task(mine_name, task, **options)
-
     try:
         builder = MineBuilder(mine_name, mine_path=mine_path.parent, containerless=True)
         if 'bio_path' in options:
             builder.install(cwd=options['bio_path'], stacktrace=True)
         builder.clean(stacktrace=True)
+
+        task = options.pop('task', None)
+        if task:
+            options['mine_path'] = mine_path.parent
+            options['containerless'] = True
+            return _task(mine_name, task, **options)
+
+        # If no task is defined, continue with build process.
+
         builder.build_db(stacktrace=True)
 
         project = parse_project_xml(mine_path / "project.xml")
