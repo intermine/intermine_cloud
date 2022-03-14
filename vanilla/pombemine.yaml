@@ -39,3 +39,4 @@ builder:
       minedir: staging/pombemine
       data: staging/pombe
       bio: staging/pombemine-bio-sources
+      #im: staging/intermine

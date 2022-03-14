@@ -2,7 +2,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  generateName: "{{.Release.Name}}-builder-"
+  name: "{{.Release.Name}}-builder-{{.Release.Revision}}"
   labels:
     app.kubernetes.io/component: builder
     {{- include "intermineinstance.labels" . | nindent 4 }}
@@ -36,12 +36,21 @@ spec:
       - name: minedir
         persistentVolumeClaim:
           claimName: job-{{.Release.Name}}-minedir
+      {{- if .Values.builder.objectStorage.buckets.data }}
       - name: data
         persistentVolumeClaim:
           claimName: job-{{.Release.Name}}-data
+      {{- end }}
+      {{- if .Values.builder.objectStorage.buckets.bio }}
       - name: bio
         persistentVolumeClaim:
           claimName: job-{{.Release.Name}}-bio
+      {{- end }}
+      {{- if .Values.builder.objectStorage.buckets.im }}
+      - name: im
+        persistentVolumeClaim:
+          claimName: job-{{.Release.Name}}-im
+      {{- end }}
       initContainers:
       - name: get-artifacts
         image: rclone/rclone:1.57.0
@@ -49,20 +58,36 @@ spec:
         args:
         - >
           rclone sync default:{{.Values.builder.objectStorage.buckets.minedir}} /mine &&
-          rclone sync default:{{.Values.builder.objectStorage.buckets.data}} /data &&
-          rclone sync default:{{.Values.builder.objectStorage.buckets.bio}} /bio &&
           chmod +x /mine/gradlew &&
-          chmod +x /bio/gradlew
+          {{- if .Values.builder.objectStorage.buckets.data }}
+          rclone sync default:{{.Values.builder.objectStorage.buckets.data}} /data &&
+          {{- end }}
+          {{- if .Values.builder.objectStorage.buckets.bio }}
+          rclone sync default:{{.Values.builder.objectStorage.buckets.bio}} /bio &&
+          chmod +x /bio/gradlew &&
+          {{- end }}
+          {{- if .Values.builder.objectStorage.buckets.im }}
+          rclone sync default:{{.Values.builder.objectStorage.buckets.im}} /im &&
+          {{- end }}
+          echo
         volumeMounts:
         - mountPath: /.rclone.conf
           name: rclone-conf
           subPath: rclone.conf
         - mountPath: /mine
           name: minedir
+        {{- if .Values.builder.objectStorage.buckets.data }}
         - mountPath: /data
           name: data
+        {{- end }}
+        {{- if .Values.builder.objectStorage.buckets.bio }}
         - mountPath: /bio
           name: bio
+        {{- end }}
+        {{- if .Values.builder.objectStorage.buckets.im }}
+        - mountPath: /im
+          name: im
+        {{- end }}
       containers:
       - name: {{.Release.Name}}-builder-job
         image: "{{.Values.builder.image.repository}}:{{.Values.builder.image.tag}}"
@@ -76,8 +101,14 @@ spec:
         - "/home/intermine/properties.pkl"
         - "--mine-path"
         - "/home/intermine/{{.Values.builder.mineName}}"
+        {{- if .Values.builder.objectStorage.buckets.bio }}
         - "--bio-path"
         - "/bio"
+        {{- end }}
+        {{- if .Values.builder.objectStorage.buckets.im }}
+        - "--im-path"
+        - "/im"
+        {{- end }}
         - "--keep-alive"
         env:
         - name: PGHOST
@@ -92,10 +123,18 @@ spec:
           subPath: properties.pkl
         - mountPath: /home/intermine/{{.Values.builder.mineName}}
           name: minedir
+        {{- if .Values.builder.objectStorage.buckets.data }}
         - mountPath: /data
           name: data
+        {{- end }}
+        {{- if .Values.builder.objectStorage.buckets.bio }}
         - mountPath: /bio
           name: bio
+        {{- end }}
+        {{- if .Values.builder.objectStorage.buckets.im }}
+        - mountPath: /im
+          name: im
+        {{- end }}
       restartPolicy: Never
 ---
 apiVersion: v1
@@ -110,6 +149,7 @@ spec:
     requests:
       storage: 200Mi
 ---
+{{- if .Values.builder.objectStorage.buckets.data }}
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -120,8 +160,10 @@ spec:
   accessModes: ["ReadWriteOnce"]
   resources:
     requests:
-      storage: 10Gi
+      storage: 20Gi
+{{- end }}
 ---
+{{- if .Values.builder.objectStorage.buckets.bio }}
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -133,6 +175,21 @@ spec:
   resources:
     requests:
       storage: 50Mi
+{{- end }}
+---
+{{- if .Values.builder.objectStorage.buckets.im }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: job-{{.Release.Name}}-im
+  labels:
+    {{- include "intermineinstance.labels" . | nindent 4 }}
+spec:
+  accessModes: ["ReadWriteOnce"]
+  resources:
+    requests:
+      storage: 1Gi
+{{- end }}
 ---
 apiVersion: v1
 kind: Secret

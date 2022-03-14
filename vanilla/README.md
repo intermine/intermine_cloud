@@ -12,14 +12,6 @@ Edit *pombemine.yaml* and *secrets.yaml* so the mineName, objectStorage keys and
 helm install -f values.yaml -f pombemine.yaml -f secrets.yaml pombemine ../helm-operator/helm-charts/intermineinstance
 ```
 
-### Rerun builder
-
-You can use this command to create a new builder job. This example sets the value `builder.task=redeploy` which will make the job only run the redeploy task instead of performing a full build.
-
-```bash
-helm template --set builder.task=redeploy -f values.yaml -f pombemine.yaml -f secrets.yaml pombemine ../helm-operator/helm-charts/intermineinstance | kubectl create -f - -l app.kubernetes.io/component=builder
-```
-
 ### Upgrading
 
 If you've made changes to the charts or values and wish to get a previously installed release up-to-date, you can use the upgrade command.
@@ -28,7 +20,7 @@ If you've made changes to the charts or values and wish to get a previously inst
 helm upgrade -f values.yaml -f pombemine.yaml -f secrets.yaml pombemine ../helm-operator/helm-charts/intermineinstance
 ```
 
-Note that some resources are considered to be immutable by Kubernetes. This includes Job, which we use for the builder. This means the resource can't be updated and a new one has to be created instead.
+To rerun a specific build task instead of performing a full build, you can add the flag: `--set builder.task=redeploy`
 
 ### Uninstalling
 
