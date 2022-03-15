@@ -128,8 +128,8 @@ def _prepare(**options):
             overrides[k] = v
 
     kwargs = dict([(envvar, os.environ.get(envvar)) for envvar in
-                    ['PGHOST', 'PGPORT', 'PSQL_USER', 'PSQL_PWD', 'TOMCAT_HOST',
-                     'TOMCAT_PORT', 'TOMCAT_USER', 'TOMCAT_PWD']
+                    ['PGHOST', 'PGUSERDBHOST', 'PGPORT', 'PSQL_USER', 'PSQL_PWD',
+                     'TOMCAT_HOST', 'TOMCAT_PORT', 'TOMCAT_USER', 'TOMCAT_PWD']
                     if envvar in os.environ])
     kwargs['overrides'] = overrides
 

@@ -113,6 +113,8 @@ spec:
         env:
         - name: PGHOST
           value: {{ template "common.names.fullname" .Subcharts.postgresql }}
+        - name: PGUSERDBHOST
+          value: {{ template "common.names.fullname" .Subcharts.postgresqluserdb }}
         - name: SOLR_HOST
           value: {{ template "common.names.fullname" .Subcharts.solr }}
         - name: TOMCAT_HOST

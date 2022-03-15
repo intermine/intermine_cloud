@@ -10,6 +10,7 @@ from pathlib import Path
 
 def create_properties(
     PGHOST: str = "intermine-postgres",
+    PGUSERDBHOST: Optional[str] = None,
     PGPORT: int = 5432,
     PSQL_USER: str = "postgres",
     PSQL_PWD: str = "postgres",
@@ -43,7 +44,7 @@ def create_properties(
         "db.common-tgt-items.datasource.password": PSQL_PWD,
         # userprofile database - used by the webapp to store logins, query history,
         # saved bags, templates and tags.
-        "db.userprofile-production.datasource.serverName": PGHOST + ":" + str(PGPORT),
+        "db.userprofile-production.datasource.serverName": (PGUSERDBHOST or PGHOST) + ":" + str(PGPORT),
         "db.userprofile-production.datasource.databaseName": "userprofile-mine",
         "db.userprofile-production.datasource.user": PSQL_USER,
         "db.userprofile-production.datasource.password": PSQL_PWD,

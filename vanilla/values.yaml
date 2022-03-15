@@ -114,9 +114,48 @@ postgresql:
           ALTER USER postgres WITH SUPERUSER;
           CREATE DATABASE "mine";
           CREATE DATABASE "items-mine";
-          CREATE DATABASE "userprofile-mine";
           GRANT ALL PRIVILEGES ON DATABASE "mine" to postgres;
           GRANT ALL PRIVILEGES ON DATABASE "items-mine" to postgres;
+    containerSecurityContext:
+      enabled: false
+    podSecurityContext:
+      enabled: false
+  readReplicas:
+    podSecurityContext:
+      enabled: false
+    containerSecurityContext:
+      enabled: false
+  metrics:
+    containerSecurityContext:
+      enabled: false
+
+postgresqluserdb:
+  port: 5432
+  postgresqlPassword: postgres
+  auth:
+    postgresPassword: postgres
+  primary:
+    persistence:
+      size: 1Gi
+      # CSC Rahti would otherwise default to glusterfs-storage, which is less
+      # performant and requires tuning to avoid errors when using postgresql.
+      # https://github.com/gluster/glusterfs/issues/2056
+      storageClass: standard-rwo
+    initdb:
+      user: postgres
+      password: postgres
+      scripts:
+        init_mine.sql: |
+          update pg_database set datallowconn = TRUE where datname = 'template0';
+          use template0;
+          update pg_database set datistemplate = FALSE where datname = 'template1';
+          drop database template1;
+          create database template1 with template = template0 encoding = 'SQL_ASCII' LC_COLLATE='C' LC_CTYPE='C';
+          update pg_database set datistemplate = TRUE where datname = 'template1';
+          use template1;
+          update pg_database set datallowconn = FALSE where datname = 'template0';
+          ALTER USER postgres WITH SUPERUSER;
+          CREATE DATABASE "userprofile-mine";
           GRANT ALL PRIVILEGES ON DATABASE "userprofile-mine" to postgres;
     containerSecurityContext:
       enabled: false
