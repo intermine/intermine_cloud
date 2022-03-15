@@ -19,6 +19,11 @@ bluegenes:
   mineName: PombeMine
   mineNamespace: pombemine
 
+postgresql:
+  primary:
+    persistence:
+      size: 20Gi
+
 builder:
   # Optional task to perform instead of doing a full build.
   # You can specify the name of any method here:
@@ -33,6 +38,8 @@ builder:
     project.title: PombeMine
     project.subTitle: An integrated database for S. pombe genomics
     project.releaseVersion: First draft
+  storageRequests:
+    data: 20Gi
   # Allas
   objectStorage:
     buckets:

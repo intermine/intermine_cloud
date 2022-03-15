@@ -160,7 +160,7 @@ spec:
   accessModes: ["ReadWriteOnce"]
   resources:
     requests:
-      storage: 20Gi
+      storage: {{.Values.builder.storageRequests.data}}
 {{- end }}
 ---
 {{- if .Values.builder.objectStorage.buckets.bio }}

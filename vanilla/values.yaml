@@ -93,6 +93,7 @@ postgresql:
     postgresPassword: postgres
   primary:
     persistence:
+      size: 20Gi
       # CSC Rahti would otherwise default to glusterfs-storage, which is less
       # performant and requires tuning to avoid errors when using postgresql.
       # https://github.com/gluster/glusterfs/issues/2056
@@ -139,6 +140,7 @@ solr:
     - mine-search
     - mine-autocomplete
   persistence:
+    size: 4Gi
     storageClass: standard-rwo
   cloudEnabled: false
   cloudBootstrap: false
@@ -161,6 +163,7 @@ tomcat:
   tomcatPassword: tomcat
   tomcatAllowRemoteManagement: 1
   persistence:
+    size: 1Gi
     storageClass: standard-rwo
   image:
     repository: bitnami/tomcat
