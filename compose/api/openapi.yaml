@@ -66,6 +66,8 @@ paths:
     $ref: paths/template.yaml
   /mine/:
     $ref: paths/mine.yaml
+  /mine/action/:
+    $ref: paths/mine_action.yaml
   /file/:
     $ref: paths/file.yaml
 components:
