@@ -14,4 +14,4 @@ class DataDB(DBModel, SurrogatePKUUID, TimestampMixin):
     file_type = Column(String, nullable=False)
     file_id = reference_col("file", nullable=True)
     protagonist_id = reference_col("protagonist")
-    metadata = Column(JSON)
+    metainfo = Column(JSON)

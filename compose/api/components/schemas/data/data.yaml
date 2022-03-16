@@ -11,9 +11,12 @@ properties:
     type: string
   file_id:
     type: string
+  metainfo:
+    type: object
 required:
   - "data_id"
   - "name"
   - "ext"
   - "file_type"
   - "file_id"
+  - "metainfo"

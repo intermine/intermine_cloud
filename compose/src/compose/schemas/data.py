@@ -14,7 +14,7 @@ class Data(BaseModel):
     ext: str
     file_type: str
     file_id: Optional[UUID4]
-    metadata: Dict = {}
+    metainfo: Dict = {}
 
     def get_id(self: "Data") -> UUID4:
         """Return object id."""
