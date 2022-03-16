@@ -15,8 +15,9 @@ class ComposeDefaultConfig(DefaultConfig):
     MINIO_ACCESS_KEY: str = "minioaccess"
     MINIO_SECRET_KEY: str = "minioaccess"
     MINIO_SECURE: bool = False
+    MESSENGER: str = "NATS"
     CLUSTER: str = "ARGO"
     DB_NAME: str = "compose"
     DB_URI: str = f"sqlite:////{xdg_data_home() / ('imcloud') / ('compose.db')}"
     CORS_SUPPORTS_CREDENTIALS: bool = True
-    CORS_ORIGINS: List[str] = ['http://localhost:8080']
+    CORS_ORIGINS: List[str] = ["http://localhost:8080"]
