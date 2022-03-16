@@ -1,6 +1,6 @@
-description : "200 Mine Response"
+description : "200 Mine Action POST Response"
 allOf:
-  - $ref: "../../schemas/200_response.yaml"
+  - $ref: "200_mine_action_response.yaml"
   - type: object
     properties:
       items:
@@ -9,6 +9,6 @@ allOf:
           mine_list:
             type: array
             items:
-              $ref: mine.yaml
+              $ref: "../mine/mine.yaml"
         required:
           - "mine_list"

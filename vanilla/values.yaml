@@ -1,6 +1,10 @@
 # Default values for intermineinstance.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
+################################ WARNING ######################################
+# These are the defaults -- if something is specific to your mine/deployment, #
+# change pombemine.yaml or secrets.yaml instead.                              #
+###############################################################################
 
 replicaCount: 1
 
@@ -46,7 +50,7 @@ ingress:
   annotations: {}
     # kubernetes.io/ingress.class: nginx
     # kubernetes.io/tls-acme: "true"
-  hostname: pombemine-staging.rahtiapp.fi
+  hostname: localhost
   # hosts:
   #   - host: localhost
   #     paths:
@@ -89,6 +93,7 @@ postgresql:
     postgresPassword: postgres
   primary:
     persistence:
+      size: 20Gi
       # CSC Rahti would otherwise default to glusterfs-storage, which is less
       # performant and requires tuning to avoid errors when using postgresql.
       # https://github.com/gluster/glusterfs/issues/2056
@@ -109,9 +114,48 @@ postgresql:
           ALTER USER postgres WITH SUPERUSER;
           CREATE DATABASE "mine";
           CREATE DATABASE "items-mine";
-          CREATE DATABASE "userprofile-mine";
           GRANT ALL PRIVILEGES ON DATABASE "mine" to postgres;
           GRANT ALL PRIVILEGES ON DATABASE "items-mine" to postgres;
+    containerSecurityContext:
+      enabled: false
+    podSecurityContext:
+      enabled: false
+  readReplicas:
+    podSecurityContext:
+      enabled: false
+    containerSecurityContext:
+      enabled: false
+  metrics:
+    containerSecurityContext:
+      enabled: false
+
+postgresqluserdb:
+  port: 5432
+  postgresqlPassword: postgres
+  auth:
+    postgresPassword: postgres
+  primary:
+    persistence:
+      size: 1Gi
+      # CSC Rahti would otherwise default to glusterfs-storage, which is less
+      # performant and requires tuning to avoid errors when using postgresql.
+      # https://github.com/gluster/glusterfs/issues/2056
+      storageClass: standard-rwo
+    initdb:
+      user: postgres
+      password: postgres
+      scripts:
+        init_mine.sql: |
+          update pg_database set datallowconn = TRUE where datname = 'template0';
+          use template0;
+          update pg_database set datistemplate = FALSE where datname = 'template1';
+          drop database template1;
+          create database template1 with template = template0 encoding = 'SQL_ASCII' LC_COLLATE='C' LC_CTYPE='C';
+          update pg_database set datistemplate = TRUE where datname = 'template1';
+          use template1;
+          update pg_database set datallowconn = FALSE where datname = 'template0';
+          ALTER USER postgres WITH SUPERUSER;
+          CREATE DATABASE "userprofile-mine";
           GRANT ALL PRIVILEGES ON DATABASE "userprofile-mine" to postgres;
     containerSecurityContext:
       enabled: false
@@ -135,6 +179,7 @@ solr:
     - mine-search
     - mine-autocomplete
   persistence:
+    size: 4Gi
     storageClass: standard-rwo
   cloudEnabled: false
   cloudBootstrap: false
@@ -157,6 +202,7 @@ tomcat:
   tomcatPassword: tomcat
   tomcatAllowRemoteManagement: 1
   persistence:
+    size: 1Gi
     storageClass: standard-rwo
   image:
     repository: bitnami/tomcat
@@ -167,7 +213,7 @@ tomcat:
       http: 8080
   ingress:
     enabled: true
-    hostname: legacy.pombemine-staging.rahtiapp.fi
+    hostname: legacy.localhost
     pathType: Prefix
   podSecurityContext:
     enabled: false
@@ -186,28 +232,11 @@ tomcat:
     name: tomcat-users
     subPath: tomcat-users.xml
 
-bluegenes:
-  backendServiceRoot: http://pombemine-tomcat:8080/pombemine
-  serviceRoot: http://pombemine-staging.rahtiapp.fi/pombemine
-  mineName: PombeMine
-  mineNamespace: pombemine
-
 builder:
   enabled: true
   image:
-    repository: docker-registry.default.svc:5000/pombemine-staging/jobbuild
+    #repository: docker-registry.default.svc:5000/pombemine-staging/jobbuild
+    repository: intermine/jobbuild
     tag: latest
-  mineName: pombemine
-  properties:
-    webapp.path: pombemine
-    project.title: PombeMine
-    project.subTitle: An integrated database for S. pombe genomics
-    project.releaseVersion: First draft
   objectStorage:
-    accessKey: fillMeIn
-    secretKey: fillMeIn
     endpoint: object.pouta.csc.fi
-    buckets:
-      minedir: staging/pombemine
-      data: staging/pombe
-      bio: staging/pombemine-bio-sources

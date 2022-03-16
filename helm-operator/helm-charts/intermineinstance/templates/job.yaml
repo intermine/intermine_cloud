@@ -2,18 +2,14 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: "{{.Release.Name}}-builder"
+  name: "{{.Release.Name}}-builder-{{.Release.Revision}}"
   labels:
-    app.kubernetes.io/managed-by: {{.Release.Service | quote }}
-    app.kubernetes.io/instance: {{.Release.Name | quote }}
-    helm.sh/chart: "{{.Chart.Name}}-{{.Chart.Version}}"
-  annotations:
-    # This is what defines this resource as a hook. Without this line, the
-    # job is considered part of the release.
-    "helm.sh/hook": post-install
-    "helm.sh/hook-weight": "-5"
-    "helm.sh/hook-delete-policy": hook-succeeded
+    app.kubernetes.io/component: builder
+    {{- include "intermineinstance.labels" . | nindent 4 }}
 spec:
+  backoffLimit: 1
+  # Not supported by Rahti.
+  # ttlSecondsAfterFinished: 86400 # Delete job after 24 hours
   template:
     metadata:
       name: "{{.Release.Name}}-builder"
@@ -25,14 +21,14 @@ spec:
       volumes:
       - name: rclone-conf
         secret:
-          secretName: rclone-conf
+          secretName: {{.Release.Name}}-rclone-conf
           defaultMode: 420
           items:
             - key: rclone.conf
               path: rclone.conf
       - name: properties-pkl
         secret:
-          secretName: properties-pkl
+          secretName: {{.Release.Name}}-properties-pkl
           defaultMode: 420
           items:
             - key: properties.pkl
@@ -40,12 +36,21 @@ spec:
       - name: minedir
         persistentVolumeClaim:
           claimName: job-{{.Release.Name}}-minedir
+      {{- if .Values.builder.objectStorage.buckets.data }}
       - name: data
         persistentVolumeClaim:
           claimName: job-{{.Release.Name}}-data
+      {{- end }}
+      {{- if .Values.builder.objectStorage.buckets.bio }}
       - name: bio
         persistentVolumeClaim:
           claimName: job-{{.Release.Name}}-bio
+      {{- end }}
+      {{- if .Values.builder.objectStorage.buckets.im }}
+      - name: im
+        persistentVolumeClaim:
+          claimName: job-{{.Release.Name}}-im
+      {{- end }}
       initContainers:
       - name: get-artifacts
         image: rclone/rclone:1.57.0
@@ -53,36 +58,63 @@ spec:
         args:
         - >
           rclone sync default:{{.Values.builder.objectStorage.buckets.minedir}} /mine &&
-          rclone sync default:{{.Values.builder.objectStorage.buckets.data}} /data &&
-          rclone sync default:{{.Values.builder.objectStorage.buckets.bio}} /bio &&
           chmod +x /mine/gradlew &&
-          chmod +x /bio/gradlew
+          {{- if .Values.builder.objectStorage.buckets.data }}
+          rclone sync default:{{.Values.builder.objectStorage.buckets.data}} /data &&
+          {{- end }}
+          {{- if .Values.builder.objectStorage.buckets.bio }}
+          rclone sync default:{{.Values.builder.objectStorage.buckets.bio}} /bio &&
+          chmod +x /bio/gradlew &&
+          {{- end }}
+          {{- if .Values.builder.objectStorage.buckets.im }}
+          rclone sync default:{{.Values.builder.objectStorage.buckets.im}} /im &&
+          {{- end }}
+          echo
         volumeMounts:
         - mountPath: /.rclone.conf
           name: rclone-conf
           subPath: rclone.conf
         - mountPath: /mine
           name: minedir
+        {{- if .Values.builder.objectStorage.buckets.data }}
         - mountPath: /data
           name: data
+        {{- end }}
+        {{- if .Values.builder.objectStorage.buckets.bio }}
         - mountPath: /bio
           name: bio
+        {{- end }}
+        {{- if .Values.builder.objectStorage.buckets.im }}
+        - mountPath: /im
+          name: im
+        {{- end }}
       containers:
       - name: {{.Release.Name}}-builder-job
         image: "{{.Values.builder.image.repository}}:{{.Values.builder.image.tag}}"
-        # command: [sh, -c, "builder_job --properties-path /home/intermine/properties.pkl --mine-path /home/intermine/{{.Values.builder.mineName}} --bio-path /bio ; sleep 4h"]
         command: ["builder_job"]
         args:
+        {{- if .Values.builder.task }}
+        - "--task"
+        - "{{.Values.builder.task}}"
+        {{- end }}
         - "--properties-path"
         - "/home/intermine/properties.pkl"
         - "--mine-path"
         - "/home/intermine/{{.Values.builder.mineName}}"
+        {{- if .Values.builder.objectStorage.buckets.bio }}
         - "--bio-path"
         - "/bio"
+        {{- end }}
+        {{- if .Values.builder.objectStorage.buckets.im }}
+        - "--im-path"
+        - "/im"
+        {{- end }}
         - "--keep-alive"
         env:
         - name: PGHOST
           value: {{ template "common.names.fullname" .Subcharts.postgresql }}
+        - name: PGUSERDBHOST
+          value: {{ template "common.names.fullname" .Subcharts.postgresqluserdb }}
         - name: SOLR_HOST
           value: {{ template "common.names.fullname" .Subcharts.solr }}
         - name: TOMCAT_HOST
@@ -93,48 +125,80 @@ spec:
           subPath: properties.pkl
         - mountPath: /home/intermine/{{.Values.builder.mineName}}
           name: minedir
+        {{- if .Values.builder.objectStorage.buckets.data }}
         - mountPath: /data
           name: data
+        {{- end }}
+        {{- if .Values.builder.objectStorage.buckets.bio }}
         - mountPath: /bio
           name: bio
+        {{- end }}
+        {{- if .Values.builder.objectStorage.buckets.im }}
+        - mountPath: /im
+          name: im
+        {{- end }}
       restartPolicy: Never
-  backoffLimit: 1
-  # ttlSecondsAfterFinished: 100
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: job-{{.Release.Name}}-minedir
+  labels:
+    {{- include "intermineinstance.labels" . | nindent 4 }}
 spec:
   accessModes: ["ReadWriteOnce"]
   resources:
     requests:
       storage: 200Mi
 ---
+{{- if .Values.builder.objectStorage.buckets.data }}
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: job-{{.Release.Name}}-data
+  labels:
+    {{- include "intermineinstance.labels" . | nindent 4 }}
 spec:
   accessModes: ["ReadWriteOnce"]
   resources:
     requests:
-      storage: 10Gi
+      storage: {{.Values.builder.storageRequests.data}}
+{{- end }}
 ---
+{{- if .Values.builder.objectStorage.buckets.bio }}
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: job-{{.Release.Name}}-bio
+  labels:
+    {{- include "intermineinstance.labels" . | nindent 4 }}
 spec:
   accessModes: ["ReadWriteOnce"]
   resources:
     requests:
       storage: 50Mi
+{{- end }}
+---
+{{- if .Values.builder.objectStorage.buckets.im }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: job-{{.Release.Name}}-im
+  labels:
+    {{- include "intermineinstance.labels" . | nindent 4 }}
+spec:
+  accessModes: ["ReadWriteOnce"]
+  resources:
+    requests:
+      storage: 1Gi
+{{- end }}
 ---
 apiVersion: v1
 kind: Secret
 metadata:
-  name: rclone-conf
+  name: {{.Release.Name}}-rclone-conf
+  labels:
+    {{- include "intermineinstance.labels" . | nindent 4 }}
 type: Opaque
 stringData:
   "rclone.conf": |-
@@ -150,7 +214,9 @@ stringData:
 apiVersion: v1
 kind: Secret
 metadata:
-  name: properties-pkl
+  name: {{.Release.Name}}-properties-pkl
+  labels:
+    {{- include "intermineinstance.labels" . | nindent 4 }}
 type: Opaque
 stringData:
   "properties.pkl": |-
@@ -164,6 +230,8 @@ apiVersion: v1
 kind: Secret
 metadata:
   name: tomcat-users
+  labels:
+    {{- include "intermineinstance.labels" . | nindent 4 }}
 type: Opaque
 stringData:
   "tomcat-users.xml": |-

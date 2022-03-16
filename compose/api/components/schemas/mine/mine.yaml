@@ -1,19 +1,29 @@
 description: Mine schema
 type: object
 properties:
-  data_id:
+  mine_id:
     type: string
   name:
     type: string
-  ext:
+  subdomain:
     type: string
-  file_type:
+  description:
     type: string
-  file_id:
+  preference:
+    type: object
+  state:
+    type: object
+  rendered_template_id:
     type: string
+  data_ids:
+    type: array
+    items:
+      type: string
 required:
-  - "data_id"
   - "name"
-  - "ext"
-  - "file_type"
-  - "file_id"
+  - "subdomain"
+  - "description"
+  - "preference"
+  - "state"
+  - "template_id"
+  - "data_ids"

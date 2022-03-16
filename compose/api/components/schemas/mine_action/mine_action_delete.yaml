@@ -1,0 +1,8 @@
+description: Mine Action delete schema
+type: object
+properties:
+  mine_action_id:
+    type: string
+required:
+  - "mine_action_id"
+

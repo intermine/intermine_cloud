@@ -8,6 +8,10 @@ dependencies:
   - name: postgresql
     version: 11.1.3
     repository: https://charts.bitnami.com/bitnami
+  - name: postgresql
+    version: 11.1.3
+    repository: https://charts.bitnami.com/bitnami
+    alias: postgresqluserdb
   - name: solr
     version: 3.0.7
     repository: https://charts.bitnami.com/bitnami
