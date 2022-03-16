@@ -332,11 +332,11 @@ def revert_rendered_template_db_entry(inputs: List[Prop]) -> List[Prop]:
             Expects
                 0: rendered_template_create_request_list
                     Prop(data=data_create_request_list, description="List of create data objects")
-                1: user
+                2: user
                     Prop(data=user, description="User")
-                2: created_rendered_template_list
+                3: created_rendered_template_list
                     Prop(data=created_rendered_template_list, description="List of created rendered_template objects")
-                3: user
+                4: user
                     Prop(data=user, description="User")
 
     Raises:
@@ -351,8 +351,8 @@ def revert_rendered_template_db_entry(inputs: List[Prop]) -> List[Prop]:
             Prop(data=user, description="User")
     """
     try:
-        created_rendered_template_list: List[RenderedTemplate] = inputs[2].data
-        user: User = inputs[3].data
+        created_rendered_template_list: List[RenderedTemplate] = inputs[3].data
+        user: User = inputs[4].data
     except Exception as e:
         raise FlowExecError(
             human_description="Parsing inputs failed",
@@ -583,34 +583,39 @@ def render_and_upload_rendered_template(inputs: List[Prop]) -> List[Prop]:
                         # Download template
                         resp = requests.get(file.presigned_get, stream=True)
                         with open(
-                            Path(tempd).joinpath("template.tar"), "wb"
+                            Path(tempd).absolute().joinpath("template.tar"), "wb"
                         ) as download_file:
                             for data in resp.iter_content(chunk_size=1024):
                                 download_file.write(data)
-                # Unpack archive
-                shutil.unpack_archive(
-                    Path(tempd).joinpath("template.tar"),
-                    Path(tempd).joinpath("template"),
-                )
+                        # Unpack archive
+                        shutil.unpack_archive(
+                            Path(tempd).absolute().joinpath("template.tar"),
+                            Path(tempd).absolute().joinpath("template"),
+                        )
+                        # Render the fetched template with provided template vars
+                        # TODO: Do it properly later, for now just cp the downloaded template
+                        shutil.copytree(
+                            Path(tempd).absolute().joinpath("template"),
+                            Path(tempd).absolute().joinpath("rendered"),
+                        )
 
-                # Render the fetched template with provided template vars
-                # TODO: Do it properly later, for now just cp the downloaded template
-                shutil.copytree(
-                    Path(tempd).joinpath("template"), Path(tempd).joinpath("rendered")
-                )
+                        archive_path = make_archive(
+                            "rendered",
+                            Path(tempd).absolute().joinpath("rendered"),
+                            Path(tempd).absolute(),
+                        )
 
-                archive_path = make_archive(
-                    "rendered", Path(tempd).joinpath("rendered"), Path(tempd)
-                )
-
-                # upload rendered template
-                with open(archive_path, "rb") as f:
-                    for file in rendered_template_file_list:
-                        if file.parent_id == rendered_template.rendered_template_id:
-                            requests.put(
-                                url=file.presigned_put,
-                                data=f,
-                            )
+                        # upload rendered template
+                        with open(archive_path, "rb") as f:
+                            for file in rendered_template_file_list:
+                                if (
+                                    file.parent_id
+                                    == rendered_template.rendered_template_id
+                                ):
+                                    requests.put(
+                                        url=file.presigned_put,
+                                        data=f,
+                                    )
 
     except Exception as e:
         raise FlowExecError(
