@@ -59,20 +59,20 @@ const useStyles = createStyle((theme) => {
     }
 })
 
-export type TGlobalModalProps = TGlobalModalReducer & {
-    onClose: () => void
+export type TModalProps = TGlobalModalReducer & {
+    onClose?: () => void
     csx?: ModalProps['csx']
 }
 
-export const Modal = (props: TGlobalModalProps) => {
+export const Modal = (props: TModalProps) => {
     const classes = useStyles()
 
     const {
         isOpen,
         heading,
         children,
-        primaryAction = {},
-        secondaryAction = {},
+        primaryAction,
+        secondaryAction,
         type = 'warning',
         HeaderIcon,
         isLoadingPrimaryAction = false,
@@ -125,20 +125,33 @@ export const Modal = (props: TGlobalModalProps) => {
             </Box>
 
             <Box className={classes.actionContainer}>
-                <Button
-                    isTextUppercase={false}
-                    color="neutral"
-                    isLoading={isLoadingSecondaryAction}
-                    isDisabled={isLoadingPrimaryAction}
-                    {...secondaryAction}
-                />
-                <Button
-                    isTextUppercase={false}
-                    color={type}
-                    isDisabled={isLoadingSecondaryAction}
-                    isLoading={isLoadingPrimaryAction}
-                    {...primaryAction}
-                />
+                {secondaryAction && (
+                    <Button
+                        isTextUppercase={false}
+                        color="neutral"
+                        isLoading={isLoadingSecondaryAction}
+                        isDisabled={isLoadingPrimaryAction}
+                        csx={{
+                            root: ({ spacing }) => ({
+                                flex: '1',
+                                ...(primaryAction && {
+                                    marginRight: spacing(8)
+                                })
+                            })
+                        }}
+                        {...secondaryAction}
+                    />
+                )}
+                {primaryAction && (
+                    <Button
+                        isTextUppercase={false}
+                        color={type}
+                        isDisabled={isLoadingSecondaryAction}
+                        isLoading={isLoadingPrimaryAction}
+                        csx={{ root: { flex: '1' } }}
+                        {...primaryAction}
+                    />
+                )}
             </Box>
         </ChromatinModal>
     )

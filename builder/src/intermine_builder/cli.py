@@ -10,7 +10,7 @@ import traceback
 import click
 import docker
 
-from intermine_builder import MineBuilder
+from intermine_builder import MineBuilder, intermine
 from intermine_builder.properties import create_properties, write_properties, write_solr_host
 from intermine_builder.project_xml import parse_project_xml
 
@@ -128,8 +128,8 @@ def _prepare(**options):
             overrides[k] = v
 
     kwargs = dict([(envvar, os.environ.get(envvar)) for envvar in
-                    ['PGHOST', 'PGPORT', 'PSQL_USER', 'PSQL_PWD', 'TOMCAT_HOST',
-                     'TOMCAT_PORT', 'TOMCAT_USER', 'TOMCAT_PWD']
+                    ['PGHOST', 'PGUSERDBHOST', 'PGPORT', 'PSQL_USER', 'PSQL_PWD',
+                     'TOMCAT_HOST', 'TOMCAT_PORT', 'TOMCAT_USER', 'TOMCAT_PWD']
                     if envvar in os.environ])
     kwargs['overrides'] = overrides
 
@@ -152,6 +152,7 @@ def prepare(**options):
 @click.option("--task", required=False, help="Run a single task instead of the full job.")
 @click.option("--mine-path", type=click.Path(exists=True, file_okay=False), required=True, help="Path to mine directory to be prepared.")
 @click.option("--bio-path", type=click.Path(exists=True, file_okay=False), required=False, help="Path to optional bio directory to be installed.")
+@click.option("--im-path", type=click.Path(exists=True, file_okay=False), required=False, help="Path to optional intermine directory to be installed.")
 @click.option("--properties-path", type=click.Path(exists=True), required=False, help="Path to pickle file containing a dict of property overrides.")
 @click.option("--override", multiple=True, help="Example: --override webapp.path=kittenmine --override project.title=KittenMine")
 @click.option("--keep-alive", is_flag=True, required=False, help="Keep process alive when job fails. Has no effect when used with `--task`. Useful to keep a container running for troubleshooting.")
@@ -174,8 +175,11 @@ def job(**options):
     _prepare(**options)
 
     try:
+        if options.get('im_path'):
+            intermine.install(Path(options['im_path']))
+
         builder = MineBuilder(mine_name, mine_path=mine_path.parent, containerless=True)
-        if 'bio_path' in options:
+        if options.get('bio_path'):
             builder.install(cwd=options['bio_path'], stacktrace=True)
         builder.clean(stacktrace=True)
 

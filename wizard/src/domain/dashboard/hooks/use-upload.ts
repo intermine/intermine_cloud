@@ -22,7 +22,6 @@ export type TUploadProps = {
     file: File
     fileList: ModelFile[]
     entityList: Data[] | Template[]
-    entity: Entities
     errorMessage?: string
 }
 
@@ -53,6 +52,11 @@ const getMsg = (type: UploadFileStatus, fileName: string) => {
     }
 }
 
+/**
+ * There is no need to have this function.
+ *
+ * @deprecated
+ */
 const serviceToGeneratePresignedURL = (
     options: TServiceToGeneratePreSignedURLOption
 ): Promise<unknown> => {
@@ -88,11 +92,12 @@ export const useUpload = () => {
     )
 
     const _setInlineAlert = (p: InlineAlertProps) => {
-        setInlineAlertProps({
-            onClose: () => setInlineAlertProps({ isOpen: false }),
+        setInlineAlertProps((prev) => ({
+            ...prev,
+            onClose: () => _setInlineAlert({ isOpen: false }),
             isOpen: true,
             ...p,
-        })
+        }))
     }
 
     const {
@@ -226,6 +231,11 @@ export const useUpload = () => {
         inlineAlertProps,
         runWhenPresignedURLGenerated,
         runWhenPresignedURLGenerationFailed,
+        /**
+         * There is no need to have this function.
+         *
+         * @deprecated
+         */
         serviceToGeneratePresignedURL,
     }
 }
@@ -235,6 +245,18 @@ export const formatUploadMachineContextForUseUploadProps = (
     entity: Entities
 ): TUploadProps => {
     const { file, response, errorMessage } = ctx
+
+    if (!file) {
+        if (process.env.NODE_ENV === 'development') {
+            console.error(
+                'FormUploadMachineContextForUseUploadProps',
+                'file is not defined',
+                'Got',
+                file
+            )
+        }
+        throw new Error('file is not defined')
+    }
 
     if (!response) {
         if (process.env.NODE_ENV === 'development') {
@@ -282,6 +304,5 @@ export const formatUploadMachineContextForUseUploadProps = (
         fileList: file_list,
         entityList,
         errorMessage,
-        entity,
     }
 }

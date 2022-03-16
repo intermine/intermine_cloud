@@ -3,19 +3,19 @@
 
 ingress:
   # Bluegenes
-  hostname: pombemine-staging.rahtiapp.fi
+  hostname: pombemine.rahtiapp.fi
 
 tomcat:
   ingress:
     # Intermine webapp and web services
-    hostname: legacy.pombemine-staging.rahtiapp.fi
+    hostname: legacy.pombemine.rahtiapp.fi
 
 bluegenes:
   # backendServiceRoot is an internal address -- only change the /pombemine
   # path if you've changed the mineNamespace/webapp.path but don't touch the
   # rest.
   backendServiceRoot: http://pombemine-tomcat:8080/pombemine
-  serviceRoot: http://pombemine-staging.rahtiapp.fi/pombemine
+  serviceRoot: http://pombemine.rahtiapp.fi/pombemine
   mineName: PombeMine
   mineNamespace: pombemine
 
@@ -37,13 +37,14 @@ builder:
     webapp.path: pombemine
     project.title: PombeMine
     project.subTitle: An integrated database for S. pombe genomics
-    project.releaseVersion: First draft
+    project.releaseVersion: PombeMine Release 1.0
+    resolver.file.rootpath: /data/pombe/idresolver/
   storageRequests:
-    data: 20Gi
+    data: 150Gi
   # Allas
   objectStorage:
     buckets:
-      minedir: staging/pombemine
+      minedir: pombemine/pombemine
       data: staging/pombe
-      bio: staging/pombemine-bio-sources
-      #im: staging/intermine
+      bio: pombemine/pombemine-bio-sources
+      im: pombemine/intermine

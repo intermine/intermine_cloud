@@ -1,18 +1,22 @@
+import { useState } from 'react'
 import { Box } from '@intermine/chromatin/box'
 import { Typography } from '@intermine/chromatin/typography'
 import { Label } from '@intermine/chromatin/label'
 import { InputBase } from '@intermine/chromatin/input-base'
 import UploadIcon from '@intermine/chromatin/icons/System/upload-cloud-2-line'
 import { createStyle } from '@intermine/chromatin/styles'
-import { useState } from 'react'
+
+import {
+    getFileFromOnChangeEvent,
+    getFileOnDropEvent
+} from '../../utils/form-event'
 
 export type TUploadBoxProps = {
     isError?: boolean
     isHidden?: boolean
     isDisabled?: boolean
     accept?: string
-    onInputChange: (event: React.FormEvent<HTMLInputElement>) => void
-    onDropHandler: (event: React.DragEvent) => void
+    onChange?: (file?: File) => void
 }
 
 type TUseStyleProps = {
@@ -64,13 +68,15 @@ const useBoxStyles = createStyle((theme) => {
             display: 'flex',
             height: '100%',
             textAlign: 'center',
-            padding: spacing(5),
-            fill: info.main
+            padding: spacing(5)
         },
-        icon: {
+        icon: (props: TUseStyleProps) => ({
             fill: info.main,
-            marginRight: spacing(2)
-        }
+            marginRight: spacing(2),
+            ...(props.isError && {
+                fill: error.main
+            })
+        })
     }
 })
 
@@ -84,10 +90,10 @@ export const UploadBox = (props: TUploadBoxProps) => {
         isDisabled = false,
         isError = false,
         isHidden = false,
-        onInputChange,
-        onDropHandler: _onDropHandler,
-        accept
+        accept,
+        onChange
     } = props
+
     const [dragEvent, setDragEvent] = useState({
         isDragOver: false
     })
@@ -105,7 +111,18 @@ export const UploadBox = (props: TUploadBoxProps) => {
     const onDropHandler = (event: React.DragEvent) => {
         preventAndStopEvent(event)
         setDragEvent({ isDragOver: false })
-        _onDropHandler(event)
+
+        const _file = getFileOnDropEvent(event)
+        if (typeof onChange === 'function') {
+            onChange(_file)
+        }
+    }
+
+    const onInputChange = (event: React.FormEvent<HTMLInputElement>) => {
+        const _file = getFileFromOnChangeEvent(event)
+        if (typeof onChange === 'function') {
+            onChange(_file)
+        }
     }
 
     const classes = useBoxStyles({ isDisabled, dragEvent, isError, isHidden })
@@ -128,17 +145,26 @@ export const UploadBox = (props: TUploadBoxProps) => {
                     width="1.5rem"
                 />
                 <Typography>
-                    <Typography Component="span" color="info">
+                    <Typography
+                        Component="span"
+                        color={isError ? 'error' : 'info'}
+                    >
                         Drag and Drop&nbsp;
                     </Typography>
-                    or browse file
+                    or&nbsp;
+                    <Typography
+                        Component="span"
+                        color={isError ? 'error' : undefined}
+                    >
+                        browse a file
+                    </Typography>
                 </Typography>
                 <InputBase
                     type="file"
                     accept={accept}
                     isHidden
-                    onChange={onInputChange}
                     isDisabled={isDisabled}
+                    onChange={onInputChange}
                 />
             </Label>
         </Box>

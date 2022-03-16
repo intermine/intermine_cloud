@@ -105,3 +105,19 @@ export const areFileTypeSame = (option: TAreFileTypeSameOption) => {
 
     return true
 }
+
+export const isFileTypeSupportedForDataset = (file?: File): boolean => {
+    if (!file) return false
+
+    const { Fasta, Csv, Gff, Tsv } = FileTypes
+
+    switch (getFileType(file)) {
+        case Fasta:
+        case Tsv:
+        case Csv:
+        case Gff:
+            return true
+        default:
+            return false
+    }
+}
