@@ -5,6 +5,7 @@
 import click
 
 from .. import __version__
+from iminfra.cli.bootstrap import boot
 
 
 @click.group()
@@ -12,3 +13,6 @@ from .. import __version__
 def main() -> None:
     """Intermine infrastructure as code console."""
     pass
+
+
+main.add_command(boot)
