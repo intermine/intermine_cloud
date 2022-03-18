@@ -1,5 +1,7 @@
 ## TODO
 
+- Use `vars`
+- Use `patchesStrategicMerge` instead of `patches`
 - Deploy `intermine/helm-operator:0.0.1` to dockerhub
 - Fix namespaces (the way it is now, workflows probably don't work) -- perhaps so each component have their own namespace in addition to `workflows`
 - Expose Argo web server in *base/argo.yaml* so you don't have to use Argo CLI for dashboard.
