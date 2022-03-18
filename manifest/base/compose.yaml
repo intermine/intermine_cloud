@@ -22,6 +22,14 @@ spec:
         env:
         - name: DB_HOST
           value: "compose-postgresql"
+        - name: MINIO_ENDPOINT
+          value: "argo-artifacts:9000"
+        - name: MINIO_ACCESS_KEY
+          value: "VnBoRFJEeUgwcDV2UWNvZ0c4NGw="
+        - name: MINIO_SECRET_KEY
+          value: "dnc5b2Y1dVA3OGlncVNVWWNVam9FYkROb0ZQR0tVWW9YQmU2WlEwdA=="
+        - name: MINIO_SECURE
+          value: "false"
         - name: MESSENGER
           value: "NATS"
         - name: NATS_ENDPOINT
