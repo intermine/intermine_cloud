@@ -1,3 +1,5 @@
+commonLabels:
+  app.kubernetes.io/part-of: intermine_cloud
 resources:
 - traefik.yaml
 - argo.yaml
@@ -5,3 +7,7 @@ resources:
 - minio.yaml
 - intermine.yaml
 - intermine_rbac.yaml
+- compose.yaml
+- compose_postgresql.yaml
+- demon.yaml
+- nats.yaml

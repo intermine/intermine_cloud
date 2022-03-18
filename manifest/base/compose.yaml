@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: compose
+  labels:
+    app: compose
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: compose
+  template:
+    metadata:
+      labels:
+        app: compose
+    spec:
+      containers:
+      - name: compose
+        image: intermine/compose:latest
+        ports:
+        - containerPort: 9991
+        env:
+        - name: DB_HOST
+          value: "compose-postgresql"
+        - name: MESSENGER
+          value: "NATS"
+        - name: NATS_ENDPOINT
+          value: "nats://nats:4222"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: compose
+  labels:
+    app: compose
+spec:
+  selector:
+    app: compose
+  type: ClusterIP
+  ports:
+    - protocol: TCP
+      port: 9991
+      targetPort: 9991
