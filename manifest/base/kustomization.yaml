@@ -2,6 +2,7 @@ commonLabels:
   app.kubernetes.io/part-of: intermine_cloud
 resources:
 - traefik.yaml
+- argo_namespace.yaml
 - argo.yaml
 - argo_artifact_repositories.yaml
 - minio.yaml
