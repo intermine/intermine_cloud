@@ -1,0 +1,6 @@
+namespace: compose
+resources:
+- compose_namespace.yaml
+- compose.yaml
+- postgresql.yaml
+- minio.yaml

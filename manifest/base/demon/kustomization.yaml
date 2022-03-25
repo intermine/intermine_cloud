@@ -1,0 +1,4 @@
+namespace: demon
+resources:
+- demon_namespace.yaml
+- demon.yaml

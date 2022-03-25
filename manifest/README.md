@@ -22,7 +22,6 @@ kubectl apply -k overlays/dev
 The first time you'll need to add the Helm repositories containing the charts.
 
 ```
-helm repo add traefik https://helm.traefik.io/traefik
 helm repo add minio https://helm.min.io/
 helm repo add bitnami https://charts.bitnami.com/bitnami
 helm repo add nats https://nats-io.github.io/k8s/helm/charts/
@@ -32,10 +31,9 @@ helm repo update
 Then you can generate the manifests.
 
 ```
-helm template traefik traefik/traefik > base/traefik.yaml
-curl https://raw.githubusercontent.com/argoproj/argo-workflows/master/manifests/install.yaml > base/argo.yaml
-helm template argo-artifacts minio/minio --set fullnameOverride=argo-artifacts > base/minio.yaml
-pushd ../helm-operator ; kustomize build config/default > ../manifest/base/intermine.yaml ; popd
-helm template compose bitnami/postgresql > base/compose_postgres.yaml
-helm template nats nats/nats > base/nats.yaml
+curl https://raw.githubusercontent.com/argoproj/argo-workflows/master/manifests/install.yaml > base/argo/argo.yaml
+helm template compose bitnami/postgresql > base/compose/postgresql.yaml
+helm template compose minio/minio > base/compose/minio.yaml
+helm template nats nats/nats > base/nats/nats.yaml
+pushd ../helm-operator ; kustomize build config/default > ../manifest/base/intermine_operator.yaml ; popd
 ```

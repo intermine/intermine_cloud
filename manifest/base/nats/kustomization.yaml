@@ -1,0 +1,4 @@
+namespace: nats
+resources:
+- nats_namespace.yaml
+- nats.yaml

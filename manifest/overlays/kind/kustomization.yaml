@@ -2,7 +2,8 @@ commonLabels:
   env: dev
   app.kubernetes.io/part-of: intermine_cloud
 bases:
-- ../../base
+- ../dev
 resources:
-- argo_rbac.yaml
-- intermine_rbac.yaml
+- argo_pns.yaml
+patches:
+- traefik.yaml

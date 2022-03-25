@@ -11,11 +11,3 @@ subjects:
 - kind: ServiceAccount
   name: default
   namespace: argo
----
-apiVersion: v1
-data:
-  config: 'containerRuntimeExecutor: pns'
-kind: ConfigMap
-metadata:
-  name: workflow-controller-configmap
-  namespace: argo
