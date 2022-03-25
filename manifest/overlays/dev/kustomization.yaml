@@ -3,5 +3,3 @@ commonLabels:
   app.kubernetes.io/part-of: intermine_cloud
 bases:
 - ../../base
-resources:
-- argo_rbac.yaml
