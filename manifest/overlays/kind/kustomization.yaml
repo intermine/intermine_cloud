@@ -5,5 +5,3 @@ bases:
 - ../dev
 resources:
 - argo_pns.yaml
-patches:
-- traefik.yaml
