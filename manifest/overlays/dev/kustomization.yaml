@@ -5,4 +5,3 @@ bases:
 - ../../base
 resources:
 - argo_rbac.yaml
-- intermine_rbac.yaml

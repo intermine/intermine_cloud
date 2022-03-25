@@ -2,3 +2,5 @@ namespace: argo
 resources:
 - argo_namespace.yaml
 - argo.yaml
+patchesStrategicMerge:
+- argo_configmap.yaml
