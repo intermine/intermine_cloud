@@ -77,7 +77,11 @@ export const UploadDataset = () => {
 
     const setFile = (file?: File) => {
         if (file) {
-            setValue('file', file)
+            setValue('file', file, {
+                shouldDirty: true,
+                shouldTouch: true,
+                shouldValidate: true
+            })
             clearErrors('file')
             setSelectedFile({ type: getFileType(file), file })
         }
