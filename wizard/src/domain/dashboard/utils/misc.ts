@@ -121,3 +121,16 @@ export const isFileTypeSupportedForDataset = (file?: File): boolean => {
             return false
     }
 }
+
+export const isFileTypeSupportedForTemplate = (file?: File): boolean => {
+    if (!file) return false
+
+    const { Zip } = FileTypes
+
+    switch (getFileType(file)) {
+        case Zip:
+            return true
+        default:
+            return false
+    }
+}
