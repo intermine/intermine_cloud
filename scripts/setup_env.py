@@ -256,7 +256,7 @@ def setup_traefik() -> None:
         # Decide platform architecture
         if current_machine == "x86_64":
             local_machine = "amd64"
-        elif current_machine == "aarch64":
+        elif current_machine == "aarch64" or current_machine == "arm64":
             local_machine = "arm64"
         else:
             raise "Machine not supported"
@@ -318,7 +318,7 @@ def setup_minio() -> None:
         # Decide platform architecture
         if current_machine == "x86_64":
             local_machine = "amd64"
-        elif current_machine == "aarch64":
+        elif current_machine == "aarch64" or current_machine == "arm64":
             local_machine = "arm64"
         else:
             raise "Machine not supported"
@@ -387,7 +387,7 @@ def setup_nats() -> None:
         # Decide platform architecture
         if current_machine == "x86_64":
             local_machine = "amd64"
-        elif current_machine == "aarch64":
+        elif current_machine == "aarch64" or current_machine == "arm64":
             local_machine = "arm64"
         else:
             raise "Machine not supported"
@@ -457,7 +457,7 @@ def setup_kind() -> None:
         # Decide platform architecture
         if current_machine == "x86_64":
             local_machine = "amd64"
-        elif current_machine == "aarch64":
+        elif current_machine == "aarch64" or current_machine == "arm64":
             local_machine = "arm64"
         else:
             raise "Machine not supported"
@@ -504,7 +504,7 @@ def setup_kubectl() -> None:
         # Decide platform architecture
         if current_machine == "x86_64":
             local_machine = "amd64"
-        elif current_machine == "aarch64":
+        elif current_machine == "aarch64" or current_machine == "arm64":
             local_machine = "arm64"
         else:
             raise "Machine not supported"
@@ -551,7 +551,7 @@ def setup_kustomize() -> None:
         # Decide platform architecture
         if current_machine == "x86_64":
             local_machine = "amd64"
-        elif current_machine == "aarch64":
+        elif current_machine == "aarch64" or current_machine == "arm64":
             local_machine = "arm64"
         else:
             raise "Machine not supported"
@@ -606,7 +606,7 @@ def setup_helm() -> None:
         # Decide platform architecture
         if current_machine == "x86_64":
             local_machine = "amd64"
-        elif current_machine == "aarch64":
+        elif current_machine == "aarch64" or current_machine == "arm64":
             local_machine = "arm64"
         else:
             raise "Machine not supported"
@@ -665,7 +665,7 @@ def setup_terraform() -> None:
         # Decide platform architecture
         if current_machine == "x86_64":
             local_machine = "amd64"
-        elif current_machine == "aarch64":
+        elif current_machine == "aarch64" or current_machine == "arm64":
             local_machine = "arm64"
         else:
             raise "Machine not supported"
@@ -762,7 +762,7 @@ def setup_gitea() -> None:
         # Decide platform architecture
         if current_machine == "x86_64":
             local_machine = "amd64"
-        elif current_machine == "aarch64":
+        elif current_machine == "aarch64" or current_machine == "arm64":
             local_machine = "arm64"
         else:
             raise "Machine not supported"
@@ -809,7 +809,7 @@ def setup_argo() -> None:
         # Decide platform architecture
         if current_machine == "x86_64":
             local_machine = "amd64"
-        elif current_machine == "aarch64":
+        elif current_machine == "aarch64" or current_machine == "arm64":
             local_machine = "arm64"
         else:
             raise "Machine not supported"
@@ -821,28 +821,17 @@ def setup_argo() -> None:
             local_ext = ".exe"
 
         # Build url
-        url = f"https://github.com/argoproj/argo-workflows/releases/download/v3.2.4/argo-{local_system}-{local_machine}.gz"
+        url = f"https://github.com/argoproj/argo-cd/releases/download/v2.3.2/argocd-{local_system}-{local_machine}"
 
         # Download argo cli
         resp = client.request("GET", url, preload_content=False)
-        with open((tools_path / "argo" / "argo.gz"), "wb") as f:
+        with open((tools_path / "argo" / "argo"), "wb") as f:
             while True:
                 data = resp.read()
                 if not data:
                     break
                 f.write(data)
         resp.release_conn()
-
-        # extract compressed file
-        with gzip.open((tools_path / "argo" / "argo.gz")) as archive:
-            with open((tools_path / "argo" / "argo"), "wb") as out:
-                shutil.copyfileobj(archive, out)
-
-        # # rename argo binary
-        # shutil.move(
-        #     (tools_path / "argo" / f"argo-{local_system}-{local_machine}"),
-        #     (tools_path / "argo" / "argo"),
-        # )
 
         # make binary executable
         if local_system != "windows":
