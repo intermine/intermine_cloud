@@ -224,9 +224,9 @@ export const UploadDataset = () => {
                         main="Select a file"
                         sub={
                             Boolean(selectedFile.file)
-                                ? 'You can select .fasta, .gff, .csv, .tsv'
-                                : `Click or drop a file here 
-                                if you want to change file`
+                                ? `Click or drop a file here 
+                                if you want to change current file`
+                                : 'You can select .fasta, .gff, .csv, and .tsv'
                         }
                         hasAsterisk
                         isError={Boolean(errors.file)}
@@ -260,6 +260,7 @@ export const UploadDataset = () => {
                         control={control}
                         fileType={selectedFile.type}
                         resetFields={resetField}
+                        formState={{ isSubmitting }}
                     />
                     <Box>
                         <DForm.Actions
