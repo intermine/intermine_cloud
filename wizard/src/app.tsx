@@ -44,7 +44,8 @@ const useStyles = createStyle({
             padding: 0
         },
         html: {
-            position: 'relative'
+            position: 'relative',
+            fontSize: '20px'
         },
         body: {
             position: 'relative',
@@ -74,10 +75,12 @@ const routes = [
 ]
 
 export const App = () => {
+    const { themeType, fontSize } = useStoreSelector(preferencesSelector)
+
     /**
      * Activate global styles
      */
-    useStyles()
+    useStyles({ fontSize })
 
     const history = useHistory()
     const { resetApp } = useAppReset()
@@ -86,7 +89,6 @@ export const App = () => {
     const storeDispatch = useStoreDispatch()
 
     const auth = useStoreSelector(authSelector)
-    const { themeType } = useStoreSelector(preferencesSelector)
 
     const _addGlobalAlert = (payload: TGlobalAlertReducerAlert) => {
         storeDispatch(addGlobalAlert(payload))
@@ -207,6 +209,20 @@ export const App = () => {
             setTimeout(checkUserAuthenticity, 10_000)
         }
     }
+
+    const setDocumentFontSize = () => {
+        if (fontSize) {
+            const HTML = document.querySelector('html')
+
+            if (HTML) {
+                HTML.style.fontSize = `${fontSize}px`
+            }
+        }
+    }
+
+    useEffect(() => {
+        setDocumentFontSize()
+    }, [fontSize])
 
     useEffect(() => {
         redirectOnMount()
