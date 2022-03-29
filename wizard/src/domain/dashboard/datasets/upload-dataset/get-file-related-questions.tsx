@@ -11,6 +11,9 @@ type TGetFileRelatedQuestionsProps = {
     control: TUploadDatasetFormControl
     fileType: FileTypes
     resetFields: TUploadDatasetFormResetFields
+    formState: {
+        isSubmitting: boolean
+    }
 }
 
 const { Csv, Fasta, Gff, Tsv } = FileTypes
