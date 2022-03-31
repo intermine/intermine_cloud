@@ -10,10 +10,17 @@ import {
 type TFastaQuestionProps = {
     control: TUploadDatasetFormControl
     resetFields: TUploadDatasetFormResetFields
+    formState: {
+        isSubmitting: boolean
+    }
 }
 
 export const FastaQuestions = (props: TFastaQuestionProps) => {
-    const { control, resetFields } = props
+    const {
+        control,
+        resetFields,
+        formState: { isSubmitting }
+    } = props
 
     useEffect(() => {
         return () => {
@@ -29,7 +36,11 @@ export const FastaQuestions = (props: TFastaQuestionProps) => {
             <DForm.Label main="What is the NCBI taxonomy ID">
                 <Controller
                     render={({ field }) => (
-                        <DForm.Input {...field} placeholder="Taxonomy ID" />
+                        <DForm.Input
+                            {...field}
+                            isDisabled={isSubmitting}
+                            placeholder="Taxonomy ID"
+                        />
                     )}
                     control={control}
                     name="fasta.taxonId"
@@ -40,6 +51,7 @@ export const FastaQuestions = (props: TFastaQuestionProps) => {
                     render={({ field }) => (
                         <DForm.Input
                             {...field}
+                            isDisabled={isSubmitting}
                             placeholder="Name of data source"
                         />
                     )}
@@ -55,6 +67,7 @@ export const FastaQuestions = (props: TFastaQuestionProps) => {
                     render={({ field }) => (
                         <DForm.Input
                             {...field}
+                            isDisabled={isSubmitting}
                             placeholder="Sequence features"
                         />
                     )}
@@ -64,7 +77,9 @@ export const FastaQuestions = (props: TFastaQuestionProps) => {
             </DForm.Label>
             <DForm.Label main="First item is a">
                 <Controller
-                    render={({ field }) => <DForm.Input {...field} />}
+                    render={({ field }) => (
+                        <DForm.Input {...field} isDisabled={isSubmitting} />
+                    )}
                     control={control}
                     name="fasta.className"
                 />

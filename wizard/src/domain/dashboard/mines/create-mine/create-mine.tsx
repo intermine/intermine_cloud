@@ -96,7 +96,7 @@ export const CreateMine = () => {
     const {
         reset,
         control,
-        formState: { isDirty, errors },
+        formState: { isDirty, errors, isSubmitting },
         handleSubmit
     } = useForm<TCreateMineFormFields>({
         defaultValues: {
@@ -197,6 +197,7 @@ export const CreateMine = () => {
                                     options={templateOptions}
                                     placeholder="Select template"
                                     isLoading={isLoading}
+                                    isDisabled={isSubmitting}
                                     isError={Boolean(errors.template)}
                                 />
                             )}
@@ -225,6 +226,7 @@ export const CreateMine = () => {
                                     options={datasetOptions}
                                     isMulti
                                     isLoading={isLoading}
+                                    isDisabled={isSubmitting}
                                     isError={Boolean(errors.datasets)}
                                 />
                             )}
@@ -249,6 +251,7 @@ export const CreateMine = () => {
                             render={({ field }) => (
                                 <DForm.Input
                                     {...field}
+                                    isDisabled={isSubmitting}
                                     isError={Boolean(errors.name)}
                                     placeholder="Enter mine name"
                                 />
@@ -272,6 +275,7 @@ export const CreateMine = () => {
                                 <DForm.Input
                                     {...field}
                                     rows={5}
+                                    isDisabled={isSubmitting}
                                     Component="textarea"
                                     placeholder="Description of your mine"
                                 />
@@ -301,6 +305,7 @@ export const CreateMine = () => {
                                         // eslint-disable-next-line max-len
                                         placeholder="my-first-intermine-database"
                                         isError={Boolean(errors.subDomain)}
+                                        isDisabled={isSubmitting}
                                     />
                                 )}
                                 control={control}
@@ -333,11 +338,21 @@ export const CreateMine = () => {
                         render={({ field }) => (
                             <RadioGroup {...field} name="action">
                                 <FormControlLabel
-                                    control={<Radio value="build" />}
+                                    control={
+                                        <Radio
+                                            value="build"
+                                            isDisabled={isSubmitting}
+                                        />
+                                    }
                                     label="Build"
                                 />
                                 <FormControlLabel
-                                    control={<Radio value="build-deploy" />}
+                                    control={
+                                        <Radio
+                                            value="build-deploy"
+                                            isDisabled={isSubmitting}
+                                        />
+                                    }
                                     label="Build & Deploy"
                                 />
                             </RadioGroup>
@@ -351,13 +366,15 @@ export const CreateMine = () => {
                                 color: 'warning',
                                 children: 'Reset',
                                 key: 'reset',
-                                onClick: resetForm
+                                onClick: resetForm,
+                                isDisabled: isSubmitting
                             },
                             {
                                 color: 'primary',
                                 children: 'Create Mine',
                                 key: 'create',
-                                type: 'submit'
+                                type: 'submit',
+                                isDisabled: isSubmitting
                             }
                         ]}
                     />

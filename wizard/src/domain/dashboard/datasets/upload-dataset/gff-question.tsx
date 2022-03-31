@@ -10,10 +10,17 @@ import {
 type TGFFQuestionProps = {
     control: TUploadDatasetFormControl
     resetFields: TUploadDatasetFormResetFields
+    formState: {
+        isSubmitting: boolean
+    }
 }
 
 export const GFFQuestions = (props: TGFFQuestionProps) => {
-    const { control, resetFields } = props
+    const {
+        control,
+        resetFields,
+        formState: { isSubmitting }
+    } = props
 
     useEffect(() => {
         return () => {
@@ -28,7 +35,11 @@ export const GFFQuestions = (props: TGFFQuestionProps) => {
             <DForm.Label main="What is the NCBI taxonomy ID">
                 <Controller
                     render={({ field }) => (
-                        <DForm.Input {...field} placeholder="Taxonomy ID" />
+                        <DForm.Input
+                            {...field}
+                            isDisabled={isSubmitting}
+                            placeholder="Taxonomy ID"
+                        />
                     )}
                     control={control}
                     name="gff.taxonId"
@@ -39,6 +50,7 @@ export const GFFQuestions = (props: TGFFQuestionProps) => {
                     render={({ field }) => (
                         <DForm.Input
                             {...field}
+                            isDisabled={isSubmitting}
                             placeholder="Name of data source"
                         />
                     )}
@@ -54,6 +66,7 @@ export const GFFQuestions = (props: TGFFQuestionProps) => {
                     render={({ field }) => (
                         <DForm.Input
                             {...field}
+                            isDisabled={isSubmitting}
                             placeholder="Sequence features"
                         />
                     )}

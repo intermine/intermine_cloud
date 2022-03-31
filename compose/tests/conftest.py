@@ -70,14 +70,9 @@ def user() -> User:
             bucket_name=f"protagonist-{created_user.user_id}", recursive=True
         )
     ]
-    try:
-        minio_client.remove_objects(
-            f"protagonist-{created_user.user_id}", delete_object_list
-        )
-    except Exception as e:
-        print(e)
-
-    # minio_client.remove_bucket(f"protagonist-{created_user.user_id}")
+    for obj in delete_object_list:
+        minio_client.remove_object(f"protagonist-{created_user.user_id}", obj._name)
+    minio_client.remove_bucket(f"protagonist-{created_user.user_id}")
 
 
 @pytest.fixture(scope="session")

@@ -14,6 +14,7 @@ class DataCreate(BaseModel):
     name: str
     ext: str
     file_type: str
+    metainfo: Dict = {}
 
 
 class DataPOSTRequest(BaseModel):

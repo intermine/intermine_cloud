@@ -12,9 +12,12 @@ properties:
           type: string
         file_type:
           type: string
+        metainfo:
+          type: object
       required:
         - "name"
         - "ext"
         - "file_type"
+        - "metainfo"
 required:
   - "data_list"

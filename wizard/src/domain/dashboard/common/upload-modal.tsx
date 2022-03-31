@@ -24,26 +24,8 @@ export const UploadModal = (props: TUploadModalProps) => {
         isOpen: false
     })
 
-    const onInputChange = (event: React.FormEvent<HTMLInputElement>) => {
-        try {
-            const files = event.currentTarget.files
-            if (files && files.length > 0) {
-                setFile(files[0])
-            }
-        } catch (error) {
-            console.error(error)
-        }
-    }
-
-    const onDropHandler = (event: React.DragEvent) => {
-        try {
-            const files = event.dataTransfer.files
-            if (files) {
-                setFile(files[0])
-            }
-        } catch (error) {
-            console.error(error)
-        }
+    const onInputChange = (file?: File) => {
+        setFile(file)
     }
 
     const onUploadClick = () => {
@@ -112,10 +94,7 @@ export const UploadModal = (props: TUploadModalProps) => {
                 {...alertProps}
             />
             Uploading file for "{uploadProps.entityList[0]?.name}"
-            <DForm.UploadBox
-                onInputChange={onInputChange}
-                onDropHandler={onDropHandler}
-            />
+            <DForm.UploadBox onChange={onInputChange} />
             <DForm.UploadFileInfo file={file} />
         </Modal>
     )

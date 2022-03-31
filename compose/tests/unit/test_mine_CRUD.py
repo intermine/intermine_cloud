@@ -1,5 +1,7 @@
 """Mine CRUD tests."""
 
+from random import randint
+
 from blackcap.schemas.user import User
 
 from compose.blocs.mine import create_mine
@@ -22,7 +24,7 @@ def test_mine_create(
             MineCreate(
                 name="randomMine",
                 description="Random Mine",
-                subdomain="random",
+                subdomain=f"random-{randint(0,10000)}",
                 template_id=template.template_id,
                 rendered_template_id=rendered_template.rendered_template_id,
                 rendered_template_file_id=file.file_id,
@@ -33,4 +35,3 @@ def test_mine_create(
     )[0]
     assert created_mine.name == "randomMine"
     assert created_mine.description == "Random Mine"
-    assert created_mine.subdomain == "random"

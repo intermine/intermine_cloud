@@ -1,0 +1,4 @@
+namespace: workflow
+resources:
+- workflow_namespace.yaml
+- rbac.yaml

@@ -3,48 +3,48 @@
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: argo-artifacts-update-prometheus-secret
+  name: compose-minio-update-prometheus-secret
   labels:
     app: minio-update-prometheus-secret
     chart: minio-8.0.10
-    release: argo-artifacts
+    release: compose
     heritage: Helm
 ---
 # Source: minio/templates/serviceaccount.yaml
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: "argo-artifacts"
+  name: "compose-minio"
   namespace: "default"
   labels:
     app: minio
     chart: minio-8.0.10
-    release: "argo-artifacts"
+    release: "compose"
 ---
 # Source: minio/templates/secrets.yaml
 apiVersion: v1
 kind: Secret
 metadata:
-  name: argo-artifacts
+  name: compose-minio
   labels:
     app: minio
     chart: minio-8.0.10
-    release: argo-artifacts
+    release: compose
     heritage: Helm
 type: Opaque
 data:
-  accesskey: "VnBoRFJEeUgwcDV2UWNvZ0c4NGw="
-  secretkey: "dnc5b2Y1dVA3OGlncVNVWWNVam9FYkROb0ZQR0tVWW9YQmU2WlEwdA=="
+  accesskey: "enl3MTJCTzVnenJTVjdVbUpJV2s="
+  secretkey: "Smd4aU82RnpINXBkY296VXlJOXNvdW4zVDE3N0ZBZjlqdUVnR09uaw=="
 ---
 # Source: minio/templates/configmap.yaml
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: argo-artifacts
+  name: compose-minio
   labels:
     app: minio
     chart: minio-8.0.10
-    release: argo-artifacts
+    release: compose
     heritage: Helm
 data:
   initialize: |-
@@ -145,11 +145,11 @@ data:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: argo-artifacts
+  name: compose-minio
   labels:
     app: minio
     chart: minio-8.0.10
-    release: argo-artifacts
+    release: compose
     heritage: Helm
 spec:
   accessModes:
@@ -162,11 +162,11 @@ spec:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
-  name: argo-artifacts-update-prometheus-secret
+  name: compose-minio-update-prometheus-secret
   labels:
     app: minio-update-prometheus-secret
     chart: minio-8.0.10
-    release: argo-artifacts
+    release: compose
     heritage: Helm
 rules:
   - apiGroups:
@@ -179,7 +179,7 @@ rules:
       - update
       - patch
     resourceNames:
-      - argo-artifacts-prometheus
+      - compose-minio-prometheus
   - apiGroups:
       - ""
     resources:
@@ -193,36 +193,36 @@ rules:
     verbs:
       - get
     resourceNames:
-      - argo-artifacts
+      - compose-minio
 ---
 # Source: minio/templates/post-install-prometheus-metrics-rolebinding.yaml
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
-  name: argo-artifacts-update-prometheus-secret
+  name: compose-minio-update-prometheus-secret
   labels:
     app: minio-update-prometheus-secret
     chart: minio-8.0.10
-    release: argo-artifacts
+    release: compose
     heritage: Helm
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
-  name: argo-artifacts-update-prometheus-secret
+  name: compose-minio-update-prometheus-secret
 subjects:
   - kind: ServiceAccount
-    name: argo-artifacts-update-prometheus-secret
+    name: compose-minio-update-prometheus-secret
     namespace: "default"
 ---
 # Source: minio/templates/service.yaml
 apiVersion: v1
 kind: Service
 metadata:
-  name: argo-artifacts
+  name: compose-minio
   labels:
     app: minio
     chart: minio-8.0.10
-    release: argo-artifacts
+    release: compose
     heritage: Helm
 spec:
   type: ClusterIP
@@ -233,17 +233,17 @@ spec:
       targetPort: 9000
   selector:
     app: minio
-    release: argo-artifacts
+    release: compose
 ---
 # Source: minio/templates/deployment.yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: argo-artifacts
+  name: compose-minio
   labels:
     app: minio
     chart: minio-8.0.10
-    release: argo-artifacts
+    release: compose
     heritage: Helm
 spec:
   strategy:
@@ -254,18 +254,18 @@ spec:
   selector:
     matchLabels:
       app: minio
-      release: argo-artifacts
+      release: compose
   template:
     metadata:
-      name: argo-artifacts
+      name: compose-minio
       labels:
         app: minio
-        release: argo-artifacts
+        release: compose
       annotations:
-        checksum/secrets: 9a6920e02dd8f4c782b7b463ddb76c539ebb0e812fb3fff8daf410449e028f3d
-        checksum/config: 9328992fa2594f29dfe97f028ef469606b6c8c772ad1232ffc3ef36385feaac3
+        checksum/secrets: 61d93e3193f2696bb131daec2844c08c56c8bfa772766746f2f5a456bbba9ba0
+        checksum/config: 6fc7647d1a0b276ea8931280d00a3a01f5f96862d7e9872049af49d2b961772c
     spec:
-      serviceAccountName: "argo-artifacts"
+      serviceAccountName: "compose-minio"
       securityContext:
         runAsUser: 1000
         runAsGroup: 1000
@@ -288,12 +288,12 @@ spec:
             - name: MINIO_ACCESS_KEY
               valueFrom:
                 secretKeyRef:
-                  name: argo-artifacts
+                  name: compose-minio
                   key: accesskey
             - name: MINIO_SECRET_KEY
               valueFrom:
                 secretKeyRef:
-                  name: argo-artifacts
+                  name: compose-minio
                   key: secretkey
           resources:
             requests:
@@ -301,7 +301,7 @@ spec:
       volumes:
         - name: export
           persistentVolumeClaim:
-            claimName: argo-artifacts
+            claimName: compose-minio
         - name: minio-user
           secret:
-            secretName: argo-artifacts
+            secretName: compose-minio

@@ -1,3 +1,5 @@
+from pathlib import Path
+from pprint import pprint
 from typing import Dict, List, Optional
 from jinja2 import Environment, PackageLoader
 import yaml
@@ -13,7 +15,7 @@ from blackcap.configs import config_registry
 
 config = config_registry.get_config()
 messenger = messenger_registry.get_messenger(config.MESSENGER)
-jinjaEnv = Environment(loader=PackageLoader("demon"))
+jinjaEnv = Environment(loader=PackageLoader("demon", package_path="templates"))
 
 
 def _report_mineprogress(workflow_yaml: str, extra_data: Optional[Dict] = None) -> None:
@@ -34,18 +36,22 @@ def _report_mineprogress(workflow_yaml: str, extra_data: Optional[Dict] = None) 
     messenger.publish({"data": progress_report}, "mineprogress")
 
 
-def _submit_workflow(workflow_template: str, workflow_meta: Dict, context: Dict) -> None:
-    tmpl = jinjaEnv.get_template(workflow_template)
+def _submit_workflow(
+    workflow_template: str, workflow_meta: Dict, context: Dict
+) -> None:
 
+    tmpl = jinjaEnv.get_template(workflow_template)
     workflow_yaml = tmpl.render(**context)
 
     _report_mineprogress(workflow_yaml, extra_data=workflow_meta)
 
-    workflow_json = json.dumps({
-        'namespace': 'argo',
-        'serverDryRun': False,
-        'workflow': yaml.safe_load(workflow_yaml)
-    })
+    workflow_json = json.dumps(
+        {
+            "namespace": "argo",
+            "serverDryRun": False,
+            "workflow": yaml.safe_load(workflow_yaml),
+        }
+    )
 
     requests.post(config.ARGO_ENDPOINT + "/api/v1/workflows/argo", json=workflow_json)
 
@@ -57,12 +63,13 @@ class ArgoCluster(BaseCluster):
         pass
 
     def submit_job(self: "BaseCluster", schedule: Schedule) -> None:
-        context = schedule.job.specification
+        # schedule = json.loads(schedule)
+        context = schedule["job"]["spec"]
         workflow_meta = {
-            "workflow_name": schedule.job.name,
+            "workflow_name": schedule["job"]["name"],
         }
 
-        if schedule.job.job_type == "build":
+        if schedule["job"]["job_type"] == "build":
             # Example context
             # context = {
             #     "mine_name": "pombemine",
@@ -88,7 +95,7 @@ class ArgoCluster(BaseCluster):
 
             _submit_workflow("minebuilder.yaml.template", workflow_meta, context)
 
-        elif schedule.job.job_type == "deploy":
+        elif schedule["job"]["job_type"] == "deploy":
             # Example context
             # context = {
             #     "mine_name": "pombemine",
@@ -99,7 +106,6 @@ class ArgoCluster(BaseCluster):
             # }
 
             _submit_workflow("minedeployer.yaml.template", workflow_meta, context)
-
 
     def get_job_status(self: "BaseCluster", job_id: str) -> List[str]:
         pass

@@ -1,39 +1,25 @@
 import { useState } from 'react'
 import { InlineAlertProps } from '@intermine/chromatin/inline-alert'
 
-import type {
-    Data,
-    ModelFile,
-    Template,
-    DataPostDataList,
-    TemplatePostTemplateList,
-} from '@intermine/compose-rest-client'
+import type { Data, ModelFile, Template } from '@intermine/compose-rest-client'
 import type { CancelTokenSource } from 'axios'
 
 import { uploadService } from '../common/dashboard-form/utils'
 import { useOnProgress } from './use-on-progress'
 import { getDataSize } from '../../../utils/get'
-import { dataApi, fileApi, templateApi } from '../../../services/api'
+import { fileApi } from '../../../services/api'
 
-import { TUploadMachineContext } from '../common/dashboard-form/upload-machine'
-import { Entities, UploadFileStatus } from '../common/constants'
+import { UploadFileStatus } from '../common/constants'
 
 export type TUploadProps = {
     file: File
     fileList: ModelFile[]
     entityList: Data[] | Template[]
-    entity: Entities
     errorMessage?: string
 }
 
 export type TRunWhenPresignedURLGeneratedOptions = TUploadProps & {
     getProgressText?: (loaded: number, total: number) => string
-}
-
-export type TServiceToGeneratePreSignedURLOption = {
-    entity: Entities
-    dataset?: DataPostDataList
-    template?: TemplatePostTemplateList
 }
 
 const { Fail, FailToUploadFile, Successful } = UploadFileStatus
@@ -53,28 +39,6 @@ const getMsg = (type: UploadFileStatus, fileName: string) => {
     }
 }
 
-const serviceToGeneratePresignedURL = (
-    options: TServiceToGeneratePreSignedURLOption
-): Promise<unknown> => {
-    const { entity, dataset, template } = options
-
-    if (entity === Entities.Dataset && typeof dataset === 'object') {
-        return dataApi.dataPost({
-            data_list: [dataset],
-        })
-    }
-
-    if (entity === Entities.Template && typeof template === 'object') {
-        return templateApi.templatePost({
-            template_list: [template],
-        })
-    }
-
-    throw new Error(
-        'serviceToGeneratePresignedURL: entity format is not correct'
-    )
-}
-
 export type TUploadFileOptions = {
     _id?: string
     file: File
@@ -88,11 +52,12 @@ export const useUpload = () => {
     )
 
     const _setInlineAlert = (p: InlineAlertProps) => {
-        setInlineAlertProps({
-            onClose: () => setInlineAlertProps({ isOpen: false }),
+        setInlineAlertProps((prev) => ({
+            ...prev,
+            onClose: () => _setInlineAlert({ isOpen: false }),
             isOpen: true,
             ...p,
-        })
+        }))
     }
 
     const {
@@ -226,62 +191,5 @@ export const useUpload = () => {
         inlineAlertProps,
         runWhenPresignedURLGenerated,
         runWhenPresignedURLGenerationFailed,
-        serviceToGeneratePresignedURL,
-    }
-}
-
-export const formatUploadMachineContextForUseUploadProps = (
-    ctx: TUploadMachineContext,
-    entity: Entities
-): TUploadProps => {
-    const { file, response, errorMessage } = ctx
-
-    if (!response) {
-        if (process.env.NODE_ENV === 'development') {
-            console.error(
-                'FormUploadMachineContextForUseUploadProps',
-                'response is not defined',
-                'Got',
-                response
-            )
-        }
-        throw new Error('response is not defined')
-    }
-
-    const { file_list, data_list, template_list } = response.data.items
-
-    if (!Array.isArray(file_list)) {
-        if (process.env.NODE_ENV === 'development') {
-            console.error(
-                'FormUploadMachineContextForUseUploadProps',
-                'file_list is not an array',
-                'Got',
-                file_list
-            )
-        }
-
-        throw new Error('file_list is not an array.')
-    }
-
-    const entityList = entity === Entities.Dataset ? data_list : template_list
-
-    if (!Array.isArray(entityList)) {
-        if (process.env.NODE_ENV === 'development') {
-            console.error(
-                'FormUploadMachineContextForUseUploadProps',
-                entity === Entities.Dataset ? 'data_list' : 'template_list',
-                'is not an array'
-            )
-        }
-
-        throw new Error('Data or File is not defined')
-    }
-
-    return {
-        file,
-        fileList: file_list,
-        entityList,
-        errorMessage,
-        entity,
     }
 }

@@ -1,5 +1,7 @@
 """Mine Flows tests."""
 
+from random import randint
+
 from blackcap.flow import Executor, FlowStatus
 from blackcap.schemas.user import User
 
@@ -17,7 +19,7 @@ def test_create_mine_flow(
         MineCreate(
             name="randomMine",
             description="Random Mine",
-            subdomain="random",
+            subdomain=f"random-{randint(1,10000)}",
             template_id=template.template_id,
             data_file_ids=[str(data.data_id)],
         )

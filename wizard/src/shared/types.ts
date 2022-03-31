@@ -105,4 +105,5 @@ export type TSidebarReducer = {
 
 export type TPreferencesReducer = {
     themeType: ThemeType
+    fontSize: number
 }

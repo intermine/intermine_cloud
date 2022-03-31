@@ -2,7 +2,7 @@
 
 from blackcap.models.meta.mixins import DBModel, SurrogatePKUUID, TimestampMixin
 from blackcap.models.meta.orm import reference_col
-from sqlalchemy import Column, String
+from sqlalchemy import JSON, Column, String
 
 
 class DataDB(DBModel, SurrogatePKUUID, TimestampMixin):
@@ -14,3 +14,4 @@ class DataDB(DBModel, SurrogatePKUUID, TimestampMixin):
     file_type = Column(String, nullable=False)
     file_id = reference_col("file", nullable=True)
     protagonist_id = reference_col("protagonist")
+    metainfo = Column(JSON)

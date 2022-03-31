@@ -1,0 +1,118 @@
+
+summary: mine action resource endpoint
+description: mine endpoint
+get:
+  tags:
+    - mine
+  operationId: mine-action-get
+  summary: Get mine-action
+  security:
+    - bearerAuth: []
+  parameters:
+    - in: query
+      name: query_type
+      schema:
+        type: string
+        enum:
+          - get_all_mine_action
+          - get_mine_action_by_id
+      description: type of mine action query to execute
+    - in: query
+      name: mine_action_id
+      schema:
+        type: string
+      description: id of the mine action to fetch
+  responses:
+    "200":
+      description: "Successfully retreived status"
+      content:
+        application/json:
+          schema:
+            $ref: "../components/schemas/mine_action/200_mine_action_response.yaml"
+    "401":
+      description: "Bad request"
+      content:
+        application/json:
+          schema:
+            $ref: "../components/schemas/401_response.yaml"
+post:
+  tags:
+    - mine
+  operationId: mine-action-post
+  summary: Create mine action
+  security:
+    - bearerAuth: []
+  requestBody:
+    content:
+      application/json:
+        schema:
+          type: object
+          items:
+            $ref: "../components/schemas/mine_action/mine_action_post.yaml"
+  responses:
+    "200":
+      description: "Successfully created mine action"
+      content:
+        application/json:
+          schema:
+            $ref: "../components/schemas/mine_action/200_mine_action_post_response.yaml"
+    "401":
+      description: "Bad request"
+      content:
+        application/json:
+          schema:
+            $ref: "../components/schemas/401_response.yaml"
+put:
+  tags:
+    - mine
+  operationId: mine-action-put
+  summary: Update mine action
+  security:
+    - bearerAuth: []
+  requestBody:
+    content:
+      application/json:
+        schema:
+          type: array
+          items:
+            $ref: "../components/schemas/mine_action/mine_action_put.yaml"
+  responses:
+    "200":
+      description: "Successfully updated mine action"
+      content:
+        application/json:
+          schema:
+            $ref: "../components/schemas/200_response.yaml"
+    "401":
+      description: "Bad request"
+      content:
+        application/json:
+          schema:
+            $ref: "../components/schemas/401_response.yaml"
+delete:
+  tags:
+    - mine
+  operationId: mine-action-delete
+  summary: Delete mine action
+  security:
+    - bearerAuth: []
+  requestBody:
+    content:
+      application/json:
+        schema:
+          type: array
+          items:
+            $ref: "../components/schemas/mine_action/mine_action_delete.yaml"
+  responses:
+    "200":
+      description: "Successfully deleted mine action"
+      content:
+        application/json:
+          schema:
+            $ref: "../components/schemas/200_response.yaml"
+    "401":
+      description: "Bad request"
+      content:
+        application/json:
+          schema:
+            $ref: "../components/schemas/401_response.yaml"
