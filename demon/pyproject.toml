@@ -9,7 +9,7 @@ include = ["minebuilder.yaml.template", "minedeployer.yaml.template"]
 
 [tool.poetry.dependencies]
 python = "^3.8"
-blackcap = "^0.39.0"
+blackcap = "^0.41.0"
 cookiecutter = "^1.7.3"
 minio = "^7.1.1"
 tqdm = "^4.62.3"
