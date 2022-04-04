@@ -502,6 +502,110 @@ def revert_mine_db_entry(inputs: List[Prop]) -> List[Prop]:
     ]
 
 
+def update_mine_db_entry(inputs: List[Prop]) -> List[Prop]:
+    """Forward function for updating file_id in created mine object.
+
+    Args:
+        inputs (List[Prop]):
+            Expects
+                0: updated_mine_list
+                    Prop(data=created_mine_list, description="List of updated mine objects")
+                1: user
+                    Prop(data=user, description="User")
+
+    Raises:
+        FlowExecError: Flow execution failed
+
+    Returns:
+        List[Prop]:
+            Updated mine objects
+
+            Prop(data=updated_mine_list, description="List of updated mine Objects")
+    """
+    try:
+        created_mine_list: List[Mine] = inputs[0].data
+        user: User = inputs[1].data
+    except Exception as e:
+        raise FlowExecError(
+            human_description="Parsing inputs failed",
+            error=e,
+            error_type=type(e),
+            is_user_facing=True,
+            error_in_function=get_outer_function(),
+        ) from e
+
+    mine_update_list = []
+    for mine in created_mine_list:
+        mine_update = MineUpdate(mine_id=mine.parent_id)
+        mine_update_list.append(mine_update)
+
+    try:
+        updated_mine_list = update_mine(mine_update_list, user)
+    except SQLAlchemyError as e:
+        raise FlowExecError(
+            human_description="Updating DB object failed",
+            error=e,
+            error_type=type(e),
+            is_user_facing=False,
+            error_in_function=get_outer_function(),
+        ) from e
+    except Exception as e:
+        raise FlowExecError(
+            human_description="Something bad happened",
+            error=e,
+            error_type=type(e),
+            is_user_facing=False,
+            error_in_function=get_outer_function(),
+        ) from e
+
+    return [Prop(data=updated_mine_list, description="List of updated mine Objects")]
+
+
+def rewind_mine_db_entry(inputs: List[Prop]) -> List[Prop]:
+    """Backward function for updating mine step.
+
+    Args:
+        inputs (List[Prop]):
+            Expects
+                0: created_mine_list
+                    Prop(data=created_mine_list, description="List of created mine objects")
+                1: user
+                    Prop(data=user, description="User")
+                2: updated_mine_list
+                    Prop(data=updated_mine_list, description="List of updated mine objects")
+
+    Raises:
+        FlowExecError: Flow execution failed
+
+    Returns:
+        List[Prop]:
+            Reverted template objects
+
+            Prop(data=reverted_template_list, description="List of reverted template Objects")
+
+            Prop(data=user, description="User")
+    """
+    try:
+        created_mine_list = inputs[0].data
+        user = inputs[1].data
+    except Exception as e:
+        raise FlowExecError(
+            human_description="Parsing inputs failed",
+            error=e,
+            error_type=type(e),
+            is_user_facing=True,
+            error_in_function=get_outer_function(),
+        ) from e
+
+    # NOTE: This the last step of the flow. So this function is not needed at the moment.
+    # NOTE: So, this is just a skeleton for future implementation, if needed.
+
+    return [
+        Prop(data=created_mine_list, description="List of reverted mine Objects"),
+        Prop(data=user, description="User"),
+    ]
+
+
 def generate_create_mine_flow(
     mine_create_request_list: List[MineCreate], user: User
 ) -> Flow:

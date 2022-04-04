@@ -8,7 +8,7 @@ from blackcap.cli.publish import pub
 from blackcap.cli.schedule import sched
 from blackcap.cli.subscribe import sub
 from blackcap.configs import config_registry
-from blackcap.schemas.api.auth.post import AuthUserCreds
+from blackcap.schemas.api.auth.post import AuthPOSTRequest
 import click
 
 from compose.cli.data import data
@@ -25,7 +25,7 @@ config = config_registry.get_config()
 @click.option("--password", required=True, help="password of user")
 def login(email, password) -> None:  # noqa: C901, ANN001
     """Login CLI."""
-    auth_creds = AuthUserCreds(email=email, password=password)
+    auth_creds = AuthPOSTRequest(email=email, password=password)
     auther = auther_registry.get_auther(config.AUTHER)
     # noqa: DAR101
     login_tuple = auther.login_user(auth_creds)

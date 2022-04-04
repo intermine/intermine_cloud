@@ -1,6 +1,8 @@
 """RenderedTemplate BLoCs."""
 
+import glob
 from typing import List
+import os
 from pathlib import Path
 import shutil
 from tempfile import TemporaryDirectory
@@ -616,6 +618,13 @@ def render_and_upload_rendered_template(inputs: List[Prop]) -> List[Prop]:
                                         url=file.presigned_put,
                                         data=f,
                                     )
+                        # Clean directory
+                        files = glob.glob(f"{tempd}/*")
+                        for f in files:
+                            if os.path.isfile(f):
+                                os.remove(f)
+                            else:
+                                shutil.rmtree(f)
 
     except Exception as e:
         raise FlowExecError(
