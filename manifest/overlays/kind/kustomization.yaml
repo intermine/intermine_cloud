@@ -5,3 +5,4 @@ bases:
 - ../dev
 patchesStrategicMerge:
 - argo_pns.yaml
+- delete_nats_test.yaml
