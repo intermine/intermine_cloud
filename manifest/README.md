@@ -43,6 +43,7 @@ helm repo update
 Then you can generate the manifests.
 
 ```
+# Argo defaults to latest tags -- you should manually replace this with a versioned tag in the interest of avoiding breakage.
 curl https://raw.githubusercontent.com/argoproj/argo-workflows/master/manifests/install.yaml > base/argo/argo.yaml
 helm template compose bitnami/postgresql > base/compose/postgresql.yaml
 helm template compose minio/minio > base/compose/minio.yaml

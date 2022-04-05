@@ -1051,7 +1051,7 @@ spec:
       - args:
         - server
         env: []
-        image: quay.io/argoproj/argocli:latest
+        image: quay.io/argoproj/argocli:v3.3.1
         name: argo-server
         ports:
         - containerPort: 2746
@@ -1097,7 +1097,7 @@ spec:
         - --configmap
         - workflow-controller-configmap
         - --executor-image
-        - quay.io/argoproj/argoexec:latest
+        - quay.io/argoproj/argoexec:v3.3.1
         command:
         - workflow-controller
         env:
@@ -1106,7 +1106,7 @@ spec:
             fieldRef:
               apiVersion: v1
               fieldPath: metadata.name
-        image: quay.io/argoproj/workflow-controller:latest
+        image: quay.io/argoproj/workflow-controller:v3.3.1
         livenessProbe:
           failureThreshold: 3
           httpGet:
