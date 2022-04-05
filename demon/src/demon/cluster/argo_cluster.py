@@ -5,6 +5,7 @@ from jinja2 import Environment, PackageLoader
 import yaml
 import requests
 import json
+from logzero import logger
 
 from blackcap.cluster.base import BaseCluster
 from blackcap.schemas.job import Job
@@ -39,37 +40,47 @@ def _report_mineprogress(workflow_yaml: str, extra_data: Optional[Dict] = None) 
 def _submit_workflow(
     workflow_template: str, workflow_meta: Dict, context: Dict
 ) -> None:
-
+    logger.info("connecting to argo...")
     tmpl = jinjaEnv.get_template(workflow_template)
     workflow_yaml = tmpl.render(**context)
+    logger.info("generated workflow yaml:")
+    logger.info(workflow_yaml)
 
     _report_mineprogress(workflow_yaml, extra_data=workflow_meta)
 
     workflow_json = json.dumps(
         {
-            "namespace": "argo",
+            "namespace": "default",
             "serverDryRun": False,
             "workflow": yaml.safe_load(workflow_yaml),
         }
     )
-
-    requests.post(config.ARGO_ENDPOINT + "/api/v1/workflows/argo", json=workflow_json)
+    
+    logger.info("generated workflow json:")
+    logger.info(workflow_json)
+    resp = requests.post(config.ARGO_ENDPOINT + "/api/v1/workflows/argo", json=workflow_json, verify=False)
+    logger.info(resp.status_code)
+    logger.info(resp.content)
 
 
 class ArgoCluster(BaseCluster):
     CONFIG_KEY_VAL = "ARGO"
 
     def prepare_job(self: "BaseCluster", schedule: Schedule) -> None:
+        logger.info("preparing job...")
         pass
 
     def submit_job(self: "BaseCluster", schedule: Schedule) -> None:
+        logger.info("submitting job...")
         # schedule = json.loads(schedule)
-        context = schedule["job"]["spec"]
+        logger.info(schedule)
+        context = schedule["job"]["specification"]
         workflow_meta = {
             "workflow_name": schedule["job"]["name"],
         }
 
         if schedule["job"]["job_type"] == "build":
+            logger.info("found a build job")
             # Example context
             # context = {
             #     "mine_name": "pombemine",
