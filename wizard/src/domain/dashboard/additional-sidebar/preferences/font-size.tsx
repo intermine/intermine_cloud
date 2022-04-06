@@ -16,7 +16,7 @@ export const FontSize = (props: TThemeToggle) => {
     const { fontSize, onFontSizeUpdate } = props
 
     const onIncrement = () => {
-        if (fontSize < 22) {
+        if (fontSize < 30) {
             onFontSizeUpdate(fontSize + 1)
         }
     }
@@ -46,14 +46,16 @@ export const FontSize = (props: TThemeToggle) => {
                     onClick={onDecrement}
                     isDisabled={fontSize < 11}
                     hasHighlightOnFocus={false}
+                    hasHoverEffectOnFocus
                 />
                 <Typography variant="title">{fontSize}px</Typography>
                 <IconButton
                     isDense
                     color="neutral"
+                    hasHoverEffectOnFocus
                     Icon={<IncreaseIcon />}
                     onClick={onIncrement}
-                    isDisabled={fontSize > 21}
+                    isDisabled={fontSize > 29}
                     hasHighlightOnFocus={false}
                 />
             </Box>
