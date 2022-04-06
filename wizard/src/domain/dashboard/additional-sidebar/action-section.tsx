@@ -18,7 +18,7 @@ export type TActionSectionProps = {
 const ActionSectionContent = (props: BoxBaseProps) => {
     return (
         <Box
-            csx={{ root: ({ spacing }) => ({ padding: spacing(4, 0) }) }}
+            csx={{ root: ({ spacing }) => ({ padding: spacing(4, 0, 4, 4) }) }}
             {...props}
         />
     )
@@ -75,7 +75,8 @@ const ActionSection = (props: TActionSectionProps) => {
                     root: {
                         display: 'flex',
                         justifyContent: 'space-between',
-                        alignItems: 'center'
+                        alignItems: 'center',
+                        paddingLeft: '1rem'
                     }
                 }}
             >
