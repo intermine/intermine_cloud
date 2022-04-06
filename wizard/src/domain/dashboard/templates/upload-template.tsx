@@ -15,7 +15,7 @@ import {
 
 import { TModalProps, Modal } from '../../../components/modal'
 import { ResponseStatus } from '../../../shared/constants'
-import { getFileType, isFileTypeSupportedForTemplate } from '../utils/misc'
+import { getFileType, isAValidFileForTemplate } from '../utils/misc'
 
 /**
  * All file extensions that we are supporting
@@ -71,13 +71,14 @@ export const UploadTemplate = () => {
     }
 
     const handleOnFileChange = (file?: File) => {
-        if (!isFileTypeSupportedForTemplate(file)) {
+        const { isValid, reason } = isAValidFileForTemplate(file)
+        if (!isValid) {
+            const { title, msg } = reason
             setModalProps({
                 isOpen: true,
                 type: 'error',
-                heading: 'File type not supported',
-                children: `File which you have selected is not supported.
-                Please select a different file.`,
+                heading: title,
+                children: msg,
                 primaryAction: {
                     children: 'Dismiss',
                     onClick: () => {

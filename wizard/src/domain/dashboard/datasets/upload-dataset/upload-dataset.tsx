@@ -12,7 +12,7 @@ import { useUpload } from '../../hooks'
 import {
     areFileTypeSame,
     getFileType,
-    isFileTypeSupportedForDataset
+    isAValidFileForDataset
 } from '../../utils/misc'
 import {
     defaultUploadDatasetFormFields,
@@ -88,13 +88,15 @@ export const UploadDataset = () => {
     }
 
     const handleOnFileChange = (file?: File) => {
-        if (!isFileTypeSupportedForDataset(file)) {
+        const {isValid, reason } = isAValidFileForDataset(file)
+
+        if (!isValid) {
+            const { title, msg } = reason
             setModalProps({
                 isOpen: true,
                 type: 'error',
-                heading: 'File type not supported',
-                children: `File which you have selected is not supported.
-                Please select a different file.`,
+                heading: title,
+                children: msg,
                 primaryAction: {
                     children: 'Dismiss',
                     onClick: () => {

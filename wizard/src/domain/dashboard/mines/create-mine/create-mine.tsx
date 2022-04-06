@@ -374,7 +374,8 @@ export const CreateMine = () => {
                                 children: 'Create Mine',
                                 key: 'create',
                                 type: 'submit',
-                                isDisabled: isSubmitting
+                                isDisabled: isSubmitting,
+                                isLoading: isSubmitting
                             }
                         ]}
                     />
