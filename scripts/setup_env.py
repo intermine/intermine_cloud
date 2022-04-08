@@ -510,7 +510,7 @@ def setup_kubectl() -> None:
             raise "Machine not supported"
 
         # Build url
-        url = f"https://dl.k8s.io/release/v1.22.0/bin/{local_system}/{local_machine}/kubectl"
+        url = f"https://dl.k8s.io/release/v1.23.3/bin/{local_system}/{local_machine}/kubectl"
 
         # Download kubectl
         resp = client.request("GET", url, preload_content=False)
