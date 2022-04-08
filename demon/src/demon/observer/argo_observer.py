@@ -92,7 +92,7 @@ def _parse_object(obj) -> Optional[Dict]:
 
 
 def main(namespace: str) -> None:
-    kube_config.load_kube_config()
+    kube_config.load_incluster_config()
     api = client.CoreV1Api()
     w = watch.Watch()
 
