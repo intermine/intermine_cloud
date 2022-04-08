@@ -41,3 +41,8 @@ subjects:
 - kind: ServiceAccount
   name: intermine-workflow
   namespace: workflow
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: intermine-workflow
