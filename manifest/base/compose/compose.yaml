@@ -33,7 +33,7 @@ spec:
         - name: MESSENGER
           value: "NATS"
         - name: NATS_ENDPOINT
-          value: "nats://nats:4222"
+          value: "nats://nats.nats.svc.cluster.local:4222"
 ---
 apiVersion: v1
 kind: Service
