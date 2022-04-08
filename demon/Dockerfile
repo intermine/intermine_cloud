@@ -36,4 +36,4 @@ RUN ls venv/bin/
 
 EXPOSE 9991
 
-CMD ["demon"]
+CMD demon sub schedule
