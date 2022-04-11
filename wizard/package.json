@@ -14,7 +14,7 @@
         "type": "git",
         "url": "git+https://github.com/intermine/intermine_cloud/tree/master/wizard"
     },
-    "author": "Ankit Kumar <ankits.kvmdam@hotmail.com>",
+    "author": "InterMine Team",
     "license": "MIT",
     "devDependencies": {
         "@babel/core": "^7.15.8",
