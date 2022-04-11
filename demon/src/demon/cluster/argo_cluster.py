@@ -3,9 +3,9 @@ from pprint import pprint
 from typing import Dict, List, Optional
 from jinja2 import Environment, PackageLoader
 import yaml
-import requests
 import json
 from logzero import logger
+from kubernetes import client as kube_client, config as kube_config
 
 from blackcap.cluster.base import BaseCluster
 from blackcap.schemas.job import Job
@@ -17,6 +17,9 @@ from blackcap.configs import config_registry
 config = config_registry.get_config()
 messenger = messenger_registry.get_messenger(config.MESSENGER)
 jinjaEnv = Environment(loader=PackageLoader("demon", package_path="templates"))
+
+kube_config.load_incluster_config()
+kube_api = kube_client.CustomObjectsApi()
 
 
 def _report_mineprogress(workflow_yaml: str, extra_data: Optional[Dict] = None) -> None:
@@ -43,24 +46,19 @@ def _submit_workflow(
     logger.info("connecting to argo...")
     tmpl = jinjaEnv.get_template(workflow_template)
     workflow_yaml = tmpl.render(**context)
-    logger.info("generated workflow yaml:")
-    logger.info(workflow_yaml)
+    logger.info("generated workflow yaml")
+    # logger.info(workflow_yaml)
 
     _report_mineprogress(workflow_yaml, extra_data=workflow_meta)
 
-    workflow_json = json.dumps(
-        {
-            "namespace": "default",
-            "serverDryRun": False,
-            "workflow": yaml.safe_load(workflow_yaml),
-        }
+    res = kube_api.create_namespaced_custom_object(
+        group="argoproj.io",
+        version="v1alpha1",
+        namespace="workflow",
+        plural="workflows",
+        body=yaml.safe_load(workflow_yaml),
     )
-    
-    logger.info("generated workflow json:")
-    logger.info(workflow_json)
-    resp = requests.post(config.ARGO_ENDPOINT + "/api/v1/workflows/argo", json=workflow_json, verify=False)
-    logger.info(resp.status_code)
-    logger.info(resp.content)
+    logger.info(res)
 
 
 class ArgoCluster(BaseCluster):
