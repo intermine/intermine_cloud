@@ -14,55 +14,52 @@ from blackcap.messenger import messenger_registry
 from blackcap.configs import config_registry
 
 
-config = config_registry.get_config()
-messenger = messenger_registry.get_messenger(config.MESSENGER)
-jinjaEnv = Environment(loader=PackageLoader("demon", package_path="templates"))
-
-kube_config.load_incluster_config()
-kube_api = kube_client.CustomObjectsApi()
-
-
-def _report_mineprogress(workflow_yaml: str, extra_data: Optional[Dict] = None) -> None:
-    workflow = yaml.safe_load(workflow_yaml)
-    try:
-        total_steps = len(workflow["spec"]["templates"][0]["steps"])
-    except KeyError:
-        # TODO what's the best way to report this error?
-        pass
-
-    progress_report = {
-        "status": "STARTED",
-        "total_steps": total_steps,
-    }
-    if extra_data:
-        progress_report.update(extra_data)
-
-    messenger.publish({"data": progress_report}, "mineprogress")
-
-
-def _submit_workflow(
-    workflow_template: str, workflow_meta: Dict, context: Dict
-) -> None:
-    logger.info("connecting to argo...")
-    tmpl = jinjaEnv.get_template(workflow_template)
-    workflow_yaml = tmpl.render(**context)
-    logger.info("generated workflow yaml")
-    # logger.info(workflow_yaml)
-
-    _report_mineprogress(workflow_yaml, extra_data=workflow_meta)
-
-    res = kube_api.create_namespaced_custom_object(
-        group="argoproj.io",
-        version="v1alpha1",
-        namespace="workflow",
-        plural="workflows",
-        body=yaml.safe_load(workflow_yaml),
-    )
-    logger.info(res)
-
-
 class ArgoCluster(BaseCluster):
     CONFIG_KEY_VAL = "ARGO"
+
+    def __init__(self) -> None:
+        self.config = config_registry.get_config()
+        self.messenger = messenger_registry.get_messenger(self.config.MESSENGER)
+        self.jinja_env = Environment(loader=PackageLoader("demon", package_path="templates"))
+        kube_config.load_incluster_config()
+        self.kube_api = kube_client.CustomObjectsApi()
+
+    def report_mineprogress(self, workflow_yaml: str, extra_data: Optional[Dict] = None) -> None:
+        workflow = yaml.safe_load(workflow_yaml)
+        try:
+            total_steps = len(workflow["spec"]["templates"][0]["steps"])
+        except KeyError:
+            # TODO what's the best way to report this error?
+            pass
+
+        progress_report = {
+            "status": "STARTED",
+            "total_steps": total_steps,
+        }
+        if extra_data:
+            progress_report.update(extra_data)
+
+        self.messenger.publish({"data": progress_report}, "mineprogress")
+
+    def submit_workflow(
+        self, workflow_template: str, workflow_meta: Dict, context: Dict
+    ) -> None:
+        logger.info("connecting to argo...")
+        tmpl = self.jinja_env.get_template(workflow_template)
+        workflow_yaml = tmpl.render(**context)
+        logger.info("generated workflow yaml")
+        # logger.info(workflow_yaml)
+
+        self.report_mineprogress(workflow_yaml, extra_data=workflow_meta)
+
+        res = self.kube_api.create_namespaced_custom_object(
+            group="argoproj.io",
+            version="v1alpha1",
+            namespace="workflow",
+            plural="workflows",
+            body=yaml.safe_load(workflow_yaml),
+        )
+        logger.info(res)
 
     def prepare_job(self: "BaseCluster", schedule: Schedule) -> None:
         logger.info("preparing job...")
@@ -102,7 +99,7 @@ class ArgoCluster(BaseCluster):
             #     "get_bio": "http://localhost:9000/my-bucket/bio.tgz?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=yGoQ32Xqe9DDM3wdXQ8j%2F20211126%2F%2Fs3%2Faws4_request&X-Amz-Date=20211126T163836Z&X-Amz-Expires=604800&X-Amz-SignedHeaders=host&X-Amz-Signature=b1632c3c613f00c8e690ea323732e1b5ed93b0fb29afed3e601dd7d8b67659d3",
             # }
 
-            _submit_workflow("minebuilder.yaml.template", workflow_meta, context)
+            self.submit_workflow("minebuilder.yaml.template", workflow_meta, context)
 
         elif schedule["job"]["job_type"] == "deploy":
             # Example context
@@ -114,7 +111,7 @@ class ArgoCluster(BaseCluster):
             #     "get_solr": "http://localhost:9000/my-bucket/bio.tgz?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=yGoQ32Xqe9DDM3wdXQ8j%2F20211126%2F%2Fs3%2Faws4_request&X-Amz-Date=20211126T163836Z&X-Amz-Expires=604800&X-Amz-SignedHeaders=host&X-Amz-Signature=b1632c3c613f00c8e690ea323732e1b5ed93b0fb29afed3e601dd7d8b67659d3",
             # }
 
-            _submit_workflow("minedeployer.yaml.template", workflow_meta, context)
+            self.submit_workflow("minedeployer.yaml.template", workflow_meta, context)
 
     def get_job_status(self: "BaseCluster", job_id: str) -> List[str]:
         pass
