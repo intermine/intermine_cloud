@@ -1,4 +1,5 @@
 namespace: demon
 resources:
 - demon_namespace.yaml
-- demon.yaml
+- demon_cluster.yaml
+- demon_observer.yaml

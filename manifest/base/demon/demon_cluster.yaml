@@ -1,23 +1,24 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: demon
+  name: demon-cluster
   labels:
-    app: demon
+    app: demon-cluster
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: demon
+      app: demon-cluster
   template:
     metadata:
       labels:
-        app: demon
+        app: demon-cluster
     spec:
-      serviceAccountName: demon
+      serviceAccountName: demon-cluster
       containers:
       - name: demon
         image: intermine/demon:latest
+        args: ["sub", "schedule"]
         ports:
         - containerPort: 9991
         env:
@@ -29,12 +30,12 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: demon
+  name: demon-cluster
   labels:
-    app: demon
+    app: demon-cluster
 spec:
   selector:
-    app: demon
+    app: demon-cluster
   type: ClusterIP
   ports:
     - protocol: TCP
@@ -52,27 +53,21 @@ rules:
   - workflows
   verbs:
   - create
-- apiGroups:
-  - ""
-  resources:
-  - events
-  verbs:
-  - watch
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: demon-binding
+  name: demon-cluster-binding
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
   name: demon-cluster-role
 subjects:
 - kind: ServiceAccount
-  name: demon
+  name: demon-cluster
   namespace: demon
 ---
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: demon
+  name: demon-cluster
