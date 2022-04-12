@@ -6,6 +6,7 @@ import yaml
 import json
 from logzero import logger
 from kubernetes import client as kube_client, config as kube_config
+from functools import lru_cache
 
 from blackcap.cluster.base import BaseCluster
 from blackcap.schemas.job import Job
@@ -17,12 +18,22 @@ from blackcap.configs import config_registry
 class ArgoCluster(BaseCluster):
     CONFIG_KEY_VAL = "ARGO"
 
-    def __init__(self) -> None:
-        self.config = config_registry.get_config()
-        self.messenger = messenger_registry.get_messenger(self.config.MESSENGER)
-        self.jinja_env = Environment(loader=PackageLoader("demon", package_path="templates"))
+    @property
+    @lru_cache
+    def messenger(self):
+        config = config_registry.get_config()
+        return messenger_registry.get_messenger(config.MESSENGER)
+
+    @property
+    @lru_cache
+    def jinja_env(self):
+        return Environment(loader=PackageLoader("demon", package_path="templates"))
+
+    @property
+    @lru_cache
+    def kube_api(self):
         kube_config.load_incluster_config()
-        self.kube_api = kube_client.CustomObjectsApi()
+        return kube_client.CustomObjectsApi()
 
     def report_mineprogress(self, workflow_yaml: str, extra_data: Optional[Dict] = None) -> None:
         workflow = yaml.safe_load(workflow_yaml)
