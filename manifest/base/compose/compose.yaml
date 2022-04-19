@@ -23,13 +23,13 @@ spec:
         - name: DB_HOST
           value: "compose-postgresql"
         - name: MINIO_ENDPOINT
-          value: "argo-artifacts:9000"
+          value: "compose-minio:9000"
         - name: MINIO_ACCESS_KEY
           value: "enl3MTJCTzVnenJTVjdVbUpJV2s="
         - name: MINIO_SECRET_KEY
           value: "Smd4aU82RnpINXBkY296VXlJOXNvdW4zVDE3N0ZBZjlqdUVnR09uaw=="
         - name: MINIO_SECURE
-          value: "false"
+          value: "true"
         - name: MESSENGER
           value: "NATS"
         - name: NATS_ENDPOINT
