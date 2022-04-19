@@ -36,7 +36,7 @@ kubectl delete all -l app.kubernetes.io/part-of=intermine_cloud --all-namespaces
 The first time you'll need to add the Helm repositories containing the charts.
 
 ```
-helm repo add minio https://helm.min.io/
+helm repo add minio https://charts.min.io/
 helm repo add bitnami https://charts.bitnami.com/bitnami
 helm repo add nats https://nats-io.github.io/k8s/helm/charts/
 helm repo update
@@ -48,7 +48,9 @@ Then you can generate the manifests.
 # Argo defaults to latest tags -- you should manually replace this with a versioned tag in the interest of avoiding breakage.
 curl https://raw.githubusercontent.com/argoproj/argo-workflows/master/manifests/install.yaml > base/argo/argo.yaml
 helm template compose bitnami/postgresql > base/compose/postgresql.yaml
-helm template compose minio/minio > base/compose/minio.yaml
+helm template --set replicas=4 compose minio/minio > base/compose/minio.yaml
 helm template nats nats/nats > base/nats/nats.yaml
 pushd ../helm-operator ; kustomize build config/default > ../manifest/base/intermine_operator.yaml ; popd
 ```
+
+Make sure to review the diffs, as sometimes manual changes have to be made to the source manifests.

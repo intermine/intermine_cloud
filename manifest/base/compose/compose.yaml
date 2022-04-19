@@ -25,9 +25,9 @@ spec:
         - name: MINIO_ENDPOINT
           value: "compose-minio:9000"
         - name: MINIO_ACCESS_KEY
-          value: "enl3MTJCTzVnenJTVjdVbUpJV2s="
+          value: "VlphbEZpN2wyUzZtaldkdWlzR0s="
         - name: MINIO_SECRET_KEY
-          value: "Smd4aU82RnpINXBkY296VXlJOXNvdW4zVDE3N0ZBZjlqdUVnR09uaw=="
+          value: "QkR5RnY2RGwwSGdDYUhuSk5uTG5pWUNna3c2S0NvUlhQOUIwR0FmOA=="
         - name: MINIO_SECURE
           value: "true"
         - name: MESSENGER
