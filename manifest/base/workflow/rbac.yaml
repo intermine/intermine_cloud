@@ -3,6 +3,13 @@ kind: Role
 metadata:
   name: workflow-role
 rules:
+- apiGroups:
+    - argoproj.io
+  resources:
+    - workflowtaskresult
+  verbs:
+    - create
+    - patch
 # pod get/watch is used to identify the container IDs of the current pod
 # pod patch is used to annotate the step's outputs back to controller (e.g. artifact location)
 - apiGroups:
