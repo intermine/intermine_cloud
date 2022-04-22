@@ -29,7 +29,7 @@ kubectl delete all -l app.kubernetes.io/part-of=intermine_cloud --all-namespaces
 
 **Argo UI**: `kubectl -n argo port-forward service/argo-server 2746:2746` then open https://localhost:2746 and accept the SSL certificate. Use `echo Bearer $(kubectl -n argo get secret $(kubectl -n argo get sa argo -o=jsonpath='{.secrets[0].name}') -o=jsonpath='{.data.token}' | base64 --decode)` to get the token for client authentication. Mine workflows are created in the `workflow` namespace -- remember to input this to the *Namespace* filter and hit *Enter*.
 
-**MinIO dashboard**: `kubectl -n compose port-forward service/compose-minio 9000:9000` then open http://localhost:9000 and use `kubectl -n compose get secret/compose-minio -o jsonpath='{.data.accesskey}' | base64 --decode` and `kubectl -n compose get secret/compose-minio -o jsonpath='{.data.secretkey}' | base64 --decode` to get the access and secret keys.
+**MinIO console**: `kubectl -n compose port-forward service/compose-minio-console 9001:9001` then open http://localhost:9001 and use `kubectl -n compose get secret/compose-minio -o jsonpath='{.data.rootUser}' | base64 --decode` and `kubectl -n compose get secret/compose-minio -o jsonpath='{.data.rootPassword}' | base64 --decode` to get the access and secret keys.
 
 ## Generating base manifests
 
