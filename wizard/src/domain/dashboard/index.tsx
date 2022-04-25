@@ -6,6 +6,7 @@ import { createStyle } from '@intermine/chromatin/styles'
 import { DomElementIDs } from '../../shared/constants'
 import {
     DASHBOARD_OVERVIEW_PATH,
+    DASHBOARD_CLUSTERS_PATH,
     DASHBOARD_DATASETS_PATH,
     DASHBOARD_TEMPLATES_PATH,
     DASHBOARD_MINES_PATH
@@ -25,12 +26,18 @@ const Overview = lazy(() => import('./overview'))
 const Datasets = lazy(() => import('./datasets'))
 const Templates = lazy(() => import('./templates'))
 const Mines = lazy(() => import('./mines'))
+const Cluster = lazy(() => import('./cluster'))
 
 const pages = [
     {
         id: 'overview',
         path: DASHBOARD_OVERVIEW_PATH,
         Component: Overview
+    },
+    {
+        id: 'cluster',
+        path: DASHBOARD_CLUSTERS_PATH,
+        Component: Cluster
     },
     {
         id: 'dataset',
@@ -58,8 +65,7 @@ const useStyles = createStyle((theme) => {
     const { themeType, palette } = theme
     const {
         themeBackground: { light, dark },
-        grey,
-        darkGrey
+        grey
     } = palette
 
     const transitionDuration = '0.23s'
