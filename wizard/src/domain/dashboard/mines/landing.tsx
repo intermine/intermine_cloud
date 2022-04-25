@@ -21,7 +21,7 @@ import { LandingPageAccordionList } from '../common/accordion-list/landing-page-
 type TMines = Mine[]
 const MsgIfListEmpty = (
     <Box>
-        You haven't created any min yet!
+        You haven't created any mine yet!
         <br />
         Use the 'Create New Mine' button to create.
     </Box>
