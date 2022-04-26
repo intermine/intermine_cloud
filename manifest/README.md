@@ -50,7 +50,7 @@ curl https://raw.githubusercontent.com/argoproj/argo-workflows/master/manifests/
 helm template compose bitnami/postgresql > base/compose/postgresql.yaml
 helm template --set replicas=4 compose minio/minio > base/compose/minio.yaml
 helm template nats nats/nats > base/nats/nats.yaml
-pushd ../helm-operator ; kustomize build config/default > ../manifest/base/intermine_operator.yaml ; popd
+pushd ../helm-operator ; kustomize build config/default > ../manifest/base/intermine-operator-system/intermine_operator.yaml ; popd
 ```
 
 Make sure to review the diffs, as sometimes manual changes have to be made to the source manifests.

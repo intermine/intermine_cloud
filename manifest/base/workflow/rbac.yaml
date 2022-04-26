@@ -28,13 +28,6 @@ rules:
   verbs:
   - get
   - watch
-# create IntermineInstance CRD
-- apiGroups:
-  - "intermine.org"
-  resources:
-  - intermineinstances
-  verbs:
-  - create
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding

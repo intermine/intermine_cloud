@@ -58,10 +58,10 @@ metadata:
   namespace: intermine-operator-system
 ---
 apiVersion: rbac.authorization.k8s.io/v1
-kind: Role
+# This has been made a ClusterRole so it can be referenced in `base/mine/rbac.yaml`.
+kind: ClusterRole
 metadata:
   name: intermine-operator-leader-election-role
-  namespace: intermine-operator-system
 rules:
 - apiGroups:
   - ""
@@ -302,7 +302,7 @@ spec:
         - --metrics-bind-address=127.0.0.1:8080
         - --leader-elect
         - --leader-election-id=helm-operator
-        image: intermine/helm-operator:0.0.1
+        image: intermine/helm-operator:0.0.4
         livenessProbe:
           httpGet:
             path: /healthz
