@@ -63,14 +63,36 @@ class ArgoCluster(BaseCluster):
 
         self.report_mineprogress(workflow_yaml, extra_data=workflow_meta)
 
-        res = self.kube_api.create_namespaced_custom_object(
+        created_workflow = self.kube_api.create_namespaced_custom_object(
             group="argoproj.io",
             version="v1alpha1",
             namespace="workflow",
             plural="workflows",
             body=yaml.safe_load(workflow_yaml),
         )
-        logger.info(res)
+        logger.info(created_workflow)
+
+        # workflow_name = created_workflow['metadata']['name']
+        # for type in ['postgres', 'solr', 'tomcat']:
+        #     created_pvc = self.kube_api.create_namespaced_persistent_volume_claim(
+        #         namespace="workflow",
+        #         body=kube_client.V1PersistentVolumeClaim(
+        #             api_version="v1",
+        #             kind="PersistentVolumeClaim",
+        #             metadata=kube_client.V1ObjectMeta(
+        #                 name=(workflow_name + "-" + type + "-data")
+        #             ),
+        #             spec=kube_client.V1PersistentVolumeClaimSpec(
+        #                 accessModes=["ReadWriteOnce"],
+        #                 resources=kube_client.V1ResourceRequirements(
+        #                     requests={
+        #                         "storage": "4Gi"
+        #                     }
+        #                 )
+        #             )
+        #         )
+        #     )
+        #     logger.info(created_pvc)
 
     def prepare_job(self: "BaseCluster", schedule: Schedule) -> None:
         logger.info("preparing job...")

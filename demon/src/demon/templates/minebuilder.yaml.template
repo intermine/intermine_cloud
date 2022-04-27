@@ -107,30 +107,18 @@ spec:
           - name: task
             value: buildUserDB
 
-    # TODO update template to use passed POST url instead then re-enable once fixed
-    # - - name: upload-artifacts
-    #     template: artifacts
+    - - name: upload-artifacts
+        template: uploader
 
-    # TODO: template if deploy
+    # TODO: only template if deploy
     - - name: start-services
         template: intermine-instance
-
-    - - name: prepare-deploy
-        template: prebuilder
         arguments:
           parameters:
-          - name: postgres-host
-            value: {% raw %}"{{workflow.name}}-postgres"{% endraw %}
-          - name: solr-host
-            value: {% raw %}"{{workflow.name}}-solr"{% endraw %}
-          - name: tomcat-host
-            value: {% raw %}"{{workflow.name}}-tomcat"{% endraw %}
-
-    - - name: prepare-tomcat
-        template: tomcat
-
-    - - name: deploy
-        template: war-builder
+          - name: get-postgres
+            value: {% raw %}"{{steps.upload-artifacts.outputs.parameters.get-postgres}}"{% endraw %}
+          - name: get-solr
+            value: {% raw %}"{{steps.upload-artifacts.outputs.parameters.get-solr}}"{% endraw %}
     # TODO end
 
 
@@ -234,41 +222,49 @@ spec:
         mountPath: /home/intermine
       - name: sources
         mountPath: /data
-  - name: artifacts
+  # TODO when compose is ready, replace this stub with using tar to create archives and uploading them with curl to presigned URLs post_postgres and post_solr - then pass on presigned URLs to fetch these (who generates this?) onto the next step.
+  - name: uploader
     container:
-      image: alpine:3.8
+      image: minio/mc:latest
       volumeMounts:
-      - name: workdir
-        mountPath: /home/intermine
+      - name: uploader-dumps
+        mountPath: /dumps
+      command: ["sh", "-c"]
+      args:
+      - >
+        mc alias set minio {{ STUB_endpoint }} {{ STUB_access_key }} {{ STUB_secret_key }} &&
+        mc cp /dumps/postgres.tgz minio/my-bucket/ &&
+        mc cp /dumps/solr.tgz minio/my-bucket/ &&
+        mc share download -q minio/my-bucket/postgres.tgz | grep Share | sed -e 's/.*Share: //' > /tmp/get_postgres &&
+        mc share download -q minio/my-bucket/solr.tgz | grep Share | sed -e 's/.*Share: //' > /tmp/get_solr
+    initContainers:
+    - name: archive-dumps
+      image: alpine:3.8
+      command: ["sh", "-c"]
+      args:
+      - >
+        tar -czf /dumps/postgres.tgz /var/lib/postgresql/data &&
+        tar -czf /dumps/solr.tgz /var/solr
+      volumeMounts:
       - name: postgres-data
         mountPath: /var/lib/postgresql/data
       - name: solr-data
         mountPath: /var/solr
-    # TODO POST to address - don't pass to next step
+      - name: uploader-dumps
+        mountPath: /dumps
     outputs:
-      artifacts:
-      - name: mine-dir
-        path: /home/intermine/{{ mine_name }}
-        s3:
-          endpoint: {{ output_endpoint }}
-          insecure: true
-          bucket: {{ output_bucket }}
-          key: {{ output_key }}-minedir
-      - name: postgres-dump
-        path: /var/lib/postgresql/data
-        s3:
-          endpoint: {{ output_endpoint }}
-          insecure: true
-          bucket: {{ output_bucket }}
-          key: {{ output_key }}-postgres
-      - name: solr-dump
-        path: /var/solr
-        s3:
-          endpoint: {{ output_endpoint }}
-          insecure: true
-          bucket: {{ output_bucket }}
-          key: {{ output_key }}-solr
+      parameters:
+      - name: get-postgres
+        valueFrom:
+          path: /tmp/get_postgres
+      - name: get-solr
+        valueFrom:
+          path: /tmp/get_solr
   - name: intermine-instance
+    inputs:
+      parameters:
+      - name: get-postgres
+      - name: get-solr
     resource:
       action: create
       manifest: |
@@ -281,17 +277,27 @@ spec:
           postgresql:
             fullnameOverride: {% raw %}"{{workflow.name}}-postgres"{% endraw %}
             persistence:
-              existingClaim: {% raw %}"{{workflow.name}}-postgres-data"{% endraw %}
               mountPath: /bitnami/postgresql/data
-              subPath: data
+            initContainers:
+            - name: fetch-dump
+              image: alpine/curl:3.14
+              command: ["sh", "-c"]
+              args: ["curl -fsSL -o /tmp/data.tgz '{% raw %}{{inputs.parameters.get-postgres}}{% endraw %}' && tar -xf /tmp/data.tgz -C /data"]
+              volumeMounts:
+              - name: data
+                mountPath: /data
           solr:
             fullnameOverride: {% raw %}"{{workflow.name}}-solr"{% endraw %}
-            persistence:
-              existingClaim: {% raw %}"{{workflow.name}}-solr-data"{% endraw %}
+            initContainers:
+            - name: fetch-dump
+              image: alpine/curl:3.14
+              command: ["sh", "-c"]
+              args: ["curl -fsSL -o /tmp/data.tgz '{% raw %}{{inputs.parameters.get-solr}}{% endraw %}' && tar -xf /tmp/data.tgz -C /data"]
+              volumeMounts:
+              - name: data
+                mountPath: /data
           tomcat:
             fullnameOverride: {% raw %}"{{workflow.name}}-tomcat"{% endraw %}
-            persistence:
-              existingClaim: {% raw %}"{{workflow.name}}-tomcat-data"{% endraw %}
             livenessProbe:
               httpGet:
                 path: /{{ mine_name }}/begin.do
@@ -300,11 +306,64 @@ spec:
               httpGet:
                 path: /{{ mine_name }}/begin.do
                 port: 80
+            extraVolumeClaimTemplates:
+            - metadata:
+                name: workdir
+              spec:
+                accessModes: ["ReadWriteOnce"]
+                resources:
+                  requests:
+                    storage: 200Mi
+            extraVolumes:
+            - name: workdir
+              persistentVolumeClaim:
+                claimName: workdir
             initContainers:
-            - name: wait-for-pvc
-              image: bitnami/kubectl:1.20.12
-              command: ["kubectl"]
-              args: {% raw %}["wait", "--for=condition=Completed=True", "workflow/{{workflow.name}}", "--timeout=-1s"]{% endraw %}
+            - name: fetch-minedir
+              image: alpine/curl:3.14
+              command: ["sh", "-c"]
+              args: ["curl -fsSL -o /tmp/minedir.tgz '{{ get_minedir }}' && tar -xf /tmp/minedir.tgz -C /workdir/{{ mine_name }}"]
+              volumeMounts:
+              - name: workdir
+                mountPath: /workdir
+            - name: prepare-minedir
+              image: intermine/prebuild:latest
+              command: ["builder_prepare"]
+              args: ["--mine-path", "/home/intermine/{{ mine_name }}", "--override", "webapp.path={{ mine_name }}", "--override", "project.title={{ pretty_mine_name }}"]
+              # TODO support property overrides in a way secrets aren't visible
+              env:
+              - name: PGHOST
+                value: {% raw %}"{{workflow.name}}-postgres"{% endraw %}
+              - name: SOLR_HOST
+                value: {% raw %}"{{workflow.name}}-solr"{% endraw %}
+              - name: TOMCAT_HOST
+                value: {% raw %}"{{workflow.name}}-tomcat"{% endraw %}
+              volumeMounts:
+              - name: workdir
+                mountPath: /home/intermine
+            - name: prepare-tomcat
+              image: intermine/tomcat:latest
+              # Copy Tomcat configs/libs/etc. excluding webapps.
+              command: ["sh", "-c", "cp -av $CATALINA_HOME/. /tomcat && rm -rvf /tomcat/webapps"]
+              volumeMounts:
+              - name: data
+                mountPath: /tomcat
+            - name: build-war
+              image: intermine/build:latest
+              workingDir: /home/intermine/{{ mine_name }}
+              command: [sh, -c]
+              # TODO support webapp.path set to nested directory
+              args: ["./gradlew war && mkdir -v /tomcat/webapps && cp -v webapp/build/libs/webapp.war /tomcat/webapps/{{ mine_name }}.war && chown -R 1001:1001 /tomcat/*"]
+              resources:
+                requests:
+                  memory: 4Gi
+                  cpu: 500m
+              volumeMounts:
+              - name: workdir
+                mountPath: /home/intermine
+              - name: data
+                mountPath: /tomcat
+
             ingress:
               hostname: legacy.{{ mine_name }}
           bluegenes:
@@ -314,27 +373,6 @@ spec:
             mineNamespace: {{ mine_name }}
           ingress:
             hostname: {{ mine_name }}
-  - name: tomcat
-    container:
-      image: intermine/tomcat:latest
-      # Copy Tomcat configs/libs/etc. excluding webapps.
-      command: ["sh", "-c", "cp -av $CATALINA_HOME/. /tomcat && rm -rvf /tomcat/webapps"]
-      volumeMounts:
-      - name: tomcat-data
-        mountPath: /tomcat
-  - name: war-builder
-    container:
-      image: intermine/build:latest
-      workingDir: /home/intermine/{{ mine_name }}
-      command: [sh, -c]
-      # TODO support webapp.path set to nested directory
-      args: ["./gradlew war && mkdir -v /tomcat/webapps && cp -v webapp/build/libs/webapp.war /tomcat/webapps/{{ mine_name }}.war && chown -R 1001:1001 /tomcat/*"]
-      resources:
-        requests:
-          memory: 4Gi
-          cpu: 500m
-      volumeMounts:
-      - name: workdir
-        mountPath: /home/intermine
-      - name: tomcat-data
-        mountPath: /tomcat
+  volumes:
+  - name: uploader-dumps
+    emptyDir: {}
