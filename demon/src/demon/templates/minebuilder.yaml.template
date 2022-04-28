@@ -127,7 +127,7 @@ spec:
     retryStrategy:
       limit: 3
     container:
-      image: intermine/postgres:0.0.2
+      image: intermine/postgres:0.0.3
       readinessProbe:
         exec:
           command:
@@ -242,14 +242,13 @@ spec:
       image: alpine:3.8
       command: ["sh", "-c"]
       args:
-      - >
-        tar -czf /dumps/postgres.tgz /var/lib/postgresql/data &&
-        tar -czf /dumps/solr.tgz /var/solr
+      - tar -cvzf /dumps/postgres.tgz -C /postgres .
+        && tar -cvzf /dumps/solr.tgz -C /solr .
       volumeMounts:
       - name: postgres-data
-        mountPath: /var/lib/postgresql/data
+        mountPath: /postgres
       - name: solr-data
-        mountPath: /var/solr
+        mountPath: /solr
       - name: uploader-dumps
         mountPath: /dumps
     outputs:
@@ -276,23 +275,33 @@ spec:
         spec:
           postgresql:
             fullnameOverride: {% raw %}"{{workflow.name}}-postgres"{% endraw %}
-            persistence:
-              mountPath: /bitnami/postgresql/data
-            initContainers:
-            - name: fetch-dump
-              image: alpine/curl:3.14
-              command: ["sh", "-c"]
-              args: ["curl -fsSL -o /tmp/data.tgz '{% raw %}{{inputs.parameters.get-postgres}}{% endraw %}' && tar -xf /tmp/data.tgz -C /data"]
-              volumeMounts:
-              - name: data
-                mountPath: /data
+            primary:
+              persistence:
+                mountPath: /bitnami/postgresql/data
+              initContainers:
+              - name: fetch-dump
+                image: alpine/curl:3.14
+                command: ["sh", "-c"]
+                args:
+                - curl -fsSL -o /tmp/data.tgz '{% raw %}{{inputs.parameters.get-postgres}}{% endraw %}'
+                  && tar -xvf /tmp/data.tgz -C /data
+                  && chown -R 1001:1001 /data
+                volumeMounts:
+                - name: data
+                  mountPath: /data
+          # TODO prepare postgresqluserdb with init container ?
           solr:
             fullnameOverride: {% raw %}"{{workflow.name}}-solr"{% endraw %}
             initContainers:
             - name: fetch-dump
               image: alpine/curl:3.14
               command: ["sh", "-c"]
-              args: ["curl -fsSL -o /tmp/data.tgz '{% raw %}{{inputs.parameters.get-solr}}{% endraw %}' && tar -xf /tmp/data.tgz -C /data"]
+              args:
+              - curl -fsSL -o /tmp/data.tgz '{% raw %}{{inputs.parameters.get-solr}}{% endraw %}'
+                && mkdir -p /data/server/solr
+                && tar -xvf /tmp/data.tgz -C /data/server/solr
+                && chown -R 1001:1001 /data/server
+                && mv -v /data/server/solr/data/* /data/server/solr
               volumeMounts:
               - name: data
                 mountPath: /data
@@ -301,35 +310,34 @@ spec:
             livenessProbe:
               httpGet:
                 path: /{{ mine_name }}/begin.do
-                port: 80
+                port: 8080
             readinessProbe:
               httpGet:
                 path: /{{ mine_name }}/begin.do
-                port: 80
-            extraVolumeClaimTemplates:
-            - metadata:
-                name: workdir
-              spec:
-                accessModes: ["ReadWriteOnce"]
-                resources:
-                  requests:
-                    storage: 200Mi
+                port: 8080
             extraVolumes:
             - name: workdir
-              persistentVolumeClaim:
-                claimName: workdir
+              emptyDir: {}
             initContainers:
             - name: fetch-minedir
               image: alpine/curl:3.14
               command: ["sh", "-c"]
-              args: ["curl -fsSL -o /tmp/minedir.tgz '{{ get_minedir }}' && tar -xf /tmp/minedir.tgz -C /workdir/{{ mine_name }}"]
+              args:
+              - curl -fsSL -o /tmp/minedir.tgz '{{ get_minedir }}'
+                && tar -xvf /tmp/minedir.tgz -C /workdir
               volumeMounts:
               - name: workdir
                 mountPath: /workdir
             - name: prepare-minedir
               image: intermine/prebuild:latest
               command: ["builder_prepare"]
-              args: ["--mine-path", "/home/intermine/{{ mine_name }}", "--override", "webapp.path={{ mine_name }}", "--override", "project.title={{ pretty_mine_name }}"]
+              args:
+              - "--mine-path"
+              - "/home/intermine/{{ mine_name }}"
+              - "--override"
+              - "webapp.path={{ mine_name }}"
+              - "--override"
+              - "project.title={{ pretty_mine_name }}"
               # TODO support property overrides in a way secrets aren't visible
               env:
               - name: PGHOST
@@ -353,7 +361,11 @@ spec:
               workingDir: /home/intermine/{{ mine_name }}
               command: [sh, -c]
               # TODO support webapp.path set to nested directory
-              args: ["./gradlew war && mkdir -v /tomcat/webapps && cp -v webapp/build/libs/webapp.war /tomcat/webapps/{{ mine_name }}.war && chown -R 1001:1001 /tomcat/*"]
+              args:
+              - ./gradlew war
+                && mkdir -v /tomcat/webapps
+                && cp -v webapp/build/libs/webapp.war /tomcat/webapps/{{ mine_name }}.war
+                && chown -R 1001:1001 /tomcat/*
               resources:
                 requests:
                   memory: 4Gi
