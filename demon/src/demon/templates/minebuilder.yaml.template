@@ -288,7 +288,6 @@ spec:
                 args:
                 - curl -fsSL -o /tmp/data.tgz '{% raw %}{{inputs.parameters.get-postgres}}{% endraw %}'
                   && tar -xvf /tmp/data.tgz -C /data
-                  && chown -R 1001:1001 /data
                 volumeMounts:
                 - name: data
                   mountPath: /data
@@ -303,7 +302,6 @@ spec:
               - curl -fsSL -o /tmp/data.tgz '{% raw %}{{inputs.parameters.get-solr}}{% endraw %}'
                 && mkdir -p /data/server/solr
                 && tar -xvf /tmp/data.tgz -C /data/server/solr
-                && chown -R 1001:1001 /data/server
                 && mv -v /data/server/solr/data/* /data/server/solr
               volumeMounts:
               - name: data
@@ -368,7 +366,6 @@ spec:
               - ./gradlew war
                 && mkdir -v /tomcat/webapps
                 && cp -v webapp/build/libs/webapp.war /tomcat/webapps/{{ mine_name }}.war
-                && chown -R 1001:1001 /tomcat/*
               resources:
                 requests:
                   memory: 4Gi
@@ -388,6 +385,11 @@ spec:
             mineNamespace: {{ mine_name }}
           ingress:
             hostname: {{ mine_name }}
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 1001
+    runAsGroup: 1001
+    fsGroup: 1001
   volumes:
   - name: uploader-dumps
     emptyDir: {}
