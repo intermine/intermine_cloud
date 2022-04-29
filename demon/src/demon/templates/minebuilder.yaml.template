@@ -11,7 +11,7 @@ spec:
       accessModes: [ "ReadWriteOnce" ]
       resources:
         requests:
-          storage: 200Mi
+          storage: 1Gi
   - metadata:
       name: sources
     spec:
@@ -128,6 +128,7 @@ spec:
       limit: 3
     container:
       image: intermine/postgres:0.0.3
+      command: ["postgres", "-c", "config_file=/opt/postgresql.conf", "-p", "5432"]
       readinessProbe:
         exec:
           command:
@@ -146,6 +147,7 @@ spec:
       limit: 3
     container:
       image: intermine/solr:latest
+      command: ["/opt/scripts/intermine.sh", "{{ mine_name }}"]
       env:
       - name: MINE_NAME
         value: {{ mine_name }}
@@ -175,6 +177,7 @@ spec:
       {% endif %}
     container:
       image: alpine:3.8
+      command: ["/bin/sh"]
       volumeMounts:
       - name: workdir
         mountPath: /home/intermine
@@ -379,8 +382,8 @@ spec:
             ingress:
               hostname: legacy.{{ mine_name }}
           bluegenes:
-            backendServiceRoot: {% raw %}http://{{workflow.name}}-tomcat:8080{% endraw %}/{{ mine_name }}
-            serviceRoot: http://{{ mine_name }}/{{ mine_name }}
+            backendServiceRoot: {% raw %}http://{{workflow.name}}-tomcat{% endraw %}/{{ mine_name }}
+            serviceRoot: http://legacy.{{ mine_name }}/{{ mine_name }}
             mineName: {{ pretty_mine_name }}
             mineNamespace: {{ mine_name }}
           ingress:
