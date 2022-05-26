@@ -90,7 +90,7 @@ spec:
               serviceName: {{ $imService }}
               servicePort: {{ $imServicePort }}
               {{- end }}
-          - path: /{{ $mine }}/portal.do
+          - path: /{{ $mine }}/run.do
             {{- if (semverCompare ">=1.18-0" $.Capabilities.KubeVersion.GitVersion) }}
             pathType: Prefix
             {{- end }}
