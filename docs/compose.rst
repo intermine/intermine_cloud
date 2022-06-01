@@ -1,0 +1,4 @@
+Intermine Compose
+==============================
+
+Compose component
