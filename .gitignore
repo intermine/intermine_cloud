@@ -4,3 +4,4 @@ creds/*
 .vscode
 scratch
 .setup.env
+.DS_Store
