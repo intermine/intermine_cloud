@@ -1,4 +1,4 @@
-Intermine Demon
+Demon
 ==============================
 
 Demon component
