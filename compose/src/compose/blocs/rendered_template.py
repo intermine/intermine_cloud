@@ -16,6 +16,7 @@ from pydantic.error_wrappers import ErrorWrapper
 import requests
 from sqlalchemy import select
 from sqlalchemy.exc import SQLAlchemyError
+from xdg import xdg_data_home
 
 from compose.models.rendered_templates import RenderedTemplateDB
 from compose.schemas.api.rendered_template.delete import RenderedTemplateDelete
@@ -578,53 +579,54 @@ def render_and_upload_rendered_template(inputs: List[Prop]) -> List[Prop]:
     try:
         for rendered_template in created_rendered_template_list:
             # Create archive of the rendered template in a temp dir
-            with TemporaryDirectory() as tempd:
-                for file in checked_template_file_list:
-                    # find the right file
-                    if file.parent_id == rendered_template.parent_template_id:
-                        # Download template
-                        resp = requests.get(file.presigned_get, stream=True)
-                        with open(
-                            Path(tempd).absolute().joinpath("template.tar"), "wb"
-                        ) as download_file:
-                            for data in resp.iter_content(chunk_size=1024):
-                                download_file.write(data)
-                        # Unpack archive
-                        shutil.unpack_archive(
-                            Path(tempd).absolute().joinpath("template.tar"),
-                            Path(tempd).absolute().joinpath("template"),
-                        )
-                        # Render the fetched template with provided template vars
-                        # TODO: Do it properly later, for now just cp the downloaded template
-                        shutil.copytree(
-                            Path(tempd).absolute().joinpath("template"),
-                            Path(tempd).absolute().joinpath("rendered"),
-                        )
+            tempd = xdg_data_home().joinpath("imcloud/workspace")
+            os.makedirs(tempd, exist_ok=True)
+            for file in checked_template_file_list:
+                # find the right file
+                if file.parent_id == rendered_template.parent_template_id:
+                    # Download template
+                    resp = requests.get(file.presigned_get, stream=True)
+                    with open(
+                        Path(tempd).absolute().joinpath(f"template_{file.parent_id}.tar"), "wb"
+                    ) as download_file:
+                        for data in resp.iter_content(chunk_size=1024):
+                            download_file.write(data)
+                    # Unpack archive
+                    shutil.unpack_archive(
+                        Path(tempd).absolute().joinpath(f"template_{file.parent_id}.tar"),
+                        Path(tempd).absolute().joinpath(f"template_{file.parent_id}"),
+                    )
+                    # Render the fetched template with provided template vars
+                    # TODO: Do it properly later, for now just cp the downloaded template
+                    shutil.copytree(
+                        Path(tempd).absolute().joinpath(f"template_{file.parent_id}"),
+                        Path(tempd).absolute().joinpath(f"rendered_{file.parent_id}"),
+                    )
 
-                        archive_path = make_archive(
-                            "rendered",
-                            Path(tempd).absolute().joinpath("rendered"),
-                            Path(tempd).absolute(),
-                        )
+                    archive_path = make_archive(
+                        f"rendered_{file.parent_id}",
+                        Path(tempd).absolute().joinpath(f"rendered_{file.parent_id}"),
+                        Path(tempd).absolute(),
+                    )
 
-                        # upload rendered template
-                        with open(archive_path, "rb") as f:
-                            for file in rendered_template_file_list:
-                                if (
-                                    file.parent_id
-                                    == rendered_template.rendered_template_id
-                                ):
-                                    requests.put(
-                                        url=file.presigned_put,
-                                        data=f,
-                                    )
-                        # Clean directory
-                        files = glob.glob(f"{tempd}/*")
-                        for f in files:
-                            if os.path.isfile(f):
-                                os.remove(f)
-                            else:
-                                shutil.rmtree(f)
+                    # upload rendered template
+                    with open(archive_path, "rb") as f:
+                        for file in rendered_template_file_list:
+                            if (
+                                file.parent_id
+                                == rendered_template.rendered_template_id
+                            ):
+                                requests.put(
+                                    url=file.presigned_put,
+                                    data=f,
+                                )
+                    # Clean directory
+                    files = glob.glob(f"{tempd}/*")
+                    for f in files:
+                        if os.path.isfile(f):
+                            os.remove(f)
+                        else:
+                            shutil.rmtree(f)
 
     except Exception as e:
         raise FlowExecError(
