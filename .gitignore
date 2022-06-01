@@ -5,3 +5,4 @@ creds/*
 scratch
 .setup.env
 .DS_Store
+_build
