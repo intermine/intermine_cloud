@@ -20,9 +20,9 @@ def test_mine_api_post(
     mine_post_request = MinePOSTRequest(
         mine_list=[
             MineCreate(
-                name="randomMine",
+                name="randomMinee2e",
                 description="Random Mine",
-                subdomain="random",
+                subdomain="random-e2e",
                 template_id=template.template_id,
                 data_file_ids=[str(data.data_id)],
             )

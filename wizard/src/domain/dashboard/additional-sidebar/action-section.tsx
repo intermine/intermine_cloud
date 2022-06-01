@@ -7,6 +7,8 @@ import CloseIcon from '@intermine/chromatin/icons/System/close-line'
 import { updateAdditionalSidebar, useStoreDispatch } from '../../../store'
 import { AdditionalSidebarTabs } from '../../../shared/constants'
 
+import { ChromatinIcon } from '@intermine/chromatin/icons/types'
+
 export type TActionSectionProps = {
     heading: string
     children: React.ReactNode
@@ -16,9 +18,34 @@ export type TActionSectionProps = {
 const ActionSectionContent = (props: BoxBaseProps) => {
     return (
         <Box
-            csx={{ root: ({ spacing }) => ({ padding: spacing(4, 0) }) }}
+            csx={{ root: ({ spacing }) => ({ padding: spacing(4, 0, 4, 4) }) }}
             {...props}
         />
+    )
+}
+
+export type TActionSectionLabelProps = {
+    Icon: (props: ChromatinIcon) => JSX.Element
+    labelText: string
+}
+
+const ActionSectionLabel = (props: TActionSectionLabelProps) => {
+    const { Icon, labelText } = props
+
+    return (
+        <Box isContentCenter>
+            <Icon
+                height="1rem"
+                width="1rem"
+                csx={{
+                    root: ({ spacing, palette }) => ({
+                        marginRight: spacing(2),
+                        fill: palette.neutral.main
+                    })
+                }}
+            />
+            {labelText}
+        </Box>
     )
 }
 
@@ -48,7 +75,8 @@ const ActionSection = (props: TActionSectionProps) => {
                     root: {
                         display: 'flex',
                         justifyContent: 'space-between',
-                        alignItems: 'center'
+                        alignItems: 'center',
+                        paddingLeft: '1rem'
                     }
                 }}
             >
@@ -67,5 +95,6 @@ const ActionSection = (props: TActionSectionProps) => {
 }
 
 ActionSection.Content = ActionSectionContent
+ActionSection.Label = ActionSectionLabel
 
 export { ActionSection }

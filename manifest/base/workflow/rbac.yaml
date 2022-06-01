@@ -3,6 +3,13 @@ kind: Role
 metadata:
   name: workflow-role
 rules:
+- apiGroups:
+    - argoproj.io
+  resources:
+    - workflowtaskresult
+  verbs:
+    - create
+    - patch
 # pod get/watch is used to identify the container IDs of the current pod
 # pod patch is used to annotate the step's outputs back to controller (e.g. artifact location)
 - apiGroups:
@@ -21,13 +28,6 @@ rules:
   verbs:
   - get
   - watch
-# create IntermineInstance CRD
-- apiGroups:
-  - "intermine.org"
-  resources:
-  - intermineinstances
-  verbs:
-  - create
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
@@ -41,3 +41,8 @@ subjects:
 - kind: ServiceAccount
   name: intermine-workflow
   namespace: workflow
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: intermine-workflow

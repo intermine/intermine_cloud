@@ -1,0 +1,4 @@
+namespace: mine
+resources:
+- mine_namespace.yaml
+- rbac.yaml

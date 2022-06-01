@@ -1,0 +1,73 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: demon-cluster
+  labels:
+    app: demon-cluster
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: demon-cluster
+  template:
+    metadata:
+      labels:
+        app: demon-cluster
+    spec:
+      serviceAccountName: demon-cluster
+      containers:
+      - name: demon
+        image: intermine/demon:latest
+        args: ["sub", "schedule"]
+        ports:
+        - containerPort: 9991
+        env:
+        - name: MESSENGER
+          value: "NATS"
+        - name: NATS_ENDPOINT
+          value: "nats://nats.nats.svc.cluster.local:4222"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: demon-cluster
+  labels:
+    app: demon-cluster
+spec:
+  selector:
+    app: demon-cluster
+  type: ClusterIP
+  ports:
+    - protocol: TCP
+      port: 9991
+      targetPort: 9991
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: demon-cluster-role
+rules:
+- apiGroups:
+  - argoproj.io
+  resources:
+  - workflows
+  verbs:
+  - create
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: demon-cluster-binding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: demon-cluster-role
+subjects:
+- kind: ServiceAccount
+  name: demon-cluster
+  namespace: demon
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: demon-cluster

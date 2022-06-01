@@ -13,6 +13,7 @@ const defaultPreferenceState: TPreferencesReducer = {
     themeType: window.matchMedia('(prefers-color-scheme: light)').matches
         ? 'light'
         : 'dark',
+    fontSize: 16,
 }
 
 export const preferencesSlice = createSlice({
@@ -28,10 +29,19 @@ export const preferencesSlice = createSlice({
             setPreferencesReducerToLocalStorage(state)
             return state
         },
+
+        updateFontSize: (
+            state,
+            action: PayloadAction<{ fontSize: number }>
+        ) => {
+            state.fontSize = action.payload.fontSize
+            setPreferencesReducerToLocalStorage(state)
+            return state
+        },
     },
 })
 
-export const { updateAppTheme } = preferencesSlice.actions
+export const { updateAppTheme, updateFontSize } = preferencesSlice.actions
 export const preferencesSelector = (state: RootState) => state.preferences
 
 export default preferencesSlice.reducer

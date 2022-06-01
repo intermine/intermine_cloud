@@ -16,18 +16,20 @@ from minio.deleteobjects import DeleteObject
 import pytest
 import requests
 
-from compose.blocs.data import create_data
+from compose.blocs.data import create_data, update_data
 from compose.blocs.file import create_file, get_file
 from compose.blocs.rendered_template import create_rendered_template
-from compose.blocs.template import create_template
+from compose.blocs.template import create_template, update_template
 from compose.configs import config_registry
 from compose.routes import register_blueprints, register_extensions
 from compose.schemas.api.auth.post import AuthPOSTRequest
 from compose.schemas.api.data.post import DataCreate
+from compose.schemas.api.data.put import DataUpdate
 from compose.schemas.api.file.get import FileGetQueryParams, FileQueryType
 from compose.schemas.api.file.post import FileCreate
 from compose.schemas.api.rendered_template.post import RenderedTemplateCreate
 from compose.schemas.api.template.post import TemplateCreate
+from compose.schemas.api.template.put import TemplateUpdate
 from compose.schemas.data import Data
 from compose.schemas.file import File
 from compose.schemas.template import RenderedTemplate, Template
@@ -138,7 +140,29 @@ def template_file(user: User, template: Template) -> File:
 def data(user: User) -> Data:
     data_create = DataCreate(name="randomDataset", ext="gff", file_type="Sequencing")
     created_data = create_data([data_create], user)[0]
-    return created_data
+    file_create = FileCreate(
+        name="testFile",
+        ext="gff",
+        file_type="sequencing",
+        parent_id=created_data.data_id,
+        uploaded=True,
+    )
+    created_file = create_file([file_create], user)[0]
+    fetched_file = get_file(
+        FileGetQueryParams(
+            query_type=FileQueryType.GET_FILE_BY_ID, file_id=created_file.file_id
+        ),
+        user,
+    )[0]
+    archive_path = Path(__file__).parent.joinpath("testData.tar")
+    with open(archive_path, "rb") as f:
+        requests.put(
+            url=fetched_file.presigned_put,
+            data=f,
+        )
+    data_update = DataUpdate(data_id=created_data.data_id, file_id=created_file.file_id)
+    updated_data = update_data([data_update], user)[0]
+    return updated_data
 
 
 @pytest.fixture(scope="session")
@@ -150,7 +174,29 @@ def template(user: User) -> Template:
         [template_create],
         user,
     )[0]
-    return created_template
+    file_create = FileCreate(
+        name="testFile",
+        ext="gff",
+        file_type="sequencing",
+        parent_id=created_template.template_id,
+        uploaded=True,
+    )
+    created_file = create_file([file_create], user)[0]
+    fetched_file = get_file(
+        FileGetQueryParams(
+            query_type=FileQueryType.GET_FILE_BY_ID, file_id=created_file.file_id
+        ),
+        user,
+    )[0]
+    archive_path = Path(__file__).parent.joinpath("testTemplate.tar")
+    with open(archive_path, "rb") as f:
+        requests.put(
+            url=fetched_file.presigned_put,
+            data=f,
+        )
+    template_update = TemplateUpdate(template_id=created_template.template_id, file_id=created_file.file_id)
+    updated_template = update_template([template_update], user)[0]
+    return updated_template
 
 
 @pytest.fixture(scope="session")

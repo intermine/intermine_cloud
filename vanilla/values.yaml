@@ -86,6 +86,10 @@ tolerations: []
 
 affinity: {}
 
+pvc:
+  # To support rolling updates, two pods need to mount it at once.
+  storageClassName: glusterfs-storage
+
 postgresql:
   port: 5432
   postgresqlPassword: postgres

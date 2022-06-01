@@ -10,6 +10,8 @@ import OverviewIcon from '@intermine/chromatin/icons/System/apps-fill'
 import DatasetIcon from '@intermine/chromatin/icons/Device/database-2-fill'
 import TemplateIcon from '@intermine/chromatin/icons/Design/paint-brush-line'
 import MinesIcon from '@intermine/chromatin/icons/Business/bubble-chart-fill'
+// eslint-disable-next-line max-len
+import ClusterIcon from '@intermine/chromatin/icons/Business/archive-drawer-fill'
 import CollapseIcon from '@intermine/chromatin/icons/System/arrow-left-line'
 
 import {
@@ -20,6 +22,7 @@ import {
 } from '../../../store'
 import {
     DASHBOARD_OVERVIEW_PATH,
+    DASHBOARD_CLUSTERS_PATH,
     DASHBOARD_DATASETS_PATH,
     DASHBOARD_TEMPLATES_PATH,
     DASHBOARD_MINES_PATH
@@ -32,6 +35,12 @@ const sidebarItems = [
         to: DASHBOARD_OVERVIEW_PATH,
         text: 'Overview',
         icon: <OverviewIcon />
+    },
+    {
+        id: 'cluster',
+        to: DASHBOARD_CLUSTERS_PATH,
+        text: 'Clusters',
+        icon: <ClusterIcon />
     },
     {
         id: 'datasets',

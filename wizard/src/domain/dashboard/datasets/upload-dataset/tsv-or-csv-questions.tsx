@@ -12,10 +12,17 @@ import {
 type TTsvOrCsvQuestionProps = {
     control: TUploadDatasetFormControl
     resetFields: TUploadDatasetFormResetFields
+    formState: {
+        isSubmitting: boolean
+    }
 }
 
 export const TsvOrCsvQuestions = (props: TTsvOrCsvQuestionProps) => {
-    const { control, resetFields } = props
+    const {
+        control,
+        resetFields,
+        formState: { isSubmitting }
+    } = props
 
     useEffect(() => {
         return () => {
@@ -34,6 +41,7 @@ export const TsvOrCsvQuestions = (props: TTsvOrCsvQuestionProps) => {
                     render={({ field }) => (
                         <DForm.Input
                             {...field}
+                            isDisabled={isSubmitting}
                             placeholder="Name of data source"
                         />
                     )}
@@ -50,7 +58,13 @@ export const TsvOrCsvQuestions = (props: TTsvOrCsvQuestionProps) => {
                             })
                         }}
                         label="Does it have a header?"
-                        control={<Checkbox {...rest} isChecked={value} />}
+                        control={
+                            <Checkbox
+                                {...rest}
+                                isDisabled={isSubmitting}
+                                isChecked={value}
+                            />
+                        }
                     />
                 )}
                 control={control}

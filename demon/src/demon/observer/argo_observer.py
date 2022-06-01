@@ -32,9 +32,6 @@ ERROR_STATES = [
     "WorkflowNodeError",
 ]
 
-config = config_registry.get_config()
-messenger = messenger_registry.get_messenger(config.MESSENGER)
-
 
 def _parse_object(obj) -> Optional[Dict]:
     try:
@@ -92,7 +89,10 @@ def _parse_object(obj) -> Optional[Dict]:
 
 
 def main(namespace: str) -> None:
-    kube_config.load_kube_config()
+    config = config_registry.get_config()
+    messenger = messenger_registry.get_messenger(config.MESSENGER)
+
+    kube_config.load_incluster_config()
     api = client.CoreV1Api()
     w = watch.Watch()
 

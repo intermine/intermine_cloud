@@ -12,7 +12,7 @@ import { useUpload } from '../../hooks'
 import {
     areFileTypeSame,
     getFileType,
-    isFileTypeSupportedForDataset
+    isAValidFileForDataset
 } from '../../utils/misc'
 import {
     defaultUploadDatasetFormFields,
@@ -77,20 +77,26 @@ export const UploadDataset = () => {
 
     const setFile = (file?: File) => {
         if (file) {
-            setValue('file', file)
+            setValue('file', file, {
+                shouldDirty: true,
+                shouldTouch: true,
+                shouldValidate: true
+            })
             clearErrors('file')
             setSelectedFile({ type: getFileType(file), file })
         }
     }
 
     const handleOnFileChange = (file?: File) => {
-        if (!isFileTypeSupportedForDataset(file)) {
+        const {isValid, reason } = isAValidFileForDataset(file)
+
+        if (!isValid) {
+            const { title, msg } = reason
             setModalProps({
                 isOpen: true,
                 type: 'error',
-                heading: 'File type not supported',
-                children: `File which you have selected is not supported.
-                Please select a different file.`,
+                heading: title,
+                children: msg,
                 primaryAction: {
                     children: 'Dismiss',
                     onClick: () => {
@@ -220,9 +226,9 @@ export const UploadDataset = () => {
                         main="Select a file"
                         sub={
                             Boolean(selectedFile.file)
-                                ? 'You can select .fasta, .gff, .csv, .tsv'
-                                : `Click or drop a file here 
-                                if you want to change file`
+                                ? `Click or drop a file here 
+                                if you want to change current file`
+                                : 'You can select .fasta, .gff, .csv, and .tsv'
                         }
                         hasAsterisk
                         isError={Boolean(errors.file)}
@@ -256,6 +262,7 @@ export const UploadDataset = () => {
                         control={control}
                         fileType={selectedFile.type}
                         resetFields={resetField}
+                        formState={{ isSubmitting }}
                     />
                     <Box>
                         <DForm.Actions

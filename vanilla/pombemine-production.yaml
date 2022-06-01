@@ -38,7 +38,8 @@ builder:
     project.title: PombeMine
     project.subTitle: An integrated database for S. pombe genomics
     project.releaseVersion: PombeMine Release 1.0
-    resolver.file.rootpath: /data/pombe/idresolver/
+    resolver.file.rootpath: /data/idresolver/
+    superuser.account: vw253@cam.ac.uk
   storageRequests:
     data: 150Gi
   # Allas
@@ -47,4 +48,4 @@ builder:
       minedir: pombemine/pombemine
       data: staging/pombe
       bio: pombemine/pombemine-bio-sources
-      im: pombemine/intermine
+      #im: pombemine/intermine

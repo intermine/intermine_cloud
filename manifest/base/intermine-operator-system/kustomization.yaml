@@ -1,0 +1,4 @@
+resources:
+- intermine_operator.yaml
+patchesStrategicMerge:
+- watch_namespace.yaml

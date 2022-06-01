@@ -3,7 +3,6 @@
 from http import HTTPStatus
 import json
 
-from blackcap.schemas.api.auth.post import AuthUserCreds
 from flask import make_response, request, Response
 from pydantic import ValidationError
 from sqlalchemy.exc import SQLAlchemyError
@@ -42,7 +41,7 @@ def post() -> Response:
 
     # try to login user
     try:
-        user, token = auther.login_user(AuthUserCreds(**user_creds.dict()))
+        user, token = auther.login_user(AuthPOSTRequest(**user_creds.dict()))
     except SQLAlchemyError:
         response_body = AuthPOSTResponse(
             msg="Something bad happened. Please come back after some time.",

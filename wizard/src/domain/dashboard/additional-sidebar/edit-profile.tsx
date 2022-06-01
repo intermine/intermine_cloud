@@ -104,62 +104,64 @@ export const EditProfile = () => {
             heading="Edit Profile"
             isActive={activeTab === AdditionalSidebarTabs.EditProfileTab}
         >
-            {loadingUserDetails === FetchingStatus.Fetching && (
-                <Typography color="neutral.30">Loading...</Typography>
-            )}
-            {loadingUserDetails === FetchingStatus.Failed && (
-                <Typography color="neutral.30">
-                    Failed to load user profile
-                </Typography>
-            )}
-            {loadingUserDetails === FetchingStatus.Fetched && (
-                <form onSubmit={handleSubmit(onSubmit)}>
-                    <FormGroup
-                        label="Email"
-                        inputProps={{
-                            value: getValues('email'),
-                            isDisabled: true,
-                            size: 'small'
-                        }}
-                    />
-                    <Controller
-                        render={({ field }) => (
-                            <FormGroup
-                                label="Name"
-                                inputProps={{
-                                    ...field,
-                                    size: 'small'
-                                }}
-                            />
-                        )}
-                        control={control}
-                        name="name"
-                    />
+            <ActionSection.Content>
+                {loadingUserDetails === FetchingStatus.Fetching && (
+                    <Typography color="neutral.30">Loading...</Typography>
+                )}
+                {loadingUserDetails === FetchingStatus.Failed && (
+                    <Typography color="neutral.30">
+                        Failed to load user profile
+                    </Typography>
+                )}
+                {loadingUserDetails === FetchingStatus.Fetched && (
+                    <form onSubmit={handleSubmit(onSubmit)}>
+                        <FormGroup
+                            label="Email"
+                            inputProps={{
+                                value: getValues('email'),
+                                isDisabled: true,
+                                size: 'small'
+                            }}
+                        />
+                        <Controller
+                            render={({ field }) => (
+                                <FormGroup
+                                    label="Name"
+                                    inputProps={{
+                                        ...field,
+                                        size: 'small'
+                                    }}
+                                />
+                            )}
+                            control={control}
+                            name="name"
+                        />
 
-                    <Controller
-                        render={({ field }) => (
-                            <FormGroup
-                                label="Organisation"
-                                inputProps={{
-                                    ...field,
-                                    size: 'small'
-                                }}
-                            />
-                        )}
-                        control={control}
-                        name="organisation"
-                    />
-                    <Button
-                        type="submit"
-                        color="primary"
-                        size="small"
-                        isDisabled={!isDirty}
-                        isLoading={isSubmitting}
-                    >
-                        Save changes
-                    </Button>
-                </form>
-            )}
+                        <Controller
+                            render={({ field }) => (
+                                <FormGroup
+                                    label="Organisation"
+                                    inputProps={{
+                                        ...field,
+                                        size: 'small'
+                                    }}
+                                />
+                            )}
+                            control={control}
+                            name="organisation"
+                        />
+                        <Button
+                            type="submit"
+                            color="primary"
+                            size="small"
+                            isDisabled={!isDirty}
+                            isLoading={isSubmitting}
+                        >
+                            Save changes
+                        </Button>
+                    </form>
+                )}
+            </ActionSection.Content>
         </ActionSection>
     )
 }

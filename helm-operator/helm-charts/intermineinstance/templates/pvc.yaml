@@ -9,5 +9,6 @@ spec:
   resources:
     requests:
       storage: 100Mi
-  storageClassName: standard-rwo
-
+  {{- if .Values.pvc.storageClassName }}
+  storageClassName: "{{.Values.pvc.storageClassName}}"
+  {{- end }}

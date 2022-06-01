@@ -1,10 +1,10 @@
-bases:
+resources:
 - ./argo
 - ./compose
 - ./demon
+- ./intermine-operator-system
+- ./mine
 - ./nats
 - ./workflow
 commonLabels:
   app.kubernetes.io/part-of: intermine_cloud
-resources:
-- intermine_operator.yaml

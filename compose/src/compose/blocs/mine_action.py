@@ -2,12 +2,13 @@
 
 from typing import List
 
+from blackcap.blocs.schedule import create_schedule_with_scheduler, create_schedule_db_entry, revert_schedule_db_entry, publish_schedule_message
 from blackcap.flow import Flow, FlowExecError, FuncProp, get_outer_function, Prop, Step
 from blackcap.flow.step import dummy_backward
 from blackcap.schemas.user import User
 from sqlalchemy.exc import SQLAlchemyError
 
-from compose.blocs.mine import get_mine
+from compose.blocs.mine import get_mine, update_mine_db_entry, rewind_mine_db_entry
 from compose.schemas.api.mine.action.post import MineActionCreate
 from compose.schemas.api.mine.get import Mine, MineGetQueryParams, MineQueryType
 
@@ -97,9 +98,12 @@ def generate_create_mine_action_flow(
     """
     check_mine_list_step = Step(check_mine_list_exist, dummy_backward)
     create_job_db_entry_step = Step()
-    create_schedule_db_entry_step = Step()
-    publish_schedule_msg_step = Step({}, dummy_backward)
-    update_mine_db_entry_step = Step()
+    create_schedule_with_scheduler_step = Step(
+        create_schedule_with_scheduler, dummy_backward
+    )
+    create_schedule_db_entry_step = Step(create_schedule_db_entry, revert_schedule_db_entry)
+    publish_schedule_message_step = Step(publish_schedule_message, dummy_backward)
+    update_mine_db_entry_step = Step(update_mine_db_entry, rewind_mine_db_entry)
 
     flow = Flow()
 
@@ -128,6 +132,15 @@ def generate_create_mine_action_flow(
             Prop(data=user, description="User credentials"),
         ],
     )
+    
+    # * 2: Process schedule create objects
+    schedule_create_list = []
+    created_job_list_func_prop = FuncProp(
+        func=flow.get_froward_output,
+        params={"index": 1},
+        description="List of created job objects",
+    )
+    flow.add_step(create_schedule_db_entry_step, [created_job_list_func_prop])
 
     # * 2: Create schedule db entry
     created_job_list_func_prop = FuncProp(
@@ -143,7 +156,7 @@ def generate_create_mine_action_flow(
         params={"index": 2},
         description="List of created schedule objects",
     )
-    flow.add_step(publish_schedule_msg_step, [created_schedule_list_func_prop])
+    flow.add_step(publish_schedule_message_step, [created_schedule_list_func_prop])
 
     # * 4: Update mine with job details
     checked_mine_list_func_prop = FuncProp(

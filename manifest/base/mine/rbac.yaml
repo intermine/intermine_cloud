@@ -1,0 +1,38 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: mine-role
+rules:
+# create IntermineInstance CRD
+- apiGroups:
+  - "intermine.org"
+  resources:
+  - intermineinstances
+  verbs:
+  - create
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: mine
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: mine-role
+subjects:
+- kind: ServiceAccount
+  name: intermine-workflow
+  namespace: workflow
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: intermine-operator
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: intermine-operator-leader-election-role
+subjects:
+- kind: ServiceAccount
+  name: intermine-operator-controller-manager
+  namespace: intermine-operator-system

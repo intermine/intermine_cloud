@@ -106,8 +106,22 @@ export const areFileTypeSame = (option: TAreFileTypeSameOption) => {
     return true
 }
 
-export const isFileTypeSupportedForDataset = (file?: File): boolean => {
-    if (!file) return false
+type TIsValidFileForDataset = {
+    isValid: boolean
+    reason: {
+        title: string
+        msg: string
+    }
+}
+export const isAValidFileForDataset = (file?: File): TIsValidFileForDataset => {
+    if (!file)
+        return {
+            isValid: false,
+            reason: {
+                title: 'Not found',
+                msg: 'File not found',
+            },
+        }
 
     const { Fasta, Csv, Gff, Tsv } = FileTypes
 
@@ -116,8 +130,63 @@ export const isFileTypeSupportedForDataset = (file?: File): boolean => {
         case Tsv:
         case Csv:
         case Gff:
-            return true
+            return {
+                isValid: true,
+                reason: {
+                    title: '',
+                    msg: '',
+                },
+            }
         default:
-            return false
+            return {
+                isValid: false,
+                reason: {
+                    title: 'Not Supported',
+                    msg: `File which you have selected is not supported.
+                Please select a different file.`,
+                },
+            }
+    }
+}
+
+type TIsValidFileForTemplate = {
+    isValid: boolean
+    reason: {
+        title: string
+        msg: string
+    }
+}
+export const isAValidFileForTemplate = (
+    file?: File
+): TIsValidFileForTemplate => {
+    if (!file)
+        return {
+            isValid: false,
+            reason: {
+                title: 'Not found',
+                msg: 'File not found',
+            },
+        }
+
+    const { Zip } = FileTypes
+
+    switch (getFileType(file)) {
+        case Zip:
+            return {
+                isValid: true,
+                reason: {
+                    title: '',
+                    msg: '',
+                },
+            }
+        default:
+            return {
+                isValid: false,
+                reason: {
+                    title: 'Not Supported',
+                    msg: `File which you have selected is not supported.
+                Please select a different file.`,
+                },
+            }
     }
 }

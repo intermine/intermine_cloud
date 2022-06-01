@@ -22,9 +22,9 @@ def test_mine_create(
     created_mine: Mine = create_mine(
         [
             MineCreate(
-                name="randomMine",
+                name="randomMineUnit",
                 description="Random Mine",
-                subdomain=f"random-{randint(0,10000)}",
+                subdomain=f"random-unit-{randint(0,10000)}",
                 template_id=template.template_id,
                 rendered_template_id=rendered_template.rendered_template_id,
                 rendered_template_file_id=file.file_id,
@@ -33,5 +33,5 @@ def test_mine_create(
         ],
         user,
     )[0]
-    assert created_mine.name == "randomMine"
+    assert created_mine.name == "randomMineUnit"
     assert created_mine.description == "Random Mine"

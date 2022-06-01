@@ -151,11 +151,6 @@ export const FormInput = (props: InputProps & { isError?: boolean }) => {
         <Input
             hasFullWidth
             hasTransparentBackground
-            csx={{
-                inputRoot: {
-                    ':hover': { background: 'transparent' }
-                }
-            }}
             color="neutral"
             {...rest}
         />

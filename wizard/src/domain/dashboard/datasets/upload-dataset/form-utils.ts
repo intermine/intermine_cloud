@@ -64,6 +64,7 @@ export const defaultUploadDatasetFormFields: Partial<TUploadDatasetFormFields> =
         fasta: defaultFastaAnswers,
         gff: defaultGffAnswers,
         tsvOrCsv: defaultTsvOrCsvAnswers,
+        file: undefined,
     }
 
 type TServerResponse = {

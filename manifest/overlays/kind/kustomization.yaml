@@ -1,7 +1,8 @@
 commonLabels:
   env: dev
   app.kubernetes.io/part-of: intermine_cloud
-bases:
+resources:
 - ../dev
 patchesStrategicMerge:
 - argo_pns.yaml
+- delete_nats_test.yaml

@@ -1,0 +1,6 @@
+commonLabels:
+  env: dev
+  app.kubernetes.io/part-of: intermine_cloud
+resources:
+- ../dev
+- ./longhorn-system

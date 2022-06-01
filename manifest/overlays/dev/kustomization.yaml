@@ -1,5 +1,5 @@
 commonLabels:
   env: dev
   app.kubernetes.io/part-of: intermine_cloud
-bases:
+resources:
 - ../../base

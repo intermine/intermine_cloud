@@ -32,8 +32,11 @@ ENV PATH="/compose/venv/bin:$PATH" \
     FLASK_APP=compose
 
 COPY --from=python-build-env /compose/venv venv
+COPY --from=python-build-env /compose/wsgi.py wsgi.py
 RUN ls venv/bin/
+RUN mkdir -p ~/.local/share/imcloud && touch ~/.local/share/imcloud/compose.db
+
 
 EXPOSE 9991
 
-CMD compose db init && compose run
+CMD compose db init && gunicorn --bind 0.0.0.0:9991 wsgi:app

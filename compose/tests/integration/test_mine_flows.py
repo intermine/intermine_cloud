@@ -17,9 +17,9 @@ def test_create_mine_flow(
 ) -> None:
     mine_create_request_list = [
         MineCreate(
-            name="randomMine",
+            name="randomMineIntegration",
             description="Random Mine",
-            subdomain=f"random-{randint(1,10000)}",
+            subdomain=f"random-int-{randint(1,10000)}",
             template_id=template.template_id,
             data_file_ids=[str(data.data_id)],
         )
@@ -27,4 +27,5 @@ def test_create_mine_flow(
     create_mine_flow = generate_create_mine_flow(mine_create_request_list, user)
     executor = Executor(create_mine_flow, {})
     executed_flow = executor.run()
+    print(executed_flow.errors)
     assert executed_flow.status == FlowStatus.PASSED

@@ -1,0 +1,13 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: intermine-operator-controller-manager
+  namespace: intermine-operator-system
+spec:
+  template:
+    spec:
+      containers:
+      - name: manager
+        env:
+        - name: WATCH_NAMESPACE
+          value: "mine"

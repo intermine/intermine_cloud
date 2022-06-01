@@ -4,4 +4,4 @@ metadata:
   name: workflow-controller-configmap
   namespace: argo
 data:
-  config: 'containerRuntimeExecutor: pns'
+  containerRuntimeExecutor: pns

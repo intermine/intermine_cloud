@@ -82,6 +82,8 @@ tolerations: []
 
 affinity: {}
 
+pvc: {}
+
 postgresql:
   port: 5432
   postgresqlPassword: postgres
@@ -107,6 +109,10 @@ tomcat:
     enabled: true
     hostname: legacy.localhost
     pathType: Prefix
+
+# Only used by vanilla.
+builder:
+  enabled: false
 
 # Default values that should be overriden by manifest.
 bluegenes:

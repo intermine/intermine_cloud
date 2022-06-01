@@ -3,8 +3,10 @@ from pprint import pprint
 from typing import Dict, List, Optional
 from jinja2 import Environment, PackageLoader
 import yaml
-import requests
 import json
+from logzero import logger
+from kubernetes import client as kube_client, config as kube_config
+from functools import lru_cache
 
 from blackcap.cluster.base import BaseCluster
 from blackcap.schemas.job import Job
@@ -13,63 +15,100 @@ from blackcap.messenger import messenger_registry
 from blackcap.configs import config_registry
 
 
-config = config_registry.get_config()
-messenger = messenger_registry.get_messenger(config.MESSENGER)
-jinjaEnv = Environment(loader=PackageLoader("demon", package_path="templates"))
-
-
-def _report_mineprogress(workflow_yaml: str, extra_data: Optional[Dict] = None) -> None:
-    workflow = yaml.safe_load(workflow_yaml)
-    try:
-        total_steps = len(workflow["spec"]["templates"][0]["steps"])
-    except KeyError:
-        # TODO what's the best way to report this error?
-        pass
-
-    progress_report = {
-        "status": "STARTED",
-        "total_steps": total_steps,
-    }
-    if extra_data:
-        progress_report.update(extra_data)
-
-    messenger.publish({"data": progress_report}, "mineprogress")
-
-
-def _submit_workflow(
-    workflow_template: str, workflow_meta: Dict, context: Dict
-) -> None:
-
-    tmpl = jinjaEnv.get_template(workflow_template)
-    workflow_yaml = tmpl.render(**context)
-
-    _report_mineprogress(workflow_yaml, extra_data=workflow_meta)
-
-    workflow_json = json.dumps(
-        {
-            "namespace": "argo",
-            "serverDryRun": False,
-            "workflow": yaml.safe_load(workflow_yaml),
-        }
-    )
-
-    requests.post(config.ARGO_ENDPOINT + "/api/v1/workflows/argo", json=workflow_json)
-
-
 class ArgoCluster(BaseCluster):
     CONFIG_KEY_VAL = "ARGO"
 
+    @property
+    @lru_cache
+    def messenger(self):
+        config = config_registry.get_config()
+        return messenger_registry.get_messenger(config.MESSENGER)
+
+    @property
+    @lru_cache
+    def jinja_env(self):
+        return Environment(loader=PackageLoader("demon", package_path="templates"))
+
+    @property
+    @lru_cache
+    def kube_api(self):
+        kube_config.load_incluster_config()
+        return kube_client.CustomObjectsApi()
+
+    def report_mineprogress(self, workflow_yaml: str, extra_data: Optional[Dict] = None) -> None:
+        workflow = yaml.safe_load(workflow_yaml)
+        try:
+            total_steps = len(workflow["spec"]["templates"][0]["steps"])
+        except KeyError:
+            # TODO what's the best way to report this error?
+            pass
+
+        progress_report = {
+            "status": "STARTED",
+            "total_steps": total_steps,
+        }
+        if extra_data:
+            progress_report.update(extra_data)
+
+        self.messenger.publish({"data": progress_report}, "mineprogress")
+
+    def submit_workflow(
+        self, workflow_template: str, workflow_meta: Dict, context: Dict
+    ) -> None:
+        logger.info("connecting to argo...")
+        tmpl = self.jinja_env.get_template(workflow_template)
+        workflow_yaml = tmpl.render(**context)
+        logger.info("generated workflow yaml")
+        # logger.info(workflow_yaml)
+
+        self.report_mineprogress(workflow_yaml, extra_data=workflow_meta)
+
+        created_workflow = self.kube_api.create_namespaced_custom_object(
+            group="argoproj.io",
+            version="v1alpha1",
+            namespace="workflow",
+            plural="workflows",
+            body=yaml.safe_load(workflow_yaml),
+        )
+        logger.info(created_workflow)
+
+        # workflow_name = created_workflow['metadata']['name']
+        # for type in ['postgres', 'solr', 'tomcat']:
+        #     created_pvc = self.kube_api.create_namespaced_persistent_volume_claim(
+        #         namespace="workflow",
+        #         body=kube_client.V1PersistentVolumeClaim(
+        #             api_version="v1",
+        #             kind="PersistentVolumeClaim",
+        #             metadata=kube_client.V1ObjectMeta(
+        #                 name=(workflow_name + "-" + type + "-data")
+        #             ),
+        #             spec=kube_client.V1PersistentVolumeClaimSpec(
+        #                 accessModes=["ReadWriteOnce"],
+        #                 resources=kube_client.V1ResourceRequirements(
+        #                     requests={
+        #                         "storage": "4Gi"
+        #                     }
+        #                 )
+        #             )
+        #         )
+        #     )
+        #     logger.info(created_pvc)
+
     def prepare_job(self: "BaseCluster", schedule: Schedule) -> None:
+        logger.info("preparing job...")
         pass
 
     def submit_job(self: "BaseCluster", schedule: Schedule) -> None:
+        logger.info("submitting job...")
         # schedule = json.loads(schedule)
-        context = schedule["job"]["spec"]
+        logger.info(schedule)
+        context = schedule["job"]["specification"]
         workflow_meta = {
             "workflow_name": schedule["job"]["name"],
         }
 
         if schedule["job"]["job_type"] == "build":
+            logger.info("found a build job")
             # Example context
             # context = {
             #     "mine_name": "pombemine",
@@ -93,7 +132,7 @@ class ArgoCluster(BaseCluster):
             #     "get_bio": "http://localhost:9000/my-bucket/bio.tgz?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=yGoQ32Xqe9DDM3wdXQ8j%2F20211126%2F%2Fs3%2Faws4_request&X-Amz-Date=20211126T163836Z&X-Amz-Expires=604800&X-Amz-SignedHeaders=host&X-Amz-Signature=b1632c3c613f00c8e690ea323732e1b5ed93b0fb29afed3e601dd7d8b67659d3",
             # }
 
-            _submit_workflow("minebuilder.yaml.template", workflow_meta, context)
+            self.submit_workflow("minebuilder.yaml.template", workflow_meta, context)
 
         elif schedule["job"]["job_type"] == "deploy":
             # Example context
@@ -105,7 +144,7 @@ class ArgoCluster(BaseCluster):
             #     "get_solr": "http://localhost:9000/my-bucket/bio.tgz?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=yGoQ32Xqe9DDM3wdXQ8j%2F20211126%2F%2Fs3%2Faws4_request&X-Amz-Date=20211126T163836Z&X-Amz-Expires=604800&X-Amz-SignedHeaders=host&X-Amz-Signature=b1632c3c613f00c8e690ea323732e1b5ed93b0fb29afed3e601dd7d8b67659d3",
             # }
 
-            _submit_workflow("minedeployer.yaml.template", workflow_meta, context)
+            self.submit_workflow("minedeployer.yaml.template", workflow_meta, context)
 
     def get_job_status(self: "BaseCluster", job_id: str) -> List[str]:
         pass

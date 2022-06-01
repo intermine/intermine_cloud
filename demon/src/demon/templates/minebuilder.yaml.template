@@ -11,7 +11,7 @@ spec:
       accessModes: [ "ReadWriteOnce" ]
       resources:
         requests:
-          storage: 200Mi
+          storage: 1Gi
   - metadata:
       name: sources
     spec:
@@ -28,6 +28,13 @@ spec:
           storage: 1Gi
   - metadata:
       name: solr-data
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 1Gi
+  - metadata:
+      name: tomcat-data
     spec:
       accessModes: [ "ReadWriteOnce" ]
       resources:
@@ -51,6 +58,8 @@ spec:
             value: {% raw %}"{{steps.start-postgres.ip}}"{% endraw %}
           - name: solr-host
             value: {% raw %}"{{steps.start-solr.ip}}"{% endraw %}
+          - name: tomcat-host
+            value: {% raw %}"NOT-USED-HERE"{% endraw %}
 
     {% if bio %}
     - - name: install-bio-sources
@@ -98,8 +107,19 @@ spec:
           - name: task
             value: buildUserDB
 
-    - - name: release-artifacts
-        template: artifacts
+    - - name: upload-artifacts
+        template: uploader
+
+    # TODO: only template if deploy
+    - - name: start-services
+        template: intermine-instance
+        arguments:
+          parameters:
+          - name: get-postgres
+            value: {% raw %}"{{steps.upload-artifacts.outputs.parameters.get-postgres}}"{% endraw %}
+          - name: get-solr
+            value: {% raw %}"{{steps.upload-artifacts.outputs.parameters.get-solr}}"{% endraw %}
+    # TODO end
 
 
   - name: postgres
@@ -107,7 +127,8 @@ spec:
     retryStrategy:
       limit: 3
     container:
-      image: intermine/postgres:0.0.2 # WARNING - not on docker hub
+      image: intermine/postgres:0.0.3
+      command: ["postgres", "-c", "config_file=/opt/postgresql.conf", "-p", "5432"]
       readinessProbe:
         exec:
           command:
@@ -126,6 +147,7 @@ spec:
       limit: 3
     container:
       image: intermine/solr:latest
+      command: ["/opt/scripts/intermine.sh", "{{ mine_name }}"]
       env:
       - name: MINE_NAME
         value: {{ mine_name }}
@@ -155,6 +177,7 @@ spec:
       {% endif %}
     container:
       image: alpine:3.8
+      command: ["/bin/sh"]
       volumeMounts:
       - name: workdir
         mountPath: /home/intermine
@@ -165,16 +188,19 @@ spec:
       parameters:
       - name: postgres-host
       - name: solr-host
+      - name: tomcat-host
     container:
       image: intermine/prebuild:latest
       command: ["builder_prepare"]
-      args: ["--mine-path", "/home/intermine/{{ mine_name }}"]
+      args: ["--mine-path", "/home/intermine/{{ mine_name }}", "--override", "webapp.path={{ mine_name }}", "--override", "project.title={{ pretty_mine_name }}"]
       # TODO support property overrides in a way secrets aren't visible
       env:
       - name: PGHOST
         value: {% raw %}"{{inputs.parameters.postgres-host}}"{% endraw %}
       - name: SOLR_HOST
         value: {% raw %}"{{inputs.parameters.solr-host}}"{% endraw %}
+      - name: TOMCAT_HOST
+        value: {% raw %}"{{inputs.parameters.tomcat-host}}"{% endraw %}
       volumeMounts:
       - name: workdir
         mountPath: /home/intermine
@@ -199,30 +225,171 @@ spec:
         mountPath: /home/intermine
       - name: sources
         mountPath: /data
-  - name: artifacts
+  # TODO when compose is ready, replace this stub with using tar to create archives and uploading them with curl to presigned URLs post_postgres and post_solr - then pass on presigned URLs to fetch these (who generates this?) onto the next step.
+  - name: uploader
     container:
-      image: alpine:3.8
+      image: minio/mc:latest
       volumeMounts:
-      - name: workdir
-        mountPath: /home/intermine
+      - name: uploader-dumps
+        mountPath: /dumps
+      command: ["sh", "-c"]
+      args:
+      - >
+        mc alias set minio {{ STUB_endpoint }} {{ STUB_access_key }} {{ STUB_secret_key }} &&
+        mc cp /dumps/postgres.tgz minio/my-bucket/ &&
+        mc cp /dumps/solr.tgz minio/my-bucket/ &&
+        mc share download -q minio/my-bucket/postgres.tgz | grep Share | sed -e 's/.*Share: //' > /tmp/get_postgres &&
+        mc share download -q minio/my-bucket/solr.tgz | grep Share | sed -e 's/.*Share: //' > /tmp/get_solr
+    initContainers:
+    - name: archive-dumps
+      image: alpine:3.8
+      command: ["sh", "-c"]
+      args:
+      - tar -cvzf /dumps/postgres.tgz -C /postgres .
+        && tar -cvzf /dumps/solr.tgz -C /solr .
+      volumeMounts:
       - name: postgres-data
-        mountPath: /var/lib/postgresql/data
+        mountPath: /postgres
       - name: solr-data
-        mountPath: /var/solr
+        mountPath: /solr
+      - name: uploader-dumps
+        mountPath: /dumps
     outputs:
-      artifacts:
-      - name: mine-dir
-        path: /home/intermine/{{ mine_name }}
-        s3:
-          bucket: {{ bucket_name }}
-          key: {{ minedir_bucket_key }}
-      - name: postgres-dump
-        path: /var/lib/postgresql/data
-        s3:
-          bucket: {{ bucket_name }}
-          key: {{ postgres_bucket_key }}
-      - name: solr-dump
-        path: /var/solr
-        s3:
-          bucket: {{ bucket_name }}
-          key: {{ solr_bucket_key }}
+      parameters:
+      - name: get-postgres
+        valueFrom:
+          path: /tmp/get_postgres
+      - name: get-solr
+        valueFrom:
+          path: /tmp/get_solr
+  - name: intermine-instance
+    inputs:
+      parameters:
+      - name: get-postgres
+      - name: get-solr
+    resource:
+      action: create
+      manifest: |
+        apiVersion: intermine.org/v1alpha1
+        kind: IntermineInstance
+        metadata:
+          name: {% raw %}"{{workflow.name}}"{% endraw %}
+          namespace: mine
+        spec:
+          postgresql:
+            fullnameOverride: {% raw %}"{{workflow.name}}-postgres"{% endraw %}
+            primary:
+              persistence:
+                mountPath: /bitnami/postgresql/data
+              initContainers:
+              - name: fetch-dump
+                image: alpine/curl:3.14
+                command: ["sh", "-c"]
+                args:
+                - curl -fsSL -o /tmp/data.tgz '{% raw %}{{inputs.parameters.get-postgres}}{% endraw %}'
+                  && tar -xvf /tmp/data.tgz -C /data
+                volumeMounts:
+                - name: data
+                  mountPath: /data
+          # TODO prepare postgresqluserdb with init container ?
+          solr:
+            fullnameOverride: {% raw %}"{{workflow.name}}-solr"{% endraw %}
+            initContainers:
+            - name: fetch-dump
+              image: alpine/curl:3.14
+              command: ["sh", "-c"]
+              args:
+              - curl -fsSL -o /tmp/data.tgz '{% raw %}{{inputs.parameters.get-solr}}{% endraw %}'
+                && mkdir -p /data/server/solr
+                && tar -xvf /tmp/data.tgz -C /data/server/solr
+                && mv -v /data/server/solr/data/* /data/server/solr
+              volumeMounts:
+              - name: data
+                mountPath: /data
+          tomcat:
+            fullnameOverride: {% raw %}"{{workflow.name}}-tomcat"{% endraw %}
+            livenessProbe:
+              httpGet:
+                path: /{{ mine_name }}/begin.do
+                port: 8080
+            readinessProbe:
+              httpGet:
+                path: /{{ mine_name }}/begin.do
+                port: 8080
+            extraVolumes:
+            - name: workdir
+              emptyDir: {}
+            initContainers:
+            - name: fetch-minedir
+              image: alpine/curl:3.14
+              command: ["sh", "-c"]
+              args:
+              - curl -fsSL -o /tmp/minedir.tgz '{{ get_minedir }}'
+                && tar -xvf /tmp/minedir.tgz -C /workdir
+              volumeMounts:
+              - name: workdir
+                mountPath: /workdir
+            - name: prepare-minedir
+              image: intermine/prebuild:latest
+              command: ["builder_prepare"]
+              args:
+              - "--mine-path"
+              - "/home/intermine/{{ mine_name }}"
+              - "--override"
+              - "webapp.path={{ mine_name }}"
+              - "--override"
+              - "project.title={{ pretty_mine_name }}"
+              # TODO support property overrides in a way secrets aren't visible
+              env:
+              - name: PGHOST
+                value: {% raw %}"{{workflow.name}}-postgres"{% endraw %}
+              - name: SOLR_HOST
+                value: {% raw %}"{{workflow.name}}-solr"{% endraw %}
+              - name: TOMCAT_HOST
+                value: {% raw %}"{{workflow.name}}-tomcat"{% endraw %}
+              volumeMounts:
+              - name: workdir
+                mountPath: /home/intermine
+            - name: prepare-tomcat
+              image: intermine/tomcat:latest
+              # Copy Tomcat configs/libs/etc. excluding webapps.
+              command: ["sh", "-c", "cp -av $CATALINA_HOME/. /tomcat && rm -rvf /tomcat/webapps"]
+              volumeMounts:
+              - name: data
+                mountPath: /tomcat
+            - name: build-war
+              image: intermine/build:latest
+              workingDir: /home/intermine/{{ mine_name }}
+              command: [sh, -c]
+              # TODO support webapp.path set to nested directory
+              args:
+              - ./gradlew war
+                && mkdir -v /tomcat/webapps
+                && cp -v webapp/build/libs/webapp.war /tomcat/webapps/{{ mine_name }}.war
+              resources:
+                requests:
+                  memory: 4Gi
+                  cpu: 500m
+              volumeMounts:
+              - name: workdir
+                mountPath: /home/intermine
+              - name: data
+                mountPath: /tomcat
+
+            ingress:
+              hostname: legacy.{{ mine_name }}
+          bluegenes:
+            backendServiceRoot: {% raw %}http://{{workflow.name}}-tomcat{% endraw %}/{{ mine_name }}
+            serviceRoot: http://legacy.{{ mine_name }}/{{ mine_name }}
+            mineName: {{ pretty_mine_name }}
+            mineNamespace: {{ mine_name }}
+          ingress:
+            hostname: {{ mine_name }}
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 1001
+    runAsGroup: 1001
+    fsGroup: 1001
+  volumes:
+  - name: uploader-dumps
+    emptyDir: {}

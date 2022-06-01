@@ -1,89 +1,126 @@
+import { useState } from 'react'
 import { Box } from '@intermine/chromatin/box'
 import { useForm, Controller } from 'react-hook-form'
 
 import { DASHBOARD_TEMPLATES_LANDING_PATH } from '../../../routes'
-import { Entities } from '../common/constants'
+import { FileTypes } from '../common/constants'
 import { DashboardForm as DForm } from '../common/dashboard-form'
-import { useDashboardUpload } from '../common/dashboard-form'
+import { useUpload } from '../hooks'
+
 import {
-    useUpload,
-    formatUploadMachineContextForUseUploadProps
-} from '../hooks'
+    TUploadTemplateFormFields,
+    defaultUploadTemplateFormFields,
+    onUploadTemplateFormSubmit
+} from './form-utils'
 
-const { Template } = Entities
+import { TModalProps, Modal } from '../../../components/modal'
+import { ResponseStatus } from '../../../shared/constants'
+import { getFileType, isAValidFileForTemplate } from '../utils/misc'
 
-type TUploadTemplateFormFields = {
-    name: string
-    description: string
+/**
+ * All file extensions that we are supporting
+ */
+const fileAcceptString = '.zip'
+
+type SelectedFile = {
+    file?: File
+    type: FileTypes
 }
 
 export const UploadTemplate = () => {
+    const [modalProps, setModalProps] = useState<TModalProps>({
+        isOpen: false
+    })
+
+    const [selectedFile, setSelectedFile] = useState<SelectedFile>({
+        type: FileTypes.Unknown
+    })
+
     const {
         control,
         reset,
-        formState: { isDirty },
-        getValues
+        formState: { isDirty, errors, isSubmitting },
+        handleSubmit,
+        setValue,
+        clearErrors
     } = useForm<TUploadTemplateFormFields>({
-        defaultValues: {
-            description: '',
-            name: ''
-        }
+        defaultValues: defaultUploadTemplateFormFields
     })
 
     const {
         runWhenPresignedURLGenerationFailed,
         runWhenPresignedURLGenerated,
-        serviceToGeneratePresignedURL,
         inlineAlertProps
     } = useUpload()
 
-    const {
-        generatePresignedURL,
-        isDirty: isUploadDirty,
-        isGeneratingPresignedURL,
-        onDropHandler,
-        onInputChange,
-        uploadMachineState,
-        reset: resetUpload
-    } = useDashboardUpload({
-        serviceToGeneratePresignedURL: (ctx) => {
-            const { file } = ctx
-
-            return serviceToGeneratePresignedURL({
-                entity: Template,
-                template: {
-                    description: getValues('description'),
-                    name: getValues('name') ? getValues('name') : file.name,
-                    template_vars: []
-                }
-            })
-        },
-
-        runWhenPresignedURLGenerated: (ctx) => {
-            const _ctx = formatUploadMachineContextForUseUploadProps(
-                ctx,
-                Template
-            )
-
-            runWhenPresignedURLGenerated(_ctx)
-            resetForm()
-        },
-
-        runWhenPresignedURLGenerationFailed: (ctx) => {
-            runWhenPresignedURLGenerationFailed({
-                errorMessage: ctx.errorMessage
-            })
-        }
-    })
-
     const resetForm = () => {
         reset()
-        resetUpload()
+        setSelectedFile({ type: FileTypes.Unknown })
+    }
+
+    const setFile = (file?: File) => {
+        if (file) {
+            setValue('file', file, {
+                shouldDirty: true,
+                shouldTouch: true,
+                shouldValidate: true
+            })
+            clearErrors('file')
+            setSelectedFile({ type: getFileType(file), file })
+        }
+    }
+
+    const handleOnFileChange = (file?: File) => {
+        const { isValid, reason } = isAValidFileForTemplate(file)
+        if (!isValid) {
+            const { title, msg } = reason
+            setModalProps({
+                isOpen: true,
+                type: 'error',
+                heading: title,
+                children: msg,
+                primaryAction: {
+                    children: 'Dismiss',
+                    onClick: () => {
+                        setModalProps({ isOpen: false })
+                    }
+                }
+            })
+            return
+        }
+
+        setFile(file)
+    }
+
+    const onFormSubmit = async (data: TUploadTemplateFormFields) => {
+        const response = await onUploadTemplateFormSubmit(data)
+
+        if (
+            response.status === ResponseStatus.Ok &&
+            response.fileList &&
+            response.templateList
+        ) {
+            runWhenPresignedURLGenerated({
+                entityList: response.templateList,
+                file: data.file,
+                fileList: response.fileList
+            })
+            resetForm()
+        } else {
+            runWhenPresignedURLGenerationFailed({
+                errorMessage: response.message
+            })
+        }
     }
 
     return (
         <Box>
-            <DForm isDirty={isDirty || isUploadDirty}>
+            <Modal
+                {...modalProps}
+                onClose={() => setModalProps({ isOpen: false })}
+            />
+
+            <DForm isDirty={isDirty} onSubmit={handleSubmit(onFormSubmit)}>
                 <DForm.PageHeading
                     landingPageUrl={DASHBOARD_TEMPLATES_LANDING_PATH}
                     pageHeading="Templates"
@@ -92,7 +129,7 @@ export const UploadTemplate = () => {
                     <DForm.InlineAlert {...inlineAlertProps} />
                     <DForm.Heading>Upload New Template</DForm.Heading>
                     <DForm.Label
-                        isDisabled={isGeneratingPresignedURL}
+                        isDisabled={isSubmitting}
                         main="Name"
                         sub="Name of your template."
                     >
@@ -100,7 +137,7 @@ export const UploadTemplate = () => {
                             render={({ field }) => (
                                 <DForm.Input
                                     {...field}
-                                    isDisabled={isGeneratingPresignedURL}
+                                    isDisabled={isSubmitting}
                                     placeholder="Template Name"
                                 />
                             )}
@@ -109,7 +146,7 @@ export const UploadTemplate = () => {
                         />
                     </DForm.Label>
                     <DForm.Label
-                        isDisabled={isGeneratingPresignedURL}
+                        isDisabled={isSubmitting}
                         main="Describe your Template"
                         sub="This will help other users to get an idea about
                         this template. You can write something like: A template 
@@ -119,7 +156,7 @@ export const UploadTemplate = () => {
                             render={({ field }) => (
                                 <DForm.Input
                                     {...field}
-                                    isDisabled={isGeneratingPresignedURL}
+                                    isDisabled={isSubmitting}
                                     rows={5}
                                     Component="textarea"
                                     placeholder="Description of your template"
@@ -131,21 +168,40 @@ export const UploadTemplate = () => {
                     </DForm.Label>
 
                     <DForm.Label
-                        isDisabled={isGeneratingPresignedURL}
+                        isDisabled={isSubmitting}
                         main="Select a file"
-                        sub="You can select .fasta, .tsv, .cst, .etc"
+                        sub={
+                            Boolean(selectedFile.file)
+                                ? `Click or drop a file here 
+                                if you want to change current file`
+                                : 'You can select .zip'
+                        }
                         hasAsterisk
-                        isError={uploadMachineState.value === 'fileMissing'}
-                        errorMsg="Please select a file."
+                        isError={Boolean(errors.file)}
+                        errorMsg={errors.file?.message}
                     >
-                        <DForm.UploadBox
-                            onInputChange={onInputChange}
-                            onDropHandler={onDropHandler}
+                        <Controller
+                            render={() => {
+                                return (
+                                    <DForm.UploadBox
+                                        accept={fileAcceptString}
+                                        isHidden={Boolean(selectedFile.file)}
+                                        isError={Boolean(errors.file)}
+                                        isDisabled={isSubmitting}
+                                        onChange={(file) =>
+                                            handleOnFileChange(file)
+                                        }
+                                    />
+                                )
+                            }}
+                            control={control}
+                            name="file"
+                            rules={{
+                                required: 'Please select a file'
+                            }}
                         />
+                        <DForm.UploadFileInfo file={selectedFile.file} />
                     </DForm.Label>
-                    <DForm.UploadFileInfo
-                        file={uploadMachineState.context.file}
-                    />
 
                     <Box>
                         <DForm.Actions
@@ -155,16 +211,16 @@ export const UploadTemplate = () => {
                                     children: 'Reset',
                                     color: 'warning',
                                     type: 'reset',
-                                    isDisabled: isGeneratingPresignedURL,
+                                    isDisabled: isSubmitting,
                                     onClick: resetForm
                                 },
                                 {
                                     key: 'upload',
                                     color: 'primary',
                                     children: 'Upload Template',
-                                    onClick: generatePresignedURL,
-                                    isDisabled: isGeneratingPresignedURL,
-                                    isLoading: isGeneratingPresignedURL
+                                    type: 'submit',
+                                    isDisabled: isSubmitting,
+                                    isLoading: isSubmitting
                                 }
                             ]}
                         />
