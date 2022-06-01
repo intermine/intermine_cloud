@@ -1,61 +1,51 @@
 Intermine Cloud
 ==============================
 
+Intemine Cloud is a cloud native platform that enables automation of InterMine
+builds and deployments. It also provides a framework to provide this automation
+to the end user as a service.
+
 .. toctree::
    :hidden:
-   :maxdepth: 1
-
-   compose
-   demon
+   :maxdepth: 2
+   
+   architecture
 
 Installation
 ------------
 
-To install intermine_compose,
-run this command in your terminal at the root of this project:
+.. code-block:: console
+
+   $ pip install iminfra
+
+
+Getting Started
+----------------
+
+Use the `iminfra` CLI to create a new git repository with the vanilla kubernetes template.
+Other available template can be found [here].
 
 .. code-block:: console
 
-   $ poetry install
+   $ iminfra new kube ./biocloud
 
-
-Usage
------
-
-intermine_compose usage looks like:
+After the execution of the above command, a biocloud directory will be created.
+Inside the directory, a python project with the same name is also created.
+Change directory to `biocloud` and use the setup script to install the project
+into an isolated environment.
 
 .. code-block:: console
 
-   $ intermine_compose [Command] [Flags]
+   $ cd biocloud && python scripts/setup_env.py
 
-**Commands**
+This will take a few minutes depending on the network connection.
+Once the isolated environment is ready, activate the environment.
 
-.. option:: run
+.. code-block:: console
 
-   Runs the backend server in debug mode.
+   $ source .setup.env
 
-.. warning:: Do not use this in prodcution.
+A CLI with the same name as the project will be present in
+this environment. In this case, it is `biocloud`. It can be used
+to manage the cloud platform.
 
-.. option:: db [Command] [Flags]
-
-   Runs database management related operations.
-
-   **Commands**
-
-   .. option:: init
-
-   Initializes the database.
-
-   .. option:: destroy
-
-   Drops all the database tables.
-
-   .. option:: reset
-
-   Drops all the database tables and then recreates them.
-
-**Flags**
-
-.. option:: --help
-
-   Display a short usage message and exit.
