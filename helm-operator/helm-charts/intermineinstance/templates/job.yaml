@@ -97,6 +97,9 @@ spec:
         - "--task"
         - "{{.Values.builder.task}}"
         {{- end }}
+        {{- if or .Values.builder.rebuild .Release.IsUpgrade }}
+        - "--rebuild"
+        {{- end }}
         - "--properties-path"
         - "/home/intermine/properties.pkl"
         - "--mine-path"

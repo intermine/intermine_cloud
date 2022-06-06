@@ -20,7 +20,12 @@ If you've made changes to the charts or values and wish to get a previously inst
 helm upgrade -f values.yaml -f pombemine.yaml -f secrets.yaml pombemine ../helm-operator/helm-charts/intermineinstance
 ```
 
-To rerun a specific build task instead of performing a full build, you can add the flag: `--set builder.task=redeploy`
+This will also start a new job to rebuild the mine (keeping the existing userprofile DB).
+
+You can optionally include any of the following flags:
+
+- `--set builder.task=redeploy` to run one specific build task instead of performing a full rebuild
+- `--set builder.rebuild=true` to perform a full build while keeping the existing userprofile DB (you don't need this flag for upgrades as this is default behaviour)
 
 ### Uninstalling
 

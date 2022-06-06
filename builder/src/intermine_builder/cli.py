@@ -150,6 +150,7 @@ def prepare(**options):
 
 @click.command()
 @click.option("--task", required=False, help="Run a single task instead of the full job.")
+@click.option("--rebuild", is_flag=True, required=False, help="Do a rebuild instead of a full build, meaning the userprofile DB won't be touched.")
 @click.option("--mine-path", type=click.Path(exists=True, file_okay=False), required=True, help="Path to mine directory to be prepared.")
 @click.option("--bio-path", type=click.Path(exists=True, file_okay=False), required=False, help="Path to optional bio directory to be installed.")
 @click.option("--im-path", type=click.Path(exists=True, file_okay=False), required=False, help="Path to optional intermine directory to be installed.")
@@ -199,8 +200,11 @@ def job(**options):
         for postprocess in project['post-processing']:
             builder.post_process(postprocess, stacktrace=True)
 
-        builder.build_user_db(stacktrace=True)
-        builder.deploy(stacktrace=True)
+        if options.get('rebuild'):
+            builder.redeploy(stacktrace=True)
+        else:
+            builder.build_user_db(stacktrace=True)
+            builder.deploy(stacktrace=True)
 
     except subprocess.CalledProcessError:
         click.echo(traceback.format_exc(), err=True)
