@@ -1,0 +1,97 @@
+{{- if .Values.backup.objectStorage.bucket -}}
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: "{{.Release.Name}}-backup"
+  labels:
+    app.kubernetes.io/component: backup
+    {{- include "intermineinstance.labels" . | nindent 4 }}
+spec:
+  schedule: "*/15 * * * *"
+  failedJobsHistoryLimit: 1
+  successfulJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          volumes:
+          - name: dump
+            emptyDir: {}
+          - name: rclone-conf
+            secret:
+              secretName: {{.Release.Name}}-backup-rclone-conf
+              defaultMode: 0420
+              items:
+                - key: rclone.conf
+                  path: rclone.conf
+          - name: pgpass
+            secret:
+              secretName: {{.Release.Name}}-backup-pgpass
+              defaultMode: 0600
+              items:
+                - key: pgpass
+                  path: pgpass
+          initContainers:
+          - name: dump-backup
+            image: postgres:14.3-alpine3.16
+            command: ["/bin/sh", "-c"]
+            args: # We have to manually copy and chmod as otherwise it would fail on a non-root cluster. It would be owned by root while the group permission would be readable by the user, which causes postgres to ignore it as it requires disallowing any access to world or group.
+            - >
+              cp /.pgpass /tmp
+              && chmod 600 /tmp/.pgpass
+              && pg_dump -cw -h {{ template "common.names.fullname" .Subcharts.postgresqluserdb }} -U postgres -f /dump/{{.Release.Name}}-$(date +%F) userprofile-mine
+            env:
+            - name: PGPASSFILE
+              value: /tmp/.pgpass
+            volumeMounts:
+            - name: dump
+              mountPath: /dump
+            - name: pgpass
+              mountPath: /.pgpass
+              subPath: pgpass
+          containers:
+          - name: upload-backup
+            image: rclone/rclone:1.57.0
+            command: ["/bin/sh", "-c"]
+            args: # As this container can be restarted if rclone fails, we ensure compression is done only once.
+            - >
+              if ! test -n "$(ls /dump/*.gz)"; then gzip /dump/*; fi
+              && rclone copy --no-traverse --checksum /dump default:{{.Values.backup.objectStorage.bucket}}
+            volumeMounts:
+            - name: dump
+              mountPath: /dump
+            - name: rclone-conf
+              mountPath: /.rclone.conf
+              subPath: rclone.conf
+          restartPolicy: OnFailure
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{.Release.Name}}-backup-rclone-conf
+  labels:
+    app.kubernetes.io/component: backup
+    {{- include "intermineinstance.labels" . | nindent 4 }}
+type: Opaque
+stringData:
+  "rclone.conf": |-
+    [default]
+    type = s3
+    provider = Other
+    env_auth = false
+    access_key_id = {{.Values.builder.objectStorage.accessKey}}
+    secret_access_key = {{.Values.builder.objectStorage.secretKey}}
+    endpoint = {{.Values.builder.objectStorage.endpoint}}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{.Release.Name}}-backup-pgpass
+  labels:
+    app.kubernetes.io/component: backup
+    {{- include "intermineinstance.labels" . | nindent 4 }}
+type: Opaque
+stringData:
+  "pgpass": |-
+    {{ template "common.names.fullname" .Subcharts.postgresqluserdb }}:5432:userprofile-mine:postgres:postgres
+{{- end }}

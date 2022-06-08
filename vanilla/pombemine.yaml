@@ -47,3 +47,7 @@ builder:
       data: staging/pombe
       bio: staging/pombemine-bio-sources
       #im: staging/intermine
+
+backup:
+  objectStorage:
+    bucket: staging/pombemine-backup

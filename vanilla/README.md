@@ -20,12 +20,14 @@ If you've made changes to the charts or values and wish to get a previously inst
 helm upgrade -f values.yaml -f pombemine.yaml -f secrets.yaml pombemine ../helm-operator/helm-charts/intermineinstance
 ```
 
-This will also start a new job to rebuild the mine (keeping the existing userprofile DB).
+**This will start a new job to rebuild the mine (keeping the existing userprofile DB).**
 
 You can optionally include any of the following flags:
 
 - `--set builder.task=redeploy` to run one specific build task instead of performing a full rebuild
 - `--set builder.rebuild=true` to perform a full build while keeping the existing userprofile DB (you don't need this flag for upgrades as this is default behaviour)
+
+*Note: If changes were made to the CronJob responsible for backups, you need to manually delete it with `kubectl delete cronjobs.batch/pombemine-backup` to be able to create the new one. After deletion, use the command from [Cherry-picking](#cherry-picking) with `app.kubernetes.io/component=backup`*
 
 ### Uninstalling
 
@@ -49,6 +51,10 @@ kubectl delete pvc/data-pombemine-solr-0
 ```
 
 ### Advanced usage
+
+#### Backups
+
+Automated backups of the userprofile DB can be made to the Allas object storage. To enable this, set `backup.objectStorage.bucket`.
 
 #### Cherry-picking
 
