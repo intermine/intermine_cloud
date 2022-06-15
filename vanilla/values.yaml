@@ -206,7 +206,7 @@ tomcat:
   tomcatPassword: tomcat
   tomcatAllowRemoteManagement: 1
   persistence:
-    size: 1Gi
+    size: 2Gi
     storageClass: standard-rwo
   image:
     repository: bitnami/tomcat
