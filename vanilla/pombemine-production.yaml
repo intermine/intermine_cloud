@@ -39,7 +39,13 @@ builder:
     project.subTitle: An integrated database for S. pombe genomics
     project.releaseVersion: PombeMine Release 1.0
     resolver.file.rootpath: /data/idresolver/
-    superuser.account: vw253@cam.ac.uk
+    superuser.account: staff@pombase.org
+    mail.host: smtp.pouta.csc.fi
+    mail.from: support@intermine.org
+    mail.subject: Welcome to PombeMine
+    mail.text: You have successfully created an account on PombeMine
+    mail.smtp.auth: false
+    mail.smtp.port: 25
   storageRequests:
     data: 150Gi
   # Allas
