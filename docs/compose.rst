@@ -1,4 +1,0 @@
-Compose
-==============================
-
-Compose component
