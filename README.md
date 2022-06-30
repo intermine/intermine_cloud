@@ -1,4 +1,5 @@
 # InterMine Cloud
+[![Documentation Status](https://readthedocs.org/projects/intermine-cloud/badge/?version=latest)](https://intermine-cloud.readthedocs.io/en/latest/?badge=latest)
 
 Monorepo for InterMine Cloud infrastructure.
 
