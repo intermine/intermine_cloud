@@ -1,8 +1,6 @@
 """RenderedTemplate BLoCs."""
 
-import glob
 from typing import List
-import os
 from pathlib import Path
 import shutil
 from tempfile import TemporaryDirectory
@@ -16,7 +14,6 @@ from pydantic.error_wrappers import ErrorWrapper
 import requests
 from sqlalchemy import select
 from sqlalchemy.exc import SQLAlchemyError
-from xdg import xdg_data_home
 
 from compose.models.rendered_templates import RenderedTemplateDB
 from compose.schemas.api.rendered_template.delete import RenderedTemplateDelete
@@ -579,58 +576,48 @@ def render_and_upload_rendered_template(inputs: List[Prop]) -> List[Prop]:
     try:
         for rendered_template in created_rendered_template_list:
             # Create archive of the rendered template in a temp dir
-            tempd = xdg_data_home().joinpath("imcloud/workspace")
-            os.makedirs(tempd, exist_ok=True)
-            for file in checked_template_file_list:
-                # find the right file
-                if file.parent_id == rendered_template.parent_template_id:
-                    # Download template
-                    resp = requests.get(file.presigned_get, stream=True)
-                    with open(
-                        Path(tempd).absolute().joinpath(f"template_{file.parent_id}.tar"), "wb"
-                    ) as download_file:
-                        for data in resp.iter_content(chunk_size=1024):
-                            download_file.write(data)
-                    # Unpack archive
-                    shutil.unpack_archive(
-                        Path(tempd).absolute().joinpath(f"template_{file.parent_id}.tar"),
-                        Path(tempd).absolute().joinpath(f"template_{file.parent_id}"),
-                    )
-                    # Render the fetched template with provided template vars
-                    # TODO: Do it properly later, for now just cp the downloaded template
-                    shutil.copytree(
-                        Path(tempd).absolute().joinpath(f"template_{file.parent_id}"),
-                        Path(tempd).absolute().joinpath(f"rendered_{file.parent_id}"),
-                    )
+            with TemporaryDirectory() as tempd:
+                tempd = Path(tempd)
+                for file in checked_template_file_list:
+                    # find the right file
+                    if (
+                        file.parent_id == rendered_template.parent_template_id
+                        and file.uploaded is True
+                    ):
 
-                    archive_path = make_archive(
-                        f"rendered_{file.parent_id}",
-                        Path(tempd).absolute().joinpath(f"rendered_{file.parent_id}"),
-                        Path(tempd).absolute(),
-                    )
+                        # Download template
+                        download_and_unpack_archive(
+                            file.presigned_get, tempd, f"template_{file.parent_id}"
+                        )
 
-                    # upload rendered template
-                    with open(archive_path, "rb") as f:
-                        for file in rendered_template_file_list:
+                        # Render the fetched template with provided template vars
+                        # TODO: Do it properly later, for now just cp the downloaded template
+                        shutil.copytree(
+                            Path(tempd)
+                            .absolute()
+                            .joinpath(f"template_{file.parent_id}"),
+                            Path(tempd)
+                            .absolute()
+                            .joinpath(f"rendered_{file.parent_id}"),
+                            dirs_exist_ok=True,
+                        )
+
+                        # get upload url
+                        for check_file in rendered_template_file_list:
                             if (
-                                file.parent_id
+                                check_file.parent_id
                                 == rendered_template.rendered_template_id
                             ):
-                                requests.put(
-                                    url=file.presigned_put,
-                                    data=f,
-                                )
-                    # Clean directory
-                    files = glob.glob(f"{tempd}/*")
-                    for f in files:
-                        if os.path.isfile(f):
-                            os.remove(f)
-                        else:
-                            shutil.rmtree(f)
+                                upload_url = check_file.presigned_put
+
+                        # Craete archive and upload
+                        make_archive_and_upload(
+                            upload_url, f"rendered_{file.parent_id}", tempd
+                        )
 
     except Exception as e:
         raise FlowExecError(
-            human_description="Something bad happened",
+            human_description=f"Something bad happened, file: {file}, {file.presigned_get}",
             error=e,
             error_type=type(e),
             is_user_facing=False,
@@ -644,3 +631,38 @@ def render_and_upload_rendered_template(inputs: List[Prop]) -> List[Prop]:
         ),
         Prop(data=user, description="User"),
     ]
+
+
+def download_and_unpack_archive(
+    download_url: str, download_path: Path, file_name: str, unpack: bool = True
+) -> None:
+    """Download and unpack archives from object storage."""
+    resp = requests.get(download_url, stream=True)
+    with open(f"{download_path.joinpath(file_name)}.tar", "wb") as download_file:
+        for data in resp.iter_content(chunk_size=1024):
+            download_file.write(data)
+
+    if unpack is True:
+        # Unpack archive
+        shutil.unpack_archive(
+            download_path.joinpath(f"{file_name}.tar"),
+            download_path.joinpath(file_name),
+        )
+
+
+def make_archive_and_upload(
+    upload_url: str, archive_name: str, file_path: Path
+) -> None:
+    """Create archive and upload to S3."""
+    archive_path = make_archive(
+        archive_name,
+        file_path.joinpath(archive_name),
+        file_path,
+    )
+
+    # upload rendered template
+    with open(archive_path, "rb") as f:
+        requests.put(
+            url=upload_url,
+            data=f,
+        )

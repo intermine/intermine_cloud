@@ -6,13 +6,6 @@ from blackcap.db import DBSession
 from blackcap.flow import Flow, FlowExecError, FuncProp, get_outer_function, Prop, Step
 from blackcap.flow.step import dummy_backward
 from blackcap.schemas.user import User
-from compose.blocs.rendered_template import (
-    create_rendered_template_db_entry,
-    render_and_upload_rendered_template,
-    revert_rendered_template_db_entry,
-    rewind_rendered_template_db_entry,
-    update_rendered_template_db_entry,
-)
 from logzero import logger
 from pydantic import UUID4, ValidationError
 from pydantic.error_wrappers import ErrorWrapper
@@ -26,6 +19,13 @@ from compose.blocs.file import (
     create_file_presigned_urls,
     get_file,
     revert_file_db_entry,
+)
+from compose.blocs.rendered_template import (
+    create_rendered_template_db_entry,
+    render_and_upload_rendered_template,
+    revert_rendered_template_db_entry,
+    rewind_rendered_template_db_entry,
+    update_rendered_template_db_entry,
 )
 from compose.blocs.template import get_template
 from compose.models.mine import MineDB
