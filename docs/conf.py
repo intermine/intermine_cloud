@@ -3,7 +3,7 @@
 from datetime import datetime
 import os
 
-project = "intermine_compose"
+project = "Intermine Cloud"
 author = "InterMine Developers"
 copyright = f"{datetime.now().year}, {author}"
 extensions = [
@@ -35,8 +35,17 @@ html_context = {
     "github_version": "master/docs/",
 }
 
-if not on_rtd:
-    import sphinx_rtd_theme
+html_theme = "furo"
 
-    html_theme = "sphinx_rtd_theme"
-    html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
+# Adapted from https://github.com/pypa/setuptools/blob/main/docs/conf.py
+html_theme_options = {
+    "sidebar_hide_name": True,
+    "light_css_variables": {
+        "color-brand-primary": "#336790",  # "blue"
+        "color-brand-content": "#336790",
+    },
+    "dark_css_variables": {
+        "color-brand-primary": "#E5B62F",  # "yellow"
+        "color-brand-content": "#E5B62F",
+    },
+}
