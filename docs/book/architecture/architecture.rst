@@ -54,6 +54,6 @@ Host Operating System isolation
     So no changes are made to the host operating system.
     This provides more stability and reproducibility to the system.
 
-
+Specific implementation details for each scenario is discussed in the next sections.
 
 
