@@ -10,13 +10,16 @@ user friendly CLI called ``minectl``, which is available on Pypi.
 
 Intermine Cloud project is designed and built with the following goals.
 
-Ease of use
+**Ease of use**
+
    Time to build and deploy your first InterMine should not take more than 10 minutes.
    
-Hackable
+**Hackable**
+
    InterMine is built for researchers. They should be able to modify the system to fit their unique needs.
 
-Reproducible
+**Reproducible**
+
    Science is going through a reproducibility crisis. We care about this problem. So, InterMines should be
    easily shareable.
 
