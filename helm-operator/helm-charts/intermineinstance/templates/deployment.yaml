@@ -60,6 +60,8 @@ spec:
               value: {{ .Values.bluegenes.mineName }}
             - name: BLUEGENES_DEFAULT_NAMESPACE
               value: {{ .Values.bluegenes.mineNamespace }}
+            - name: BLUEGENES_DEPLOY_PATH
+              value: {{ .Values.bluegenes.deployPath }}
           volumeMounts:
             - name: tools
               mountPath: /tools
