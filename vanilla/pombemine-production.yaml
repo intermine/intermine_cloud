@@ -18,6 +18,7 @@ bluegenes:
   serviceRoot: http://pombemine.rahtiapp.fi/pombemine
   mineName: PombeMine
   mineNamespace: pombemine
+  deployPath: /im
 
 postgresql:
   primary:
