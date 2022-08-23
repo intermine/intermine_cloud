@@ -39,11 +39,11 @@ spec:
               protocol: TCP
           livenessProbe:
             httpGet:
-              path: /
+              path: {{ or .Values.bluegenes.deployPath "/"}}
               port: http
           readinessProbe:
             httpGet:
-              path: /
+              path: {{ or .Values.bluegenes.deployPath "/"}}
               port: http
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
