@@ -19,6 +19,7 @@ bluegenes:
   mineName: PombeMine
   mineNamespace: pombemine
   deployPath: /im
+  googleAnalytics: G-VWL4P0C0CE
 
 postgresql:
   primary:

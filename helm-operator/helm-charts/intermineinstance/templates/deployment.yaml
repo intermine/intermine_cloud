@@ -62,6 +62,8 @@ spec:
               value: {{ .Values.bluegenes.mineNamespace }}
             - name: BLUEGENES_DEPLOY_PATH
               value: {{ .Values.bluegenes.deployPath }}
+            - name: GOOGLE_ANALYTICS
+              value: {{ .Values.bluegenes.googleAnalytics }}
           volumeMounts:
             - name: tools
               mountPath: /tools
