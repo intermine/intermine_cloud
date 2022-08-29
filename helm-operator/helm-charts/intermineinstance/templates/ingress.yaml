@@ -14,6 +14,7 @@ See: _helpers.tpl:call-nested
   {{- $_ := set .Values.ingress.annotations "kubernetes.io/ingress.class" .Values.ingress.className}}
   {{- end }}
 {{- end }}
+{{- if .Capabilities.APIVersions.Has "networking.k8s.io/v1/Ingress" }}
 {{- if semverCompare ">=1.19-0" .Capabilities.KubeVersion.GitVersion -}}
 apiVersion: networking.k8s.io/v1
 {{- else if semverCompare ">=1.14-0" .Capabilities.KubeVersion.GitVersion -}}
@@ -139,4 +140,28 @@ spec:
               {{- end }}
           {{- end }}
     {{- end }}
+{{- else if .Capabilities.APIVersions.Has "route.openshift.io/v1/Route" -}}
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: {{ $fullName }}
+  labels:
+    {{- include "intermineinstance.labels" . | nindent 4 }}
+  {{- with .Values.ingress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  host: {{ .Values.ingress.hostname | quote }}
+  tls:
+    insecureEdgeTerminationPolicy: Redirect
+    termination: edge
+  to:
+    kind: Service
+    name: {{ $fullName }}
+    weight: 100
+  wildcardPolicy: None
+status:
+  ingress: []
+{{- end }}
 {{- end }}
