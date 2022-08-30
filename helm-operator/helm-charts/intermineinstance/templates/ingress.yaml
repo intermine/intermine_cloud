@@ -154,8 +154,6 @@ metadata:
 spec:
   host: {{ .Values.ingress.hostname | quote }}
   path: "/"
-  port:
-    targetPort: {{ $svcPort }}
   tls:
     insecureEdgeTerminationPolicy: Redirect
     termination: edge
@@ -181,8 +179,6 @@ metadata:
 spec:
   host: {{ .Values.ingress.hostname | quote }}
   path: /{{ $mine }}/service
-  port:
-    targetPort: {{ $imServicePort }}
   tls:
     insecureEdgeTerminationPolicy: Redirect
     termination: edge
@@ -208,8 +204,6 @@ metadata:
 spec:
   host: {{ .Values.ingress.hostname | quote }}
   path: /{{ $mine }}/model
-  port:
-    targetPort: {{ $imServicePort }}
   tls:
     insecureEdgeTerminationPolicy: Redirect
     termination: edge
@@ -235,8 +229,31 @@ metadata:
 spec:
   host: {{ .Values.ingress.hostname | quote }}
   path: /{{ $mine }}/run.do
-  port:
-    targetPort: {{ $imServicePort }}
+  tls:
+    insecureEdgeTerminationPolicy: Redirect
+    termination: edge
+  to:
+    kind: Service
+    name: {{ $imService }}
+    weight: 100
+  wildcardPolicy: None
+status:
+  ingress: []
+---
+
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: {{ $fullName }}
+  labels:
+    {{- include "intermineinstance.labels" . | nindent 4 }}
+  {{- with .Values.ingress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  host: {{ .Values.ingress.hostname | quote }}
+  path: /{resource:[A-z0-9\-]+\.(xml|txt)}
   tls:
     insecureEdgeTerminationPolicy: Redirect
     termination: edge
