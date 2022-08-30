@@ -144,7 +144,7 @@ spec:
 apiVersion: route.openshift.io/v1
 kind: Route
 metadata:
-  name: {{ $fullName }}
+  name: {{ $fullName }}-root
   labels:
     {{- include "intermineinstance.labels" . | nindent 4 }}
   {{- with .Values.ingress.annotations }}
@@ -169,7 +169,7 @@ status:
 apiVersion: route.openshift.io/v1
 kind: Route
 metadata:
-  name: {{ $fullName }}
+  name: {{ $fullName }}-service
   labels:
     {{- include "intermineinstance.labels" . | nindent 4 }}
   {{- with .Values.ingress.annotations }}
@@ -194,7 +194,7 @@ status:
 apiVersion: route.openshift.io/v1
 kind: Route
 metadata:
-  name: {{ $fullName }}
+  name: {{ $fullName }}-model
   labels:
     {{- include "intermineinstance.labels" . | nindent 4 }}
   {{- with .Values.ingress.annotations }}
@@ -219,7 +219,7 @@ status:
 apiVersion: route.openshift.io/v1
 kind: Route
 metadata:
-  name: {{ $fullName }}
+  name: {{ $fullName }}-run
   labels:
     {{- include "intermineinstance.labels" . | nindent 4 }}
   {{- with .Values.ingress.annotations }}
@@ -244,7 +244,7 @@ status:
 apiVersion: route.openshift.io/v1
 kind: Route
 metadata:
-  name: {{ $fullName }}
+  name: {{ $fullName }}-resource
   labels:
     {{- include "intermineinstance.labels" . | nindent 4 }}
   {{- with .Values.ingress.annotations }}
