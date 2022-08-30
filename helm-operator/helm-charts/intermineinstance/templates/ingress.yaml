@@ -14,6 +14,7 @@ See: _helpers.tpl:call-nested
   {{- $_ := set .Values.ingress.annotations "kubernetes.io/ingress.class" .Values.ingress.className}}
   {{- end }}
 {{- end }}
+{{- if .Capabilities.APIVersions.Has "networking.k8s.io/v1/Ingress" }}
 {{- if semverCompare ">=1.19-0" .Capabilities.KubeVersion.GitVersion -}}
 apiVersion: networking.k8s.io/v1
 {{- else if semverCompare ">=1.14-0" .Capabilities.KubeVersion.GitVersion -}}
@@ -139,4 +140,129 @@ spec:
               {{- end }}
           {{- end }}
     {{- end }}
+{{- else if .Capabilities.APIVersions.Has "route.openshift.io/v1/Route" -}}
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: {{ $fullName }}-root
+  labels:
+    {{- include "intermineinstance.labels" . | nindent 4 }}
+  {{- with .Values.ingress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  host: {{ .Values.ingress.hostname | quote }}
+  path: "/"
+  tls:
+    insecureEdgeTerminationPolicy: Redirect
+    termination: edge
+  to:
+    kind: Service
+    name: {{ $fullName }}
+    weight: 100
+  wildcardPolicy: None
+status:
+  ingress: []
+---
+
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: {{ $fullName }}-service
+  labels:
+    {{- include "intermineinstance.labels" . | nindent 4 }}
+  {{- with .Values.ingress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  host: {{ .Values.ingress.hostname | quote }}
+  path: /{{ $mine }}/service
+  tls:
+    insecureEdgeTerminationPolicy: Redirect
+    termination: edge
+  to:
+    kind: Service
+    name: {{ $imService }}
+    weight: 100
+  wildcardPolicy: None
+status:
+  ingress: []
+---
+
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: {{ $fullName }}-model
+  labels:
+    {{- include "intermineinstance.labels" . | nindent 4 }}
+  {{- with .Values.ingress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  host: {{ .Values.ingress.hostname | quote }}
+  path: /{{ $mine }}/model
+  tls:
+    insecureEdgeTerminationPolicy: Redirect
+    termination: edge
+  to:
+    kind: Service
+    name: {{ $imService }}
+    weight: 100
+  wildcardPolicy: None
+status:
+  ingress: []
+---
+
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: {{ $fullName }}-run
+  labels:
+    {{- include "intermineinstance.labels" . | nindent 4 }}
+  {{- with .Values.ingress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  host: {{ .Values.ingress.hostname | quote }}
+  path: /{{ $mine }}/run.do
+  tls:
+    insecureEdgeTerminationPolicy: Redirect
+    termination: edge
+  to:
+    kind: Service
+    name: {{ $imService }}
+    weight: 100
+  wildcardPolicy: None
+status:
+  ingress: []
+---
+
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: {{ $fullName }}-resource
+  labels:
+    {{- include "intermineinstance.labels" . | nindent 4 }}
+  {{- with .Values.ingress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  host: {{ .Values.ingress.hostname | quote }}
+  path: /{resource:[A-z0-9\-]+\.(xml|txt)}
+  tls:
+    insecureEdgeTerminationPolicy: Redirect
+    termination: edge
+  to:
+    kind: Service
+    name: {{ $imService }}
+    weight: 100
+  wildcardPolicy: None
+status:
+  ingress: []
+{{- end }}
 {{- end }}
