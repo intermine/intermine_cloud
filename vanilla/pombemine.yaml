@@ -15,7 +15,7 @@ bluegenes:
   # path if you've changed the mineNamespace/webapp.path but don't touch the
   # rest.
   backendServiceRoot: http://pombemine-tomcat:8080/pombemine
-  serviceRoot: https://pombemine-staging.rahtiapp.fi/pombemine
+  serviceRoot: http://pombemine-staging.rahtiapp.fi/pombemine
   mineName: PombeMine
   mineNamespace: pombemine
   deployPath: /im
