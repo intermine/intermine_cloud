@@ -141,6 +141,7 @@ spec:
           {{- end }}
     {{- end }}
 {{- else if .Capabilities.APIVersions.Has "route.openshift.io/v1/Route" -}}
+{{- if .Values.bluegenes.https}}
 apiVersion: route.openshift.io/v1
 kind: Route
 metadata:
@@ -264,5 +265,6 @@ spec:
   wildcardPolicy: None
 status:
   ingress: []
+{{- end }}
 {{- end }}
 {{- end }}

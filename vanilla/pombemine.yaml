@@ -16,6 +16,7 @@ bluegenes:
   # rest.
   backendServiceRoot: http://pombemine-tomcat:8080/pombemine
   serviceRoot: http://pombemine-staging.rahtiapp.fi/pombemine
+  https: false
   mineName: PombeMine
   mineNamespace: pombemine
   deployPath: /im
